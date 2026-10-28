@@ -1005,7 +1005,77 @@
           gap: 35px;
         }
       }
+      /* ===== NDC VAHAN TOOL TUTORIAL ===== */
 
+      .tutorial-section {
+        background:
+          radial-gradient(
+            ellipse at 50% 0%,
+            rgba(215, 182, 79, 0.07),
+            transparent 55%
+          ),
+          #090909;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .tutorial-container {
+        max-width: 950px;
+        margin: 0 auto;
+      }
+
+      .tutorial-heading {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .tutorial-heading .section-desc {
+        margin: 0 auto;
+      }
+
+      .tutorial-video-frame {
+        padding: 10px;
+        border: 1px solid rgba(215, 182, 79, 0.4);
+        border-radius: 18px;
+        background: linear-gradient(145deg, #191919, #080808);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+      }
+
+      .tutorial-video {
+        display: block;
+        width: 100%;
+        max-height: 560px;
+        aspect-ratio: 16 / 9;
+        object-fit: contain;
+        background: #000;
+        border-radius: 11px;
+      }
+
+      .tutorial-caption {
+        margin: 18px 0 0;
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .tutorial-caption strong {
+        color: var(--gold-light);
+      }
+
+      @media (max-width: 560px) {
+        .tutorial-video-frame {
+          padding: 5px;
+          border-radius: 12px;
+        }
+
+        .tutorial-video {
+          border-radius: 8px;
+        }
+
+        .tutorial-caption {
+          font-size: 12px;
+        }
+      }
       @media (max-width: 850px) {
         .pricing {
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1039,8 +1109,9 @@
           >
         </a>
         <nav class="nav-links" aria-label="Main navigation">
-          <a href="#home">Home</a><a href="#features">Features</a
-          ><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
+          <a href="#home">Home</a><a href="#features">Features</a>
+          <a href="#tutorial">Tutorial</a>
+          <a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
         </nav>
         <a class="btn btn-primary" href="#pricing"
           >Get Started <span aria-hidden="true">↗</span></a
@@ -1255,7 +1326,43 @@
           </div>
         </div>
       </section>
+      <!-- TUTORIAL VIDEO -->
+      <section class="tutorial-section" id="tutorial">
+        <div class="container tutorial-container">
+          <div class="section-head tutorial-heading">
+            <div class="section-kicker">See It in Action</div>
 
+            <h2 class="section-title">
+              Learn How to Use <span class="gold">NDC VAHAN TOOL</span>
+            </h2>
+
+            <p class="section-desc">
+              Watch our tutorial to understand the document preparation and
+              VAHAN upload workflow before getting started.
+            </p>
+          </div>
+
+          <div class="tutorial-video-frame">
+            <video
+              class="tutorial-video"
+              id="ndcTutorialVideo"
+              controls
+              controlsList="nodownload noplaybackrate"
+              disablePictureInPicture
+              preload="metadata"
+              playsinline
+              aria-label="NDC VAHAN TOOL tutorial"
+            >
+              <source src="tutorial.webm" type="video/webm" />
+              Your browser does not support WebM video playback.
+            </video>
+          </div>
+
+          <p class="tutorial-caption">
+            <strong>NDC VAHAN TOOL</strong> · Step-by-step product tutorial
+          </p>
+        </div>
+      </section>
       <!-- AUTOMATION SETTINGS -->
       <section id="automation">
         <div class="container">
