@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#080808" />
+    <meta
+      name="description"
+      content="Privacy Policy for VAHAN NDC TOOL by Next Dimension Customs."
+    />
+
+    <title>Privacy Policy | VAHAN NDC TOOL</title>
+
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #080808;
+        --surface: #111111;
+        --surface-light: #171717;
+        --gold: #d7bd55;
+        --gold-muted: #a89543;
+        --text: #f2f0e8;
+        --muted: #aaa79c;
+        --border: #29271f;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 100px;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.8;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: var(--gold);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(8, 8, 8, 0.96);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(12px);
+      }
+
+      .nav {
+        max-width: 1100px;
+        margin: auto;
+        padding: 18px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .brand {
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 2px;
+      }
+
+      .brand span {
+        color: var(--gold);
+      }
+
+      .nav-link {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .hero {
+        max-width: 1100px;
+        margin: auto;
+        padding: 86px 24px 56px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        color: var(--gold);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        margin-bottom: 22px;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 24px;
+        height: 1px;
+        background: var(--gold);
+      }
+
+      h1 {
+        max-width: 800px;
+        font-size: clamp(38px, 7vw, 68px);
+        line-height: 1.08;
+        letter-spacing: -2px;
+        font-weight: 800;
+      }
+
+      h1 span {
+        color: var(--gold);
+      }
+
+      .hero-description {
+        max-width: 650px;
+        color: var(--muted);
+        margin-top: 24px;
+        font-size: 16px;
+      }
+
+      .updated {
+        display: inline-block;
+        margin-top: 26px;
+        padding: 8px 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .layout {
+        max-width: 1100px;
+        margin: auto;
+        padding: 0 24px 90px;
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 48px;
+        align-items: start;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 92px;
+        padding: 22px 18px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+
+      .sidebar-title {
+        color: var(--gold);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        margin-bottom: 15px;
+      }
+
+      .sidebar a {
+        display: block;
+        padding: 8px 0;
+        color: var(--muted);
+        font-size: 12px;
+        border-bottom: 1px solid #222;
+      }
+
+      .sidebar a:last-child {
+        border-bottom: none;
+      }
+
+      .sidebar a:hover {
+        color: var(--gold);
+        text-decoration: none;
+      }
+
+      .content {
+        min-width: 0;
+      }
+
+      .intro-card {
+        padding: 24px;
+        margin-bottom: 32px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--gold);
+        border-radius: 6px;
+        color: #c8c5bb;
+        font-size: 14px;
+      }
+
+      .section {
+        padding: 30px 0;
+        border-bottom: 1px solid var(--border);
+        scroll-margin-top: 90px;
+      }
+
+      .section:first-of-type {
+        padding-top: 0;
+      }
+
+      .section h2 {
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+        margin-bottom: 15px;
+        font-size: 21px;
+        letter-spacing: -0.4px;
+      }
+
+      .number {
+        color: var(--gold);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1px;
+      }
+
+      .section p {
+        margin: 12px 0;
+        color: #b6b3a9;
+        font-size: 14px;
+      }
+
+      .section ul {
+        padding-left: 22px;
+        margin: 14px 0;
+        color: #b6b3a9;
+        font-size: 14px;
+      }
+
+      .section li {
+        padding: 5px 0;
+      }
+
+      .section strong {
+        color: var(--text);
+        font-weight: 650;
+      }
+
+      .contact-card {
+        margin-top: 32px;
+        padding: 28px;
+        border: 1px solid var(--gold-muted);
+        background: var(--surface-light);
+        border-radius: 8px;
+      }
+
+      .contact-card h2 {
+        color: var(--gold);
+        font-size: 20px;
+        margin-bottom: 12px;
+      }
+
+      .contact-card p {
+        color: var(--muted);
+        font-size: 14px;
+        margin: 8px 0;
+      }
+
+      .footer {
+        border-top: 1px solid var(--border);
+        padding: 30px 24px;
+        text-align: center;
+        color: #77756d;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+      }
+
+      .footer strong {
+        color: var(--gold);
+      }
+
+      @media (max-width: 760px) {
+        .nav {
+          padding: 16px 20px;
+        }
+
+        .hero {
+          padding: 60px 20px 38px;
+        }
+
+        .layout {
+          padding: 0 20px 60px;
+          grid-template-columns: 1fr;
+          gap: 28px;
+        }
+
+        .sidebar {
+          position: static;
+        }
+
+        .sidebar a {
+          display: inline-block;
+          margin-right: 14px;
+          border: none;
+        }
+
+        h1 {
+          letter-spacing: -1.5px;
+        }
+
+        .section h2 {
+          font-size: 19px;
+        }
+      }
+
+      @media print {
+        :root {
+          color-scheme: light;
+          --bg: #ffffff;
+          --surface: #ffffff;
+          --surface-light: #ffffff;
+          --text: #111111;
+          --muted: #555555;
+          --border: #dddddd;
+        }
+
+        body {
+          background: white;
+          color: black;
+        }
+
+        .topbar,
+        .sidebar {
+          display: none;
+        }
+
+        .layout {
+          display: block;
+        }
+
+        .hero {
+          padding-top: 20px;
+        }
+
+        .section p,
+        .section ul,
+        .intro-card {
+          color: #333333;
+        }
+
+        a {
+          color: #665000;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="topbar">
+      <nav class="nav" aria-label="Main navigation">
+        <a class="brand" href="#top">NDC <span>/</span> TOOLS</a>
+        <a class="nav-link" href="#contact">Privacy & Contact</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="eyebrow">Next Dimension Customs</div>
+        <h1>Privacy <span>Policy.</span></h1>
+        <p class="hero-description">
+          Transparency matters. Learn how VAHAN NDC TOOL handles information
+          when you use our Chrome extension.
+        </p>
+        <div class="updated">LAST UPDATED: OCTOBER 28, 2026</div>
+      </section>
+
+      <div class="layout">
+        <aside class="sidebar" aria-label="Policy sections">
+          <div class="sidebar-title">ON THIS PAGE</div>
+          <a href="#overview">Overview</a>
+          <a href="#information">Information Processed</a>
+          <a href="#usage">How We Use Data</a>
+          <a href="#storage">Storage & Security</a>
+          <a href="#sharing">Data Sharing</a>
+          <a href="#retention">Data Retention</a>
+          <a href="#control">Your Control</a>
+          <a href="#changes">Policy Changes</a>
+          <a href="#contact">Contact</a>
+          <a href="#disclaimer">Disclaimer</a>
+        </aside>
+
+        <article class="content">
+          <div class="intro-card">
+            This policy applies to VAHAN NDC TOOL, a Chrome extension designed
+            to help authorized users prepare, organize, and upload vehicle
+            registration documents on supported VAHAN portal pages.
+          </div>
+
+          <section class="section" id="overview">
+            <h2><span class="number">01</span> Overview</h2>
+            <p>
+              VAHAN NDC TOOL is developed as a productivity utility for document
+              preparation and upload workflows. This policy explains the
+              information the extension may process and how that information is
+              used to provide its features.
+            </p>
+          </section>
+
+          <section class="section" id="information">
+            <h2><span class="number">02</span> Information We Process</h2>
+            <p>Depending on the features you use, the extension may process:</p>
+            <ul>
+              <li>
+                <strong>Account information:</strong> Username and credentials
+                supplied for authentication.
+              </li>
+              <li>
+                <strong>Session information:</strong> Tokens or identifiers used
+                to maintain and verify an authorized session.
+              </li>
+              <li>
+                <strong>Extension settings:</strong> Preferences for uploading
+                files and completing supported workflow steps.
+              </li>
+              <li>
+                <strong>Selected files:</strong> PDF and image documents chosen
+                by the user for preparation and upload.
+              </li>
+              <li>
+                <strong>File metadata:</strong> Names, formats, sizes, and
+                categories used to organize documents.
+              </li>
+              <li>
+                <strong>Document contents:</strong> Information contained in
+                vehicle-registration documents selected by the user.
+              </li>
+            </ul>
+          </section>
+
+          <section class="section" id="usage">
+            <h2><span class="number">03</span> How We Use Information</h2>
+            <p>Information is used as necessary to:</p>
+            <ul>
+              <li>Authenticate users and enforce account permissions.</li>
+              <li>Save extension preferences and settings.</li>
+              <li>Prepare, categorize, and optimize selected documents.</li>
+              <li>
+                Support document uploading and related portal interactions.
+              </li>
+              <li>
+                Maintain service security and prevent unauthorized access.
+              </li>
+            </ul>
+            <p>
+              We do not use document information for advertising or sell
+              personal information to advertisers.
+            </p>
+          </section>
+
+          <section class="section" id="storage">
+            <h2><span class="number">04</span> Storage & Security</h2>
+            <p>
+              Extension settings may be stored in Chrome's extension storage.
+              Selected documents may be processed locally by the extension
+              before they are submitted to the destination selected by the user.
+            </p>
+            <p>
+              Authentication requests are sent to the NDC authentication service
+              over HTTPS. The service may process account status, access
+              permissions, session limits, and security information.
+            </p>
+            <p>
+              We take reasonable measures to protect information handled by the
+              service. No method of electronic storage or transmission can
+              guarantee absolute security.
+            </p>
+          </section>
+
+          <section class="section" id="sharing">
+            <h2><span class="number">05</span> Data Sharing</h2>
+            <p>
+              Authentication information is sent to the NDC authentication
+              service when required to verify access and manage sessions.
+              Documents are submitted to the relevant VAHAN portal when the user
+              carries out the document-upload workflow.
+            </p>
+            <p>
+              Information is not sold to advertisers. Any additional sharing
+              with third-party services will be subject to the actual features
+              and data practices of the extension.
+            </p>
+          </section>
+
+          <section class="section" id="retention">
+            <h2><span class="number">06</span> Data Retention</h2>
+            <p>
+              Locally stored settings may remain in the browser until cleared or
+              the extension is removed. Server-side account information,
+              sessions, and security logs may be retained as necessary for
+              authentication, service administration, security, and applicable
+              legal obligations.
+            </p>
+            <p>
+              Retention periods depend on the type of information and the
+              operational requirements of the service.
+            </p>
+          </section>
+
+          <section class="section" id="control">
+            <h2><span class="number">07</span> Your Control</h2>
+            <p>
+              Users choose which files to select and submit. You can review your
+              extension settings and remove locally stored extension data
+              through Chrome's available extension-data controls.
+            </p>
+            <p>
+              For account-related or privacy requests, use the contact details
+              provided below.
+            </p>
+          </section>
+
+          <section class="section" id="changes">
+            <h2><span class="number">08</span> Policy Changes</h2>
+            <p>
+              This policy may be updated when the extension's features or data
+              practices change. Updates will be published on this page along
+              with a revised last-updated date.
+            </p>
+          </section>
+
+          <section class="section" id="disclaimer">
+            <h2>
+              <span class="number">09</span> Third-Party Service Disclaimer
+            </h2>
+            <p>
+              VAHAN NDC TOOL is an independent third-party utility. It is not
+              affiliated with, endorsed by, or officially connected to the
+              Government of India or the Ministry of Road Transport and
+              Highways.
+            </p>
+          </section>
+
+          <section class="contact-card" id="contact">
+            <h2>Privacy questions?</h2>
+            <p>
+              For privacy-related questions or requests, contact the developer
+              using the email address below.
+            </p>
+            <p>
+              <strong>Email:</strong>
+              <a href="mailto:nextdimensioncustoms@gmail.com">
+                nextdimensioncustoms@gmail.com
+              </a>
+            </p>
+          </section>
+        </article>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <strong>NDC</strong> — NEXT DIMENSION CUSTOMS
+      <p>VAHAN NDC TOOL · PRIVACY POLICY</p>
+    </footer>
+  </body>
+</html>
