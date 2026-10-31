@@ -2,25 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#080808" />
     <meta
       name="description"
-      content="NDC VAHAN TOOL helps automobile dealerships streamline VAHAN document uploads with smart document matching, image compression and ZIP preparation."
+      content="NDC VAHAN TOOL helps automobile dealerships prepare and upload VAHAN documents with smart matching, compression, already-uploaded detection, optional final submission and ZIP downloads."
     />
-    <title>NDC VAHAN TOOL | Faster VAHAN Document Uploads</title>
+    <title>NDC VAHAN TOOL | Smarter VAHAN Document Workflows</title>
     <style>
       :root {
+        color-scheme: dark;
         --bg: #080808;
-        --panel: #101010;
-        --panel-2: #151515;
+        --panel: #111;
+        --panel2: #171717;
         --gold: #d7b64f;
-        --gold-light: #f3d77b;
+        --light: #f3d77b;
         --text: #f5f3ed;
-        --muted: #b8b6ae;
-        --line: rgba(215, 182, 79, 0.24);
-        --green: #6ce0a0;
-        --radius: 18px;
+        --muted: #aaa79d;
+        --line: rgba(215, 182, 79, 0.22);
+        --green: #78dda5;
         --max: 1160px;
       }
       * {
@@ -28,6 +28,7 @@
       }
       html {
         scroll-behavior: smooth;
+        scroll-padding-top: 90px;
       }
       body {
         margin: 0;
@@ -38,595 +39,881 @@
           ui-sans-serif,
           system-ui,
           -apple-system,
-          BlinkMacSystemFont,
           "Segoe UI",
           sans-serif;
-        line-height: 1.6;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
       }
       a {
         color: inherit;
         text-decoration: none;
       }
-      button,
-      a {
-        -webkit-tap-highlight-color: transparent;
+      button {
+        font: inherit;
       }
       .container {
         width: min(var(--max), calc(100% - 40px));
         margin: auto;
       }
+      .gold {
+        color: var(--gold);
+      }
       .topbar {
         position: sticky;
         top: 0;
-        z-index: 20;
-        background: rgba(8, 8, 8, 0.91);
-        backdrop-filter: blur(14px);
+        z-index: 50;
+        background: rgba(8, 8, 8, 0.92);
+        backdrop-filter: blur(16px);
         border-bottom: 1px solid var(--line);
       }
       .nav {
-        min-height: 76px;
+        min-height: 74px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 24px;
+        gap: 20px;
       }
       .brand {
         display: flex;
         align-items: center;
-        gap: 13px;
-        min-width: 220px;
+        gap: 11px;
+        min-width: max-content;
       }
       .brand-mark {
+        font-size: 30px;
         font-weight: 950;
-        font-size: 31px;
-        line-height: 1;
-        letter-spacing: -2px;
-        color: var(--gold);
         font-style: italic;
+        letter-spacing: -2px;
+        line-height: 1;
+        color: var(--gold);
       }
       .brand-name {
-        font-weight: 800;
-        font-size: 16px;
+        font-size: 14px;
+        font-weight: 850;
         letter-spacing: 0.04em;
+        line-height: 1.3;
       }
       .brand-sub {
         display: block;
+        margin-top: 3px;
         color: var(--muted);
-        font-size: 11px;
-        font-weight: 400;
+        font-size: 10px;
+        font-weight: 450;
         letter-spacing: 0;
       }
       .nav-links {
         display: flex;
         align-items: center;
-        gap: 30px;
-        color: #e4e1d8;
-        font-size: 14px;
+        gap: 22px;
+        font-size: 13px;
+        color: #ddd8cd;
       }
       .nav-links a:hover {
-        color: var(--gold-light);
+        color: var(--light);
+      }
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .menu-toggle {
+        display: none;
+        width: 40px;
+        height: 40px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: var(--panel);
+        color: var(--text);
       }
       .btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 9px;
-        padding: 12px 20px;
-        border-radius: 10px;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 18px;
         border: 1px solid var(--gold);
+        border-radius: 10px;
+        font-size: 13px;
         font-weight: 800;
-        font-size: 14px;
-        transition:
-          transform 0.18s ease,
-          background 0.18s ease;
+        transition: 0.18s;
         cursor: pointer;
       }
       .btn:hover {
         transform: translateY(-2px);
       }
       .btn-primary {
-        background: linear-gradient(135deg, var(--gold-light), var(--gold));
-        color: #111;
+        background: linear-gradient(135deg, var(--light), var(--gold));
         border-color: transparent;
+        color: #15120a;
       }
       .btn-outline {
+        background: #0004;
         color: var(--text);
-        background: rgba(0, 0, 0, 0.3);
       }
       .btn-outline:hover {
-        background: rgba(215, 182, 79, 0.1);
+        background: #d7b64f18;
       }
       .hero {
-        position: relative;
-        overflow: hidden;
-        padding: 76px 0 70px;
-        background:
-          radial-gradient(
-            ellipse at 76% 35%,
-            rgba(164, 119, 23, 0.18),
-            transparent 36%
-          ),
-          radial-gradient(
-            ellipse at 8% 20%,
-            rgba(215, 182, 79, 0.07),
-            transparent 35%
-          ),
-          #090909;
+        padding: 78px 0 70px;
         border-bottom: 1px solid var(--line);
-      }
-      .hero::after {
-        content: "";
-        position: absolute;
-        width: 560px;
-        height: 250px;
-        right: -80px;
-        bottom: -120px;
-        border: 1px solid rgba(215, 182, 79, 0.17);
-        border-radius: 50%;
-        transform: rotate(-12deg);
-        box-shadow:
-          0 0 0 25px rgba(215, 182, 79, 0.025),
-          0 0 0 55px rgba(215, 182, 79, 0.02);
-        pointer-events: none;
+        background:
+          radial-gradient(ellipse at 78% 35%, #a477172e, transparent 38%),
+          radial-gradient(ellipse at 8% 15%, #d7b64f12, transparent 36%),
+          #090909;
       }
       .hero-grid {
         display: grid;
         grid-template-columns: 1.06fr 0.94fr;
-        gap: 54px;
+        gap: 48px;
         align-items: center;
-        position: relative;
-        z-index: 1;
       }
-      .eyebrow {
-        color: var(--gold-light);
-        font-size: 12px;
+      .eyebrow,
+      .kicker {
+        color: var(--light);
+        font-size: 11px;
         font-weight: 850;
-        letter-spacing: 0.22em;
+        letter-spacing: 0.19em;
         text-transform: uppercase;
       }
       h1 {
-        margin: 15px 0 12px;
-        font-size: clamp(38px, 5vw, 64px);
-        line-height: 1.04;
-        letter-spacing: -0.045em;
-      }
-      .gold {
-        color: var(--gold);
+        margin: 16px 0 13px;
+        font-size: clamp(42px, 5.3vw, 68px);
+        line-height: 1.02;
+        letter-spacing: -0.055em;
       }
       .hero h2 {
-        font-size: clamp(19px, 2.1vw, 25px);
+        max-width: 590px;
+        margin: 0 0 16px;
+        font-size: clamp(20px, 2.2vw, 26px);
         line-height: 1.35;
-        margin: 0 0 17px;
-        max-width: 550px;
       }
       .hero-copy {
-        color: #c9c7bf;
-        max-width: 560px;
-        font-size: 16px;
+        max-width: 580px;
+        margin: 0;
+        color: #c7c4bb;
+        font-size: 15px;
       }
       .hero-actions {
         display: flex;
         flex-wrap: wrap;
-        gap: 13px;
-        margin: 28px 0 25px;
+        gap: 12px;
+        margin: 27px 0 23px;
       }
       .trust-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 20px;
+        gap: 12px 18px;
+        font-size: 12px;
         color: #ddd8c8;
-        font-size: 13px;
       }
       .trust-row span {
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 7px;
       }
       .trust-row b {
         color: var(--gold);
-        font-size: 17px;
+        font-size: 16px;
       }
       .product-stage {
         position: relative;
-        min-height: 385px;
+        min-height: 420px;
         display: grid;
         place-items: center;
       }
       .halo {
         position: absolute;
-        width: 330px;
-        height: 330px;
+        width: 350px;
+        height: 350px;
         border-radius: 50%;
-        background: radial-gradient(
-          circle,
-          rgba(215, 182, 79, 0.15),
-          transparent 68%
-        );
+        background: radial-gradient(circle, #d7b64f2b, transparent 68%);
       }
       .mockup {
-        width: min(100%, 370px);
         position: relative;
-        z-index: 2;
+        width: min(100%, 390px);
+        z-index: 1;
         padding: 17px;
-        border: 1px solid rgba(235, 218, 163, 0.55);
+        border: 1px solid #ebdaa380;
         border-radius: 17px;
-        background: linear-gradient(
-          145deg,
-          rgba(28, 28, 28, 0.98),
-          rgba(8, 8, 8, 0.98)
-        );
+        background: linear-gradient(145deg, #1c1c1c, #090909);
         box-shadow:
-          0 25px 80px rgba(0, 0, 0, 0.6),
-          0 0 35px rgba(215, 182, 79, 0.08);
+          0 25px 80px #0009,
+          0 0 35px #d7b64f14;
         transform: rotate(1deg);
       }
       .mock-head {
         display: flex;
-        align-items: center;
         justify-content: space-between;
-        padding-bottom: 14px;
+        align-items: center;
+        padding-bottom: 13px;
         border-bottom: 1px solid #343127;
       }
       .mock-logo {
         color: var(--gold);
-        font-weight: 900;
+        font-weight: 950;
         font-style: italic;
       }
       .mock-logo small {
+        margin-left: 7px;
         color: #f3e8be;
+        font-size: 10px;
         font-style: normal;
-        margin-left: 8px;
-        font-size: 11px;
+      }
+      .mock-status,
+      .ready {
+        color: var(--green);
+      }
+      .mock-status {
+        font-size: 10px;
+        font-weight: 750;
       }
       .upload-zone {
+        margin: 15px 0 11px;
+        padding: 18px 12px;
         border: 1px dashed #766b48;
         border-radius: 10px;
-        padding: 22px 12px;
         text-align: center;
-        margin: 16px 0 12px;
-        background: rgba(215, 182, 79, 0.035);
+        background: #d7b64f09;
       }
       .upload-icon {
-        font-size: 28px;
+        font-size: 25px;
         color: var(--gold);
       }
       .upload-zone strong {
         display: block;
-        font-size: 13px;
+        font-size: 12px;
       }
       .upload-zone small {
+        font-size: 10px;
         color: var(--muted);
-        font-size: 11px;
       }
       .mock-stats {
+        margin-bottom: 11px;
         color: #c9c5b7;
-        font-size: 10px;
-        margin-bottom: 12px;
+        font-size: 9px;
       }
       .mock-checks {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
-        font-size: 10px;
+        gap: 8px 12px;
+        margin-bottom: 12px;
         color: #ddd7c5;
-        margin-bottom: 14px;
+        font-size: 9px;
       }
-      .mock-checks span::before {
+      .mock-checks span:before {
         content: "✓";
-        color: var(--gold);
         margin-right: 5px;
+        color: var(--gold);
       }
       .mock-buttons {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 9px;
+        gap: 8px;
       }
       .mock-buttons span {
-        text-align: center;
+        padding: 8px 5px;
         border-radius: 7px;
-        padding: 9px 5px;
-        font-size: 10px;
-        font-weight: 800;
         background: var(--gold);
         color: #111;
+        text-align: center;
+        font-size: 9px;
+        font-weight: 850;
       }
       .mock-buttons span + span {
-        color: #f3e8be;
         border: 1px solid #7b6731;
         background: transparent;
+        color: #f3e8be;
       }
       .mock-table {
-        margin-top: 14px;
+        overflow: hidden;
+        margin-top: 12px;
         border: 1px solid #302d25;
         border-radius: 8px;
-        overflow: hidden;
-        font-size: 10px;
+        font-size: 9px;
       }
       .mock-row {
         display: flex;
         justify-content: space-between;
-        padding: 7px 9px;
+        gap: 10px;
+        padding: 6px 8px;
         border-bottom: 1px solid #292720;
         color: #d6d2c7;
       }
       .mock-row:last-child {
-        border-bottom: 0;
-      }
-      .ready {
-        color: var(--green);
+        border: 0;
       }
       section {
-        padding: 76px 0;
+        padding: 74px 0;
       }
       .section-head {
-        margin-bottom: 32px;
+        margin-bottom: 29px;
       }
-      .section-kicker {
-        color: var(--gold);
-        font-size: 12px;
-        font-weight: 850;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-      }
-      h2.section-title {
-        font-size: clamp(28px, 3vw, 38px);
-        line-height: 1.15;
-        letter-spacing: -0.025em;
-        margin: 8px 0;
+      .section-title {
+        margin: 8px 0 10px;
+        font-size: clamp(29px, 3.2vw, 40px);
+        line-height: 1.14;
+        letter-spacing: -0.035em;
       }
       .section-desc {
-        color: var(--muted);
+        max-width: 700px;
         margin: 0;
-        max-width: 680px;
+        color: var(--muted);
+        font-size: 14px;
       }
       .features {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1px;
-        border: 1px solid #29261e;
-        border-radius: var(--radius);
-        overflow: hidden;
-        background: #29261e;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 13px;
       }
       .feature {
-        background: #0c0c0c;
-        padding: 27px;
-        min-height: 205px;
+        min-height: 195px;
+        padding: 23px;
+        border: 1px solid #29261e;
+        border-radius: 15px;
+        background: linear-gradient(145deg, #111, #0b0b0b);
+        transition:
+          transform 0.2s,
+          border-color 0.2s;
+      }
+      .feature:hover {
+        transform: translateY(-4px);
+        border-color: #d7b64f88;
       }
       .feature-icon {
-        width: 52px;
-        height: 52px;
         display: grid;
+        width: 45px;
+        height: 45px;
         place-items: center;
-        border-radius: 50%;
-        border: 1px solid var(--gold);
-        color: var(--gold);
-        font-size: 23px;
-        margin-bottom: 17px;
-        background: rgba(215, 182, 79, 0.08);
+        margin-bottom: 16px;
+        border: 1px solid #d7b64f99;
+        border-radius: 12px;
+        background: #d7b64f12;
+        color: var(--light);
+        font-size: 19px;
       }
       .feature h3 {
         margin: 0 0 8px;
-        font-size: 17px;
+        font-size: 16px;
+        line-height: 1.35;
       }
       .feature p {
         margin: 0;
         color: var(--muted);
-        font-size: 14px;
+        font-size: 13px;
+        line-height: 1.7;
       }
-      .plans-section {
+      .workflow {
+        border-block: 1px solid var(--line);
+        background:
+          radial-gradient(ellipse at 50% 0%, #d7b64f12, transparent 55%),
+          #0b0b0b;
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        counter-reset: step;
+      }
+      .step {
+        padding: 22px;
+        border: 1px solid #302d24;
+        border-radius: 14px;
+        background: #ffffff05;
+        counter-increment: step;
+      }
+      .step:before {
+        content: "0" counter(step);
+        display: block;
+        margin-bottom: 14px;
+        color: var(--gold);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+      }
+      .step h3 {
+        margin: 0 0 7px;
+        font-size: 15px;
+      }
+      .step p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .tutorial {
+        border-bottom: 1px solid var(--line);
+        background: #090909;
+      }
+      .tutorial-container {
+        max-width: 950px;
+        margin: auto;
+      }
+      .tutorial-heading {
+        text-align: center;
+      }
+      .tutorial-heading .section-desc {
+        margin: auto;
+      }
+      .video-frame {
+        padding: 9px;
+        border: 1px solid #d7b64f66;
+        border-radius: 17px;
+        background: linear-gradient(145deg, #191919, #080808);
+        box-shadow: 0 24px 70px #0008;
+      }
+      .tutorial-video {
+        display: block;
+        width: 100%;
+        max-height: 560px;
+        aspect-ratio: 16/9;
+        object-fit: contain;
+        border-radius: 10px;
+        background: #000;
+      }
+      .tutorial-caption {
+        margin: 15px 0 0;
+        color: var(--muted);
+        text-align: center;
+        font-size: 12px;
+      }
+      .tutorial-caption strong {
+        color: var(--light);
+      }
+      .plans {
+        border-block: 1px solid #29251b;
         background: linear-gradient(180deg, #0b0b0b, #10100e);
-        border-top: 1px solid #242116;
-        border-bottom: 1px solid #242116;
       }
       .plans-layout {
         display: grid;
-        grid-template-columns: 0.8fr 1.2fr;
-        gap: 55px;
+        grid-template-columns: 0.78fr 1.22fr;
+        gap: 40px;
         align-items: start;
       }
       .limit-list {
-        list-style: none;
-        padding: 0;
-        margin: 26px 0 0;
         display: grid;
-        gap: 18px;
+        gap: 16px;
+        margin: 24px 0 0;
+        padding: 0;
+        list-style: none;
       }
       .limit-list li {
         display: grid;
-        grid-template-columns: 34px 1fr;
-        gap: 12px;
+        grid-template-columns: 28px 1fr;
+        gap: 11px;
       }
       .limit-icon {
         color: var(--gold);
-        font-size: 21px;
+        font-size: 19px;
       }
       .limit-list strong {
         display: block;
-        color: var(--gold-light);
-        font-size: 14px;
+        color: var(--light);
+        font-size: 13px;
       }
       .limit-list small {
         display: block;
+        margin-top: 3px;
         color: var(--muted);
-        font-size: 13px;
-        margin-top: 2px;
+        font-size: 12px;
       }
       .pricing-wrap {
-        padding: 24px;
+        padding: 21px;
         border: 1px solid #373126;
-        border-radius: var(--radius);
-        background: rgba(0, 0, 0, 0.35);
+        border-radius: 18px;
+        background: #0005;
       }
       .pricing-wrap h3 {
-        margin: 0 0 19px;
-        font-size: 20px;
+        margin: 0 0 17px;
+        font-size: 19px;
       }
       .pricing {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 11px;
       }
       .plan {
-        padding: 23px 20px;
+        position: relative;
+        min-width: 0;
+        padding: 20px 15px;
         border: 1px solid #35332d;
         border-radius: 13px;
         background: linear-gradient(145deg, #171717, #0c0c0c);
-        position: relative;
       }
       .plan.featured {
         border-color: var(--gold);
-        box-shadow: inset 0 0 0 1px rgba(215, 182, 79, 0.14);
+        box-shadow: inset 0 0 0 1px #d7b64f24;
       }
       .plan-label {
-        color: var(--gold-light);
-        font-size: 12px;
-        font-weight: 850;
+        color: var(--light);
+        font-size: 10px;
+        font-weight: 900;
         letter-spacing: 0.13em;
       }
       .price {
-        font-size: 42px;
+        margin-top: 8px;
+        font-size: clamp(27px, 2.5vw, 37px);
         font-weight: 900;
-        letter-spacing: -0.04em;
-        margin: 7px 0 0;
+        letter-spacing: -0.05em;
+        line-height: 1.2;
       }
       .per {
+        min-height: 18px;
         color: var(--muted);
-        font-size: 12px;
+        font-size: 10px;
       }
       .plan hr {
+        margin: 15px 0;
         border: 0;
         border-top: 1px solid #39352a;
-        margin: 17px 0;
       }
       .plan h4 {
         margin: 0 0 10px;
+        font-size: 14px;
       }
       .plan ul {
-        list-style: none;
-        padding: 0;
-        margin: 0 0 20px;
         display: grid;
-        gap: 10px;
+        gap: 8px;
+        margin: 0 0 17px;
+        padding: 0;
+        list-style: none;
         color: #d6d3ca;
-        font-size: 13px;
+        font-size: 11px;
       }
-      .plan li::before {
+      .plan li {
+        position: relative;
+        padding-left: 15px;
+      }
+      .plan li:before {
         content: "✓";
+        position: absolute;
+        left: 0;
         color: var(--gold);
         font-weight: 900;
-        margin-right: 8px;
       }
       .plan .btn {
         width: 100%;
-        padding: 11px 12px;
-        font-size: 13px;
+        min-height: 40px;
+        padding: 8px 6px;
+        font-size: 11px;
       }
       .best {
         position: absolute;
-        right: 12px;
-        top: -11px;
-        background: var(--gold-light);
-        color: #15120a;
-        font-size: 10px;
-        font-weight: 900;
-        padding: 4px 9px;
+        top: -10px;
+        right: 9px;
+        padding: 3px 8px;
         border-radius: 30px;
+        background: var(--light);
+        color: #15120a;
+        font-size: 9px;
+        font-weight: 950;
+      }
+      .notice {
+        margin: 14px 0 0;
+        color: #8f8b80;
+        font-size: 11px;
       }
       .faq-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 14px;
+        gap: 12px;
       }
       details {
+        padding: 17px 19px;
         border: 1px solid #302d24;
         border-radius: 12px;
-        padding: 18px 20px;
         background: #0d0d0d;
       }
       summary {
+        position: relative;
+        padding-right: 22px;
         cursor: pointer;
+        font-size: 13px;
         font-weight: 750;
+        list-style: none;
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      summary:after {
+        content: "+";
+        position: absolute;
+        right: 0;
+        top: -2px;
+        color: var(--gold);
+        font-size: 19px;
+      }
+      details[open] summary:after {
+        content: "−";
       }
       details p {
+        margin: 11px 0 0;
         color: var(--muted);
-        font-size: 14px;
-        margin-bottom: 0;
+        font-size: 12px;
+        line-height: 1.75;
       }
       .cta {
-        padding: 43px 0;
-        background:
-          radial-gradient(
-            ellipse at 50% 100%,
-            rgba(215, 182, 79, 0.13),
-            transparent 65%
-          ),
-          #0b0b0b;
+        padding: 68px 0;
         border-top: 1px solid var(--line);
+        background:
+          radial-gradient(ellipse at 5% 100%, #d7b64f19, transparent 42%),
+          linear-gradient(135deg, #0c0c0c, #11100d 55%, #080808);
       }
       .cta-inner {
-        display: flex;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
         align-items: center;
-        gap: 25px;
+        gap: 52px;
       }
-      .cta h2 {
-        margin: 0 0 5px;
-        font-size: clamp(24px, 3vw, 34px);
+      .cta-brand {
+        margin-bottom: 24px;
       }
-      .cta p {
-        color: var(--muted);
+      .cta-tag {
+        display: inline-block;
+        margin-bottom: 11px;
+        color: var(--gold);
+        font-size: 10px;
+        font-weight: 850;
+        letter-spacing: 2px;
+      }
+      .cta-info h2 {
+        margin: 0 0 14px;
+        font-size: clamp(30px, 3.5vw, 43px);
+        line-height: 1.17;
+        letter-spacing: -1.2px;
+      }
+      .cta-description {
+        max-width: 490px;
+        margin: 0 0 22px;
+        color: #b9b7ae;
+        font-size: 13px;
+      }
+      .contact-list {
+        display: grid;
+        gap: 9px;
+        max-width: 490px;
+      }
+      .contact-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border: 1px solid #302d24;
+        border-radius: 12px;
+        background: #ffffff05;
+        transition: 0.2s;
+      }
+      .contact-card:hover {
+        transform: translateX(3px);
+        border-color: var(--gold);
+        background: #d7b64f0e;
+      }
+      .contact-icon {
+        display: grid;
+        flex: 0 0 40px;
+        width: 40px;
+        height: 40px;
+        place-items: center;
+        border: 1px solid #d7b64f59;
+        border-radius: 10px;
+        background: #d7b64f14;
+        color: var(--light);
+        font-size: 18px;
+      }
+      .contact-copy {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
+        gap: 2px;
+      }
+      .contact-copy small {
+        color: #969287;
+        font-size: 9px;
+        font-weight: 850;
+        letter-spacing: 1.4px;
+      }
+      .contact-copy strong {
+        overflow-wrap: anywhere;
+        color: #f1eee5;
+        font-size: 12px;
+        font-weight: 650;
+      }
+      .contact-arrow {
+        color: var(--gold);
+      }
+      .cta-card {
+        position: relative;
+        overflow: hidden;
+        padding: 30px;
+        border: 1px solid #d7b64f5c;
+        border-radius: 19px;
+        background:
+          radial-gradient(ellipse at 100% 0%, #d7b64f1f, transparent 42%),
+          linear-gradient(145deg, #191814, #0c0c0c 75%);
+        box-shadow: 0 24px 65px #0006;
+      }
+      .cta-card:before {
+        content: "NDC";
+        position: absolute;
+        top: 35px;
+        right: -8px;
+        color: #d7b64f09;
+        font-size: 100px;
+        font-weight: 950;
+        font-style: italic;
+        pointer-events: none;
+      }
+      .cta-card-icon {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        margin-bottom: 18px;
+        border: 1px solid var(--gold);
+        border-radius: 12px;
+        background: #d7b64f17;
+        color: var(--light);
+        font-size: 22px;
+      }
+      .cta-card-label {
+        color: var(--gold);
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 2px;
+      }
+      .cta-card h3 {
+        position: relative;
+        margin: 11px 0;
+        font-size: clamp(27px, 3vw, 35px);
+        line-height: 1.2;
+      }
+      .cta-card > p {
         margin: 0;
+        color: #b9b7ae;
+        font-size: 12px;
+        line-height: 1.8;
+      }
+      .cta-price {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin: 22px 0;
+        padding: 17px 0;
+        border-block: 1px solid #373126;
+      }
+      .cta-price > div {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .cta-price small {
+        color: #9f9b8f;
+        font-size: 9px;
+        font-weight: 850;
+        letter-spacing: 1px;
+      }
+      .cta-price strong {
+        color: #f5f0df;
+        font-size: 22px;
+        white-space: nowrap;
+      }
+      .cta-price strong span {
+        color: #aaa69a;
+        font-size: 10px;
+        font-weight: 500;
+      }
+      .cta-price-divider {
+        align-self: stretch;
+        width: 1px;
+        background: #373126;
+      }
+      .cta-main-btn {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+      }
+      .cta-whatsapp-link {
+        display: block;
+        margin-top: 15px;
+        color: var(--light);
+        text-align: center;
+        font-size: 11px;
+        font-weight: 650;
+      }
+      .cta-whatsapp-link:hover {
+        color: #fff0b4;
       }
       footer {
-        padding: 22px 0;
+        padding: 20px 0;
         border-top: 1px solid #242116;
         color: #a8a59b;
-        font-size: 12px;
+        font-size: 11px;
       }
       .footer-inner {
         display: flex;
         justify-content: space-between;
-        gap: 16px;
         flex-wrap: wrap;
+        gap: 12px;
       }
-      .notice {
-        font-size: 12px;
-        color: #8f8b80;
-        margin-top: 15px;
-      }
-      @media (max-width: 850px) {
+      @media (max-width: 1050px) {
         .nav-links {
-          display: none;
+          gap: 13px;
         }
-        .hero-grid,
         .plans-layout {
           grid-template-columns: 1fr;
           gap: 30px;
         }
+      }
+      @media (max-width: 850px) {
+        .nav-links {
+          position: fixed;
+          inset: 74px 0 auto;
+          display: none;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 0;
+          padding: 10px 20px 18px;
+          border-bottom: 1px solid var(--line);
+          background: #080808fa;
+        }
+        .nav-links.is-open {
+          display: flex;
+        }
+        .nav-links a {
+          padding: 12px 5px;
+          border-bottom: 1px solid #ffffff0c;
+        }
+        .menu-toggle {
+          display: grid;
+          place-items: center;
+        }
         .hero {
           padding: 55px 0;
         }
+        .hero-grid,
+        .cta-inner {
+          grid-template-columns: 1fr;
+          gap: 30px;
+        }
         .product-stage {
-          min-height: 340px;
+          min-height: 380px;
         }
         .features {
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
-        .plans-layout {
-          gap: 35px;
+        .steps {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .cta-card {
+          max-width: 560px;
         }
       }
-      @media (max-width: 560px) {
+      @media (max-width: 600px) {
         .container {
           width: min(100% - 28px, var(--max));
         }
-        .nav {
-          min-height: 68px;
-        }
-        .brand {
-          min-width: 0;
-          gap: 9px;
+        section {
+          padding: 53px 0;
         }
         .brand-mark {
           font-size: 26px;
@@ -635,592 +922,687 @@
           font-size: 12px;
         }
         .brand-sub {
-          font-size: 10px;
+          font-size: 9px;
         }
-        .nav > .btn {
-          padding: 10px 12px;
-          font-size: 12px;
+        .nav-actions > .btn {
+          min-height: 39px;
+          padding: 8px 11px;
+          font-size: 11px;
+        }
+        .menu-toggle {
+          width: 39px;
+          height: 39px;
+        }
+        .nav-links {
+          inset-block-start: 68px;
         }
         h1 {
-          font-size: 41px;
+          font-size: clamp(39px, 11vw, 48px);
         }
-        section {
-          padding: 55px 0;
+        .hero-copy {
+          font-size: 14px;
+        }
+        .product-stage {
+          min-height: 345px;
+        }
+        .halo {
+          width: 290px;
+          height: 290px;
+        }
+        .mockup {
+          padding: 13px;
         }
         .features,
+        .steps,
         .pricing,
         .faq-grid {
           grid-template-columns: 1fr;
         }
         .feature {
-          min-height: auto;
-          padding: 23px;
+          min-height: 0;
+          padding: 21px;
         }
         .pricing-wrap {
-          padding: 16px;
+          padding: 15px;
         }
-        .cta-inner {
-          align-items: flex-start;
-          flex-direction: column;
+        .plan {
+          padding: 22px 19px;
         }
-        .trust-row {
-          gap: 12px;
+        .plan .price {
+          font-size: 37px;
         }
-      }
-
-      /* ===== NDC PREMIUM CONTACT SECTION ===== */
-
-      .cta {
-        position: relative;
-        overflow: hidden;
-        padding: 75px 0;
-        background:
-          radial-gradient(
-            ellipse at 5% 100%,
-            rgba(215, 182, 79, 0.09),
-            transparent 42%
-          ),
-          linear-gradient(135deg, #0c0c0c, #11100d 55%, #080808);
-        border-top: 1px solid rgba(215, 182, 79, 0.3);
-      }
-
-      .cta-inner {
-        display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
-        align-items: center;
-        gap: 60px;
-      }
-
-      .cta-info {
-        min-width: 0;
-      }
-
-      .cta-brand {
-        margin-bottom: 28px;
-      }
-
-      .cta-tag {
-        display: inline-block;
-        margin-bottom: 12px;
-        color: var(--gold);
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: 2.2px;
-      }
-
-      .cta-info h2 {
-        margin: 0 0 15px;
-        font-size: clamp(30px, 3.5vw, 43px);
-        line-height: 1.18;
-        letter-spacing: -1.3px;
-      }
-
-      .cta-description {
-        max-width: 490px;
-        margin: 0 0 26px;
-        color: #b9b7ae;
-        font-size: 14px;
-        line-height: 1.8;
-      }
-
-      .contact-list {
-        display: grid;
-        gap: 10px;
-        max-width: 490px;
-      }
-
-      .contact-card {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        min-width: 0;
-        padding: 13px 15px;
-        border: 1px solid #302d24;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.018);
-        transition:
-          border-color 0.2s ease,
-          background 0.2s ease,
-          transform 0.2s ease;
-      }
-
-      .contact-card:hover {
-        transform: translateX(4px);
-        border-color: var(--gold);
-        background: rgba(215, 182, 79, 0.055);
-      }
-
-      .contact-icon {
-        display: grid;
-        flex: 0 0 42px;
-        width: 42px;
-        height: 42px;
-        place-items: center;
-        border: 1px solid rgba(215, 182, 79, 0.35);
-        border-radius: 10px;
-        background: rgba(215, 182, 79, 0.08);
-        color: var(--gold-light);
-        font-size: 19px;
-      }
-
-      .contact-copy {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        gap: 3px;
-        min-width: 0;
-      }
-
-      .contact-copy small {
-        color: #969287;
-        font-size: 9px;
-        font-weight: 800;
-        letter-spacing: 1.5px;
-      }
-
-      .contact-copy strong {
-        overflow-wrap: anywhere;
-        color: #f1eee5;
-        font-size: 13px;
-        font-weight: 650;
-      }
-
-      .contact-arrow {
-        color: var(--gold);
-        font-size: 18px;
-        transition: transform 0.2s ease;
-      }
-
-      .contact-card:hover .contact-arrow {
-        transform: translate(2px, -2px);
-      }
-
-      /* Subscription card */
-
-      .cta-card {
-        position: relative;
-        padding: 34px;
-        overflow: hidden;
-        border: 1px solid rgba(215, 182, 79, 0.36);
-        border-radius: 20px;
-        background:
-          radial-gradient(
-            ellipse at 100% 0%,
-            rgba(215, 182, 79, 0.12),
-            transparent 42%
-          ),
-          linear-gradient(145deg, #191814, #0c0c0c 75%);
-        box-shadow: 0 24px 65px rgba(0, 0, 0, 0.25);
-      }
-
-      .cta-card::before {
-        content: "NDC";
-        position: absolute;
-        right: -8px;
-        top: 35px;
-        color: rgba(215, 182, 79, 0.035);
-        font-size: 100px;
-        font-weight: 950;
-        font-style: italic;
-        line-height: 1;
-        pointer-events: none;
-      }
-
-      .cta-card-icon {
-        display: grid;
-        width: 46px;
-        height: 46px;
-        place-items: center;
-        margin-bottom: 20px;
-        border: 1px solid var(--gold);
-        border-radius: 13px;
-        background: rgba(215, 182, 79, 0.09);
-        color: var(--gold-light);
-        font-size: 24px;
-      }
-
-      .cta-card-label {
-        color: var(--gold);
-        font-size: 10px;
-        font-weight: 850;
-        letter-spacing: 2px;
-      }
-
-      .cta-card h3 {
-        position: relative;
-        margin: 12px 0;
-        font-size: clamp(27px, 3vw, 35px);
-        line-height: 1.2;
-      }
-
-      .cta-card > p {
-        margin: 0;
-        color: #b9b7ae;
-        font-size: 13px;
-        line-height: 1.8;
-      }
-
-      .cta-price {
-        display: flex;
-        align-items: center;
-        gap: 22px;
-        margin: 25px 0;
-        padding: 19px 0;
-        border-top: 1px solid #373126;
-        border-bottom: 1px solid #373126;
-      }
-
-      .cta-price > div {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-      }
-
-      .cta-price small {
-        color: #9f9b8f;
-        font-size: 9px;
-        font-weight: 800;
-        letter-spacing: 1px;
-      }
-
-      .cta-price strong {
-        color: #f5f0df;
-        font-size: 23px;
-        white-space: nowrap;
-      }
-
-      .cta-price strong span {
-        color: #aaa69a;
-        font-size: 11px;
-        font-weight: 500;
-      }
-
-      .cta-price-divider {
-        align-self: stretch;
-        width: 1px;
-        background: #373126;
-      }
-
-      .cta-main-btn {
-        display: flex;
-        width: 100%;
-        justify-content: space-between;
-        padding: 14px 18px;
-      }
-
-      .cta-whatsapp-link {
-        display: block;
-        margin-top: 17px;
-        color: var(--gold-light);
-        text-align: center;
-        font-size: 12px;
-        font-weight: 650;
-      }
-
-      .cta-whatsapp-link:hover {
-        color: #fff0b4;
-      }
-
-      /* Responsive layout */
-
-      @media (max-width: 850px) {
-        .cta-inner {
-          grid-template-columns: 1fr;
-          gap: 35px;
-        }
-
-        .contact-list {
-          max-width: none;
-        }
-
-        .cta-card {
-          max-width: 560px;
-        }
-      }
-
-      @media (max-width: 560px) {
         .cta {
           padding: 52px 0;
         }
-
         .cta-inner {
-          gap: 28px;
+          gap: 27px;
         }
-
-        .cta-brand {
-          margin-bottom: 23px;
-        }
-
         .cta-info h2 {
           font-size: 32px;
         }
-
-        .contact-card {
-          padding: 11px;
-          gap: 10px;
-        }
-
-        .contact-copy strong {
-          font-size: 12px;
-        }
-
         .cta-card {
           padding: 24px 20px;
         }
-
         .cta-price {
           gap: 14px;
         }
-
         .cta-price strong {
           font-size: 20px;
         }
-      }
-      /* ===== NDC THREE-PLAN PRICING LAYOUT ===== */
-
-      .pricing {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-
-      .plan {
-        min-width: 0;
-        padding: 23px 17px;
-      }
-
-      .plan .price {
-        font-size: clamp(27px, 2.6vw, 38px);
-      }
-
-      .plan .per {
-        min-height: 19px;
-      }
-
-      .plan ul {
-        font-size: 12px;
-      }
-
-      @media (max-width: 1100px) {
-        .plans-layout {
-          grid-template-columns: 1fr;
-          gap: 35px;
-        }
-      }
-      /* ===== NDC VAHAN TOOL TUTORIAL ===== */
-
-      .tutorial-section {
-        background:
-          radial-gradient(
-            ellipse at 50% 0%,
-            rgba(215, 182, 79, 0.07),
-            transparent 55%
-          ),
-          #090909;
-        border-top: 1px solid var(--line);
-        border-bottom: 1px solid var(--line);
-      }
-
-      .tutorial-container {
-        max-width: 950px;
-        margin: 0 auto;
-      }
-
-      .tutorial-heading {
-        text-align: center;
-        margin-bottom: 30px;
-      }
-
-      .tutorial-heading .section-desc {
-        margin: 0 auto;
-      }
-
-      .tutorial-video-frame {
-        padding: 10px;
-        border: 1px solid rgba(215, 182, 79, 0.4);
-        border-radius: 18px;
-        background: linear-gradient(145deg, #191919, #080808);
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
-      }
-
-      .tutorial-video {
-        display: block;
-        width: 100%;
-        max-height: 560px;
-        aspect-ratio: 16 / 9;
-        object-fit: contain;
-        background: #000;
-        border-radius: 11px;
-      }
-
-      .tutorial-caption {
-        margin: 18px 0 0;
-        text-align: center;
-        color: var(--muted);
-        font-size: 14px;
-      }
-
-      .tutorial-caption strong {
-        color: var(--gold-light);
-      }
-
-      @media (max-width: 560px) {
-        .tutorial-video-frame {
+        .video-frame {
           padding: 5px;
           border-radius: 12px;
         }
-
         .tutorial-video {
           border-radius: 8px;
         }
-
-        .tutorial-caption {
-          font-size: 12px;
+        .footer-inner {
+          flex-direction: column;
         }
       }
-      @media (max-width: 850px) {
-        .pricing {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *:before,
+        *:after {
+          transition-duration: 0.01ms !important;
         }
       }
+      .payment-section {
+        padding: 100px 0;
+        background: #090a0d;
+        border-top: 1px solid rgba(215, 189, 85, 0.12);
+      }
 
-      @media (max-width: 560px) {
-        .pricing {
+      .payment-heading {
+        text-align: center;
+        max-width: 650px;
+        margin: 0 auto 48px;
+      }
+
+      .payment-kicker {
+        color: #d7bd55;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+      }
+
+      .payment-heading h2 {
+        color: #fff;
+        font-size: clamp(30px, 5vw, 44px);
+        margin: 14px 0;
+      }
+
+      .payment-heading h2 span {
+        color: #d7bd55;
+      }
+
+      .payment-heading p {
+        color: #999;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .payment-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+        max-width: 950px;
+        margin: auto;
+      }
+
+      .payment-card {
+        background: #111216;
+        border: 1px solid #292a2e;
+        border-radius: 16px;
+        padding: 32px;
+        transition:
+          border-color 0.25s,
+          transform 0.25s;
+      }
+
+      .payment-card:hover {
+        border-color: rgba(215, 189, 85, 0.6);
+        transform: translateY(-4px);
+      }
+
+      .payment-icon {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        background: rgba(215, 189, 85, 0.12);
+        color: #d7bd55;
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 22px;
+      }
+
+      .payment-label {
+        color: #d7bd55;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.6px;
+      }
+
+      .payment-card h3 {
+        color: #fff;
+        font-size: 22px;
+        margin: 10px 0;
+      }
+
+      .payment-card > p {
+        color: #999;
+        font-size: 13px;
+        line-height: 1.7;
+        margin-bottom: 24px;
+      }
+
+      .upi-id {
+        background: #191a1f;
+        border: 1px solid #303137;
+        border-radius: 10px;
+        padding: 17px;
+        margin-bottom: 15px;
+      }
+
+      .upi-id span,
+      .bank-detail span {
+        display: block;
+        color: #888;
+        font-size: 11px;
+        margin-bottom: 7px;
+      }
+
+      .upi-id strong {
+        color: #fff;
+        font-size: 18px;
+        letter-spacing: 0.3px;
+        overflow-wrap: anywhere;
+      }
+
+      .payment-copy {
+        width: 100%;
+        border: 1px solid #d7bd55;
+        border-radius: 8px;
+        background: #d7bd55;
+        color: #090a0d;
+        padding: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      .payment-copy:hover {
+        background: transparent;
+        color: #d7bd55;
+      }
+
+      .bank-details {
+        display: grid;
+        gap: 12px;
+      }
+
+      .bank-detail {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 14px;
+        background: #191a1f;
+        border: 1px solid #303137;
+        border-radius: 9px;
+      }
+
+      .bank-detail span {
+        width: 100%;
+        margin-bottom: -5px;
+      }
+
+      .bank-detail strong {
+        color: #fff;
+        font-size: 13px;
+        overflow-wrap: anywhere;
+      }
+
+      .bank-detail button {
+        background: transparent;
+        border: 1px solid #555;
+        color: #d7bd55;
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 11px;
+        cursor: pointer;
+      }
+
+      .bank-detail button:hover {
+        border-color: #d7bd55;
+      }
+
+      .payment-note {
+        max-width: 750px;
+        margin: 32px auto 18px;
+        text-align: center;
+        color: #999;
+        font-size: 13px;
+        line-height: 1.8;
+      }
+
+      .payment-support {
+        display: block;
+        width: fit-content;
+        margin: 0 auto;
+        padding: 13px 24px;
+        border-radius: 8px;
+        background: #d7bd55;
+        color: #090a0d;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.2s;
+      }
+
+      .payment-support:hover {
+        background: #ead47b;
+        transform: translateY(-2px);
+      }
+
+      @media (max-width: 700px) {
+        .payment-section {
+          padding: 70px 0;
+        }
+
+        .payment-grid {
           grid-template-columns: 1fr;
+          padding: 0 16px;
         }
 
-        .plan {
-          padding: 23px 20px;
+        .payment-card {
+          padding: 24px;
         }
 
-        .plan .price {
-          font-size: 38px;
+        .payment-heading {
+          padding: 0 18px;
         }
+      }
+      .payment-container {
+        max-width: 760px;
+        margin: auto;
+        display: grid;
+        gap: 20px;
+      }
+
+      .payment-summary,
+      .payment-methods {
+        background: #111216;
+        border: 1px solid #292a2e;
+        border-radius: 15px;
+        padding: 28px;
+      }
+
+      .payment-summary {
+        border-color: rgba(215, 189, 85, 0.4);
+      }
+
+      .payment-label {
+        color: #d7bd55;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+      }
+
+      .payment-summary h3 {
+        color: #fff;
+        font-size: 23px;
+        margin: 12px 0 20px;
+      }
+
+      .payment-amount {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 18px;
+        background: #191a1f;
+        border-radius: 10px;
+      }
+
+      .payment-amount span {
+        color: #aaa;
+        font-size: 13px;
+      }
+
+      .payment-amount strong {
+        color: #d7bd55;
+        font-size: 27px;
+      }
+
+      .payment-summary-info {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+        color: #999;
+        font-size: 12px;
+      }
+
+      .payment-methods h3 {
+        color: #fff;
+        font-size: 19px;
+        margin: 0 0 7px;
+      }
+
+      .payment-methods > p {
+        color: #999;
+        font-size: 13px;
+        margin-bottom: 20px;
+      }
+
+      .payment-options {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .payment-option {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 17px;
+        background: #191a1f;
+        border: 1px solid #303137;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      .payment-option:has(input:checked) {
+        border-color: #d7bd55;
+        background: rgba(215, 189, 85, 0.06);
+      }
+
+      .payment-option input {
+        accent-color: #d7bd55;
+        width: 17px;
+        height: 17px;
+      }
+
+      .payment-option-content {
+        display: grid;
+        gap: 5px;
+      }
+
+      .payment-option-content strong {
+        color: #fff;
+        font-size: 14px;
+      }
+
+      .payment-option-content small {
+        color: #999;
+        font-size: 12px;
+      }
+
+      .payment-detail-box {
+        background: #191a1f;
+        border: 1px solid #303137;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .payment-detail-box[hidden] {
+        display: none;
+      }
+
+      .payment-detail-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 0;
+        border-bottom: 1px solid #303137;
+      }
+
+      .payment-detail-row:last-of-type {
+        border-bottom: none;
+      }
+
+      .payment-detail-row div {
+        display: grid;
+        gap: 6px;
+      }
+
+      .payment-detail-row small {
+        color: #888;
+        font-size: 11px;
+      }
+
+      .payment-detail-row strong {
+        color: #fff;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+      }
+
+      .payment-detail-row button {
+        background: transparent;
+        color: #d7bd55;
+        border: 1px solid #555;
+        border-radius: 6px;
+        padding: 7px 12px;
+        cursor: pointer;
+      }
+
+      .payment-detail-box > p {
+        color: #999;
+        font-size: 12px;
+        line-height: 1.6;
+        margin: 12px 0 0;
+      }
+
+      .payment-proceed {
+        width: 100%;
+        padding: 15px;
+        border: 1px solid #d7bd55;
+        border-radius: 9px;
+        background: #d7bd55;
+        color: #090a0d;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      .payment-proceed:hover:not(:disabled) {
+        background: #ead47b;
+      }
+
+      .payment-proceed:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .payment-secure-note {
+        color: #888;
+        font-size: 12px;
+        line-height: 1.7;
+        text-align: center;
+        margin: 17px 0 0;
+      }
+
+      @media (max-width: 600px) {
+        .payment-summary,
+        .payment-methods {
+          padding: 20px;
+        }
+
+        .payment-amount strong {
+          font-size: 23px;
+        }
+      }
+      .payment-credentials {
+        padding: 24px;
+        border: 1px solid rgba(215, 189, 85, 0.2);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.025);
+      }
+
+      .payment-credentials h3 {
+        margin: 10px 0 6px;
+      }
+
+      .payment-credentials > p {
+        margin-bottom: 20px;
+        color: #999;
+        font-size: 14px;
+      }
+
+      .credential-field {
+        margin-bottom: 16px;
+      }
+
+      .credential-field label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #ddd;
+      }
+
+      .credential-field input {
+        width: 100%;
+        padding: 13px 15px;
+        border: 1px solid #333;
+        border-radius: 8px;
+        outline: none;
+        background: #101010;
+        color: #fff;
+        font: inherit;
+        box-sizing: border-box;
+      }
+
+      .credential-field input:focus {
+        border-color: #d7bd55;
+      }
+
+      .credential-note {
+        color: #aaa;
+        font-size: 12px;
       }
     </style>
   </head>
   <body>
     <header class="topbar">
       <div class="container nav">
-        <a class="brand" href="#home" aria-label="NDC VAHAN TOOL home">
-          <span class="brand-mark">NDC</span>
-          <span class="brand-name"
+        <a class="brand" href="#home" aria-label="NDC VAHAN TOOL home"
+          ><span class="brand-mark">NDC</span
+          ><span class="brand-name"
             >VAHAN TOOL<span class="brand-sub"
               >By Next Dimension Customs</span
             ></span
-          >
-        </a>
-        <nav class="nav-links" aria-label="Main navigation">
-          <a href="#home">Home</a><a href="#features">Features</a>
-          <a href="#tutorial">Tutorial</a>
-          <a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
-          <a href="privacy-policy.html">Privacy Policy</a>
-          <a href="#features">Features</a>
-        </nav>
-        <a class="btn btn-primary" href="#pricing"
-          >Get Started <span aria-hidden="true">↗</span></a
+          ></a
         >
+        <nav class="nav-links" id="primaryNav" aria-label="Main navigation">
+          <a href="#home">Home</a><a href="#features">Features</a
+          ><a href="#how-it-works">How It Works</a
+          ><a href="#tutorial">Tutorial</a><a href="#pricing">Pricing</a
+          ><a href="#faq">FAQ</a
+          ><a href="privacy-policy.html">Privacy Policy</a>
+        </nav>
+        <div class="nav-actions">
+          <a class="btn btn-primary" href="#pricing">Get Started ↗</a
+          ><button
+            class="menu-toggle"
+            id="menuToggle"
+            type="button"
+            aria-label="Open navigation"
+            aria-expanded="false"
+            aria-controls="primaryNav"
+          >
+            ☰
+          </button>
+        </div>
       </div>
     </header>
-
     <main>
-      <!-- HERO SECTION -->
       <section class="hero" id="home">
         <div class="container hero-grid">
           <div>
             <div class="eyebrow">
               Automate&nbsp; | &nbsp;Simplify&nbsp; | &nbsp;Save Time
             </div>
-
             <h1><span class="gold">NDC</span> VAHAN TOOL</h1>
-
             <h2>
-              Faster VAHAN Document Uploads. Smarter Dealership Workflows.
+              Smarter VAHAN Document Uploads. Smoother Dealership Workflows.
             </h2>
-
             <p class="hero-copy">
-              A powerful Chrome extension designed for automobile dealerships
-              and vehicle registration teams. Automatically compress documents,
-              streamline VAHAN uploads, and reduce repetitive manual work with
-              intelligent document identification and convenient automation
-              settings.
+              A Chrome extension built for automobile dealerships and vehicle
+              registration teams. Prepare and match documents, compress
+              supported files, upload them through the VAHAN workflow, skip
+              documents already uploaded, and optionally automate the final
+              submission step.
             </p>
-
             <div class="hero-actions">
-              <a class="btn btn-primary" href="#pricing">
-                ◉ &nbsp; View Plans
-              </a>
-
-              <a class="btn btn-outline" href="#features"> Explore Features </a>
+              <a class="btn btn-primary" href="#pricing"
+                >◉ &nbsp; View Subscription Plans</a
+              ><a class="btn btn-outline" href="#features">Explore Features</a>
             </div>
-
             <div class="trust-row">
-              <span><b>ϟ</b> Auto Compression</span>
-              <span><b>↗</b> Automated Uploads</span>
-              <span><b>✓</b> Reduced Human Errors</span>
+              <span><b>ϟ</b> Smart Compression</span
+              ><span><b>✓</b> Existing-Document Detection</span
+              ><span><b>↗</b> Optional Final Submission</span>
             </div>
           </div>
-
-          <!-- PRODUCT INTERFACE PREVIEW -->
           <div
             class="product-stage"
-            aria-label="NDC VAHAN TOOL interface preview"
+            aria-label="Illustrative preview of the NDC VAHAN TOOL interface"
           >
             <div class="halo"></div>
-
             <div class="mockup">
               <div class="mock-head">
                 <div class="mock-logo">NDC <small>VAHAN TOOL</small></div>
-                <span aria-hidden="true">⚙</span>
+                <span class="mock-status">● Ready</span>
               </div>
-
               <div class="upload-zone">
                 <div class="upload-icon">⇧</div>
-                <strong>Choose Files</strong>
-                <small>Up to 12 files · JPG / PNG / PDF</small>
+                <strong>Choose Documents</strong
+                ><small>Up to 12 files · JPG / PNG / WEBP / PDF</small>
               </div>
-
               <div class="mock-stats">
                 0 / 12 files · Original 0 B · Prepared 0 B
               </div>
-
               <div class="mock-checks">
-                <span>Auto-Start Upload</span>
-                <span>Auto-Move After Upload</span>
+                <span>Auto-Start Upload</span><span>Skip Existing</span
+                ><span>Final Submission</span>
               </div>
-
               <div class="mock-buttons">
-                <span>Start Uploading</span>
-                <span>Automation Settings</span>
+                <span>Start Uploading</span><span>Download ZIP</span>
               </div>
-
               <div class="mock-table">
                 <div class="mock-row">
-                  <span>VAHAN Document</span>
-                  <span>Status</span>
+                  <span>Document</span><span>Status</span>
                 </div>
-
                 <div class="mock-row">
-                  <span>1. Address Proof</span>
-                  <span class="ready">Ready</span>
+                  <span>Address Proof</span><span class="ready">Ready</span>
                 </div>
-
                 <div class="mock-row">
-                  <span>2. Insurance</span>
-                  <span class="ready">Ready</span>
+                  <span>Insurance</span><span class="ready">Ready</span>
                 </div>
-
                 <div class="mock-row">
-                  <span>3. Dealers Invoice</span>
-                  <span class="ready">Ready</span>
+                  <span>Dealer Invoice</span><span class="ready">Ready</span>
                 </div>
-
                 <div class="mock-row">
-                  <span>4. Form 20</span>
-                  <span>Waiting</span>
+                  <span>Already Uploaded</span
+                  ><span class="ready">Skipped</span>
                 </div>
-
                 <div class="mock-row">
-                  <span>Document Preparation</span>
-                  <span class="ready">Ready</span>
+                  <span>Upload Summary</span
+                  ><span class="ready">Available</span>
                 </div>
               </div>
             </div>
@@ -1228,123 +1610,182 @@
         </div>
       </section>
 
-      <!-- KEY FEATURES -->
       <section id="features">
         <div class="container">
           <div class="section-head">
-            <div class="section-kicker">Built for Dealership Productivity</div>
-
+            <div class="kicker">Built for Dealership Productivity</div>
             <h2 class="section-title">
-              <span class="gold">Powerful</span> Key Features
+              <span class="gold">Powerful</span> Features. One Workflow.
             </h2>
-
             <p class="section-desc">
-              Everything you need for a faster, easier, and more organized VAHAN
-              document upload workflow.
+              Tools that help reduce repetitive document preparation and upload
+              tasks while keeping users in control of the official VAHAN
+              process.
             </p>
           </div>
-
           <div class="features">
             <article class="feature">
               <div class="feature-icon">▧</div>
               <h3>Automatic Document Compression</h3>
               <p>
-                Automatically compress supported images to help meet configured
-                file-size limits without requiring repetitive manual resizing.
+                Compress supported images during preparation to help meet
+                configured file-size limits without repeated manual resizing.
               </p>
             </article>
-
             <article class="feature">
               <div class="feature-icon">ϟ</div>
-              <h3>Auto-Start After Compression</h3>
+              <h3>Auto-Start After Preparation</h3>
               <p>
-                Enable automatic upload initiation after document compression
-                and preparation are complete, saving time and clicks.
+                Optionally start the upload workflow automatically after
+                document preparation and compression are complete.
               </p>
             </article>
-
             <article class="feature">
               <div class="feature-icon">↗</div>
-              <h3>Automated VAHAN Uploads</h3>
+              <h3>Assisted VAHAN Uploads</h3>
               <p>
-                Streamline repetitive document selection and upload steps on
-                supported VAHAN portal pages.
+                Streamline supported document selection, category handling and
+                upload steps on compatible VAHAN portal pages.
               </p>
             </article>
-
             <article class="feature">
-              <div class="feature-icon">⇥</div>
-              <h3>Auto-Move After Upload</h3>
+              <div class="feature-icon">↻</div>
+              <h3>Skip Already Uploaded Documents</h3>
               <p>
-                Enable automatic navigation to the next document after the
-                current upload completes, reducing manual navigation.
+                Detect documents identified as already uploaded in the VAHAN
+                workflow and skip unnecessary repeat uploads when enabled.
               </p>
             </article>
-
+            <article class="feature">
+              <div class="feature-icon">✓</div>
+              <h3>Optional Final Submission</h3>
+              <p>
+                Choose whether the workflow should continue to the final
+                submission step after document uploads are processed.
+              </p>
+            </article>
             <article class="feature">
               <div class="feature-icon">▤</div>
               <h3>Smart Document Identification</h3>
               <p>
-                Match files to supported VAHAN document categories using
-                filenames, helping reduce document-selection mistakes.
+                Use filename hints and document-matching logic to help assign
+                selected files to supported VAHAN document categories.
               </p>
             </article>
-
+            <article class="feature">
+              <div class="feature-icon">⇩</div>
+              <h3>Convenient ZIP Download</h3>
+              <p>
+                Download prepared documents together in a ZIP archive for easier
+                file handling and record keeping.
+              </p>
+            </article>
             <article class="feature">
               <div class="feature-icon">◈</div>
-              <h3>Multiple Document Formats</h3>
+              <h3>Multiple File Formats</h3>
               <p>
-                Work with supported JPG, PNG, and PDF documents through one
-                convenient document preparation workflow.
+                Prepare supported JPG, PNG, WEBP and PDF documents through one
+                convenient extension workflow.
               </p>
             </article>
-
+            <article class="feature">
+              <div class="feature-icon">▥</div>
+              <h3>Clear Processing Results</h3>
+              <p>
+                Review workflow results, including documents processed and
+                documents identified as already uploaded and skipped.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">🔒</div>
+              <h3>Account-Based Access</h3>
+              <p>
+                Use an authorized account with server-managed approval, account
+                status and access permissions.
+              </p>
+            </article>
             <article class="feature">
               <div class="feature-icon">◎</div>
-              <h3>Clarity-Focused Compression</h3>
+              <h3>Managed Session Limits</h3>
               <p>
-                Image/PDF compression is designed to balance reduced file sizes
-                with readability, helping preserve important document details.
+                Configured session and device limits help manage how an
+                authorized account can access the extension.
               </p>
             </article>
-
-            <article class="feature">
-              <div class="feature-icon">✓</div>
-              <h3>Improved Accuracy</h3>
-              <p>
-                Reduce repetitive manual actions and potential human errors with
-                a more consistent, organized upload workflow.
-              </p>
-            </article>
-
             <article class="feature">
               <div class="feature-icon">⚙</div>
-              <h3>Two Automation Settings</h3>
+              <h3>Flexible Automation Settings</h3>
               <p>
-                Configure automatic upload initiation after compression and
-                automatic movement to the next document after upload.
+                Choose the automation options that suit your workflow instead of
+                being locked into one fixed process.
+              </p>
+            </article>
+          </div>
+          <p class="notice">
+            Feature availability depends on the supported VAHAN page and the
+            options enabled in your extension and account.
+          </p>
+        </div>
+      </section>
+
+      <section class="workflow" id="how-it-works">
+        <div class="container">
+          <div class="section-head">
+            <div class="kicker">A More Organized Process</div>
+            <h2 class="section-title">
+              How <span class="gold">NDC VAHAN TOOL</span> Works
+            </h2>
+            <p class="section-desc">
+              A simple overview of the typical document workflow, from selecting
+              files to reviewing the portal result.
+            </p>
+          </div>
+          <div class="steps">
+            <article class="step">
+              <h3>Select Your Documents</h3>
+              <p>
+                Choose the required files for the vehicle registration document
+                workflow.
+              </p>
+            </article>
+            <article class="step">
+              <h3>Prepare and Match</h3>
+              <p>
+                Supported files are prepared, compressed where applicable and
+                matched to document categories.
+              </p>
+            </article>
+            <article class="step">
+              <h3>Run the Upload Workflow</h3>
+              <p>
+                Start uploads, with the option to skip documents identified as
+                already uploaded.
+              </p>
+            </article>
+            <article class="step">
+              <h3>Review the Result</h3>
+              <p>
+                Check the processing summary and verify the final status on the
+                official VAHAN portal.
               </p>
             </article>
           </div>
         </div>
       </section>
-      <!-- TUTORIAL VIDEO -->
-      <section class="tutorial-section" id="tutorial">
+
+      <section class="tutorial" id="tutorial">
         <div class="container tutorial-container">
           <div class="section-head tutorial-heading">
-            <div class="section-kicker">See It in Action</div>
-
+            <div class="kicker">See It in Action</div>
             <h2 class="section-title">
               Learn How to Use <span class="gold">NDC VAHAN TOOL</span>
             </h2>
-
             <p class="section-desc">
-              Watch our tutorial to understand the document preparation and
-              VAHAN upload workflow before getting started.
+              Watch the product tutorial to understand document preparation and
+              the VAHAN upload workflow before getting started.
             </p>
           </div>
-
-          <div class="tutorial-video-frame">
+          <div class="video-frame">
             <video
               class="tutorial-video"
               id="ndcTutorialVideo"
@@ -1359,238 +1800,201 @@
               Your browser does not support WebM video playback.
             </video>
           </div>
-
           <p class="tutorial-caption">
             <strong>NDC VAHAN TOOL</strong> · Step-by-step product tutorial
           </p>
         </div>
       </section>
-      <!-- AUTOMATION SETTINGS -->
+
       <section id="automation">
         <div class="container">
           <div class="section-head">
-            <div class="section-kicker">Simple. Flexible. Efficient.</div>
-
+            <div class="kicker">Simple. Flexible. Configurable.</div>
             <h2 class="section-title">
-              <span class="gold">Smart</span> Automation Settings
+              <span class="gold">Automation</span> on Your Terms
             </h2>
-
             <p class="section-desc">
-              Choose how NDC VAHAN TOOL handles your document upload workflow.
-              Enable either setting according to your preferences.
+              Enable the options that fit your process. Automation settings are
+              optional and can be reviewed before running the workflow.
             </p>
           </div>
-
           <div class="features">
             <article class="feature">
               <div class="feature-icon">01</div>
-
               <h3>Automatic Upload Start</h3>
-
               <p>
-                Enable this setting to automatically initiate uploads after
-                compression and document preparation are complete. Spend less
-                time clicking through repetitive steps.
+                Automatically initiate the upload workflow after file
+                preparation and compression are complete.
               </p>
             </article>
-
             <article class="feature">
               <div class="feature-icon">02</div>
-
-              <h3>Automatic File Movement</h3>
-
+              <h3>Skip Existing Documents</h3>
               <p>
-                Enable this setting to move to the next document after the
-                current upload completes, helping keep the workflow moving.
+                Check the VAHAN document workflow and skip documents identified
+                as already uploaded, instead of repeating the same upload step.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">03</div>
+              <h3>Automatic Final Submission</h3>
+              <p>
+                Optionally continue the final submission workflow after uploads
+                are processed. Always verify the details and final status on the
+                portal.
               </p>
             </article>
           </div>
-
           <p class="notice">
-            Both automation settings are optional. Upload results and document
-            readability should be checked before completing official
-            submissions.
+            NDC VAHAN TOOL assists with supported portal actions. Users remain
+            responsible for document accuracy and for confirming all official
+            submission requirements.
           </p>
         </div>
       </section>
 
-      <!-- SESSION LIMITS AND PRICING -->
-      <section class="plans-section" id="pricing">
+      <section class="plans" id="pricing">
         <div class="container plans-layout">
           <div>
-            <div class="section-kicker">Subscription Information</div>
-
+            <div class="kicker">Subscription Information</div>
             <h2 class="section-title">
               <span class="gold">Session</span> &amp; Access Limits
             </h2>
-
             <p class="section-desc">
               Choose the monthly subscription that matches your expected usage.
               Each plan includes one authorized user account.
             </p>
-
             <ul class="limit-list">
               <li>
                 <span class="limit-icon">♟</span>
                 <div>
-                  <strong>1 User Account</strong>
-                  <small> One authorized user account per subscription. </small>
+                  <strong>1 User Account</strong
+                  ><small>One authorized user account per subscription.</small>
                 </div>
               </li>
-
               <li>
                 <span class="limit-icon">▣</span>
                 <div>
-                  <strong>Plan-Based Login Allowance</strong>
-                  <small>
-                    Choose 3 logins with Starter, 6 logins with Pro, or enquire
-                    about a Custom Plan.
-                  </small>
+                  <strong>Plan-Based Login Allowance</strong
+                  ><small
+                    >Starter includes 3 logins, Pro includes 6 logins. Ask us
+                    about a Custom Plan.</small
+                  >
                 </div>
               </li>
-
               <li>
                 <span class="limit-icon">⬟</span>
                 <div>
-                  <strong>Authorized Access</strong>
-                  <small>
-                    Access is subject to account approval and configured
-                    authentication controls.
-                  </small>
+                  <strong>Authorized Access</strong
+                  ><small
+                    >Access is subject to account approval and configured
+                    authentication controls.</small
+                  >
                 </div>
               </li>
-
               <li>
                 <span class="limit-icon">▦</span>
                 <div>
-                  <strong>30-Day Subscription</strong>
-                  <small>
-                    Monthly access for 30 days from activation, unless otherwise
-                    agreed.
-                  </small>
+                  <strong>30-Day Subscription</strong
+                  ><small
+                    >Monthly access for 30 days from activation, unless
+                    otherwise agreed.</small
+                  >
                 </div>
               </li>
-
               <li>
                 <span class="limit-icon">↻</span>
                 <div>
-                  <strong>Subscription Renewal</strong>
-                  <small>
-                    Renew your subscription to continue using the tool after
-                    your plan expires.
-                  </small>
+                  <strong>Subscription Renewal</strong
+                  ><small
+                    >Renew your subscription to continue using the tool after
+                    your plan expires.</small
+                  >
                 </div>
               </li>
             </ul>
-
             <p class="notice">
-              Login allowances are subject to the access rules configured for
-              your subscription.
+              Login allowances and session/device limits are subject to the
+              access rules confirmed for your subscription.
             </p>
           </div>
-
-          <!-- MONTHLY PLANS -->
-          <!-- MONTHLY PLANS -->
           <div class="pricing-wrap">
             <h3><span class="gold">Monthly</span> Subscription Plans</h3>
-
             <div class="pricing">
-              <!-- STARTER PLAN -->
               <article class="plan">
                 <div class="plan-label">STARTER PLAN</div>
-
                 <div class="price">₹499</div>
                 <div class="per">per month</div>
-
                 <hr />
-
                 <h4>1 User</h4>
-
                 <ul>
                   <li>3 logins</li>
-                  <li>Automated VAHAN upload assistance</li>
+                  <li>Assisted VAHAN uploads</li>
                   <li>Smart document identification</li>
                   <li>Automatic image compression</li>
-                  <li>Auto-start upload setting</li>
-                  <li>Auto-move after upload setting</li>
-                  <li>JPG, PNG and PDF support</li>
+                  <li>Skip already uploaded documents</li>
+                  <li>Auto-start and final submission options</li>
+                  <li>JPG, PNG, WEBP and PDF support</li>
+                  <li>Prepared-document ZIP download</li>
                 </ul>
-
-                <a
+                <button
                   class="btn btn-outline"
-                  href="https://wa.me/919052691719?text=Hi%2C%20I%20am%20interested%20in%20the%20NDC%20VAHAN%20TOOL%20Starter%20Plan%20for%20Rs.%20499%20per%20month%20with%203%20logins."
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  type="button"
+                  onclick="selectPlan('Starter', 499, '3 logins')"
                 >
                   Choose Starter
-                </a>
+                </button>
               </article>
-
-              <!-- PRO PLAN -->
               <article class="plan featured">
                 <span class="best">POPULAR CHOICE</span>
-
                 <div class="plan-label">PRO PLAN</div>
-
                 <div class="price">₹799</div>
                 <div class="per">per month</div>
-
                 <hr />
-
                 <h4>1 User</h4>
-
                 <ul>
                   <li>6 logins</li>
-                  <li>Automated VAHAN upload assistance</li>
+                  <li>Assisted VAHAN uploads</li>
                   <li>Smart document identification</li>
                   <li>Automatic image compression</li>
-                  <li>Auto-start upload setting</li>
-                  <li>Auto-move after upload setting</li>
-                  <li>JPG, PNG and PDF support</li>
+                  <li>Skip already uploaded documents</li>
+                  <li>Auto-start and final submission options</li>
+                  <li>JPG, PNG, WEBP and PDF support</li>
+                  <li>Prepared-document ZIP download</li>
                 </ul>
-
-                <a
+                <button
                   class="btn btn-primary"
-                  href="https://wa.me/919052691719?text=Hi%2C%20I%20am%20interested%20in%20the%20NDC%20VAHAN%20TOOL%20Pro%20Plan%20for%20Rs.%20799%20per%20month%20with%206%20logins."
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  type="button"
+                  onclick="selectPlan('Pro', 799, '6 logins')"
                 >
                   Choose Pro
-                </a>
+                </button>
               </article>
-
-              <!-- CUSTOM PLAN -->
               <article class="plan">
                 <div class="plan-label">CUSTOM PLAN</div>
-
                 <div class="price">Let's Talk</div>
                 <div class="per">pricing based on your requirements</div>
-
                 <hr />
-
                 <h4>Tailored Access</h4>
-
                 <ul>
                   <li>Custom subscription arrangement</li>
                   <li>Discuss your required login allowance</li>
-                  <li>Automated VAHAN upload assistance</li>
+                  <li>Assisted VAHAN uploads</li>
                   <li>Smart document identification</li>
                   <li>Automatic image compression</li>
-                  <li>Auto-start and auto-move settings</li>
-                  <li>JPG, PNG and PDF support</li>
+                  <li>Skip existing and automation options</li>
+                  <li>JPG, PNG, WEBP and PDF support</li>
+                  <li>Prepared-document ZIP download</li>
                 </ul>
-
-                <a
+                <button
                   class="btn btn-outline"
-                  href="https://wa.me/919052691719?text=Hi%2C%20I%20am%20interested%20in%20a%20Custom%20Plan%20for%20NDC%20VAHAN%20TOOL.%20Please%20share%20the%20available%20options."
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  type="button"
+                  onclick="selectCustomPlan()"
                 >
                   Discuss Custom Plan
-                </a>
+                </button>
               </article>
             </div>
-
             <p class="notice">
               All plans are intended for one authorized user account unless
               otherwise agreed. Login allowances and custom arrangements are
@@ -1599,69 +2003,401 @@
           </div>
         </div>
       </section>
+      <section class="payment-section" id="payment">
+        <div class="container">
+          <div class="payment-heading">
+            <span class="payment-kicker">COMPLETE YOUR SUBSCRIPTION</span>
+            <h2>Subscription <span>Payment</span></h2>
+            <p>Select a plan above to continue with your payment.</p>
+          </div>
 
-      <!-- FAQ -->
+          <div class="payment-container">
+            <!-- SELECTED PLAN -->
+            <div class="payment-summary">
+              <span class="payment-label">YOUR SELECTED PLAN</span>
+              <h3 id="selectedPlanName">No Plan Selected</h3>
+
+              <div class="payment-amount">
+                <span>Amount Payable</span>
+                <strong id="selectedPlanAmount">₹0</strong>
+              </div>
+
+              <div class="payment-summary-info">
+                <span id="selectedPlanLogins"
+                  >Choose a subscription plan to continue.</span
+                >
+                <span>30-Day Subscription</span>
+              </div>
+            </div>
+            <!-- ACCOUNT CREDENTIALS -->
+            <div class="payment-credentials">
+              <span class="payment-label">ACCOUNT DETAILS</span>
+              <h3>Create Your Login Credentials</h3>
+              <p>Choose the username and password for your NDC account.</p>
+
+              <div class="credential-field">
+                <label for="accountUsername">Username</label>
+                <input
+                  type="text"
+                  id="accountUsername"
+                  placeholder="Enter username (minimum 9 characters)"
+                  minlength="9"
+                  maxlength="30"
+                  autocomplete="username"
+                  required
+                />
+              </div>
+
+              <div class="credential-field">
+                <label for="accountPassword">Password</label>
+                <input
+                  type="password"
+                  id="accountPassword"
+                  placeholder="Enter password (minimum 9 characters)"
+                  minlength="9"
+                  maxlength="64"
+                  autocomplete="new-password"
+                  required
+                />
+              </div>
+
+              <small class="credential-note">
+                Username and password must both be at least 9 characters long.
+              </small>
+            </div>
+            <!-- PAYMENT METHODS -->
+            <div class="payment-methods">
+              <h3>Select Payment Method</h3>
+              <p>Choose how you would like to pay.</p>
+
+              <div class="payment-options">
+                <label class="payment-option">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="UPI"
+                    checked
+                  />
+                  <span class="payment-option-content">
+                    <strong>UPI Payment</strong>
+                    <small>Google Pay, PhonePe, Paytm or any UPI app</small>
+                  </span>
+                  <span class="payment-radio"></span>
+                </label>
+
+                <label class="payment-option">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="Bank Transfer"
+                  />
+                  <span class="payment-option-content">
+                    <strong>Bank Transfer</strong>
+                    <small>NEFT / RTGS / IMPS</small>
+                  </span>
+                  <span class="payment-radio"></span>
+                </label>
+              </div>
+
+              <!-- UPI DETAILS -->
+              <div class="payment-detail-box" id="upiDetails">
+                <span class="payment-label">UPI PAYMENT DETAILS</span>
+
+                <div class="payment-detail-row">
+                  <div>
+                    <small>UPI ID</small>
+                    <strong>9052691719@slc</strong>
+                  </div>
+
+                  <button
+                    type="button"
+                    onclick="copyPaymentDetail('9052691719@slc', this)"
+                  >
+                    Copy
+                  </button>
+                </div>
+
+                <p>Use the above UPI ID to transfer the exact amount shown.</p>
+              </div>
+
+              <!-- BANK DETAILS -->
+              <div class="payment-detail-box" id="bankDetails" hidden>
+                <span class="payment-label">BANK ACCOUNT DETAILS</span>
+
+                <div class="payment-detail-row">
+                  <div>
+                    <small>Account Name</small>
+                    <strong>ADEPU NANDU KUMAR</strong>
+                  </div>
+                  <button
+                    type="button"
+                    onclick="copyPaymentDetail('ADEPU NANDU KUMAR', this)"
+                  >
+                    Copy
+                  </button>
+                </div>
+
+                <div class="payment-detail-row">
+                  <div>
+                    <small>Account Number</small>
+                    <strong>033325222360428</strong>
+                  </div>
+                  <button
+                    type="button"
+                    onclick="copyPaymentDetail('033325222360428', this)"
+                  >
+                    Copy
+                  </button>
+                </div>
+
+                <div class="payment-detail-row">
+                  <div>
+                    <small>IFSC Code</small>
+                    <strong>NESF0000333</strong>
+                  </div>
+                  <button
+                    type="button"
+                    onclick="copyPaymentDetail('NESF0000333', this)"
+                  >
+                    Copy
+                  </button>
+                </div>
+
+                <p>Available transfer methods: NEFT, RTGS and IMPS.</p>
+              </div>
+
+              <button
+                class="payment-proceed"
+                id="paymentProceed"
+                type="button"
+                onclick="proceedToPayment()"
+                disabled
+              >
+                Select a Plan to Continue
+              </button>
+
+              <p class="payment-secure-note">
+                After payment, share your transaction reference or screenshot
+                through WhatsApp for payment verification and account
+                activation.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <script>
+        let selectedPlan = null;
+
+        function selectPlan(name, amount, logins) {
+          selectedPlan = { name, amount, logins };
+
+          document.getElementById("selectedPlanName").textContent =
+            name + " Plan";
+
+          document.getElementById("selectedPlanAmount").textContent =
+            "₹" + amount.toLocaleString("en-IN");
+
+          document.getElementById("selectedPlanLogins").textContent =
+            "1 User · " + logins;
+
+          const proceed = document.getElementById("paymentProceed");
+
+          proceed.disabled = false;
+          proceed.textContent =
+            "Proceed to Payment · ₹" + amount.toLocaleString("en-IN");
+
+          document.getElementById("payment").scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+
+        function selectCustomPlan() {
+          const message =
+            "Hi, I am interested in a Custom Plan for NDC VAHAN TOOL. Please share the pricing and available options.";
+
+          window.open(
+            "https://wa.me/919052691719?text=" + encodeURIComponent(message),
+            "_blank",
+          );
+        }
+
+        document
+          .querySelectorAll('input[name="paymentMethod"]')
+          .forEach((input) => {
+            input.addEventListener("change", function () {
+              const isUPI = this.value === "UPI";
+
+              document.getElementById("upiDetails").hidden = !isUPI;
+              document.getElementById("bankDetails").hidden = isUPI;
+            });
+          });
+
+        function proceedToPayment() {
+          if (!selectedPlan) {
+            alert("Please select a subscription plan first.");
+            return;
+          }
+
+          const username = document
+            .getElementById("accountUsername")
+            .value.trim();
+
+          const password = document.getElementById("accountPassword").value;
+
+          if (username.length < 9) {
+            alert("Username must be at least 9 characters long.");
+            document.getElementById("accountUsername").focus();
+            return;
+          }
+
+          if (password.length < 9) {
+            alert("Password must be at least 9 characters long.");
+            document.getElementById("accountPassword").focus();
+            return;
+          }
+
+          const method = document.querySelector(
+            'input[name="paymentMethod"]:checked',
+          ).value;
+
+          const amount = "₹" + selectedPlan.amount.toLocaleString("en-IN");
+
+          const paymentDetails =
+            method === "UPI"
+              ? "UPI ID: 9052691719@slc"
+              : "Bank Transfer: NEFT / RTGS / IMPS";
+
+          const message =
+            "Hi, I want to purchase the NDC VAHAN TOOL subscription.\n\n" +
+            "Plan: " +
+            selectedPlan.name +
+            " Plan\n" +
+            "Amount: " +
+            amount +
+            "\n" +
+            "Duration: 30 Days\n" +
+            "Login Allowance: " +
+            selectedPlan.logins +
+            "\n\n" +
+            "ACCOUNT DETAILS\n" +
+            "Requested Username: " +
+            username +
+            "Requested Password: " +
+            password +
+            "\n\n" +
+            "\n\n" +
+            "Payment Method: " +
+            method +
+            "\n" +
+            paymentDetails +
+            "\n\n" +
+            "Please guide me with the payment verification and account activation process.";
+
+          window.open(
+            "https://wa.me/919052691719?text=" + encodeURIComponent(message),
+            "_blank",
+          );
+        }
+        function copyPaymentDetail(value, button) {
+          navigator.clipboard
+            .writeText(value)
+            .then(() => {
+              const original = button.textContent;
+              button.textContent = "Copied!";
+
+              setTimeout(() => {
+                button.textContent = original;
+              }, 1500);
+            })
+            .catch(() => {
+              alert("Unable to copy. Please copy manually: " + value);
+            });
+        }
+      </script>
       <section id="faq">
         <div class="container">
           <div class="section-head">
-            <div class="section-kicker">Everything You Need to Know</div>
-
+            <div class="kicker">Everything You Need to Know</div>
             <h2 class="section-title">Frequently Asked Questions</h2>
-
             <p class="section-desc">
-              Learn more about NDC VAHAN TOOL, its automation settings,
-              supported formats, and subscription plans.
+              Learn more about NDC VAHAN TOOL, its workflow, supported formats
+              and subscription plans.
             </p>
           </div>
-
           <div class="faq-grid">
             <details>
               <summary>What is NDC VAHAN TOOL?</summary>
               <p>
                 NDC VAHAN TOOL is a Chrome extension designed to simplify
-                repetitive document preparation and upload workflows on
-                supported VAHAN portal pages.
+                supported document preparation and upload workflows on VAHAN
+                portal pages.
               </p>
             </details>
-
             <details>
               <summary>Which document formats are supported?</summary>
               <p>
-                The tool supports JPG, PNG, and PDF files. Actual upload
-                requirements depend on the selected document category and the
-                VAHAN portal's applicable requirements.
+                The extension supports JPG, PNG, WEBP and PDF files. Actual
+                upload requirements depend on the selected document category and
+                the VAHAN portal's applicable requirements.
               </p>
             </details>
-
             <details>
               <summary>Can uploads start automatically?</summary>
               <p>
-                Yes. Enable the Auto-Start Upload setting to initiate the upload
-                workflow after document compression and preparation are
-                complete.
+                Yes. Enable Auto-Start Upload to initiate the upload workflow
+                after document preparation and compression are complete.
               </p>
             </details>
-
             <details>
-              <summary>Will compression affect document clarity?</summary>
+              <summary>Can it skip documents already uploaded?</summary>
               <p>
-                Image compression is designed to balance file-size reduction
-                with readability. Always review prepared documents to ensure
-                important text and details remain clear before submission.
+                Yes. When Skip Already Uploaded Documents is enabled, the tool
+                checks the VAHAN document workflow and skips documents it
+                identifies as already uploaded.
               </p>
             </details>
-
+            <details>
+              <summary>Can the tool complete final submission?</summary>
+              <p>
+                The optional automatic final submission setting can continue the
+                supported submission workflow after document uploads are
+                processed. Users should verify the final submission status on
+                the official VAHAN portal.
+              </p>
+            </details>
+            <details>
+              <summary>Does the tool provide an upload summary?</summary>
+              <p>
+                Yes. The workflow reports the number of documents processed and
+                the number of documents identified as already uploaded and
+                skipped.
+              </p>
+            </details>
+            <details>
+              <summary>Can I download my prepared documents?</summary>
+              <p>
+                Yes. Use Download ZIP to download the prepared documents
+                together in a ZIP archive.
+              </p>
+            </details>
+            <details>
+              <summary>Does the extension require an account?</summary>
+              <p>
+                Yes. Users access the extension through an authorized account.
+                Account approval, access permissions and configured session
+                limits are managed through the authentication system.
+              </p>
+            </details>
             <details>
               <summary>Which subscription should I choose?</summary>
               <p>
                 The Starter Plan costs ₹499 per month and includes one user
                 account with 3 logins. The Pro Plan costs ₹799 per month and
-                includes one user account with 6 logins. If you need a different
-                login allowance or a tailored subscription arrangement, contact
-                us to discuss a Custom Plan.
+                includes one user account with 6 logins. Contact us to discuss a
+                Custom Plan.
               </p>
             </details>
-
             <details>
               <summary>How do I activate my subscription?</summary>
               <p>
@@ -1670,7 +2406,6 @@
                 plan and subscription activation.
               </p>
             </details>
-
             <details>
               <summary>
                 Does the tool replace the official VAHAN portal?
@@ -1681,151 +2416,133 @@
                 accuracy and completing official portal requirements.
               </p>
             </details>
+            <details>
+              <summary>Will compression affect document clarity?</summary>
+              <p>
+                Compression is designed to reduce file sizes while keeping
+                documents usable. Always review prepared files to ensure
+                important text and details remain readable before submission.
+              </p>
+            </details>
           </div>
         </div>
       </section>
 
-      <!-- CONTACT AND SUBSCRIPTION CTA -->
       <section class="cta" id="contact">
         <div class="container cta-inner">
-          <!-- BRAND AND CONTACT INFORMATION -->
           <div class="cta-info">
             <div class="brand cta-brand">
-              <span class="brand-mark">NDC</span>
-
-              <span class="brand-name">
-                VAHAN TOOL
-                <span class="brand-sub"> By Next Dimension Customs </span>
-              </span>
+              <span class="brand-mark">NDC</span
+              ><span class="brand-name"
+                >VAHAN TOOL<span class="brand-sub"
+                  >By Next Dimension Customs</span
+                ></span
+              >
             </div>
-
-            <span class="cta-tag"> YOUR DEALERSHIP WORKFLOW PARTNER </span>
-
+            <span class="cta-tag">YOUR DEALERSHIP WORKFLOW PARTNER</span>
             <h2>
-              Less Repetitive Work.<br />
-              <span class="gold">More Productivity.</span>
+              Less Repetitive Work.<br /><span class="gold"
+                >More Productivity.</span
+              >
             </h2>
-
             <p class="cta-description">
               Ready to simplify your VAHAN document uploads? Contact us to
-              choose your plan and activate your subscription.
+              choose a plan, ask questions and activate your subscription.
             </p>
-
             <div class="contact-list">
-              <a class="contact-card" href="tel:+919052691719">
-                <span class="contact-icon">☎</span>
-
-                <span class="contact-copy">
-                  <small>CALL US</small>
-                  <strong>9052691719</strong>
-                </span>
-
-                <span class="contact-arrow">↗</span>
-              </a>
-
+              <a class="contact-card" href="tel:+919052691719"
+                ><span class="contact-icon">☎</span
+                ><span class="contact-copy"
+                  ><small>CALL US</small><strong>9052691719</strong></span
+                ><span class="contact-arrow">↗</span></a
+              >
               <a
-                class="contact-card whatsapp-card"
+                class="contact-card"
                 href="https://wa.me/919052691719?text=Hi%2C%20I%20am%20interested%20in%20NDC%20VAHAN%20TOOL."
                 target="_blank"
                 rel="noopener noreferrer"
+                ><span class="contact-icon">✆</span
+                ><span class="contact-copy"
+                  ><small>CHAT ON WHATSAPP</small
+                  ><strong>9052691719</strong></span
+                ><span class="contact-arrow">↗</span></a
               >
-                <span class="contact-icon">✆</span>
-
-                <span class="contact-copy">
-                  <small>CHAT ON WHATSAPP</small>
-                  <strong>9052691719</strong>
-                </span>
-
-                <span class="contact-arrow">↗</span>
-              </a>
-
               <a
                 class="contact-card"
                 href="mailto:nextdimensioncustom@gmail.com"
+                ><span class="contact-icon">✉</span
+                ><span class="contact-copy"
+                  ><small>EMAIL SUPPORT</small
+                  ><strong>nextdimensioncustom@gmail.com</strong></span
+                ><span class="contact-arrow">↗</span></a
               >
-                <span class="contact-icon">✉</span>
-
-                <span class="contact-copy">
-                  <small>EMAIL SUPPORT</small>
-                  <strong>nextdimensioncustom@gmail.com</strong>
-                </span>
-
-                <span class="contact-arrow">↗</span>
-              </a>
             </div>
           </div>
-
-          <!-- SUBSCRIPTION CTA CARD -->
           <div class="cta-card">
             <div class="cta-card-icon">✦</div>
-
-            <span class="cta-card-label"> NDC VAHAN TOOL </span>
-
-            <h3>
-              Work Smarter.<br />
-              <span class="gold">Not Harder.</span>
-            </h3>
-
+            <span class="cta-card-label">NDC VAHAN TOOL</span>
+            <h3>Work Smarter.<br /><span class="gold">Not Harder.</span></h3>
             <p>
-              Choose a monthly subscription that fits your workflow. Start
-              simplifying your VAHAN document uploads with NDC.
+              Choose a monthly subscription that fits your workflow and start
+              simplifying supported VAHAN document tasks with NDC.
             </p>
-
             <div class="cta-price">
               <div>
-                <small>STARTING FROM</small>
-                <strong>₹499<span>/month</span></strong>
+                <small>STARTING FROM</small
+                ><strong>₹499<span>/month</span></strong>
               </div>
-
               <span class="cta-price-divider"></span>
-
-              <div>
-                <small>PLANS AVAILABLE</small>
-                <strong>3 Plans</strong>
-              </div>
+              <div><small>PLANS AVAILABLE</small><strong>3 Plans</strong></div>
             </div>
-
             <a
               class="btn btn-primary cta-main-btn"
               href="https://wa.me/919052691719?text=Hi%2C%20I%20would%20like%20to%20enquire%20about%20NDC%20VAHAN%20TOOL%20subscription%20plans."
               target="_blank"
               rel="noopener noreferrer"
+              >Enquire About Plans <span>↗</span></a
             >
-              Enquire About Plans <span>↗</span>
-            </a>
-
             <a
               class="cta-whatsapp-link"
               href="mailto:nextdimensioncustom@gmail.com?subject=NDC%20VAHAN%20TOOL%20Subscription"
+              >Prefer email? Contact our support →</a
             >
-              Prefer email? Contact our support →
-            </a>
           </div>
         </div>
       </section>
     </main>
-
     <footer>
       <div class="container footer-inner">
         <span
           >© <span id="year"></span> NDC VAHAN TOOL · Next Dimension
           Customs</span
-        >
-        <span>Built for Dealerships · Powered by NDC</span>
+        ><span>Built for Dealerships · Powered by NDC</span>
       </div>
     </footer>
     <script>
       document.getElementById("year").textContent = new Date().getFullYear();
-      document.querySelectorAll("[data-plan]").forEach(function (link) {
-        link.addEventListener("click", function () {
-          var plan = link.getAttribute("data-plan");
-          var emailLink = document.querySelector('.cta a[href^="mailto:"]');
-          if (emailLink) {
-            emailLink.href =
-              "mailto:nextdimensioncustom@gmail.com?subject=" +
-              encodeURIComponent("NDC VAHAN TOOL — " + plan);
-          }
-        });
+      const menuToggle = document.getElementById("menuToggle");
+      const primaryNav = document.getElementById("primaryNav");
+      function closeMenu() {
+        primaryNav.classList.remove("is-open");
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.setAttribute("aria-label", "Open navigation");
+      }
+      menuToggle.addEventListener("click", function () {
+        const open = primaryNav.classList.toggle("is-open");
+        menuToggle.setAttribute("aria-expanded", String(open));
+        menuToggle.setAttribute(
+          "aria-label",
+          open ? "Close navigation" : "Open navigation",
+        );
+      });
+      primaryNav
+        .querySelectorAll("a")
+        .forEach((link) => link.addEventListener("click", closeMenu));
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeMenu();
+      });
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 850) closeMenu();
       });
     </script>
   </body>
