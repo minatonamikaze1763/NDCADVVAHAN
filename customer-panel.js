@@ -924,6 +924,23 @@
             <b>${Number(account.maxDevices) || 1}</b>
           </div>
 
+          <div class="ndc-password-settings">
+            <h2>Change password</h2>
+            <p>Update the password used for your customer panel and VAHAN extension. All devices will be signed out after the change.</p>
+            <form id="ndcPasswordForm">
+              <label for="ndcCurrentPassword">Current password</label>
+              <input id="ndcCurrentPassword" type="password" autocomplete="current-password" required maxlength="72">
+              <label for="ndcNewPassword">New password</label>
+              <input id="ndcNewPassword" type="password" autocomplete="new-password" required minlength="12" maxlength="72" aria-describedby="ndcPasswordHelp">
+              <label for="ndcConfirmPassword">Confirm new password</label>
+              <input id="ndcConfirmPassword" type="password" autocomplete="new-password" required minlength="12" maxlength="72">
+              <small id="ndcPasswordHelp">Use 12–72 UTF-8 bytes. Never share your password.</small>
+              <label class="ndc-password-visibility"><input id="ndcShowPasswords" type="checkbox"> Show passwords</label>
+              <button class="ndc-home-button" id="ndcPasswordSubmit" type="submit">Confirm password change</button>
+              <p id="ndcPasswordStatus" role="status" aria-live="polite"></p>
+            </form>
+          </div>
+
           <p class="ndc-note">
             For account changes, renewals or payment questions, contact
             NDC support. Security restrictions can only be changed by
@@ -1129,6 +1146,36 @@
             message(err.message);
         }
     }
+    let passwordChangeBusy = false;
+    async function changePassword(event) {
+        event.preventDefault();
+        if (passwordChangeBusy) return;
+        const current = $("ndcCurrentPassword"), next = $("ndcNewPassword"), confirm = $("ndcConfirmPassword");
+        const button = $("ndcPasswordSubmit"), message = $("ndcPasswordStatus");
+        const currentPassword = current.value, newPassword = next.value, confirmPassword = confirm.value;
+        if (!currentPassword || new TextEncoder().encode(newPassword).length < 12 || new TextEncoder().encode(newPassword).length > 72) {
+            message.textContent = "Enter your current password and a new password of 12–72 UTF-8 bytes."; return;
+        }
+        if (newPassword !== confirmPassword) { message.textContent = "New passwords do not match."; return; }
+        if (newPassword === currentPassword) { message.textContent = "Choose a different new password."; return; }
+        passwordChangeBusy = true;
+        button.disabled = true;
+        message.textContent = "Updating your password…";
+        try {
+            await api("/api/panel/auth/change-password", {
+                method: "POST", body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
+            });
+            current.value = next.value = confirm.value = "";
+            message.textContent = "Password changed. All sessions have been signed out. Returning to sign in…";
+            setTimeout(() => { void redirectToLogin(); }, 1800);
+        } catch (error) {
+            current.value = next.value = confirm.value = "";
+            message.textContent = error.message;
+            button.disabled = false;
+            passwordChangeBusy = false;
+        }
+    }
+
     // ---------------------------------------------------------
     // INITIALIZATION
     // ---------------------------------------------------------
@@ -1136,7 +1183,16 @@
     document.addEventListener("DOMContentLoaded", async () => {
 
         document.addEventListener("change",e=>{if(e.target?.id==="ndcRenewalPlan"||e.target?.id==="ndcRenewalMonths")renewalTotal();});
-        document.addEventListener("submit",e=>{if(e.target?.id==="ndcRenewalForm")renewSubscription(e);});
+        document.addEventListener("submit",e=>{
+            if(e.target?.id==="ndcRenewalForm") renewSubscription(e);
+            if(e.target?.id==="ndcPasswordForm") changePassword(e);
+        });
+        document.addEventListener("change", e => {
+            if (e.target?.id !== "ndcShowPasswords") return;
+            ["ndcCurrentPassword", "ndcNewPassword", "ndcConfirmPassword"].forEach(id => {
+                if ($(id)) $(id).type = e.target.checked ? "text" : "password";
+            });
+        });
         // Footer year.
         const year = $("ndcPortalYear");
 
