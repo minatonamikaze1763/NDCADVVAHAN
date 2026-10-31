@@ -18,6 +18,8 @@
     let dashboardData = null;
     let activeSection = "overview";
     let redirecting = false;
+    let paymentBusy = false;
+    let serverClockOffset = 0;
 
     // ---------------------------------------------------------
     // HELPERS
@@ -72,7 +74,8 @@
         disabled: "Disabled",
         banned: "Banned",
         pending_approval: "Pending approval",
-        expired: "Expired"
+        expired: "Expired",
+        renewal_required: "Renewal required"
     }[status] || "Unknown");
 
     function showLoading() {
@@ -174,6 +177,8 @@
                 throw new Error("Customer account information is unavailable.");
             }
 
+            const serverTime = Date.parse(dashboardData.serverTime);
+            serverClockOffset = Number.isFinite(serverTime) ? serverTime - Date.now() : 0;
             renderDashboard();
             renewalTotal();
 
@@ -205,6 +210,50 @@
     // ---------------------------------------------------------
     // DASHBOARD RENDERER
     // ---------------------------------------------------------
+
+    function currentPlanId(account) {
+        // Never silently switch a customer with an unrecognised plan.
+        const name = String(account.plan?.id || account.plan?.name || "").trim().toLowerCase();
+        return Object.hasOwn(RENEWAL_PRICES, name) ? name : null;
+    }
+
+    function renewalCard(account) {
+        const planId = currentPlanId(account);
+        const expiry = Date.parse(account.expiresAt);
+        const now = Date.now() + serverClockOffset;
+        const remaining = expiry - now;
+        const hasExpiry = Number.isFinite(expiry);
+        const expired = hasExpiry && remaining <= 0;
+        const days = hasExpiry ? Math.max(0, Math.ceil(remaining / 86400000)) : null;
+        const urgent = hasExpiry && remaining <= 7 * 86400000;
+        const panelEnd = Date.parse(account.renewal?.panelExpiresAt || account.panelExpiresAt) || (expiry + 5 * 86400000);
+        const canRenew = account.approved === true && !account.disabled && !account.banned &&
+            account.renewal?.canRenew !== false && (!hasExpiry || now < panelEnd);
+        const start = hasExpiry && expiry > now ? expiry : now;
+        const newExpiry = new Date(start + 30 * 86400000);
+        const heading = expired ? "Your extension access has expired" : urgent
+            ? `Your plan expires in ${days} day${days === 1 ? "" : "s"}` : "Want more time on your current plan?";
+        const description = expired
+            ? "Renew to restore extension access. Your new 30 days begin when payment is verified."
+            : hasExpiry ? "Pay now to add 30 days after your current paid expiry. Your remaining paid days are preserved."
+            : "Choose a paid plan below. Contact support before replacing access with no expiry.";
+        return `
+          <section class="ndc-renewal-card${urgent ? " is-urgent" : ""}" aria-labelledby="ndcRenewalHeading">
+            <div>
+              <span class="ndc-eyebrow">${expired ? "RENEWAL REQUIRED" : urgent ? "RENEWAL REMINDER" : "EXTEND YOUR SUBSCRIPTION"}</span>
+              <h2 id="ndcRenewalHeading">${esc(heading)}</h2>
+              <p>${esc(description)}</p>
+              ${planId && hasExpiry ? `<p class="ndc-renewal-preview">${esc(account.plan.name)} · ${esc(money(RENEWAL_PRICES[planId]))} for 30 days<br>New paid expiry: ${esc(date(newExpiry))}${expired ? " (estimated)" : ""}</p>` : ""}
+              ${expired && Number.isFinite(panelEnd) ? `<p>Panel access for renewal ends ${esc(date(panelEnd))}.</p>` : ""}
+              ${!planId ? `<p>Choose your plan using the month selector below.</p>` : ""}
+            </div>
+            <div class="ndc-renewal-buttons">
+              <button type="button" class="ndc-home-button" id="ndcQuickRenew" ${!canRenew || !planId || !hasExpiry || paymentBusy ? "disabled" : ""}>${urgent ? "Renew now" : "Pay now"} — add 30 days</button>
+              <button type="button" class="ndc-renewal-more" id="ndcMoreMonths">Want more months?</button>
+            </div>
+            <p id="ndcQuickRenewStatus" class="ndc-renewal-message" role="status" aria-live="polite"></p>
+          </section>`;
+    }
 
     function renderDashboard() {
         const data = dashboardData;
@@ -406,6 +455,8 @@
 
         if (activeSection === "overview") {
             sectionHTML = `
+        ${renewalCard(account)}
+
 
         <div class="ndc-welcome">
 
@@ -667,6 +718,8 @@
 
         else if (activeSection === "subscription") {
             sectionHTML = `
+        ${renewalCard(account)}
+
 
         <div class="ndc-page-heading">
           <span class="ndc-eyebrow">PLAN & BILLING</span>
@@ -707,7 +760,7 @@
           <div class="ndc-billing-actions">
             <h3>Manage your subscription</h3>
             <p>Renew your current plan or switch plans for your next subscription period. Payments are processed securely through Razorpay.</p>
-            <form id="ndcRenewalForm">
+            <form id="ndcRenewalForm" tabindex="-1">
               <label for="ndcRenewalPlan">Subscription plan</label>
               <select id="ndcRenewalPlan" required>
                 <option value="starter">Starter — ₹499/month · 3 devices</option>
@@ -891,6 +944,20 @@
 
         content.innerHTML = sectionHTML;
 
+        const planSelect = $("ndcRenewalPlan");
+        const assignedPlan = currentPlanId(account);
+        if (planSelect && assignedPlan) planSelect.value = assignedPlan;
+        $("ndcQuickRenew")?.addEventListener("click", () => {
+            const planId = currentPlanId(dashboardData.account);
+            if (planId) startRenewalPayment(planId, 1, "ndcQuickRenewStatus");
+        });
+        $("ndcMoreMonths")?.addEventListener("click", () => {
+            if (activeSection !== "subscription") navigate("subscription");
+            $("ndcRenewalForm")?.scrollIntoView({ behavior: "smooth", block: "center" });
+            $("ndcRenewalMonths")?.focus({ preventScroll: true });
+        });
+        setPaymentBusy(paymentBusy);
+
         // Update active navigation button.
         document.querySelectorAll("[data-section]").forEach((element) => {
             element.classList.toggle(
@@ -983,7 +1050,85 @@
 
     const RENEWAL_PRICES={starter:499,pro:799};
     function renewalTotal(){const plan=$("ndcRenewalPlan")?.value,months=Number($("ndcRenewalMonths")?.value||1);if($("ndcRenewalTotal")&&RENEWAL_PRICES[plan])$("ndcRenewalTotal").textContent=`Total: ${money(RENEWAL_PRICES[plan]*months)} · ${months} month(s)`;}
-    async function renewSubscription(event){event.preventDefault();const button=$("ndcRenewalSubmit"),message=$("ndcRenewalStatus");if(!button||button.disabled)return;if(typeof Razorpay!=="function"){message.textContent="Razorpay Checkout did not load. Refresh and retry.";return;}button.disabled=true;message.textContent="Creating secure payment order…";try{const planId=$("ndcRenewalPlan").value,months=Number($("ndcRenewalMonths").value);const result=await api("/api/panel/payments/orders",{method:"POST",body:JSON.stringify({planId,months})});const order=result.data||result;if(!order.keyId||!order.orderId||!Number.isFinite(Number(order.amount)))throw Error("Invalid payment order response.");const checkout=new Razorpay({key:order.keyId,order_id:order.orderId,amount:order.amount,currency:order.currency||"INR",name:"Next Dimension Customs",description:"Subscription renewal",theme:{color:"#d7bd55"},handler:async payment=>{message.textContent="Verifying your payment…";try{const result=await api("/api/panel/payments/verify",{method:"POST",body:JSON.stringify(payment)});if(result.manualReview){message.textContent="Payment requires manual review. Contact support.";}else{message.textContent="Payment verified! Refreshing your subscription…";await loadDashboard();}}catch(err){message.textContent=`Payment completed, but verification is pending: ${err.message}. Save payment ID ${payment.razorpay_payment_id}.`;}finally{button.disabled=false;}},modal:{ondismiss:()=>{button.disabled=false;message.textContent="Checkout closed. Check your account before retrying if you paid.";}}});checkout.on("payment.failed",e=>{button.disabled=false;message.textContent=e.error?.description||"Payment failed.";});checkout.open();}catch(err){button.disabled=false;message.textContent=err.message;}}
+    function setPaymentBusy(busy) {
+        paymentBusy = busy;
+        const quick = $("ndcQuickRenew");
+        const account = dashboardData?.account || {};
+        const paidExpiry = Date.parse(account.expiresAt);
+        const panelExpiry = Date.parse(account.panelExpiresAt || account.renewal?.panelExpiresAt) || (paidExpiry + 5 * 86400000);
+        if (quick) quick.disabled = busy || !currentPlanId(dashboardData?.account || {}) ||
+            !dashboardData?.account?.expiresAt || dashboardData?.account?.renewal?.canRenew === false ||
+            dashboardData?.account?.approved !== true || dashboardData?.account?.disabled || dashboardData?.account?.banned ||
+            Date.now() + serverClockOffset >= panelExpiry;
+        ["ndcRenewalSubmit", "ndcRenewalPlan", "ndcRenewalMonths"].forEach(id => {
+            if ($(id)) $(id).disabled = busy;
+        });
+    }
+
+    async function renewSubscription(event) {
+        event.preventDefault();
+        await startRenewalPayment($("ndcRenewalPlan").value, Number($("ndcRenewalMonths").value), "ndcRenewalStatus");
+    }
+
+    async function startRenewalPayment(planId, months, statusId) {
+        if (paymentBusy) return;
+        const message = (text) => {
+            // Resolve the current node: navigation may re-render during checkout.
+            const node = $(statusId) || $("ndcQuickRenewStatus") || $("ndcRenewalStatus");
+            if (node) node.textContent = text;
+        };
+        if (typeof Razorpay !== "function") {
+            message("Razorpay Checkout did not load. Refresh and retry.");
+            return;
+        }
+        setPaymentBusy(true);
+        message("Creating secure payment order…");
+        try {
+            const result = await api("/api/panel/payments/orders", {
+                method: "POST", body: JSON.stringify({ planId, months })
+            });
+            const order = result.data || result;
+            if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error("Invalid payment order response.");
+            let verificationStarted = false;
+            const checkout = new Razorpay({
+                key: order.keyId, order_id: order.orderId, amount: order.amount,
+                currency: order.currency || "INR", name: "Next Dimension Customs",
+                description: "Subscription renewal", theme: { color: "#d7bd55" },
+                handler: async payment => {
+                    if (verificationStarted) return;
+                    verificationStarted = true;
+                    message("Verifying your payment…");
+                    try {
+                        const result = await api("/api/panel/payments/verify", {
+                            method: "POST", body: JSON.stringify(payment)
+                        });
+                        if (result.manualReview) {
+                            message("Payment requires manual review. Contact support.");
+                        } else {
+                            await loadDashboard();
+                            message("Payment verified! Your subscription has been updated.");
+                        }
+                    } catch (err) {
+                        message(`Payment completed, but verification is pending: ${err.message}. Save payment ID ${payment.razorpay_payment_id}.`);
+                    } finally { setPaymentBusy(false); }
+                },
+                modal: { ondismiss: () => {
+                    if (verificationStarted) return;
+                    setPaymentBusy(false);
+                    message("Checkout closed. Check your account before retrying if you paid.");
+                } }
+            });
+            checkout.on("payment.failed", e => {
+                if (verificationStarted) return;
+                setPaymentBusy(false);
+                message(e.error?.description || "Payment failed.");
+            });
+            checkout.open();
+        } catch (err) {
+            setPaymentBusy(false);
+            message(err.message);
+        }
+    }
     // ---------------------------------------------------------
     // INITIALIZATION
     // ---------------------------------------------------------

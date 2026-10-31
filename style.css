@@ -2506,3 +2506,175 @@ footer {
 
 /* NDC secure subscription forms */
 .ndc-billing-actions{margin-top:24px;padding:22px;border:1px solid #3b3422;border-radius:14px;background:#12110e}.ndc-billing-actions h3{color:#d7bd55}.ndc-billing-actions form{display:grid;gap:12px;max-width:480px}.ndc-billing-actions select,.payment-credentials select{width:100%;padding:13px;border-radius:9px;border:1px solid #51462b;background:#141414;color:#f4f0e5}.ndc-billing-actions label{color:#e6d9ad;font-weight:600}.ndc-billing-actions button{cursor:pointer}.ndc-billing-actions button:disabled{opacity:.6;cursor:wait}#ndcRenewalStatus,#ndcSignupStatus{overflow-wrap:anywhere;line-height:1.6}#ndcRenewalTotal{font-weight:700;color:#d7bd55}
+
+/* Quick renewal actions on Overview and Subscription. */
+.ndc-renewal-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 24px;margin-bottom:26px;padding:24px;border:1px solid #51462b;border-radius:16px;background:linear-gradient(120deg,#1b180f,#111);color:#f4f0e5}
+.ndc-renewal-card.is-urgent{border:2px solid #d7bd55;box-shadow:0 0 0 4px #d7bd5514;background:linear-gradient(120deg,#302610,#14120c)}
+.ndc-renewal-card h2{margin:8px 0 12px;font-size:clamp(20px,3vw,26px);line-height:1.25;color:#f5e4a3}
+.ndc-renewal-card p{margin:8px 0 0;line-height:1.6;color:#c9c4b5}
+.ndc-renewal-card .ndc-renewal-preview{color:#f1dda0;font-weight:600}
+.ndc-renewal-buttons{display:flex;flex-direction:column;justify-content:center;align-items:stretch;gap:12px}
+.ndc-renewal-buttons button{cursor:pointer;white-space:normal;text-align:center}
+.ndc-renewal-buttons .ndc-home-button{margin:0;border:1px solid #d7bd55;font:inherit;font-weight:700}
+.ndc-renewal-more{padding:12px 18px;background:transparent;color:#e6d9ad;border:1px solid #76663b;border-radius:9px;font:inherit;font-weight:600}
+.ndc-renewal-more:hover{background:#d7bd5512}
+.ndc-renewal-buttons button:disabled{opacity:.5;cursor:not-allowed}
+.ndc-renewal-buttons button:focus-visible{outline:3px solid #fff1ae;outline-offset:4px}
+.ndc-renewal-message{grid-column:1/-1;overflow-wrap:anywhere}
+.ndc-renewal-message:empty{display:none}
+.ndc-status-renewal_required{color:#f5d979;background:#d7bd5520;border-color:#d7bd5555}
+@media(max-width:680px){.ndc-renewal-card{grid-template-columns:1fr;padding:20px}.ndc-renewal-buttons{width:100%}.ndc-renewal-buttons button{width:100%}}
+
+/* NDC customer portal redesign. Scoped to the portal to preserve other pages. */
+.ndc-portal-overlay {
+  --cx-bg:#0b0d10; --cx-surface:#14171c; --cx-raised:#1a1e24;
+  --cx-line:#2a2f37; --cx-text:#f3f4f6; --cx-muted:#a2a9b4;
+  --cx-gold:#e9c66b; --cx-gold-dim:#30291a;
+  background:var(--cx-bg); color:var(--cx-text); font-size:14px; line-height:1.6;
+}
+.ndc-portal-overlay :is(button,a,input,select){-webkit-tap-highlight-color:transparent}
+.ndc-portal-overlay :is(button,a,input,select):focus-visible{outline:3px solid var(--cx-gold);outline-offset:4px}
+.ndc-portal-overlay button{font:inherit;cursor:pointer}
+.ndc-portal-overlay button:disabled{opacity:.45;cursor:not-allowed}
+.ndc-portal-overlay .ndc-portal-shell{grid-template-columns:244px minmax(0,1fr);max-width:1920px;background:var(--cx-bg)}
+.ndc-portal-overlay .ndc-sidebar{padding:30px 18px 22px;background:#101216;border-right:1px solid var(--cx-line);overflow-y:auto;gap:0}
+.ndc-portal-overlay .ndc-sidebar-brand{gap:12px;padding:0 8px 32px}
+.ndc-portal-overlay .ndc-brand-mark{width:44px;height:44px;border:0;border-radius:13px;background:var(--cx-gold);color:#17140c;letter-spacing:-.5px;font-size:13px;font-weight:900;box-shadow:0 6px 22px #0003}
+.ndc-portal-overlay .ndc-sidebar-brand b{font-size:10px;letter-spacing:1.1px;color:var(--cx-text)}
+.ndc-portal-overlay .ndc-sidebar-brand small{font-size:10px;letter-spacing:1px;color:var(--cx-muted)}
+.ndc-portal-overlay .ndc-sidebar-label{font-size:10px;letter-spacing:1.6px;color:#89919e;padding:6px 14px 12px}
+.ndc-portal-overlay .ndc-side-nav{display:grid;gap:6px}
+.ndc-portal-overlay .ndc-side-nav button{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--cx-muted);font-size:13px;font-weight:550;text-align:left;transition:background .15s,color .15s}
+.ndc-portal-overlay .ndc-side-nav button span{width:20px;font-size:18px;text-align:center;color:inherit}
+.ndc-portal-overlay .ndc-side-nav button:hover{color:var(--cx-text);background:#ffffff06}
+.ndc-portal-overlay .ndc-side-nav button.is-active{background:var(--cx-gold-dim);border-color:#e9c66b29;color:#f2d48b;box-shadow:none}
+.ndc-portal-overlay .ndc-sidebar-bottom{margin-top:auto;padding-top:44px}
+.ndc-portal-overlay .ndc-support-card{padding:17px;border:1px solid var(--cx-line);border-radius:12px;background:var(--cx-surface)}
+.ndc-portal-overlay .ndc-support-card b{font-size:13px;color:var(--cx-text)}
+.ndc-portal-overlay .ndc-support-card span{display:block;margin:8px 0 14px;font-size:12px;color:var(--cx-muted)}
+.ndc-portal-overlay .ndc-support-card a{font-size:12px;color:var(--cx-gold);font-weight:600}
+.ndc-portal-overlay .ndc-portal-main{display:flex;flex-direction:column;min-width:0;background:var(--cx-bg)}
+.ndc-portal-overlay .ndc-portal-topbar{min-height:88px;padding:20px 40px;border-bottom:1px solid var(--cx-line);background:#0f1115;gap:20px}
+.ndc-portal-overlay .ndc-portal-topbar>div:first-child b{font-size:14px;font-weight:600}
+.ndc-portal-overlay .ndc-eyebrow{font-size:10px;line-height:1.6;letter-spacing:1.8px;font-weight:700;color:var(--cx-gold)}
+.ndc-portal-overlay .ndc-topbar-right{gap:12px;flex-wrap:wrap}
+.ndc-portal-overlay .ndc-secure-label{font-size:11px;color:#92c7a6;margin-right:10px}
+.ndc-portal-overlay :is(.ndc-home-button,.ndc-logout-button,.ndc-text-button,.ndc-small-danger,.ndc-renewal-more){display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:10px 16px;border:1px solid var(--cx-line);border-radius:9px;background:var(--cx-raised);color:var(--cx-text);font-size:12px;font-weight:600;text-decoration:none;line-height:1.4;gap:8px}
+.ndc-portal-overlay :is(.ndc-home-button,.ndc-logout-button,.ndc-text-button,.ndc-renewal-more):hover{border-color:#77705d;color:var(--cx-gold);background:#24231e}
+.ndc-portal-overlay .ndc-logout-button{background:transparent;color:var(--cx-muted)}
+.ndc-portal-overlay .ndc-dashboard-content{width:100%;max-width:1400px;padding:36px 40px 48px;margin:0 auto;min-width:0}
+.ndc-portal-overlay :is(.ndc-welcome,.ndc-page-heading){margin:0 0 28px;padding:0;border:0;background:none}
+.ndc-portal-overlay .ndc-welcome{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.ndc-portal-overlay :is(.ndc-welcome,.ndc-page-heading) h1{margin:8px 0;font-size:clamp(25px,2.5vw,36px);letter-spacing:-1.1px;line-height:1.2;font-weight:650;color:var(--cx-text)}
+.ndc-portal-overlay :is(.ndc-welcome,.ndc-page-heading) p{margin:8px 0 0;font-size:13px;color:var(--cx-muted)}
+.ndc-portal-overlay .ndc-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0 0 24px}
+.ndc-portal-overlay .ndc-stat{min-width:0;padding:22px;border:1px solid var(--cx-line);border-radius:14px;background:var(--cx-surface);box-shadow:none}
+.ndc-portal-overlay .ndc-stat>span{font-size:12px;color:var(--cx-muted)}
+.ndc-portal-overlay .ndc-stat strong{display:block;margin:12px 0 8px;font-size:clamp(19px,1.8vw,26px);line-height:1.25;letter-spacing:-.7px;color:var(--cx-text);overflow-wrap:anywhere}
+.ndc-portal-overlay .ndc-stat small{font-size:11px;color:#929ba8}
+.ndc-portal-overlay .ndc-two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin:0}
+.ndc-portal-overlay .ndc-panel-card{min-width:0;padding:26px;border:1px solid var(--cx-line);border-radius:14px;background:var(--cx-surface);margin:0 0 24px;box-shadow:none}
+.ndc-portal-overlay .ndc-card-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 22px}
+.ndc-portal-overlay .ndc-card-heading h2{font-size:18px;letter-spacing:-.4px;font-weight:600;line-height:1.3;margin:6px 0 0;color:var(--cx-text)}
+.ndc-portal-overlay .ndc-mini-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:var(--cx-gold-dim);color:var(--cx-gold);border:0;font-size:22px}
+.ndc-portal-overlay .ndc-plan-name{font-size:14px;font-weight:600;letter-spacing:.2px;color:var(--cx-gold);margin:0 0 4px}
+.ndc-portal-overlay .ndc-plan-price{font-size:38px;letter-spacing:-1.7px;line-height:1.3;font-weight:650;color:var(--cx-text);margin:0 0 24px}
+.ndc-portal-overlay .ndc-plan-price small{font-size:12px;letter-spacing:0;color:var(--cx-muted);font-weight:400}
+.ndc-portal-overlay .ndc-detail-line{display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding:14px 0;border-bottom:1px solid var(--cx-line);font-size:12px}
+.ndc-portal-overlay .ndc-detail-line:last-child{border-bottom:0}
+.ndc-portal-overlay .ndc-detail-line span{color:var(--cx-muted);flex-shrink:0}
+.ndc-portal-overlay .ndc-detail-line b{font-size:12px;font-weight:500;color:var(--cx-text);text-align:right;overflow-wrap:anywhere;min-width:0}
+.ndc-portal-overlay .ndc-status{display:inline-flex;align-items:center;justify-content:center;padding:5px 10px;border:1px solid #75839433;border-radius:6px;font-size:11px;line-height:1.4;font-weight:600;white-space:normal;color:#c9ced6;background:#8793a012}
+.ndc-portal-overlay .ndc-status-active{color:#97ddba;background:#75d7a00d;border-color:#75d7a029}
+.ndc-portal-overlay :is(.ndc-status-expired,.ndc-status-disabled,.ndc-status-banned){color:#f4a7a7;background:#eb77770d;border-color:#eb777729}
+.ndc-portal-overlay :is(.ndc-status-pending_approval,.ndc-status-renewal_required){color:var(--cx-gold);background:#e9c66b0d;border-color:#e9c66b35}
+.ndc-portal-overlay .ndc-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 28px}
+.ndc-portal-overlay .ndc-feature{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 0;border:0;border-bottom:1px solid var(--cx-line);border-radius:0;background:none;font-size:12px}
+.ndc-portal-overlay .ndc-feature span{color:#c2c8d0}
+.ndc-portal-overlay .ndc-feature b{flex-shrink:0;font-size:10px;font-weight:600;padding:3px 7px;border-radius:5px}
+.ndc-portal-overlay .ndc-feature .is-on{color:#97ddba;background:#75d7a00d}
+.ndc-portal-overlay .ndc-feature .is-off{color:#f4a7a7;background:#eb77770d}
+.ndc-portal-overlay .ndc-table-wrap{max-width:100%;overflow:auto;border:1px solid var(--cx-line);border-radius:10px}
+.ndc-portal-overlay .ndc-table{border-collapse:collapse;width:100%;min-width:570px;font-size:12px}
+.ndc-portal-overlay .ndc-table th{padding:13px 16px;background:#1c2026;color:#9fa8b6;font-size:10px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;text-align:left;border-bottom:1px solid var(--cx-line)}
+.ndc-portal-overlay .ndc-table td{padding:16px;color:#d4d9e0;border-bottom:1px solid var(--cx-line);font-size:12px}
+.ndc-portal-overlay .ndc-table tr:last-child td{border-bottom:0}
+.ndc-portal-overlay .ndc-table tbody tr:hover{background:#ffffff03}
+.ndc-portal-overlay .ndc-payment-status{font-size:10px;padding:4px 8px;border-radius:5px}
+.ndc-portal-overlay .ndc-payment-paid{background:#75d7a00d;color:#97ddba}
+.ndc-portal-overlay :is(.ndc-payment-failed,.ndc-payment-refunded){color:#f4a7a7;background:#eb77770d}
+.ndc-portal-overlay .ndc-session-list{display:grid;gap:12px}
+.ndc-portal-overlay .ndc-session{display:flex;align-items:center;gap:16px;padding:18px;border:1px solid var(--cx-line);border-radius:11px;background:#111419}
+.ndc-portal-overlay .ndc-session-icon{display:grid;place-items:center;flex-shrink:0;width:42px;height:42px;border:0;border-radius:11px;background:var(--cx-raised);color:var(--cx-gold);font-size:20px}
+.ndc-portal-overlay .ndc-session-main{flex:1;min-width:0}
+.ndc-portal-overlay .ndc-session-main b{display:block;font-size:13px;font-weight:600;color:var(--cx-text)}
+.ndc-portal-overlay .ndc-session-main span{display:block;color:var(--cx-muted);font-size:11px;overflow-wrap:anywhere;white-space:normal}
+.ndc-portal-overlay .ndc-session-main small{font-size:10px;color:#929ba8}
+.ndc-portal-overlay .ndc-session-actions{display:flex;align-items:center;gap:10px;margin:0}
+.ndc-portal-overlay .ndc-small-danger{color:#f4a7a7;border-color:#eb777733;background:#eb777709;font-size:11px}
+.ndc-portal-overlay :is(.ndc-note,.ndc-empty){color:var(--cx-muted);font-size:13px;line-height:1.7}
+.ndc-portal-overlay .ndc-note{padding:18px;margin:22px 0 0;border:1px solid var(--cx-line);border-radius:10px;background:#111419}
+.ndc-portal-overlay .ndc-empty{padding:28px;text-align:center}
+.ndc-portal-overlay .ndc-loading{padding:64px 20px;color:var(--cx-muted);font-size:14px}
+.ndc-portal-overlay .ndc-spinner{border-color:#e9c66b22;border-top-color:var(--cx-gold)}
+.ndc-portal-overlay .ndc-portal-footer{padding:22px 40px;border-top:1px solid var(--cx-line);background:none;font-size:11px;color:#858f9c;text-align:left}
+.ndc-portal-overlay .ndc-renewal-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px 32px;padding:28px;margin:0 0 32px;border:1px solid #e9c66b35;border-radius:15px;background:linear-gradient(105deg,#222016,#15171b 75%);box-shadow:none;color:var(--cx-text)}
+.ndc-portal-overlay .ndc-renewal-card.is-urgent{border:1px solid #e9c66b80;border-left:4px solid var(--cx-gold);background:linear-gradient(105deg,#2b2414,#17191d 80%);box-shadow:none}
+.ndc-portal-overlay .ndc-renewal-card h2{color:var(--cx-text);font-size:clamp(21px,2.2vw,28px);letter-spacing:-.7px;line-height:1.25;margin:8px 0 12px;font-weight:600}
+.ndc-portal-overlay .ndc-renewal-card p{font-size:12px;color:#b8b6ac;line-height:1.7;margin:8px 0 0}
+.ndc-portal-overlay .ndc-renewal-card .ndc-renewal-preview{color:#e1d4af;font-weight:500}
+.ndc-portal-overlay .ndc-renewal-buttons{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:10px;min-width:220px}
+.ndc-portal-overlay .ndc-renewal-buttons .ndc-home-button,.ndc-portal-overlay #ndcRenewalSubmit{min-height:46px;background:var(--cx-gold);border:1px solid var(--cx-gold);color:#1b170e;font-size:13px;font-weight:700;border-radius:9px;text-align:center;white-space:normal}
+.ndc-portal-overlay .ndc-renewal-buttons .ndc-home-button:hover,.ndc-portal-overlay #ndcRenewalSubmit:hover{background:#f5d788;color:#1b170e}
+.ndc-portal-overlay .ndc-renewal-more{min-height:43px;background:transparent;color:#e3d5ad;border-color:#e9c66b38}
+.ndc-portal-overlay .ndc-renewal-message{grid-column:1/-1;overflow-wrap:anywhere}
+.ndc-portal-overlay .ndc-renewal-message:empty{display:none}
+.ndc-portal-overlay .ndc-billing-actions{margin:28px 0 0;padding:24px;border:1px solid var(--cx-line);border-radius:12px;background:#101318}
+.ndc-portal-overlay .ndc-billing-actions h3{font-size:17px;letter-spacing:-.3px;font-weight:600;color:var(--cx-text);margin:0 0 10px}
+.ndc-portal-overlay .ndc-billing-actions>p{font-size:12px;color:var(--cx-muted);max-width:650px}
+.ndc-portal-overlay .ndc-billing-actions form{display:grid;gap:12px;max-width:600px;margin-top:24px}
+.ndc-portal-overlay .ndc-billing-actions label{font-size:12px;font-weight:500;color:#cbd1da}
+.ndc-portal-overlay .ndc-billing-actions select{min-height:48px;padding:12px 14px;border:1px solid #373e48;border-radius:9px;background:var(--cx-raised);color:var(--cx-text);font:inherit;font-size:13px;width:100%;color-scheme:dark}
+.ndc-portal-overlay #ndcRenewalTotal{color:var(--cx-gold);font-size:14px;font-weight:600;margin:10px 0}
+.ndc-portal-overlay #ndcRenewalStatus{font-size:12px;line-height:1.7;color:var(--cx-muted);overflow-wrap:anywhere}
+@media(min-width:1600px){.ndc-portal-overlay .ndc-dashboard-content{padding-top:44px}}
+@media(max-width:1150px){
+ .ndc-portal-overlay .ndc-portal-shell{grid-template-columns:210px minmax(0,1fr)}
+ .ndc-portal-overlay .ndc-dashboard-content{padding:28px 24px}
+ .ndc-portal-overlay .ndc-portal-topbar{padding:20px 24px}
+ .ndc-portal-overlay .ndc-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ndc-portal-overlay .ndc-renewal-card{grid-template-columns:1fr}
+ .ndc-portal-overlay .ndc-renewal-buttons{flex-direction:row;justify-content:flex-start;min-width:0;flex-wrap:wrap}
+ .ndc-portal-overlay .ndc-two-col{grid-template-columns:1fr;gap:0}
+}
+@media(max-width:760px){
+ .ndc-portal-overlay .ndc-portal-shell{display:block}
+ .ndc-portal-overlay .ndc-sidebar{position:relative;width:100%;height:auto;padding:18px 18px 8px;border-right:0;border-bottom:1px solid var(--cx-line);overflow:visible}
+ .ndc-portal-overlay .ndc-sidebar-brand{padding:0 0 18px}
+ .ndc-portal-overlay :is(.ndc-sidebar-label,.ndc-sidebar-bottom){display:none}
+ .ndc-portal-overlay .ndc-side-nav{display:flex;overflow-x:auto;gap:7px;padding:2px 2px 12px;scrollbar-width:thin;scrollbar-color:#5d5134 transparent}
+ .ndc-portal-overlay .ndc-side-nav button{width:auto;flex:0 0 auto;min-height:42px;padding:10px 14px;font-size:12px}
+ .ndc-portal-overlay .ndc-side-nav button span{display:none}
+ .ndc-portal-overlay .ndc-portal-topbar{min-height:76px;padding:16px 20px;flex-wrap:wrap;gap:14px}
+ .ndc-portal-overlay .ndc-secure-label{display:none}
+ .ndc-portal-overlay .ndc-dashboard-content{padding:24px 20px 32px}
+ .ndc-portal-overlay .ndc-portal-footer{padding:20px;font-size:10px}
+ .ndc-portal-overlay .ndc-feature-grid{grid-template-columns:1fr}
+ .ndc-portal-overlay .ndc-session{flex-wrap:wrap;align-items:flex-start;padding:15px}
+ .ndc-portal-overlay .ndc-session-actions{margin-left:58px;flex-wrap:wrap}
+}
+@media(max-width:440px){
+ .ndc-portal-overlay .ndc-stat-grid{gap:10px}
+ .ndc-portal-overlay .ndc-stat{padding:16px 13px}
+ .ndc-portal-overlay .ndc-stat strong{font-size:20px}
+ .ndc-portal-overlay .ndc-panel-card{padding:19px}
+ .ndc-portal-overlay .ndc-renewal-card{padding:22px 18px}
+ .ndc-portal-overlay .ndc-renewal-buttons{flex-direction:column}
+ .ndc-portal-overlay .ndc-renewal-buttons button{width:100%}
+ .ndc-portal-overlay .ndc-billing-actions{padding:18px}
+ .ndc-portal-overlay .ndc-welcome{align-items:flex-start;flex-direction:column;gap:12px}
+ .ndc-portal-overlay .ndc-detail-line{gap:12px}
+ .ndc-portal-overlay .ndc-detail-line span{flex-shrink:1}
+ .ndc-portal-overlay .ndc-topbar-right{gap:8px}
+}
+@media(prefers-reduced-motion:reduce){.ndc-portal-overlay *{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
