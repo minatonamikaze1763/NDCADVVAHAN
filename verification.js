@@ -1,135 +1,108 @@
-/* NDC Customer Panel UI and session verification. Load after auth.js. */
+/* NDC Customer Portal — Homepage Login Handler */
 (() => {
   "use strict";
 
   const $ = (id) => document.getElementById(id);
 
-  function setMessage(message, type = "error") {
-    const el = $("ndcAuthMessage");
-    if (!el) return;
-    el.textContent = message || "";
-    el.dataset.type = type;
-    el.hidden = !message;
+  const modal = $("ndcLoginModal");
+  const form = $("ndcLoginForm");
+  const message = $("ndcAuthMessage");
+  const submitButton = $("ndcLoginSubmit");
+
+  function showMessage(text, type = "error") {
+    if (!message) return;
+
+    message.textContent = text || "";
+    message.dataset.type = type;
+    message.hidden = !text;
   }
 
-  function showLogin() {
-    $("ndcLoginModal").hidden = false;
-    $("ndcCustomerDashboard").hidden = true;
-    $("ndcLoginUsername").focus();
+  function openLogin() {
+    if (!modal) return;
+
+    modal.hidden = false;
+    $("ndcLoginUsername")?.focus();
   }
 
-  function showDashboard(user) {
-    const username = user?.username || "Customer";
-    $("ndcUserButton").setAttribute("aria-label", `Open customer dashboard for ${username}`);
-    $("ndcUserButton").classList.add("is-authenticated");
-    $("ndcLoginModal").hidden = true;
-    $("ndcCustomerDashboard").hidden = false;
-    $("ndcPanelUsername").textContent = username;
-    $("ndcPanelIdentity").textContent =
-      user?.useradminUsername || `${username}_admin`;
-    $("ndcPanelStatus").textContent = "Authenticated";
-    $("ndcPanelExpiry").textContent = user?.expiresAt
-      ? new Date(user.expiresAt).toLocaleString()
-      : "No account expiry";
-  }
-
-  function showLoggedOut() {
-    $("ndcUserButton").classList.remove("is-authenticated");
-    $("ndcUserButton").setAttribute("aria-label", "Customer login");
-    $("ndcCustomerDashboard").hidden = true;
-    $("ndcLoginModal").hidden = true;
-  }
-
-  async function verifyOnLoad() {
-    if (!window.NDCAuth.isLoggedIn()) {
-      showLoggedOut();
-      return;
-    }
-    try {
-      const user = await window.NDCAuth.verifySession();
-      if (user) showDashboard(user);
-      else showLoggedOut();
-    } catch {
-      showLoggedOut();
-    }
+  function closeLogin() {
+    if (modal) modal.hidden = true;
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const userButton = $("ndcUserButton");
-    const loginModal = $("ndcLoginModal");
-    const dashboard = $("ndcCustomerDashboard");
-    const loginForm = $("ndcLoginForm");
-    const loginSubmit = $("ndcLoginSubmit");
-
-    userButton.addEventListener("click", async () => {
-      if (window.NDCAuth.isLoggedIn()) {
+    // Customer icon in the homepage navigation.
+    $("ndcUserButton")?.addEventListener("click", async () => {
+      if (window.NDCAuth?.isLoggedIn()) {
         try {
           const user = await window.NDCAuth.verifySession();
-          if (user) showDashboard(user);
-          else showLogin();
-        } catch {
-          showLoggedOut();
-          showLogin();
+
+          if (user?.useradmin === true) {
+            window.location.assign("customer-panel.html");
+            return;
+          }
+        } catch (error) {
+          console.warn("[NDC] Existing customer session is invalid:", error);
         }
-      } else {
-        showLogin();
+      }
+
+      openLogin();
+    });
+
+    // Close buttons.
+    document.querySelectorAll("[data-ndc-close]").forEach((button) => {
+      button.addEventListener("click", closeLogin);
+    });
+
+    // Close when clicking outside the login card.
+    modal?.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closeLogin();
       }
     });
 
-    document.querySelectorAll("[data-ndc-close]").forEach((button) => {
-      button.addEventListener("click", () => {
-        loginModal.hidden = true;
-        dashboard.hidden = true;
-      });
-    });
-
-    [loginModal, dashboard].forEach((overlay) => {
-      overlay.addEventListener("click", (event) => {
-        if (event.target === overlay) overlay.hidden = true;
-      });
-    });
-
+    // Escape key closes the login modal.
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
-        loginModal.hidden = true;
-        dashboard.hidden = true;
+        closeLogin();
       }
     });
 
-    loginForm.addEventListener("submit", async (event) => {
+    // Customer login.
+    form?.addEventListener("submit", async (event) => {
       event.preventDefault();
-      setMessage("");
-      loginSubmit.disabled = true;
-      loginSubmit.textContent = "Signing in…";
+
+      showMessage("");
+
+      if (!window.NDCAuth) {
+        showMessage("Authentication service is unavailable. Please refresh.");
+        return;
+      }
+
+      const username = $("ndcLoginUsername")?.value.trim();
+      const password = $("ndcLoginPassword")?.value;
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Signing in…";
 
       try {
-        const user = await window.NDCAuth.login(
-          $("ndcLoginUsername").value,
-          $("ndcLoginPassword").value,
-        );
-        loginForm.reset();
-        showDashboard(user);
+        const user = await window.NDCAuth.login(username, password);
+
+        if (user && user.useradmin !== true) {
+          await window.NDCAuth.logout();
+          throw new Error("This account does not have customer portal access.");
+        }
+
+        form.reset();
+
+        // Open the separate dashboard page.
+        window.location.assign("customer-panel.html");
       } catch (error) {
-        setMessage(error.message || "Login failed.");
+        showMessage(
+          error.message || "Unable to sign in. Please try again."
+        );
       } finally {
-        loginSubmit.disabled = false;
-        loginSubmit.textContent = "Sign In";
+        submitButton.disabled = false;
+        submitButton.textContent = "Sign in to account";
       }
     });
-
-    $("ndcLogoutButton").addEventListener("click", async () => {
-      const button = $("ndcLogoutButton");
-      button.disabled = true;
-      try {
-        await window.NDCAuth.logout();
-      } catch {
-        // Local credentials are cleared by NDCAuth even if the server is offline.
-      } finally {
-        button.disabled = false;
-        showLoggedOut();
-      }
-    });
-
-    verifyOnLoad();
   });
 })();

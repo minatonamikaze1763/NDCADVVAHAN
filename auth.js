@@ -1,5 +1,5 @@
-/* NDC Customer Panel authentication client.
-   Uses the separate customer-panel endpoints; it does not use /api/admin routes. */
+
+
 (() => {
   "use strict";
 
@@ -19,10 +19,7 @@
     let response;
     try {
       response = await fetch(`${API_BASE}${path}`, {
-        ...options,
-        headers,
-        credentials: "omit",
-        cache: "no-store",
+        ...options, headers, credentials: "omit", cache: "no-store",
       });
     } catch {
       throw new Error("Unable to connect to the NDC server. Please try again.");
@@ -37,7 +34,7 @@
   }
 
   function saveSession(data) {
-    if (!data || !data.token || !data.user || data.user.useradmin !== true) {
+    if (!data?.token || !data?.user || data.user.useradmin !== true) {
       throw new Error("The server returned an invalid customer-panel session.");
     }
     sessionStorage.setItem(TOKEN_KEY, data.token);
@@ -66,7 +63,6 @@
       throw new Error("Use your customer-panel username ending in _admin.");
     }
     if (!password) throw new Error("Enter your password.");
-
     const data = await request("/api/panel/auth/login", {
       method: "POST",
       body: JSON.stringify({ username: cleanUsername, password }),
@@ -76,7 +72,6 @@
 
   async function verifySession() {
     if (!sessionStorage.getItem(TOKEN_KEY)) return null;
-
     const data = await request("/api/panel/auth/me", { method: "GET" });
     const user = data.user || data;
     if (!user || user.useradmin !== true) {
@@ -98,10 +93,8 @@
   }
 
   window.NDCAuth = Object.freeze({
-    login,
-    verifySession,
-    logout,
-    getCachedUser,
+    login, verifySession, logout, getCachedUser,
     isLoggedIn: () => Boolean(sessionStorage.getItem(TOKEN_KEY)),
   });
 })();
+

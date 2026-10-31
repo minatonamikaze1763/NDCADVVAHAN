@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#080808" />
+    <meta name="color-scheme" content="dark" />
+
+    <title>Customer Portal | Next Dimension Customs</title>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <script src="auth.js" defer></script>
+    <script src="customer-panel.js" defer></script>
+  </head>
+
+  <body>
+    <div class="ndc-portal-overlay">
+      <div class="ndc-portal-shell">
+        <!-- SIDEBAR -->
+        <aside class="ndc-sidebar">
+          <div class="ndc-sidebar-brand">
+            <span class="ndc-brand-mark">NDC</span>
+
+            <div>
+              <b>NEXT DIMENSION</b>
+              <small>CUSTOMER PORTAL</small>
+            </div>
+          </div>
+
+          <div class="ndc-sidebar-label">ACCOUNT</div>
+
+          <nav class="ndc-side-nav" aria-label="Customer dashboard navigation">
+            <button type="button" data-section="overview" class="is-active">
+              <span>◫</span>
+              Overview
+            </button>
+
+            <button type="button" data-section="profile">
+              <span>◎</span>
+              My Profile
+            </button>
+
+            <button type="button" data-section="subscription">
+              <span>◇</span>
+              Subscription
+            </button>
+
+            <button type="button" data-section="payments">
+              <span>▤</span>
+              Payments
+            </button>
+
+            <button type="button" data-section="sessions">
+              <span>⌁</span>
+              Active Sessions
+            </button>
+
+            <button type="button" data-section="features">
+              <span>✧</span>
+              Features & Access
+            </button>
+
+            <button type="button" data-section="security">
+              <span>⬡</span>
+              Security & Status
+            </button>
+          </nav>
+
+          <div class="ndc-sidebar-bottom">
+            <div class="ndc-support-card">
+              <b>Need assistance?</b>
+              <span>Contact NDC support for billing or account help.</span>
+
+              <a
+                href="https://wa.me/919052691719"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Contact support ↗
+              </a>
+            </div>
+          </div>
+        </aside>
+
+        <!-- MAIN DASHBOARD -->
+        <main class="ndc-portal-main">
+          <header class="ndc-portal-topbar">
+            <div>
+              <span class="ndc-eyebrow">NEXT DIMENSION CUSTOMS</span>
+              <b>Customer account</b>
+            </div>
+
+            <div class="ndc-topbar-right">
+              <span class="ndc-secure-label"> ● Secure session </span>
+
+              <a href="index.html" class="ndc-home-button"> Website </a>
+
+              <button
+                type="button"
+                id="ndcLogoutButton"
+                class="ndc-logout-button"
+              >
+                Sign out
+              </button>
+            </div>
+          </header>
+
+          <!-- DASHBOARD CONTENT -->
+          <div id="ndcDashboardContent" class="ndc-dashboard-content">
+            <div class="ndc-loading">
+              <span class="ndc-spinner"></span>
+              Loading your account…
+            </div>
+          </div>
+
+          <footer class="ndc-portal-footer">
+            © <span id="ndcPortalYear"></span>
+            Next Dimension Customs
+            <span>·</span>
+            Wear What Defines You
+          </footer>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

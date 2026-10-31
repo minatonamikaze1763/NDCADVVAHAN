@@ -868,9 +868,6 @@
             "ACCOUNT DETAILS\n" +
             "Requested Username: " +
             username +
-            "Requested Password: " +
-            password +
-            "\n\n" +
             "\n\n" +
             "Payment Method: " +
             method +
@@ -1132,15 +1129,27 @@
     </script>
 
     <!-- CUSTOMER LOGIN MODAL -->
-    <div id="ndcLoginModal" hidden>
-      <div class="ndc-auth-card">
-        <button type="button" data-ndc-close aria-label="Close">✕</button>
-
-        <h2>Customer Login</h2>
-        <p>Sign in to your NDC customer account.</p>
-
+    <div id="ndcLoginModal" class="ndc-overlay" hidden>
+      <div
+        class="ndc-auth-card ndc-login-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ndcLoginTitle"
+      >
+        <button
+          type="button"
+          class="ndc-close"
+          data-ndc-close
+          aria-label="Close"
+        >
+          ×
+        </button>
+        <div class="ndc-brand-mark">NDC</div>
+        <span class="ndc-eyebrow">CUSTOMER PORTAL</span>
+        <h2 id="ndcLoginTitle">Welcome back</h2>
+        <p>Sign in to manage your NDC account and subscription.</p>
         <form id="ndcLoginForm">
-          <label for="ndcLoginUsername">Panel Username</label>
+          <label for="ndcLoginUsername">Panel username</label>
           <input
             type="text"
             id="ndcLoginUsername"
@@ -1148,7 +1157,6 @@
             autocomplete="username"
             required
           />
-
           <label for="ndcLoginPassword">Password</label>
           <input
             type="password"
@@ -1157,27 +1165,14 @@
             autocomplete="current-password"
             required
           />
-
-          <p id="ndcAuthMessage" hidden></p>
-
-          <button type="submit" id="ndcLoginSubmit">Sign In</button>
+          <p id="ndcAuthMessage" class="ndc-auth-message" hidden></p>
+          <button type="submit" class="ndc-primary-button" id="ndcLoginSubmit">
+            Sign in to account
+          </button>
         </form>
-      </div>
-    </div>
-
-    <!-- CUSTOMER DASHBOARD -->
-    <div id="ndcCustomerDashboard" hidden>
-      <div class="ndc-auth-card">
-        <button type="button" data-ndc-close aria-label="Close">✕</button>
-
-        <h2>Customer Dashboard</h2>
-
-        <p>Username: <strong id="ndcPanelUsername"></strong></p>
-        <p>Panel Identity: <strong id="ndcPanelIdentity"></strong></p>
-        <p>Status: <strong id="ndcPanelStatus"></strong></p>
-        <p>Expiry: <strong id="ndcPanelExpiry"></strong></p>
-
-        <button type="button" id="ndcLogoutButton">Sign Out</button>
+        <small class="ndc-login-foot"
+          >Secure customer access · Next Dimension Customs</small
+        >
       </div>
     </div>
   </body>
