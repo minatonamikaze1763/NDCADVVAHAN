@@ -614,289 +614,79 @@
                 <span>30-Day Subscription</span>
               </div>
             </div>
-            <!-- ACCOUNT CREDENTIALS -->
-            <div class="payment-credentials">
-              <span class="payment-label">ACCOUNT DETAILS</span>
-              <h3>Create Your Login Credentials</h3>
-              <p>Choose the username and password for your NDC account.</p>
-
+            <form id="ndcSignupForm" class="payment-credentials">
+              <span class="payment-label">SECURE ACCOUNT SIGNUP</span>
+              <h3>Create your NDC account</h3>
+              <p>
+                Pay with Razorpay. Set your password through the secure email
+                link after payment.
+              </p>
               <div class="credential-field">
-                <label for="accountUsername">Username</label>
-                <input
-                  type="text"
+                <label for="signupName">Full name</label
+                ><input
+                  id="signupName"
+                  required
+                  maxlength="100"
+                  autocomplete="name"
+                  placeholder="Your name"
+                />
+              </div>
+              <div class="credential-field">
+                <label for="accountUsername">Username</label
+                ><input
                   id="accountUsername"
-                  placeholder="Enter username (minimum 9 characters)"
-                  minlength="9"
+                  required
+                  minlength="3"
                   maxlength="30"
+                  pattern="[a-zA-Z0-9_]+"
                   autocomplete="username"
-                  required
+                  placeholder="Choose a username"
                 />
               </div>
-
               <div class="credential-field">
-                <label for="accountPassword">Password</label>
-                <input
-                  type="password"
-                  id="accountPassword"
-                  placeholder="Enter password (minimum 9 characters)"
-                  minlength="9"
-                  maxlength="64"
-                  autocomplete="new-password"
+                <label for="signupEmail">Email</label
+                ><input
+                  id="signupEmail"
+                  type="email"
                   required
+                  autocomplete="email"
+                  placeholder="name@example.com"
                 />
               </div>
-
-              <small class="credential-note">
-                Username and password must both be at least 9 characters long.
-              </small>
-            </div>
-            <!-- PAYMENT METHODS -->
-            <div class="payment-methods">
-              <h3>Select Payment Method</h3>
-              <p>Choose how you would like to pay.</p>
-
-              <div class="payment-options">
-                <label class="payment-option">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="UPI"
-                    checked
-                  />
-                  <span class="payment-option-content">
-                    <strong>UPI Payment</strong>
-                    <small>Google Pay, PhonePe, Paytm or any UPI app</small>
-                  </span>
-                  <span class="payment-radio"></span>
-                </label>
-
-                <label class="payment-option">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="Bank Transfer"
-                  />
-                  <span class="payment-option-content">
-                    <strong>Bank Transfer</strong>
-                    <small>NEFT / RTGS / IMPS</small>
-                  </span>
-                  <span class="payment-radio"></span>
-                </label>
+              <div class="credential-field">
+                <label for="signupMonths">Subscription duration</label
+                ><select id="signupMonths" required></select>
               </div>
-
-              <!-- UPI DETAILS -->
-              <div class="payment-detail-box" id="upiDetails">
-                <span class="payment-label">UPI PAYMENT DETAILS</span>
-
-                <div class="payment-detail-row">
-                  <div>
-                    <small>UPI ID</small>
-                    <strong>9052691719@slc</strong>
-                  </div>
-
-                  <button
-                    type="button"
-                    onclick="copyPaymentDetail('9052691719@slc', this)"
-                  >
-                    Copy
-                  </button>
-                </div>
-
-                <p>Use the above UPI ID to transfer the exact amount shown.</p>
-              </div>
-
-              <!-- BANK DETAILS -->
-              <div class="payment-detail-box" id="bankDetails" hidden>
-                <span class="payment-label">BANK ACCOUNT DETAILS</span>
-
-                <div class="payment-detail-row">
-                  <div>
-                    <small>Account Name</small>
-                    <strong>ADEPU NANDU KUMAR</strong>
-                  </div>
-                  <button
-                    type="button"
-                    onclick="copyPaymentDetail('ADEPU NANDU KUMAR', this)"
-                  >
-                    Copy
-                  </button>
-                </div>
-
-                <div class="payment-detail-row">
-                  <div>
-                    <small>Account Number</small>
-                    <strong>033325222360428</strong>
-                  </div>
-                  <button
-                    type="button"
-                    onclick="copyPaymentDetail('033325222360428', this)"
-                  >
-                    Copy
-                  </button>
-                </div>
-
-                <div class="payment-detail-row">
-                  <div>
-                    <small>IFSC Code</small>
-                    <strong>NESF0000333</strong>
-                  </div>
-                  <button
-                    type="button"
-                    onclick="copyPaymentDetail('NESF0000333', this)"
-                  >
-                    Copy
-                  </button>
-                </div>
-
-                <p>Available transfer methods: NEFT, RTGS and IMPS.</p>
-              </div>
-
               <button
                 class="payment-proceed"
                 id="paymentProceed"
-                type="button"
-                onclick="proceedToPayment()"
+                type="submit"
                 disabled
               >
                 Select a Plan to Continue
               </button>
-
-              <p class="payment-secure-note">
-                After payment, share your transaction reference or screenshot
-                through WhatsApp for payment verification and account
-                activation.
+              <p
+                class="credential-note"
+                id="ndcSignupStatus"
+                role="status"
+                aria-live="polite"
+              ></p>
+              <p class="credential-note">
+                Already a customer?
+                <button
+                  type="button"
+                  id="ndcSignupLogin"
+                  class="ndc-text-button"
+                >
+                  Sign in
+                </button>
               </p>
-            </div>
+            </form>
           </div>
         </div>
       </section>
-      <script>
-        let selectedPlan = null;
-
-        function selectPlan(name, amount, logins) {
-          selectedPlan = { name, amount, logins };
-
-          document.getElementById("selectedPlanName").textContent =
-            name + " Plan";
-
-          document.getElementById("selectedPlanAmount").textContent =
-            "₹" + amount.toLocaleString("en-IN");
-
-          document.getElementById("selectedPlanLogins").textContent =
-            "1 User · " + logins;
-
-          const proceed = document.getElementById("paymentProceed");
-
-          proceed.disabled = false;
-          proceed.textContent =
-            "Proceed to Payment · ₹" + amount.toLocaleString("en-IN");
-
-          document.getElementById("payment").scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }
-
-        function selectCustomPlan() {
-          const message =
-            "Hi, I am interested in a Custom Plan for NDC VAHAN TOOL. Please share the pricing and available options.";
-
-          window.open(
-            "https://wa.me/919052691719?text=" + encodeURIComponent(message),
-            "_blank",
-          );
-        }
-
-        document
-          .querySelectorAll('input[name="paymentMethod"]')
-          .forEach((input) => {
-            input.addEventListener("change", function () {
-              const isUPI = this.value === "UPI";
-
-              document.getElementById("upiDetails").hidden = !isUPI;
-              document.getElementById("bankDetails").hidden = isUPI;
-            });
-          });
-
-        function proceedToPayment() {
-          if (!selectedPlan) {
-            alert("Please select a subscription plan first.");
-            return;
-          }
-
-          const username = document
-            .getElementById("accountUsername")
-            .value.trim();
-
-          const password = document.getElementById("accountPassword").value;
-
-          if (username.length < 9) {
-            alert("Username must be at least 9 characters long.");
-            document.getElementById("accountUsername").focus();
-            return;
-          }
-
-          if (password.length < 9) {
-            alert("Password must be at least 9 characters long.");
-            document.getElementById("accountPassword").focus();
-            return;
-          }
-
-          const method = document.querySelector(
-            'input[name="paymentMethod"]:checked',
-          ).value;
-
-          const amount = "₹" + selectedPlan.amount.toLocaleString("en-IN");
-
-          const paymentDetails =
-            method === "UPI"
-              ? "UPI ID: 9052691719@slc"
-              : "Bank Transfer: NEFT / RTGS / IMPS";
-
-          const message =
-            "Hi, I want to purchase the NDC VAHAN TOOL subscription.\n\n" +
-            "Plan: " +
-            selectedPlan.name +
-            " Plan\n" +
-            "Amount: " +
-            amount +
-            "\n" +
-            "Duration: 30 Days\n" +
-            "Login Allowance: " +
-            selectedPlan.logins +
-            "\n\n" +
-            "ACCOUNT DETAILS\n" +
-            "Requested Username: " +
-            username +
-            "\n\n" +
-            "Payment Method: " +
-            method +
-            "\n" +
-            paymentDetails +
-            "\n\n" +
-            "Please guide me with the payment verification and account activation process.";
-
-          window.open(
-            "https://wa.me/919052691719?text=" + encodeURIComponent(message),
-            "_blank",
-          );
-        }
-        function copyPaymentDetail(value, button) {
-          navigator.clipboard
-            .writeText(value)
-            .then(() => {
-              const original = button.textContent;
-              button.textContent = "Copied!";
-
-              setTimeout(() => {
-                button.textContent = original;
-              }, 1500);
-            })
-            .catch(() => {
-              alert("Unable to copy. Please copy manually: " + value);
-            });
-        }
-      </script>
+      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+      <script src="signup.js" defer></script>
       <section id="faq">
         <div class="container">
           <div class="section-head">
@@ -983,9 +773,12 @@
             <details>
               <summary>How do I activate my subscription?</summary>
               <p>
-                Contact NDC through WhatsApp at 9052691719 or email
-                nextdimensioncustom@gmail.com to enquire about your preferred
-                plan and subscription activation.
+                Select your preferred NDC subscription plan (Starter or Pro),
+                choose your subscription duration, and complete the secure
+                payment through Razorpay. Once your payment is verified, you
+                will receive an email with a secure link to set your account
+                password. After setting your password, you can log in and start
+                using NDC VAHAN TOOL.
               </p>
             </details>
             <details>
@@ -1014,80 +807,107 @@
         <div class="container cta-inner">
           <div class="cta-info">
             <div class="brand cta-brand">
-              <span class="brand-mark">NDC</span
-              ><span class="brand-name"
-                >VAHAN TOOL<span class="brand-sub"
-                  >By Next Dimension Customs</span
-                ></span
-              >
+              <span class="brand-mark">NDC</span>
+              <span class="brand-name">
+                VAHAN TOOL
+                <span class="brand-sub">By Next Dimension Customs</span>
+              </span>
             </div>
+
             <span class="cta-tag">YOUR DEALERSHIP WORKFLOW PARTNER</span>
+
             <h2>
-              Less Repetitive Work.<br /><span class="gold"
-                >More Productivity.</span
-              >
+              Less Repetitive Work.<br />
+              <span class="gold">More Productivity.</span>
             </h2>
+
             <p class="cta-description">
-              Ready to simplify your VAHAN document uploads? Contact us to
-              choose a plan, ask questions and activate your subscription.
+              Simplify your VAHAN document uploads with NDC VAHAN TOOL. Choose
+              your subscription plan, complete your payment securely through
+              Razorpay, and activate your account online. Need assistance? Our
+              support team is here to help.
             </p>
+
             <div class="contact-list">
-              <a class="contact-card" href="tel:+919052691719"
-                ><span class="contact-icon">☎</span
-                ><span class="contact-copy"
-                  ><small>CALL US</small><strong>9052691719</strong></span
-                ><span class="contact-arrow">↗</span></a
-              >
+              <a class="contact-card" href="tel:+919052691719">
+                <span class="contact-icon">☎</span>
+                <span class="contact-copy">
+                  <small>CALL SUPPORT</small>
+                  <strong>9052691719</strong>
+                </span>
+                <span class="contact-arrow">↗</span>
+              </a>
+
               <a
                 class="contact-card"
-                href="https://wa.me/919052691719?text=Hi%2C%20I%20am%20interested%20in%20NDC%20VAHAN%20TOOL."
+                href="https://wa.me/919052691719?text=Hi%2C%20I%20need%20assistance%20with%20NDC%20VAHAN%20TOOL."
                 target="_blank"
                 rel="noopener noreferrer"
-                ><span class="contact-icon">✆</span
-                ><span class="contact-copy"
-                  ><small>CHAT ON WHATSAPP</small
-                  ><strong>9052691719</strong></span
-                ><span class="contact-arrow">↗</span></a
               >
+                <span class="contact-icon">✆</span>
+                <span class="contact-copy">
+                  <small>WHATSAPP SUPPORT</small>
+                  <strong>9052691719</strong>
+                </span>
+                <span class="contact-arrow">↗</span>
+              </a>
+
               <a
                 class="contact-card"
                 href="mailto:nextdimensioncustom@gmail.com"
-                ><span class="contact-icon">✉</span
-                ><span class="contact-copy"
-                  ><small>EMAIL SUPPORT</small
-                  ><strong>nextdimensioncustom@gmail.com</strong></span
-                ><span class="contact-arrow">↗</span></a
               >
+                <span class="contact-icon">✉</span>
+                <span class="contact-copy">
+                  <small>EMAIL SUPPORT</small>
+                  <strong>nextdimensioncustom@gmail.com</strong>
+                </span>
+                <span class="contact-arrow">↗</span>
+              </a>
             </div>
           </div>
+
           <div class="cta-card">
             <div class="cta-card-icon">✦</div>
+
             <span class="cta-card-label">NDC VAHAN TOOL</span>
-            <h3>Work Smarter.<br /><span class="gold">Not Harder.</span></h3>
+
+            <h3>
+              Work Smarter.<br />
+              <span class="gold">Not Harder.</span>
+            </h3>
+
             <p>
-              Choose a monthly subscription that fits your workflow and start
-              simplifying supported VAHAN document tasks with NDC.
+              Get started with NDC VAHAN TOOL in just a few steps. Select your
+              plan, choose your subscription duration, pay securely, and set up
+              your account using the activation link sent to your email.
             </p>
+
             <div class="cta-price">
               <div>
-                <small>STARTING FROM</small
-                ><strong>₹499<span>/month</span></strong>
+                <small>STARTING FROM</small>
+                <strong>₹499<span>/month</span></strong>
               </div>
+
               <span class="cta-price-divider"></span>
-              <div><small>PLANS AVAILABLE</small><strong>3 Plans</strong></div>
+
+              <div>
+                <small>SUBSCRIPTION PLANS</small>
+                <strong>Starter &amp; Pro</strong>
+              </div>
             </div>
-            <a
-              class="btn btn-primary cta-main-btn"
-              href="https://wa.me/919052691719?text=Hi%2C%20I%20would%20like%20to%20enquire%20about%20NDC%20VAHAN%20TOOL%20subscription%20plans."
-              target="_blank"
-              rel="noopener noreferrer"
-              >Enquire About Plans <span>↗</span></a
-            >
+
+            <a class="btn btn-primary cta-main-btn" href="#pricing">
+              View Plans &amp; Subscribe <span>↗</span>
+            </a>
+
             <a
               class="cta-whatsapp-link"
-              href="mailto:nextdimensioncustom@gmail.com?subject=NDC%20VAHAN%20TOOL%20Subscription"
-              >Prefer email? Contact our support →</a
+              href="https://wa.me/919052691719?text=Hi%2C%20I%20need%20help%20with%20my%20NDC%20VAHAN%20TOOL%20subscription."
+              target="_blank"
+              rel="noopener noreferrer"
             >
+              Need help? Contact our support →
+            </a>
           </div>
         </div>
       </section>

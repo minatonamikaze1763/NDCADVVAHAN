@@ -175,6 +175,7 @@
             }
 
             renderDashboard();
+            renewalTotal();
 
         } catch (error) {
             if (redirecting) return;
@@ -703,11 +704,22 @@
             <b>${esc(date(lastPayment))}</b>
           </div>
 
-          <p class="ndc-note">
-            Renewal and billing dates are shown only when they have been
-            recorded by NDC.
-          </p>
-
+          <div class="ndc-billing-actions">
+            <h3>Manage your subscription</h3>
+            <p>Renew your current plan or switch plans for your next subscription period. Payments are processed securely through Razorpay.</p>
+            <form id="ndcRenewalForm">
+              <label for="ndcRenewalPlan">Subscription plan</label>
+              <select id="ndcRenewalPlan" required>
+                <option value="starter">Starter — ₹499/month · 3 devices</option>
+                <option value="pro">Pro — ₹799/month · 6 devices</option>
+              </select>
+              <label for="ndcRenewalMonths">Duration</label>
+              <select id="ndcRenewalMonths" required>${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1} month${i===0?"":"s"}</option>`).join("")}</select>
+              <p id="ndcRenewalTotal" aria-live="polite"></p>
+              <button class="ndc-home-button" id="ndcRenewalSubmit" type="submit">Continue to secure payment</button>
+              <p id="ndcRenewalStatus" role="status" aria-live="polite"></p>
+            </form>
+          </div>
         </section>
       `;
         }
@@ -966,14 +978,20 @@
         activeSection = section;
 
         renderDashboard();
+        renewalTotal();
     }
 
+    const RENEWAL_PRICES={starter:499,pro:799};
+    function renewalTotal(){const plan=$("ndcRenewalPlan")?.value,months=Number($("ndcRenewalMonths")?.value||1);if($("ndcRenewalTotal")&&RENEWAL_PRICES[plan])$("ndcRenewalTotal").textContent=`Total: ${money(RENEWAL_PRICES[plan]*months)} · ${months} month(s)`;}
+    async function renewSubscription(event){event.preventDefault();const button=$("ndcRenewalSubmit"),message=$("ndcRenewalStatus");if(!button||button.disabled)return;if(typeof Razorpay!=="function"){message.textContent="Razorpay Checkout did not load. Refresh and retry.";return;}button.disabled=true;message.textContent="Creating secure payment order…";try{const planId=$("ndcRenewalPlan").value,months=Number($("ndcRenewalMonths").value);const result=await api("/api/panel/payments/orders",{method:"POST",body:JSON.stringify({planId,months})});const order=result.data||result;if(!order.keyId||!order.orderId||!Number.isFinite(Number(order.amount)))throw Error("Invalid payment order response.");const checkout=new Razorpay({key:order.keyId,order_id:order.orderId,amount:order.amount,currency:order.currency||"INR",name:"Next Dimension Customs",description:"Subscription renewal",theme:{color:"#d7bd55"},handler:async payment=>{message.textContent="Verifying your payment…";try{const result=await api("/api/panel/payments/verify",{method:"POST",body:JSON.stringify(payment)});if(result.manualReview){message.textContent="Payment requires manual review. Contact support.";}else{message.textContent="Payment verified! Refreshing your subscription…";await loadDashboard();}}catch(err){message.textContent=`Payment completed, but verification is pending: ${err.message}. Save payment ID ${payment.razorpay_payment_id}.`;}finally{button.disabled=false;}},modal:{ondismiss:()=>{button.disabled=false;message.textContent="Checkout closed. Check your account before retrying if you paid.";}}});checkout.on("payment.failed",e=>{button.disabled=false;message.textContent=e.error?.description||"Payment failed.";});checkout.open();}catch(err){button.disabled=false;message.textContent=err.message;}}
     // ---------------------------------------------------------
     // INITIALIZATION
     // ---------------------------------------------------------
 
     document.addEventListener("DOMContentLoaded", async () => {
 
+        document.addEventListener("change",e=>{if(e.target?.id==="ndcRenewalPlan"||e.target?.id==="ndcRenewalMonths")renewalTotal();});
+        document.addEventListener("submit",e=>{if(e.target?.id==="ndcRenewalForm")renewSubscription(e);});
         // Footer year.
         const year = $("ndcPortalYear");
 

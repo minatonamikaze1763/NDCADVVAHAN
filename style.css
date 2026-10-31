@@ -2503,3 +2503,6 @@ footer {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* NDC secure subscription forms */
+.ndc-billing-actions{margin-top:24px;padding:22px;border:1px solid #3b3422;border-radius:14px;background:#12110e}.ndc-billing-actions h3{color:#d7bd55}.ndc-billing-actions form{display:grid;gap:12px;max-width:480px}.ndc-billing-actions select,.payment-credentials select{width:100%;padding:13px;border-radius:9px;border:1px solid #51462b;background:#141414;color:#f4f0e5}.ndc-billing-actions label{color:#e6d9ad;font-weight:600}.ndc-billing-actions button{cursor:pointer}.ndc-billing-actions button:disabled{opacity:.6;cursor:wait}#ndcRenewalStatus,#ndcSignupStatus{overflow-wrap:anywhere;line-height:1.6}#ndcRenewalTotal{font-weight:700;color:#d7bd55}
