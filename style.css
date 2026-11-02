@@ -2691,3 +2691,28 @@ footer {
 .ndc-portal-overlay .ndc-password-visibility input{accent-color:#e9c66b;width:17px;height:17px}
 .ndc-portal-overlay #ndcPasswordSubmit{background:#e9c66b;color:#1b170e;border-color:#e9c66b;min-height:46px;margin-top:6px}
 .ndc-portal-overlay #ndcPasswordStatus{overflow-wrap:anywhere;font-size:12px;color:#d8c998;line-height:1.6}
+
+/* Subscription selection */
+.ndc-choice-group{border:0;padding:0;margin:28px 0;min-width:0}
+.ndc-choice-group legend{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold,#d7bd55);font-weight:700;margin-bottom:14px}
+.ndc-plan-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.ndc-choice{position:relative;display:block;cursor:pointer;margin:0!important}
+.ndc-choice input{position:absolute;opacity:0;width:1px;height:1px}
+.ndc-choice>span{display:block;border:1px solid #343844;border-radius:18px;background:linear-gradient(145deg,#1c2029,#11141b);color:#edf0f6;transition:border-color .18s,box-shadow .18s,transform .18s}
+.ndc-plan-choice>span{padding:24px;height:100%}
+.ndc-choice input:checked+span{border-color:#d7bd55;box-shadow:0 0 0 1px #d7bd55,inset 0 0 32px #d7bd550d;background:linear-gradient(145deg,#302c1d,#15171b)}
+.ndc-choice input:focus-visible+span{outline:3px solid #91baff;outline-offset:4px}
+.ndc-choice input:disabled+span{opacity:.55;cursor:wait}
+.ndc-choice:hover>span{border-color:#b5a66b;transform:translateY(-2px)}
+.ndc-plan-choice strong{display:block;font-size:26px;margin:12px 0}
+.ndc-plan-choice b{font-size:30px;display:block}
+.ndc-plan-choice small{font-size:11px;color:#b9beca;letter-spacing:.06em}
+.ndc-plan-choice em{display:block;font-size:13px;color:#c8cbd4;margin:14px 0;font-style:normal}
+.ndc-plan-choice ul{list-style:none;padding:16px 0 0;margin:0;border-top:1px solid #ffffff16;display:grid;gap:9px;font-size:12px;line-height:1.5}
+.ndc-plan-choice li::before{content:'✓';color:#d7bd55;margin-right:8px}
+.ndc-month-options{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.ndc-month-choice>span{text-align:center;padding:16px 6px}
+.ndc-month-choice strong{display:block;font-size:23px}
+.ndc-month-choice small{display:block;font-size:11px;color:#b9beca;margin-top:4px}
+#ndcRenewalTotal{padding:20px;border:1px solid #d7bd5540;border-radius:14px;background:#d7bd550a;font-size:19px;font-weight:700}
+@media(max-width:650px){.ndc-plan-options{grid-template-columns:1fr}.ndc-month-options{grid-template-columns:repeat(3,minmax(0,1fr))}.ndc-plan-choice>span{padding:20px}}

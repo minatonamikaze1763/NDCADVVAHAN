@@ -1,192 +1,186 @@
 /* NDC Customer Portal — Standalone Dashboard */
 (() => {
-    "use strict";
+  "use strict";
 
-    const $ = (id) => document.getElementById(id);
+  const $ = (id) => document.getElementById(id);
 
-    const API_BASE = "https://server.nextdimensioncustoms.in";
-    const TOKEN_KEY = "ndc_customer_panel_token";
-    const DEFAULT_FEATURES = {
-        assistedVahanUploads: true,
-        smartDocumentIdentification: true,
-        automaticImageCompression: true,
-        skipAlreadyUploadedDocuments: true,
-        autoStartAndFinalSubmission: true,
-        supportedFileFormats: true,
-        preparedDocumentZipDownload: true
-    };
-    let dashboardData = null;
-    let activeSection = "overview";
-    let redirecting = false;
-    let paymentBusy = false;
-    let serverClockOffset = 0;
+  const API_BASE = "https://server.nextdimensioncustoms.in";
 
-    // ---------------------------------------------------------
-    // HELPERS
-    // ---------------------------------------------------------
+  const TOKEN_KEY = "ndc_customer_panel_token";
+  let dashboardData = null;
+  let activeSection = "overview";
+  let redirecting = false;
+  let paymentBusy = false;
+  let serverClockOffset = 0;
 
-    const esc = (value) =>
-        String(value ?? "").replace(/[&<>"']/g, (character) => ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;"
-        })[character]);
+  // ---------------------------------------------------------
+  // HELPERS
+  // ---------------------------------------------------------
 
-    const date = (value) => {
-        if (!value) return "Not available";
+  const esc = (value) =>
+    String(value ?? "").replace(/[&<>"']/g, (character) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[character]);
 
-        const parsed = new Date(value);
+  const date = (value) => {
+    if (!value) return "Not available";
 
-        if (Number.isNaN(parsed.getTime())) {
-            return "Not available";
-        }
+    const parsed = new Date(value);
 
-        return parsed.toLocaleString(undefined, {
-            dateStyle: "medium",
-            timeStyle: "short"
-        });
-    };
+    if (Number.isNaN(parsed.getTime())) {
+      return "Not available";
+    }
 
-    const money = (amount, currency = "INR") => {
-        if (
-            amount === null ||
-            amount === undefined ||
-            amount === "" ||
-            !Number.isFinite(Number(amount))
-        ) {
-            return "Not set";
-        }
+    return parsed.toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short"
+    });
+  };
 
-        try {
-            return new Intl.NumberFormat("en-IN", {
-                style: "currency",
-                currency
-            }).format(Number(amount));
-        } catch {
-            return `${currency} ${amount}`;
-        }
-    };
+  const money = (amount, currency = "INR") => {
+    if (
+      amount === null ||
+      amount === undefined ||
+      amount === "" ||
+      !Number.isFinite(Number(amount))
+    ) {
+      return "Not set";
+    }
 
-    const statusLabel = (status) => ({
-        active: "Active",
-        disabled: "Disabled",
-        banned: "Banned",
-        pending_approval: "Pending approval",
-        expired: "Expired",
-        renewal_required: "Renewal required"
-    }[status] || "Unknown");
+    try {
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency
+      }).format(Number(amount));
+    } catch {
+      return `${currency} ${amount}`;
+    }
+  };
 
-    function showLoading() {
-        const content = $("ndcDashboardContent");
+  const statusLabel = (status) => ({
+    active: "Active",
+    disabled: "Disabled",
+    banned: "Banned",
+    pending_approval: "Pending approval",
+    expired: "Expired",
+    renewal_required: "Renewal required"
+  }[status] || "Unknown");
 
-        if (!content) return;
+  function showLoading() {
+    const content = $("ndcDashboardContent");
 
-        content.innerHTML = `
+    if (!content) return;
+
+    content.innerHTML = `
       <div class="ndc-loading">
         <span class="ndc-spinner"></span>
         Loading your account…
       </div>
     `;
+  }
+
+  async function redirectToLogin() {
+    if (redirecting) return;
+
+    redirecting = true;
+
+    try {
+      await window.NDCAuth?.logout();
+    } catch (error) {
+      console.warn("[NDC] Could not clear server session:", error);
     }
 
-    async function redirectToLogin() {
-        if (redirecting) return;
+    window.location.replace("index.html");
+  }
 
-        redirecting = true;
+  // ---------------------------------------------------------
+  // API REQUEST
+  // ---------------------------------------------------------
 
-        try {
-            await window.NDCAuth?.logout();
-        } catch (error) {
-            console.warn("[NDC] Could not clear server session:", error);
-        }
+  async function api(path, options = {}) {
+    const token = sessionStorage.getItem(TOKEN_KEY);
 
-        window.location.replace("index.html");
+    if (!token) {
+      await redirectToLogin();
+      throw new Error("Your session has expired.");
     }
 
-    // ---------------------------------------------------------
-    // API REQUEST
-    // ---------------------------------------------------------
+    const response = await fetch(`${API_BASE}${path}`, {
+      ...options,
 
-    async function api(path, options = {}) {
-        const token = sessionStorage.getItem(TOKEN_KEY);
+      headers: {
+        Accept: "application/json",
 
-        if (!token) {
-            await redirectToLogin();
-            throw new Error("Your session has expired.");
-        }
+        ...(options.body
+          ? { "Content-Type": "application/json" }
+          : {}),
 
-        const response = await fetch(`${API_BASE}${path}`, {
-            ...options,
+        Authorization: `Bearer ${token}`,
 
-            headers: {
-                Accept: "application/json",
+        ...(options.headers || {})
+      },
 
-                ...(options.body
-                    ? { "Content-Type": "application/json" }
-                    : {}),
+      credentials: "omit",
+      cache: "no-store"
+    });
 
-                Authorization: `Bearer ${token}`,
+    const data = await response.json().catch(() => ({}));
 
-                ...(options.headers || {})
-            },
-
-            credentials: "omit",
-            cache: "no-store"
-        });
-
-        const data = await response.json().catch(() => ({}));
-
-        if (response.status === 401) {
-            await redirectToLogin();
-            throw new Error("Your session has expired. Please sign in again.");
-        }
-
-        if (!response.ok) {
-            throw new Error(
-                data.error || `Request failed (${response.status})`
-            );
-        }
-
-        return data;
+    if (response.status === 401) {
+      await redirectToLogin();
+      throw new Error("Your session has expired. Please sign in again.");
     }
 
-    // ---------------------------------------------------------
-    // DASHBOARD DATA
-    // ---------------------------------------------------------
+    if (!response.ok) {
+      throw new Error(
+        data.error || `Request failed (${response.status})`
+      );
+    }
 
-    async function loadDashboard() {
-        const content = $("ndcDashboardContent");
+    return data;
+  }
 
-        if (content) {
-            content.innerHTML = `
+  // ---------------------------------------------------------
+  // DASHBOARD DATA
+  // ---------------------------------------------------------
+
+  async function loadDashboard() {
+    const content = $("ndcDashboardContent");
+
+    if (content) {
+      content.innerHTML = `
         <div class="ndc-loading">
           <span class="ndc-spinner"></span>
           Loading your account…
         </div>
       `;
-        }
+    }
 
-        try {
-            const response = await api("/api/panel/dashboard");
+    try {
+      await NDCPlans.ready;
+      for (const p of NDCPlans.all) RENEWAL_PRICES[p.id] = p.monthlyPrice;
+      const response = await api("/api/panel/dashboard");
 
-            dashboardData = response.dashboard || response;
+      dashboardData = response.dashboard || response;
 
-            if (!dashboardData?.account) {
-                throw new Error("Customer account information is unavailable.");
-            }
+      if (!dashboardData?.account) {
+        throw new Error("Customer account information is unavailable.");
+      }
 
-            const serverTime = Date.parse(dashboardData.serverTime);
-            serverClockOffset = Number.isFinite(serverTime) ? serverTime - Date.now() : 0;
-            renderDashboard();
-            renewalTotal();
+      const serverTime = Date.parse(dashboardData.serverTime);
+      serverClockOffset = Number.isFinite(serverTime) ? serverTime - Date.now() : 0;
+      renderDashboard();
+      renewalTotal();
 
-        } catch (error) {
-            if (redirecting) return;
+    } catch (error) {
+      if (redirecting) return;
 
-            if (content) {
-                content.innerHTML = `
+      if (content) {
+        content.innerHTML = `
           <div class="ndc-empty">
             <p>${esc(error.message)}</p>
             <button
@@ -199,45 +193,45 @@
           </div>
         `;
 
-                $("ndcRetryDashboard")?.addEventListener(
-                    "click",
-                    loadDashboard
-                );
-            }
-        }
+        $("ndcRetryDashboard")?.addEventListener(
+          "click",
+          loadDashboard
+        );
+      }
     }
+  }
 
-    // ---------------------------------------------------------
-    // DASHBOARD RENDERER
-    // ---------------------------------------------------------
+  // ---------------------------------------------------------
+  // DASHBOARD RENDERER
+  // ---------------------------------------------------------
 
-    function currentPlanId(account) {
-        // Never silently switch a customer with an unrecognised plan.
-        const name = String(account.plan?.id || account.plan?.name || "").trim().toLowerCase();
-        return Object.hasOwn(RENEWAL_PRICES, name) ? name : null;
-    }
+  function currentPlanId(account) {
+    // Never silently switch a customer with an unrecognised plan.
+    const name = String(account.plan?.id || account.plan?.name || "").trim().toLowerCase();
+    return Object.hasOwn(RENEWAL_PRICES, name) ? name : null;
+  }
 
-    function renewalCard(account) {
-        const planId = currentPlanId(account);
-        const expiry = Date.parse(account.expiresAt);
-        const now = Date.now() + serverClockOffset;
-        const remaining = expiry - now;
-        const hasExpiry = Number.isFinite(expiry);
-        const expired = hasExpiry && remaining <= 0;
-        const days = hasExpiry ? Math.max(0, Math.ceil(remaining / 86400000)) : null;
-        const urgent = hasExpiry && remaining <= 7 * 86400000;
-        const panelEnd = Date.parse(account.renewal?.panelExpiresAt || account.panelExpiresAt) || (expiry + 5 * 86400000);
-        const canRenew = account.approved === true && !account.disabled && !account.banned &&
-            account.renewal?.canRenew !== false && (!hasExpiry || now < panelEnd);
-        const start = hasExpiry && expiry > now ? expiry : now;
-        const newExpiry = new Date(start + 30 * 86400000);
-        const heading = expired ? "Your extension access has expired" : urgent
-            ? `Your plan expires in ${days} day${days === 1 ? "" : "s"}` : "Want more time on your current plan?";
-        const description = expired
-            ? "Renew to restore extension access. Your new 30 days begin when payment is verified."
-            : hasExpiry ? "Pay now to add 30 days after your current paid expiry. Your remaining paid days are preserved."
-            : "Choose a paid plan below. Contact support before replacing access with no expiry.";
-        return `
+  function renewalCard(account) {
+    const planId = currentPlanId(account);
+    const expiry = Date.parse(account.expiresAt);
+    const now = Date.now() + serverClockOffset;
+    const remaining = expiry - now;
+    const hasExpiry = Number.isFinite(expiry);
+    const expired = hasExpiry && remaining <= 0;
+    const days = hasExpiry ? Math.max(0, Math.ceil(remaining / 86400000)) : null;
+    const urgent = hasExpiry && remaining <= 7 * 86400000;
+    const panelEnd = Date.parse(account.renewal?.panelExpiresAt || account.panelExpiresAt) || (expiry + 5 * 86400000);
+    const canRenew = account.approved === true && !account.disabled && !account.banned &&
+      account.renewal?.canRenew !== false && (!hasExpiry || now < panelEnd);
+    const start = hasExpiry && expiry > now ? expiry : now;
+    const newExpiry = new Date(start + 30 * 86400000);
+    const heading = expired ? "Your extension access has expired" : urgent
+      ? `Your plan expires in ${days} day${days === 1 ? "" : "s"}` : "Want more time on your current plan?";
+    const description = expired
+      ? "Renew to restore extension access. Your new 30 days begin when payment is verified."
+      : hasExpiry ? "Pay now to add 30 days after your current paid expiry. Your remaining paid days are preserved."
+        : "Choose a paid plan below. Contact support before replacing access with no expiry.";
+    return `
           <section class="ndc-renewal-card${urgent ? " is-urgent" : ""}" aria-labelledby="ndcRenewalHeading">
             <div>
               <span class="ndc-eyebrow">${expired ? "RENEWAL REQUIRED" : urgent ? "RENEWAL REMINDER" : "EXTEND YOUR SUBSCRIPTION"}</span>
@@ -253,61 +247,61 @@
             </div>
             <p id="ndcQuickRenewStatus" class="ndc-renewal-message" role="status" aria-live="polite"></p>
           </section>`;
-    }
+  }
 
-    function renderDashboard() {
-        const data = dashboardData;
+  function renderDashboard() {
+    const data = dashboardData;
 
-        if (!data?.account) return;
+    if (!data?.account) return;
 
-        const account = data.account;
+    const account = data.account;
 
-        const sessions = Array.isArray(data.sessions)
-            ? data.sessions
-            : [];
+    const sessions = Array.isArray(data.sessions)
+      ? data.sessions
+      : [];
 
-        const payments = Array.isArray(data.payments)
-            ? data.payments
-            : [];
+    const payments = Array.isArray(data.payments)
+      ? data.payments
+      : [];
 
-        const activeSessions = sessions.filter(
-            (session) => session.status === "active"
-        );
+    const activeSessions = sessions.filter(
+      (session) => session.status === "active"
+    );
 
-        const status = account.status || "unknown";
+    const status = account.status || "unknown";
 
-        const safeStatus = String(status).replace(
-            /[^a-z0-9_-]/gi,
-            ""
-        );
+    const safeStatus = String(status).replace(
+      /[^a-z0-9_-]/gi,
+      ""
+    );
 
-        const badge = `
+    const badge = `
       <span class="ndc-status ndc-status-${esc(safeStatus)}">
         ${esc(statusLabel(status))}
       </span>
     `;
 
-        // -------------------------------------------------------
-        // FEATURES
-        // -------------------------------------------------------
+    // -------------------------------------------------------
+    // FEATURES
+    // -------------------------------------------------------
 
-        // -------------------------------------------------------
-        // DEFAULT FEATURES — FRONTEND ONLY
-        // -------------------------------------------------------
+    // -------------------------------------------------------
+    // FEATURES FROM ACCOUNT API
+    // -------------------------------------------------------
 
-        const featureEntries = [
-            ...Object.entries(DEFAULT_FEATURES),
-            ["maxDevices", Number(account.maxDevices) || 1]
-        ];
+    const featureEntries = [
+      ...Object.entries(account.features || {}),
+      ["maxDevices", Number(account.maxDevices) || 1]
+    ];
 
-        const features = featureEntries.map(([key, value]) => {
-            const isMaxDevices = key === "maxDevices";
+    const features = featureEntries.map(([key, value]) => {
+      const isMaxDevices = key === "maxDevices";
 
-            const label = isMaxDevices
-                ? "Maximum Allowed Devices"
-                : key.replace(/([A-Z])/g, " $1").replace(/^./, c => c.toUpperCase());
+      const label = isMaxDevices
+        ? "Maximum Allowed Devices"
+        : key.replace(/([A-Z])/g, " $1").replace(/^./, c => c.toUpperCase());
 
-            return `
+      return `
     <div class="ndc-feature">
       <span>${esc(label)}</span>
       <b class="${isMaxDevices ? "is-on" : value ? "is-on" : "is-off"}">
@@ -315,16 +309,16 @@
       </b>
     </div>
   `;
-        }).join("");
+    }).join("");
 
 
 
-        // -------------------------------------------------------
-        // PAYMENT HISTORY
-        // -------------------------------------------------------
+    // -------------------------------------------------------
+    // PAYMENT HISTORY
+    // -------------------------------------------------------
 
-        const paymentRows = payments.length
-            ? payments.map((payment) => `
+    const paymentRows = payments.length
+      ? payments.map((payment) => `
           <tr>
             <td>${esc(date(payment.paidAt || payment.createdAt))}</td>
 
@@ -336,11 +330,11 @@
 
             <td>
               <span class="ndc-payment-status ndc-payment-${esc(
-                String(payment.status || "unknown").replace(
-                    /[^a-z0-9_-]/gi,
-                    ""
-                )
-            )}">
+        String(payment.status || "unknown").replace(
+          /[^a-z0-9_-]/gi,
+          ""
+        )
+      )}">
                 ${esc(payment.status || "Unknown")}
               </span>
             </td>
@@ -348,7 +342,7 @@
             <td>${esc(payment.reference || "—")}</td>
           </tr>
         `).join("")
-            : `
+      : `
           <tr>
             <td colspan="5" class="ndc-empty">
               No payment records available yet.
@@ -356,22 +350,22 @@
           </tr>
         `;
 
-        // -------------------------------------------------------
-        // SESSION LIST
-        // -------------------------------------------------------
+    // -------------------------------------------------------
+    // SESSION LIST
+    // -------------------------------------------------------
 
-        const sessionRows = sessions.length
-            ? sessions.map((session) => {
-                const isCurrent = session.current === true;
-                const isActive = session.status === "active";
+    const sessionRows = sessions.length
+      ? sessions.map((session) => {
+        const isCurrent = session.current === true;
+        const isActive = session.status === "active";
 
-                const sessionTitle = isCurrent
-                    ? "This device · Current session"
-                    : session.type === "extension"
-                        ? "VAHAN extension session"
-                        : "Customer portal session";
+        const sessionTitle = isCurrent
+          ? "This device · Current session"
+          : session.type === "extension"
+            ? "VAHAN extension session"
+            : "Customer portal session";
 
-                return `
+        return `
             <div class="ndc-session">
 
               <div class="ndc-session-icon">
@@ -384,9 +378,9 @@
 
                 <span>
                   ${esc(
-                    session.userAgent ||
-                    "Device details unavailable"
-                )}
+          session.userAgent ||
+          "Device details unavailable"
+        )}
                 </span>
 
                 <small>
@@ -399,12 +393,12 @@
               <div class="ndc-session-actions">
 
                 <span class="ndc-status ndc-status-${isActive ? "active" : "expired"
-                    }">
+          }">
                   ${esc(session.status || "Unknown")}
                 </span>
 
                 ${isActive && !isCurrent
-                        ? `
+            ? `
                       <button
                         type="button"
                         class="ndc-small-danger"
@@ -414,47 +408,47 @@
                         Revoke
                       </button>
                     `
-                        : ""
-                    }
+            : ""
+          }
 
               </div>
 
             </div>
           `;
-            }).join("")
-            : `
+      }).join("")
+      : `
           <div class="ndc-empty">
             No panel sessions found.
           </div>
         `;
 
-        // -------------------------------------------------------
-        // ACCOUNT DETAILS
-        // -------------------------------------------------------
+    // -------------------------------------------------------
+    // ACCOUNT DETAILS
+    // -------------------------------------------------------
 
-        const lastPayment =
-            account.lastPaymentAt ||
-            payments.find((payment) => payment.status === "paid")?.paidAt;
+    const lastPayment =
+      account.lastPaymentAt ||
+      payments.find((payment) => payment.status === "paid")?.paidAt;
 
-        const planName =
-            account.plan?.name || "No plan assigned";
+    const planName =
+      account.plan?.name || "No plan assigned";
 
-        const planPrice =
-            account.plan?.price == null
-                ? "Not set"
-                : money(
-                    account.plan.price,
-                    account.plan.currency || "INR"
-                );
+    const planPrice =
+      account.plan?.price == null
+        ? "Not set"
+        : money(
+          account.plan.price,
+          account.plan.currency || "INR"
+        );
 
-        let sectionHTML = "";
+    let sectionHTML = "";
 
-        // =======================================================
-        // OVERVIEW
-        // =======================================================
+    // =======================================================
+    // OVERVIEW
+    // =======================================================
 
-        if (activeSection === "overview") {
-            sectionHTML = `
+    if (activeSection === "overview") {
+      sectionHTML = `
         ${renewalCard(account)}
 
 
@@ -498,9 +492,9 @@
             <span>Account expiry</span>
             <strong>
               ${account.expiresAt
-                    ? esc(new Date(account.expiresAt).toLocaleDateString())
-                    : "No expiry"
-                }
+          ? esc(new Date(account.expiresAt).toLocaleDateString())
+          : "No expiry"
+        }
             </strong>
             <small>Access validity</small>
           </article>
@@ -666,14 +660,14 @@
 
         </section>
       `;
-        }
+    }
 
-        // =======================================================
-        // PROFILE
-        // =======================================================
+    // =======================================================
+    // PROFILE
+    // =======================================================
 
-        else if (activeSection === "profile") {
-            sectionHTML = `
+    else if (activeSection === "profile") {
+      sectionHTML = `
 
         <div class="ndc-page-heading">
           <span class="ndc-eyebrow">PERSONAL INFORMATION</span>
@@ -710,14 +704,14 @@
 
         </section>
       `;
-        }
+    }
 
-        // =======================================================
-        // SUBSCRIPTION
-        // =======================================================
+    // =======================================================
+    // SUBSCRIPTION
+    // =======================================================
 
-        else if (activeSection === "subscription") {
-            sectionHTML = `
+    else if (activeSection === "subscription") {
+      sectionHTML = `
         ${renewalCard(account)}
 
 
@@ -761,13 +755,10 @@
             <h3>Manage your subscription</h3>
             <p>Renew your current plan or switch plans for your next subscription period. Payments are processed securely through Razorpay.</p>
             <form id="ndcRenewalForm" tabindex="-1">
-              <label for="ndcRenewalPlan">Subscription plan</label>
-              <select id="ndcRenewalPlan" required>
-                <option value="starter">Starter — ₹499/month · 3 devices</option>
-                <option value="pro">Pro — ₹799/month · 6 devices</option>
-              </select>
-              <label for="ndcRenewalMonths">Duration</label>
-              <select id="ndcRenewalMonths" required>${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1} month${i===0?"":"s"}</option>`).join("")}</select>
+              <fieldset class="ndc-choice-group"><legend>01 · Choose your plan</legend>
+              <div class="ndc-plan-options">${NDCPlans.visible.map((p, i) => `<label class="ndc-choice ndc-plan-choice"><input type="radio" name="renewalPlan" value="${esc(p.id)}" ${i === 0 ? "checked" : ""} required><span><small>${p.id === 'test' ? 'AUTHORIZED TESTING' : 'MONTHLY MEMBERSHIP'}</small><strong>${esc(p.name)}</strong><b>${esc(money(p.monthlyPrice))}<small> / month</small></b><em>${esc(p.maxDevices)} devices · ${esc(p.durationDays)} days/month</em><ul>${Object.entries(p.features || {}).filter(([, v]) => v === true).map(([k]) => `<li>${esc(NDCPlans.label(k))}</li>`).join('')}</ul></span></label>`).join('')}</div></fieldset>
+              <fieldset class="ndc-choice-group"><legend>02 · Add more time</legend><p>Each month adds 30 days. Choose 1–12 months.</p>
+              <div class="ndc-month-options">${Array.from({ length: 12 }, (_, i) => `<label class="ndc-choice ndc-month-choice"><input type="radio" name="renewalMonths" value="${i + 1}" ${i === 0 ? 'checked' : ''}><span><strong>${i + 1}</strong><small>${i === 0 ? 'month' : 'months'}</small></span></label>`).join('')}</div></fieldset>
               <p id="ndcRenewalTotal" aria-live="polite"></p>
               <button class="ndc-home-button" id="ndcRenewalSubmit" type="submit">Continue to secure payment</button>
               <p id="ndcRenewalStatus" role="status" aria-live="polite"></p>
@@ -775,14 +766,14 @@
           </div>
         </section>
       `;
-        }
+    }
 
-        // =======================================================
-        // PAYMENTS
-        // =======================================================
+    // =======================================================
+    // PAYMENTS
+    // =======================================================
 
-        else if (activeSection === "payments") {
-            sectionHTML = `
+    else if (activeSection === "payments") {
+      sectionHTML = `
 
         <div class="ndc-page-heading">
           <span class="ndc-eyebrow">TRANSACTION RECORDS</span>
@@ -816,14 +807,14 @@
 
         </section>
       `;
-        }
+    }
 
-        // =======================================================
-        // ACTIVE SESSIONS
-        // =======================================================
+    // =======================================================
+    // ACTIVE SESSIONS
+    // =======================================================
 
-        else if (activeSection === "sessions") {
-            sectionHTML = `
+    else if (activeSection === "sessions") {
+      sectionHTML = `
 
         <div class="ndc-page-heading">
           <span class="ndc-eyebrow">SIGNED-IN DEVICES</span>
@@ -854,14 +845,14 @@
 
         </section>
       `;
-        }
+    }
 
-        // =======================================================
-        // FEATURES
-        // =======================================================
+    // =======================================================
+    // FEATURES
+    // =======================================================
 
-        else if (activeSection === "features") {
-            sectionHTML = `
+    else if (activeSection === "features") {
+      sectionHTML = `
 
         <div class="ndc-page-heading">
           <span class="ndc-eyebrow">ACCOUNT PERMISSIONS</span>
@@ -877,14 +868,14 @@
 
         </section>
       `;
-        }
+    }
 
-        // =======================================================
-        // SECURITY
-        // =======================================================
+    // =======================================================
+    // SECURITY
+    // =======================================================
 
-        else if (activeSection === "security") {
-            sectionHTML = `
+    else if (activeSection === "security") {
+      sectionHTML = `
 
         <div class="ndc-page-heading">
           <span class="ndc-eyebrow">ACCOUNT PROTECTION</span>
@@ -949,307 +940,311 @@
 
         </section>
       `;
-        }
-
-        // -------------------------------------------------------
-        // INSERT SECTION
-        // -------------------------------------------------------
-
-        const content = $("ndcDashboardContent");
-
-        if (!content) return;
-
-        content.innerHTML = sectionHTML;
-
-        const planSelect = $("ndcRenewalPlan");
-        const assignedPlan = currentPlanId(account);
-        if (planSelect && assignedPlan) planSelect.value = assignedPlan;
-        $("ndcQuickRenew")?.addEventListener("click", () => {
-            const planId = currentPlanId(dashboardData.account);
-            if (planId) startRenewalPayment(planId, 1, "ndcQuickRenewStatus");
-        });
-        $("ndcMoreMonths")?.addEventListener("click", () => {
-            if (activeSection !== "subscription") navigate("subscription");
-            $("ndcRenewalForm")?.scrollIntoView({ behavior: "smooth", block: "center" });
-            $("ndcRenewalMonths")?.focus({ preventScroll: true });
-        });
-        setPaymentBusy(paymentBusy);
-
-        // Update active navigation button.
-        document.querySelectorAll("[data-section]").forEach((element) => {
-            element.classList.toggle(
-                "is-active",
-                element.dataset.section === activeSection
-            );
-        });
-
-        // Dashboard internal navigation.
-        document.querySelectorAll("[data-go-section]").forEach((element) => {
-            element.addEventListener("click", () => {
-                navigate(element.dataset.goSection);
-            });
-        });
-
-        // Session revocation.
-        document.querySelectorAll("[data-revoke-session]").forEach((element) => {
-            element.addEventListener("click", async () => {
-                const sessionId = element.dataset.revokeSession;
-
-                const sessionType =
-                    element.dataset.sessionType || "customer_portal";
-
-                if (!sessionId) {
-                    alert("Session ID is unavailable.");
-                    return;
-                }
-
-                if (
-                    !confirm(
-                        "Revoke this device session? That device will need to sign in again."
-                    )
-                ) {
-                    return;
-                }
-
-                element.disabled = true;
-                element.textContent = "Revoking…";
-
-                try {
-                    await api(
-                        `/api/panel/sessions/${encodeURIComponent(sessionId)}?type=${encodeURIComponent(sessionType)}`,
-                        {
-                            method: "DELETE"
-                        }
-                    );
-
-                    await loadDashboard();
-
-                } catch (error) {
-                    alert(error.message);
-
-                    element.disabled = false;
-                    element.textContent = "Revoke";
-                }
-            });
-        });
-
-        // Refresh dashboard data.
-        $("ndcRefreshDashboard")?.addEventListener(
-            "click",
-            loadDashboard
-        );
     }
 
-    // ---------------------------------------------------------
-    // SECTION NAVIGATION
-    // ---------------------------------------------------------
+    // -------------------------------------------------------
+    // INSERT SECTION
+    // -------------------------------------------------------
 
-    function navigate(section) {
-        const allowedSections = [
-            "overview",
-            "profile",
-            "subscription",
-            "payments",
-            "sessions",
-            "features",
-            "security"
-        ];
+    const content = $("ndcDashboardContent");
 
-        if (!allowedSections.includes(section)) {
-            return;
-        }
+    if (!content) return;
 
-        activeSection = section;
+    content.innerHTML = sectionHTML;
 
-        renderDashboard();
-        renewalTotal();
-    }
-
-    const RENEWAL_PRICES={starter:499,pro:799};
-    function renewalTotal(){const plan=$("ndcRenewalPlan")?.value,months=Number($("ndcRenewalMonths")?.value||1);if($("ndcRenewalTotal")&&RENEWAL_PRICES[plan])$("ndcRenewalTotal").textContent=`Total: ${money(RENEWAL_PRICES[plan]*months)} · ${months} month(s)`;}
-    function setPaymentBusy(busy) {
-        paymentBusy = busy;
-        const quick = $("ndcQuickRenew");
-        const account = dashboardData?.account || {};
-        const paidExpiry = Date.parse(account.expiresAt);
-        const panelExpiry = Date.parse(account.panelExpiresAt || account.renewal?.panelExpiresAt) || (paidExpiry + 5 * 86400000);
-        if (quick) quick.disabled = busy || !currentPlanId(dashboardData?.account || {}) ||
-            !dashboardData?.account?.expiresAt || dashboardData?.account?.renewal?.canRenew === false ||
-            dashboardData?.account?.approved !== true || dashboardData?.account?.disabled || dashboardData?.account?.banned ||
-            Date.now() + serverClockOffset >= panelExpiry;
-        ["ndcRenewalSubmit", "ndcRenewalPlan", "ndcRenewalMonths"].forEach(id => {
-            if ($(id)) $(id).disabled = busy;
-        });
-    }
-
-    async function renewSubscription(event) {
-        event.preventDefault();
-        await startRenewalPayment($("ndcRenewalPlan").value, Number($("ndcRenewalMonths").value), "ndcRenewalStatus");
-    }
-
-    async function startRenewalPayment(planId, months, statusId) {
-        if (paymentBusy) return;
-        const message = (text) => {
-            // Resolve the current node: navigation may re-render during checkout.
-            const node = $(statusId) || $("ndcQuickRenewStatus") || $("ndcRenewalStatus");
-            if (node) node.textContent = text;
-        };
-        if (typeof Razorpay !== "function") {
-            message("Razorpay Checkout did not load. Refresh and retry.");
-            return;
-        }
-        setPaymentBusy(true);
-        message("Creating secure payment order…");
-        try {
-            const result = await api("/api/panel/payments/orders", {
-                method: "POST", body: JSON.stringify({ planId, months })
-            });
-            const order = result.data || result;
-            if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error("Invalid payment order response.");
-            let verificationStarted = false;
-            const checkout = new Razorpay({
-                key: order.keyId, order_id: order.orderId, amount: order.amount,
-                currency: order.currency || "INR", name: "Next Dimension Customs",
-                description: "Subscription renewal", theme: { color: "#d7bd55" },
-                handler: async payment => {
-                    if (verificationStarted) return;
-                    verificationStarted = true;
-                    message("Verifying your payment…");
-                    try {
-                        const result = await api("/api/panel/payments/verify", {
-                            method: "POST", body: JSON.stringify(payment)
-                        });
-                        if (result.manualReview) {
-                            message("Payment requires manual review. Contact support.");
-                        } else {
-                            await loadDashboard();
-                            message("Payment verified! Your subscription has been updated.");
-                        }
-                    } catch (err) {
-                        message(`Payment completed, but verification is pending: ${err.message}. Save payment ID ${payment.razorpay_payment_id}.`);
-                    } finally { setPaymentBusy(false); }
-                },
-                modal: { ondismiss: () => {
-                    if (verificationStarted) return;
-                    setPaymentBusy(false);
-                    message("Checkout closed. Check your account before retrying if you paid.");
-                } }
-            });
-            checkout.on("payment.failed", e => {
-                if (verificationStarted) return;
-                setPaymentBusy(false);
-                message(e.error?.description || "Payment failed.");
-            });
-            checkout.open();
-        } catch (err) {
-            setPaymentBusy(false);
-            message(err.message);
-        }
-    }
-    let passwordChangeBusy = false;
-    async function changePassword(event) {
-        event.preventDefault();
-        if (passwordChangeBusy) return;
-        const current = $("ndcCurrentPassword"), next = $("ndcNewPassword"), confirm = $("ndcConfirmPassword");
-        const button = $("ndcPasswordSubmit"), message = $("ndcPasswordStatus");
-        const currentPassword = current.value, newPassword = next.value, confirmPassword = confirm.value;
-        if (!currentPassword || new TextEncoder().encode(newPassword).length < 12 || new TextEncoder().encode(newPassword).length > 72) {
-            message.textContent = "Enter your current password and a new password of 12–72 UTF-8 bytes."; return;
-        }
-        if (newPassword !== confirmPassword) { message.textContent = "New passwords do not match."; return; }
-        if (newPassword === currentPassword) { message.textContent = "Choose a different new password."; return; }
-        passwordChangeBusy = true;
-        button.disabled = true;
-        message.textContent = "Updating your password…";
-        try {
-            await api("/api/panel/auth/change-password", {
-                method: "POST", body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
-            });
-            current.value = next.value = confirm.value = "";
-            message.textContent = "Password changed. All sessions have been signed out. Returning to sign in…";
-            setTimeout(() => { void redirectToLogin(); }, 1800);
-        } catch (error) {
-            current.value = next.value = confirm.value = "";
-            message.textContent = error.message;
-            button.disabled = false;
-            passwordChangeBusy = false;
-        }
-    }
-
-    // ---------------------------------------------------------
-    // INITIALIZATION
-    // ---------------------------------------------------------
-
-    document.addEventListener("DOMContentLoaded", async () => {
-
-        document.addEventListener("change",e=>{if(e.target?.id==="ndcRenewalPlan"||e.target?.id==="ndcRenewalMonths")renewalTotal();});
-        document.addEventListener("submit",e=>{
-            if(e.target?.id==="ndcRenewalForm") renewSubscription(e);
-            if(e.target?.id==="ndcPasswordForm") changePassword(e);
-        });
-        document.addEventListener("change", e => {
-            if (e.target?.id !== "ndcShowPasswords") return;
-            ["ndcCurrentPassword", "ndcNewPassword", "ndcConfirmPassword"].forEach(id => {
-                if ($(id)) $(id).type = e.target.checked ? "text" : "password";
-            });
-        });
-        // Footer year.
-        const year = $("ndcPortalYear");
-
-        if (year) {
-            year.textContent = new Date().getFullYear();
-        }
-
-        // Sidebar navigation.
-        document.querySelectorAll("[data-section]").forEach((element) => {
-            element.addEventListener("click", () => {
-                navigate(element.dataset.section);
-            });
-        });
-
-        // Logout.
-        $("ndcLogoutButton")?.addEventListener("click", async () => {
-            const button = $("ndcLogoutButton");
-
-            button.disabled = true;
-            button.textContent = "Signing out…";
-
-            try {
-                await window.NDCAuth.logout();
-            } finally {
-                window.location.replace("index.html");
-            }
-        });
-
-        // Check authentication client.
-        if (!window.NDCAuth) {
-            window.location.replace("index.html");
-            return;
-        }
-
-        // Check for an existing session.
-        if (!window.NDCAuth.isLoggedIn()) {
-            window.location.replace("index.html");
-            return;
-        }
-
-        showLoading();
-
-        try {
-            const user = await window.NDCAuth.verifySession();
-
-            if (!user || user.useradmin !== true) {
-                await redirectToLogin();
-                return;
-            }
-
-            await loadDashboard();
-
-        } catch (error) {
-            console.error("[NDC] Customer dashboard authentication failed:", error);
-
-            await redirectToLogin();
-        }
+    const assignedPlan = currentPlanId(account);
+    const selectedRadio = document.querySelector(`input[name="renewalPlan"][value="${assignedPlan}"]`);
+    if (selectedRadio) selectedRadio.checked = true;
+    renewalTotal();
+    $("ndcQuickRenew")?.addEventListener("click", () => {
+      const planId = currentPlanId(dashboardData.account);
+      if (planId) startRenewalPayment(planId, 1, "ndcQuickRenewStatus");
     });
+    $("ndcMoreMonths")?.addEventListener("click", () => {
+      if (activeSection !== "subscription") navigate("subscription");
+      $("ndcRenewalForm")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      document.querySelector('input[name="renewalMonths"]')?.focus({ preventScroll: true });
+    });
+    setPaymentBusy(paymentBusy);
+
+    // Update active navigation button.
+    document.querySelectorAll("[data-section]").forEach((element) => {
+      element.classList.toggle(
+        "is-active",
+        element.dataset.section === activeSection
+      );
+    });
+
+    // Dashboard internal navigation.
+    document.querySelectorAll("[data-go-section]").forEach((element) => {
+      element.addEventListener("click", () => {
+        navigate(element.dataset.goSection);
+      });
+    });
+
+    // Session revocation.
+    document.querySelectorAll("[data-revoke-session]").forEach((element) => {
+      element.addEventListener("click", async () => {
+        const sessionId = element.dataset.revokeSession;
+
+        const sessionType =
+          element.dataset.sessionType || "customer_portal";
+
+        if (!sessionId) {
+          alert("Session ID is unavailable.");
+          return;
+        }
+
+        if (
+          !confirm(
+            "Revoke this device session? That device will need to sign in again."
+          )
+        ) {
+          return;
+        }
+
+        element.disabled = true;
+        element.textContent = "Revoking…";
+
+        try {
+          await api(
+            `/api/panel/sessions/${encodeURIComponent(sessionId)}?type=${encodeURIComponent(sessionType)}`,
+            {
+              method: "DELETE"
+            }
+          );
+
+          await loadDashboard();
+
+        } catch (error) {
+          alert(error.message);
+
+          element.disabled = false;
+          element.textContent = "Revoke";
+        }
+      });
+    });
+
+    // Refresh dashboard data.
+    $("ndcRefreshDashboard")?.addEventListener(
+      "click",
+      loadDashboard
+    );
+  }
+
+  // ---------------------------------------------------------
+  // SECTION NAVIGATION
+  // ---------------------------------------------------------
+
+  function navigate(section) {
+    const allowedSections = [
+      "overview",
+      "profile",
+      "subscription",
+      "payments",
+      "sessions",
+      "features",
+      "security"
+    ];
+
+    if (!allowedSections.includes(section)) {
+      return;
+    }
+
+    activeSection = section;
+
+    renderDashboard();
+    renewalTotal();
+  }
+
+  const RENEWAL_PRICES = {};
+  function renewalTotal() { const plan = document.querySelector('input[name="renewalPlan"]:checked')?.value, months = Number(document.querySelector('input[name="renewalMonths"]:checked')?.value || 1); if ($("ndcRenewalTotal") && RENEWAL_PRICES[plan]) $("ndcRenewalTotal").textContent = `Total: ${money(RENEWAL_PRICES[plan] * months)} · ${months} month(s)`; }
+  function setPaymentBusy(busy) {
+    paymentBusy = busy;
+    document.querySelectorAll('input[name="renewalPlan"], input[name="renewalMonths"]').forEach(input => input.disabled = busy);
+    const quick = $("ndcQuickRenew");
+    const account = dashboardData?.account || {};
+    const paidExpiry = Date.parse(account.expiresAt);
+    const panelExpiry = Date.parse(account.panelExpiresAt || account.renewal?.panelExpiresAt) || (paidExpiry + 5 * 86400000);
+    if (quick) quick.disabled = busy || !currentPlanId(dashboardData?.account || {}) ||
+      !dashboardData?.account?.expiresAt || dashboardData?.account?.renewal?.canRenew === false ||
+      dashboardData?.account?.approved !== true || dashboardData?.account?.disabled || dashboardData?.account?.banned ||
+      Date.now() + serverClockOffset >= panelExpiry;
+    ["ndcRenewalSubmit", "ndcRenewalPlan", "ndcRenewalMonths"].forEach(id => {
+      if ($(id)) $(id).disabled = busy;
+    });
+  }
+
+  async function renewSubscription(event) {
+    event.preventDefault();
+    await startRenewalPayment(document.querySelector('input[name="renewalPlan"]:checked').value, Number(document.querySelector('input[name="renewalMonths"]:checked').value), "ndcRenewalStatus");
+  }
+
+  async function startRenewalPayment(planId, months, statusId) {
+    if (paymentBusy) return;
+    const message = (text) => {
+      // Resolve the current node: navigation may re-render during checkout.
+      const node = $(statusId) || $("ndcQuickRenewStatus") || $("ndcRenewalStatus");
+      if (node) node.textContent = text;
+    };
+    if (typeof Razorpay !== "function") {
+      message("Razorpay Checkout did not load. Refresh and retry.");
+      return;
+    }
+    setPaymentBusy(true);
+    message("Creating secure payment order…");
+    try {
+      const result = await api("/api/panel/payments/orders", {
+        method: "POST", body: JSON.stringify({ planId, months })
+      });
+      const order = result.data || result;
+      if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error("Invalid payment order response.");
+      let verificationStarted = false;
+      const checkout = new Razorpay({
+        key: order.keyId, order_id: order.orderId, amount: order.amount,
+        currency: order.currency || "INR", name: "Next Dimension Customs",
+        description: "Subscription renewal", theme: { color: "#d7bd55" },
+        handler: async payment => {
+          if (verificationStarted) return;
+          verificationStarted = true;
+          message("Verifying your payment…");
+          try {
+            const result = await api("/api/panel/payments/verify", {
+              method: "POST", body: JSON.stringify(payment)
+            });
+            if (result.manualReview) {
+              message("Payment requires manual review. Contact support.");
+            } else {
+              await loadDashboard();
+              message("Payment verified! Your subscription has been updated.");
+            }
+          } catch (err) {
+            message(`Payment completed, but verification is pending: ${err.message}. Save payment ID ${payment.razorpay_payment_id}.`);
+          } finally { setPaymentBusy(false); }
+        },
+        modal: {
+          ondismiss: () => {
+            if (verificationStarted) return;
+            setPaymentBusy(false);
+            message("Checkout closed. Check your account before retrying if you paid.");
+          }
+        }
+      });
+      checkout.on("payment.failed", e => {
+        if (verificationStarted) return;
+        setPaymentBusy(false);
+        message(e.error?.description || "Payment failed.");
+      });
+      checkout.open();
+    } catch (err) {
+      setPaymentBusy(false);
+      message(err.message);
+    }
+  }
+  let passwordChangeBusy = false;
+  async function changePassword(event) {
+    event.preventDefault();
+    if (passwordChangeBusy) return;
+    const current = $("ndcCurrentPassword"), next = $("ndcNewPassword"), confirm = $("ndcConfirmPassword");
+    const button = $("ndcPasswordSubmit"), message = $("ndcPasswordStatus");
+    const currentPassword = current.value, newPassword = next.value, confirmPassword = confirm.value;
+    if (!currentPassword || new TextEncoder().encode(newPassword).length < 12 || new TextEncoder().encode(newPassword).length > 72) {
+      message.textContent = "Enter your current password and a new password of 12–72 UTF-8 bytes."; return;
+    }
+    if (newPassword !== confirmPassword) { message.textContent = "New passwords do not match."; return; }
+    if (newPassword === currentPassword) { message.textContent = "Choose a different new password."; return; }
+    passwordChangeBusy = true;
+    button.disabled = true;
+    message.textContent = "Updating your password…";
+    try {
+      await api("/api/panel/auth/change-password", {
+        method: "POST", body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
+      });
+      current.value = next.value = confirm.value = "";
+      message.textContent = "Password changed. All sessions have been signed out. Returning to sign in…";
+      setTimeout(() => { void redirectToLogin(); }, 1800);
+    } catch (error) {
+      current.value = next.value = confirm.value = "";
+      message.textContent = error.message;
+      button.disabled = false;
+      passwordChangeBusy = false;
+    }
+  }
+
+  // ---------------------------------------------------------
+  // INITIALIZATION
+  // ---------------------------------------------------------
+
+  document.addEventListener("DOMContentLoaded", async () => {
+
+    document.addEventListener("change", e => { if (e.target?.name === "renewalPlan" || e.target?.name === "renewalMonths") renewalTotal(); });
+    document.addEventListener("submit", e => {
+      if (e.target?.id === "ndcRenewalForm") renewSubscription(e);
+      if (e.target?.id === "ndcPasswordForm") changePassword(e);
+    });
+    document.addEventListener("change", e => {
+      if (e.target?.id !== "ndcShowPasswords") return;
+      ["ndcCurrentPassword", "ndcNewPassword", "ndcConfirmPassword"].forEach(id => {
+        if ($(id)) $(id).type = e.target.checked ? "text" : "password";
+      });
+    });
+    // Footer year.
+    const year = $("ndcPortalYear");
+
+    if (year) {
+      year.textContent = new Date().getFullYear();
+    }
+
+    // Sidebar navigation.
+    document.querySelectorAll("[data-section]").forEach((element) => {
+      element.addEventListener("click", () => {
+        navigate(element.dataset.section);
+      });
+    });
+
+    // Logout.
+    $("ndcLogoutButton")?.addEventListener("click", async () => {
+      const button = $("ndcLogoutButton");
+
+      button.disabled = true;
+      button.textContent = "Signing out…";
+
+      try {
+        await window.NDCAuth.logout();
+      } finally {
+        window.location.replace("index.html");
+      }
+    });
+
+    // Check authentication client.
+    if (!window.NDCAuth) {
+      window.location.replace("index.html");
+      return;
+    }
+
+    // Check for an existing session.
+    if (!window.NDCAuth.isLoggedIn()) {
+      window.location.replace("index.html");
+      return;
+    }
+
+    showLoading();
+
+    try {
+      const user = await window.NDCAuth.verifySession();
+
+      if (!user || user.useradmin !== true) {
+        await redirectToLogin();
+        return;
+      }
+
+      await loadDashboard();
+
+    } catch (error) {
+      console.error("[NDC] Customer dashboard authentication failed:", error);
+
+      await redirectToLogin();
+    }
+  });
 
 })();

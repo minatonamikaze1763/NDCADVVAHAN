@@ -1,7 +1,7 @@
 (() => {
 "use strict";
 const API="https://server.nextdimensioncustoms.in";
-const plans={starter:{name:"Starter",price:499,devices:3},pro:{name:"Pro",price:799,devices:6}};
+const plans={};
 const $=id=>document.getElementById(id);
 let selected=null,busy=false;
 const status=message=>{$("ndcSignupStatus").textContent=message;};
@@ -11,5 +11,12 @@ function update(){const p=plans[selected],months=Number($("signupMonths").value)
 window.selectPlan=function(name){const id=String(name).toLowerCase();if(!plans[id])return;selected=id;update();$("payment").scrollIntoView({behavior:"smooth",block:"start"});};
 window.selectCustomPlan=function(){window.open("https://wa.me/919052691719?text="+encodeURIComponent("Hi, I am interested in a Custom Plan for NDC VAHAN TOOL."),"_blank","noopener");};
 async function begin(e){e.preventDefault();if(busy)return;if(!selected){status("Choose a plan first.");return;}if(!e.target.reportValidity())return;if(typeof Razorpay!=="function"){status("Unable to load Razorpay Checkout.");return;}busy=true;update();status("Creating your payment order…");try{const details={name:$("signupName").value.trim(),username:$("accountUsername").value.trim().toLowerCase(),email:$("signupEmail").value.trim(),planId:selected,months:Number($("signupMonths").value)};const result=await post("/api/public/payments/orders",details);const order=result.data||result;if(!order.keyId||!order.orderId||!Number.isFinite(Number(order.amount)))throw Error("Invalid payment order response.");status("Complete payment in the secure checkout.");const checkout=new Razorpay({key:order.keyId,order_id:order.orderId,amount:order.amount,currency:order.currency||"INR",name:"Next Dimension Customs",description:plans[selected].name+" subscription",prefill:{name:details.name,email:details.email},theme:{color:"#d7bd55"},handler:async response=>{status("Verifying payment…");try{const verified=await post("/api/public/payments/verify",response);status(verified.manualReview?"Payment requires manual review. Please contact support.":"Payment verified! Check your email (and spam folder) for your password setup link.");}catch(err){status(`Payment completed but verification is pending: ${err.message}. Save payment ID ${response.razorpay_payment_id} and contact support.`);}finally{busy=false;update();}},modal:{ondismiss:()=>{busy=false;update();status("Checkout closed. If payment succeeded, check your email before retrying.");}}});checkout.on("payment.failed",e=>{busy=false;update();status(e.error?.description||"Payment failed.");});checkout.open();}catch(err){busy=false;update();status(err.message);}}
-document.addEventListener("DOMContentLoaded",()=>{for(let i=1;i<=12;i++){const option=document.createElement("option");option.value=i;option.textContent=`${i} month${i===1?"":"s"}`;$("signupMonths").append(option);}$("signupMonths").addEventListener("change",update);$("ndcSignupForm").addEventListener("submit",begin);$("ndcSignupLogin").addEventListener("click",()=>$("ndcUserButton")?.click());update();});
+document.addEventListener("DOMContentLoaded",async()=>{
+$("paymentProceed").disabled=true;
+try { await NDCPlans.ready;
+for (const p of NDCPlans.all) plans[p.id]={...p,price:p.monthlyPrice,devices:p.maxDevices};
+const cards=document.querySelectorAll(".pricing .plan");
+NDCPlans.visible.forEach((p,i)=>{const card=cards[i];if(!card)return;card.querySelector(".plan-label").textContent=p.name+" PLAN";card.querySelector(".price").textContent=money(p.monthlyPrice);const list=card.querySelector("ul");list.replaceChildren();for(const text of [p.maxDevices+" devices",...Object.entries(p.features||{}).filter(([,v])=>v===true).map(([k])=>NDCPlans.label(k))]){const li=document.createElement("li");li.textContent=text;list.append(li);}const button=card.querySelector("button");button.removeAttribute("onclick");button.textContent="Choose "+p.name;button.onclick=()=>window.selectPlan(p.id);});
+} catch(error){ status(error.message); return; }
+for(let i=1;i<=12;i++){const option=document.createElement("option");option.value=i;option.textContent=`${i} month${i===1?"":"s"}`;$("signupMonths").append(option);}$("signupMonths").addEventListener("change",update);$("ndcSignupForm").addEventListener("submit",begin);$("ndcSignupLogin").addEventListener("click",()=>$("ndcUserButton")?.click());update();});
 })();
