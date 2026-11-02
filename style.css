@@ -2733,3 +2733,7 @@ footer {
 .ndc-setup-guide{overflow-wrap:anywhere}.ndc-setup-guide table{border-collapse:collapse;background:transparent!important}.ndc-setup-guide td{background:transparent!important;border-color:#ffffff15!important;color:#c1cbd9!important}.ndc-setup-guide h3{color:#f1e0b1!important}.ndc-setup-guide p,.ndc-setup-guide li{color:#c1cbd9!important}.ndc-setup-guide a{color:#e0c37a!important}.ndc-setup-guide div[style]{background:#e0c37a0d!important;color:#c1cbd9!important}.ndc-setup-guide td[style]{padding:12px 0 28px!important}.ndc-setup-guide table table td[style]{padding:12px!important}
 @media(max-width:620px){.ndc-subscription-visual{padding:22px}.ndc-membership-head h2{font-size:28px}.ndc-membership-dates,.ndc-preview-comparison{grid-template-columns:1fr}.ndc-preview-heading{align-items:flex-start;flex-direction:column}.ndc-preview-comparison>b{transform:rotate(90deg);justify-self:start}.ndc-renewal-preview{padding:19px}.ndc-payment-dialog{padding:25px}.ndc-payment-dialog h2{font-size:23px}}
 @media(prefers-reduced-motion:reduce){.ndc-payment-symbol.is-loading{animation:none}}
+
+/* Fixed-in-view customer header, contained within the panel column. */
+.ndc-portal-overlay .ndc-portal-topbar{position:sticky;top:0;z-index:30;box-shadow:0 8px 24px #0002}
+#ndcCustomerWelcome{display:block;overflow-wrap:anywhere;text-align:left}

@@ -308,6 +308,8 @@
     if (!data?.account) return;
 
     const account = data.account;
+    const greeting = $("ndcCustomerWelcome");
+    if (greeting) greeting.textContent = `Welcome back, ${account.name || account.username}`;
 
     const sessions = Array.isArray(data.sessions)
       ? data.sessions
