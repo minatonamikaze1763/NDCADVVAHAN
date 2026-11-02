@@ -2716,3 +2716,10 @@ footer {
 .ndc-month-choice small{display:block;font-size:11px;color:#b9beca;margin-top:4px}
 #ndcRenewalTotal{padding:20px;border:1px solid #d7bd5540;border-radius:14px;background:#d7bd550a;font-size:19px;font-weight:700}
 @media(max-width:650px){.ndc-plan-options{grid-template-columns:1fr}.ndc-month-options{grid-template-columns:repeat(3,minmax(0,1fr))}.ndc-plan-choice>span{padding:20px}}
+
+/* Account email controls */
+.ndc-email-settings{margin-top:24px}.ndc-email-settings h2{margin:12px 0 20px}.ndc-email-settings p,.ndc-email-recovery p{color:#b8c1cf;line-height:1.8;font-size:13px}
+.ndc-email-settings select,.ndc-email-recovery input:not([type=checkbox]){box-sizing:border-box;background:#0c121c;color:#edf1f8;border:1px solid #3b4555;padding:13px;border-radius:10px;width:100%;margin:8px 0 14px}
+.ndc-email-recovery{margin:20px 0;border:1px solid #514a31;background:#d7bd5505;border-radius:14px;padding:16px;text-align:left}.ndc-email-recovery summary,.ndc-email-settings summary{color:#e0c37a;cursor:pointer;font-size:13px;font-weight:600}
+.ndc-email-check{display:flex!important;align-items:flex-start;gap:10px;margin:18px 0!important;font-size:12px!important;line-height:1.7!important;color:#c9cfda!important;text-align:left}.ndc-email-check input{width:17px!important;height:17px!important;flex:0 0 17px;accent-color:#e0c37a;margin-top:3px}
+.ndc-email-secondary{border-top:1px solid #ffffff15;margin-top:24px;padding-top:18px}.ndc-email-settings details{margin-top:20px}.ndc-email-settings [role=status],.ndc-email-recovery [role=status]{overflow-wrap:anywhere}.ndc-login-card{max-height:92vh;overflow-y:auto}

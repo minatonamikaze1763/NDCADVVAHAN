@@ -54,7 +54,8 @@
       content="NDC VAHAN TOOL helps automobile dealerships prepare and upload VAHAN documents with smart matching, compression, already-uploaded detection, optional final submission and ZIP downloads."
     />
     <title>NDC VAHAN TOOL | Smarter VAHAN Document Workflows</title>
-  </head>
+      <script src="email-tools.js" defer></script>
+</head>
   <body>
     <header class="topbar">
       <div class="container nav">
@@ -682,6 +683,12 @@
                 </button>
               </p>
             </form>
+              <details class="ndc-email-recovery"><summary>Paid, but didn’t receive your setup email?</summary><p>Check inbox and spam, then request a new link. You do not need to pay again.</p><form data-ndc-public-setup>
+              <label>Signup username<input name="username" required maxlength="32" autocomplete="username"></label>
+              <label>Signup email<input name="email" required type="email" maxlength="254" autocomplete="email"></label>
+              <label class="ndc-email-check"><input name="confirmed" type="checkbox" required> I checked inbox and spam and did not receive a setup email.</label>
+              <button type="submit" class="btn btn-outline" disabled>Resend setup email</button><p role="status" data-email-status></p></form></details>
+
           </div>
         </div>
       </section>
@@ -991,6 +998,10 @@
             Sign in to account
           </button>
         </form>
+        <details class="ndc-email-recovery"><summary>Forgot your password?</summary><p>Enter your original extension username (without the panel’s _admin suffix) and registered email.</p><form data-ndc-forgot>
+        <label>Username<input name="username" required autocomplete="username" maxlength="32"></label>
+        <label>Registered email<input name="email" type="email" required autocomplete="email" maxlength="254"></label>
+        <button type="submit" class="ndc-primary-button">Send password reset link</button><p role="status" data-email-status></p></form></details>
         <small class="ndc-login-foot"
           >Secure customer access · Next Dimension Customs</small
         >

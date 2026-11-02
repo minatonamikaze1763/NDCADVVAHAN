@@ -13,6 +13,22 @@
   let paymentBusy = false;
   let serverClockOffset = 0;
 
+  function emailSettings(account) {
+    return `<section class="ndc-panel-card ndc-email-settings">
+      <span class="ndc-eyebrow">ACCOUNT EMAILS</span><h2>Your email & notifications</h2>
+      <div class="ndc-detail-line"><span>Registered email</span><b>${esc(account.email || "No email registered — contact NDC support")}</b></div>
+      <p>Payment receipts include your plan, added months, payment reference and paid expiry. Check your inbox and spam folder before requesting another copy.</p>
+      <form data-ndc-email-resend>
+        <label for="ndcEmailType">Email to resend</label><select id="ndcEmailType" name="type"><option value="receipt">Latest successful payment receipt</option>${account.passwordSetupPending ? '<option value="setup">Account password setup link</option>' : ''}</select>
+        <label class="ndc-email-check"><input type="checkbox" name="confirmed" required> I checked my inbox and spam folder and did not receive this email.</label>
+        <button type="submit" class="ndc-home-button" disabled>Resend email</button><p role="status" data-email-status></p>
+      </form>
+      <div class="ndc-email-secondary"><h3>Need a password reset?</h3><p>Send a secure, one-time reset link to your registered email. Your account remains signed in until the password is reset.</p>
+      <button type="button" class="ndc-home-button" data-ndc-send-reset data-username="${esc(account.username)}" data-email="${esc(account.email || '')}" ${!account.email?'disabled':''}>Email me a reset link</button><p role="status" data-reset-status></p></div>
+      <details><summary>Recent email activity</summary><div data-ndc-email-activity><button type="button" class="ndc-home-button" data-ndc-load-emails>Load email activity</button><div data-email-records></div></div></details>
+    </section>`;
+  }
+
   // ---------------------------------------------------------
   // HELPERS
   // ---------------------------------------------------------
@@ -586,7 +602,11 @@
             </div>
 
             <div class="ndc-detail-line">
-              <span>Panel identity</span>
+              <span>Registered email</span>
+            <b>${esc(account.email || "Not provided")}</b>
+          </div>
+          <div class="ndc-detail-line">
+            <span>Panel identity</span>
               <b>${esc(account.useradminUsername || "—")}</b>
             </div>
 
@@ -687,6 +707,10 @@
             <b>${esc(account.username)}</b>
           </div>
 
+          <div class="ndc-detail-line">
+            <span>Registered email</span>
+            <b>${esc(account.email || "Not provided")}</b>
+          </div>
           <div class="ndc-detail-line">
             <span>Panel identity</span>
             <b>${esc(account.useradminUsername || "—")}</b>
@@ -950,6 +974,7 @@
 
     if (!content) return;
 
+    if (["profile", "security", "payments"].includes(activeSection)) sectionHTML += emailSettings(account);
     content.innerHTML = sectionHTML;
 
     const assignedPlan = currentPlanId(account);
