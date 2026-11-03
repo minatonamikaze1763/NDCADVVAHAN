@@ -522,89 +522,44 @@
       </section>
 
       <section class="plans" id="pricing">
-        <div class="container plans-layout">
-          <div>
-            <div class="kicker">Subscription Information</div>
-            <h2 class="section-title">
-              <span class="gold">Session</span> &amp; Access Limits
-            </h2>
-            <p class="section-desc">
-              Choose the monthly subscription that matches your expected usage.
-              Each plan includes one authorized user account.
-            </p>
-            <ul class="limit-list">
-              <li>
-                <span class="limit-icon">♟</span>
-                <div>
-                  <strong>1 User Account</strong
-                  ><small>One authorized user account per subscription.</small>
-                </div>
-              </li>
-              <li>
-                <span class="limit-icon">▣</span>
-                <div>
-                  <strong>Plan-Based Login Allowance</strong
-                  ><small
-                    >Starter includes 3 logins, Pro includes 6 logins. Ask us
-                    about a Custom Plan.</small
-                  >
-                </div>
-              </li>
-              <li>
-                <span class="limit-icon">⬟</span>
-                <div>
-                  <strong>Authorized Access</strong
-                  ><small
-                    >Access is subject to account approval and configured
-                    authentication controls.</small
-                  >
-                </div>
-              </li>
-              <li>
-                <span class="limit-icon">▦</span>
-                <div>
-                  <strong>30-Day Subscription</strong
-                  ><small
-                    >Monthly access for 30 days from activation, unless
-                    otherwise agreed.</small
-                  >
-                </div>
-              </li>
-              <li>
-                <span class="limit-icon">↻</span>
-                <div>
-                  <strong>Subscription Renewal</strong
-                  ><small
-                    >Renew your subscription to continue using the tool after
-                    your plan expires.</small
-                  >
-                </div>
-              </li>
-            </ul>
-            <p class="notice">
-              Login allowances and session/device limits are subject to the
-              access rules confirmed for your subscription.
-            </p>
+        <div class="container">
+          <div class="pricing-section-heading">
+            <div class="kicker">ONE TOOL. EVERY FEATURE.</div>
+            <h2 class="section-title">Monthly <span class="gold">Subscription Plans</span></h2>
+            <p class="section-desc">All the tools you need. Choose the login allowance that fits your dealership.</p>
           </div>
+          <div class="ndc-pricing-layout">
+            <aside class="ndc-shared-features" id="ndcSharedFeatures">
+              <span class="kicker">INCLUDED WITH EVERY PLAN</span>
+              <h3>Every feature.<br />Every subscription.</h3>
+              <p>One complete toolkit, whichever plan you choose.</p>
+              <ul aria-live="polite"><li>Loading included features…</li></ul>
+            </aside>
           <div class="pricing-wrap">
-            <h3><span class="gold">Monthly</span> Subscription Plans</h3>
+
             <div class="pricing">
+              <article class="plan">
+                <div class="plan-label">BASIC PLAN</div>
+                <div class="price">₹199</div>
+                <div class="per">per month</div>
+                <hr />
+                <h4>1 User</h4>
+                <ul><li>1 login</li></ul>
+                <button
+                  class="btn btn-outline"
+                  type="button"
+                  onclick="selectPlan('Basic', 199, '1 login')"
+                >
+                  Choose Basic
+                </button>
+              </article>
               <article class="plan">
                 <div class="plan-label">STARTER PLAN</div>
                 <div class="price">₹499</div>
                 <div class="per">per month</div>
                 <hr />
                 <h4>1 User</h4>
-                <ul>
-                  <li>3 logins</li>
-                  <li>Assisted VAHAN uploads</li>
-                  <li>Smart document identification</li>
-                  <li>Automatic image compression</li>
-                  <li>Skip already uploaded documents</li>
-                  <li>Auto-start and final submission options</li>
-                  <li>JPG, PNG, WEBP and PDF support</li>
-                  <li>Prepared-document ZIP download</li>
-                </ul>
+                <ul><li>3 logins</li></ul>
                 <button
                   class="btn btn-outline"
                   type="button"
@@ -620,16 +575,7 @@
                 <div class="per">per month</div>
                 <hr />
                 <h4>1 User</h4>
-                <ul>
-                  <li>6 logins</li>
-                  <li>Assisted VAHAN uploads</li>
-                  <li>Smart document identification</li>
-                  <li>Automatic image compression</li>
-                  <li>Skip already uploaded documents</li>
-                  <li>Auto-start and final submission options</li>
-                  <li>JPG, PNG, WEBP and PDF support</li>
-                  <li>Prepared-document ZIP download</li>
-                </ul>
+                <ul><li>6 logins</li></ul>
                 <button
                   class="btn btn-primary"
                   type="button"
@@ -643,17 +589,8 @@
                 <div class="price">Let's Talk</div>
                 <div class="per">pricing based on your requirements</div>
                 <hr />
-                <h4>Tailored Access</h4>
-                <ul>
-                  <li>Custom subscription arrangement</li>
-                  <li>Discuss your required login allowance</li>
-                  <li>Assisted VAHAN uploads</li>
-                  <li>Smart document identification</li>
-                  <li>Automatic image compression</li>
-                  <li>Skip existing and automation options</li>
-                  <li>JPG, PNG, WEBP and PDF support</li>
-                  <li>Prepared-document ZIP download</li>
-                </ul>
+                <h4>Your login allowance</h4>
+                <ul><li>Custom access limits</li><li>Flexible subscription arrangement</li></ul>
                 <button
                   class="btn btn-outline"
                   type="button"
@@ -668,6 +605,7 @@
               otherwise agreed. Login allowances and custom arrangements are
               subject to the access rules confirmed at subscription.
             </p>
+          </div>
           </div>
         </div>
       </section>

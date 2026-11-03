@@ -624,7 +624,9 @@ summary:after {
   content: "+";
   position: absolute;
   right: 0;
-  top: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  line-height: 1;
   color: var(--gold);
   font-size: 19px;
 }
@@ -4236,3 +4238,31 @@ footer {
   overflow-wrap: anywhere;
   text-align: left;
 }
+
+/* Shared feature list and compact plan choices. */
+.ndc-shared-features {padding:24px;border:1px solid #53452a;border-radius:16px;background:#101010;margin:20px 0;color:#eee;}
+.ndc-shared-features h4,.ndc-shared-features h3 {color:var(--gold);margin-top:0;}
+.ndc-shared-features ul {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-left:20px;}
+.pricing {grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+@media(max-width:600px){.ndc-shared-features ul{grid-template-columns:1fr;}}
+
+/* Pricing: server feature list on the left, four compact plans on the right. */
+.pricing-section-heading {margin-bottom:32px;max-width:760px;}
+#pricing .ndc-pricing-layout {display:grid;grid-template-columns:minmax(260px,.9fr) minmax(0,1.65fr);gap:28px;align-items:start;}
+#pricing .ndc-shared-features {margin:0;padding:30px;background:linear-gradient(150deg,#1c1911,#0e0e0e);border-color:#5b4927;}
+#pricing .ndc-shared-features h3 {font-size:30px;line-height:1.2;margin:16px 0 12px;color:#f2ead4;}
+#pricing .ndc-shared-features p {font-size:13px;color:var(--muted);margin-bottom:24px;}
+#pricing .ndc-shared-features ul {display:grid;grid-template-columns:1fr;gap:13px;list-style:none;padding:0;margin:0;}
+#pricing .ndc-shared-features li {position:relative;padding-left:25px;font-size:13px;line-height:1.55;}
+#pricing .ndc-shared-features li::before {content:'✓';position:absolute;left:0;color:var(--gold);font-weight:800;}
+#pricing .pricing-wrap {min-width:0;padding:0;border:0;background:none;}
+#pricing .pricing {grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;}
+#pricing .plan {display:flex;flex-direction:column;padding:26px 22px;min-height:270px;}
+#pricing .plan .price {font-size:36px;margin-top:13px;}
+#pricing .plan .per {font-size:12px;min-height:32px;margin-top:5px;}
+#pricing .plan ul {font-size:13px;margin-bottom:24px;}
+#pricing .plan .btn {margin-top:auto;min-height:44px;font-size:12px;}
+#pricing .best {top:-11px;right:16px;padding:5px 10px;}
+#pricing .notice {line-height:1.7;padding:0 4px;}
+@media(max-width:850px){#pricing .ndc-pricing-layout{grid-template-columns:1fr;}#pricing .ndc-shared-features ul{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:520px){#pricing .pricing{grid-template-columns:1fr;}#pricing .ndc-shared-features ul{grid-template-columns:1fr;}#pricing .ndc-shared-features{padding:24px;}#pricing .plan{min-height:250px;}}

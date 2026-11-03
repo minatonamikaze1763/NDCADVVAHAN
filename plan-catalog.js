@@ -14,10 +14,10 @@ window.NDCPlans = (() => {
     ready,
     label,
     get all() {
-      return plans.filter(p => ["starter", "pro"].includes(p.id));
+      return plans.filter(p => ["basic", "starter", "pro"].includes(p.id));
     },
     get visible() {
-      return plans.filter(p => ["starter", "pro"].includes(p.id));
+      return plans.filter(p => ["basic", "starter", "pro"].includes(p.id));
     }
   };
 
