@@ -55,6 +55,7 @@
     />
     <title>NDC VAHAN TOOL | Smarter VAHAN Document Workflows</title>
     <script src="email-tools.js" defer></script>
+    <script src="filename-guide.js" defer></script>
   </head>
   <body>
     <header class="topbar">
@@ -211,11 +212,33 @@
           </div>
           <div class="features">
             <article class="feature">
+              <div class="feature-icon">PDF</div>
+              <h3>Optional Auto Image to PDF Conversion</h3>
+              <p>
+                Enable AUTO img to PDF CONVERTION in the extension settings.
+                Images are compressed first, then converted to PDF. The final
+                PDF is checked against the size limit; retries start with the
+                source image. The option is off by default and your choice is
+                saved.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">✓</div>
+              <h3>Conversion Results at a Glance</h3>
+              <p>
+                See a success notice after images are compressed and converted.
+                Converted files display PDF tiles and PDF filenames in the file
+                list. Enabled settings appear as green highlights below the
+                notice.
+              </p>
+            </article>
+            <article class="feature">
               <div class="feature-icon">▧</div>
               <h3>Automatic Document Compression</h3>
               <p>
-                Compress supported images during preparation to help meet
-                configured file-size limits without repeated manual resizing.
+                Prepare documents within 400 KB (400,000 bytes), with the
+                existing smaller Form 20 limit. Files that cannot meet their
+                limit are skipped.
               </p>
             </article>
             <article class="feature">
@@ -405,6 +428,71 @@
             </p>
           </div>
 
+          <div
+            class="filename-actions"
+            aria-label="Copy or download filename formats"
+          >
+            <div class="filename-action-group">
+              <button
+                class="btn btn-primary"
+                type="button"
+                data-copy-filenames="all"
+              >
+                Copy all formats
+              </button>
+              <button
+                class="btn btn-outline"
+                type="button"
+                data-copy-filenames="full"
+              >
+                Copy full filenames
+              </button>
+              <button
+                class="btn btn-outline"
+                type="button"
+                data-copy-filenames="quick"
+              >
+                Copy quick filenames
+              </button>
+            </div>
+            <div
+              class="filename-action-group"
+              aria-label="Download filename guide"
+            >
+              <span>Download guide:</span>
+              <a
+                class="btn btn-outline"
+                href="downloads/VAHAN-filename-formats.pdf"
+                download
+                >PDF</a
+              >
+              <a
+                class="btn btn-outline"
+                href="downloads/VAHAN-filename-formats.xlsx"
+                download
+                >Excel (.xlsx)</a
+              >
+              <a
+                class="btn btn-outline"
+                href="downloads/VAHAN-filename-formats.docx"
+                download
+                >Word (.docx)</a
+              >
+              <a
+                class="btn btn-outline"
+                href="downloads/VAHAN-filename-formats.txt"
+                download
+                >TXT</a
+              >
+            </div>
+            <p id="filename-copy-status" role="status" aria-live="polite"></p>
+            <textarea
+              id="filename-copy-fallback"
+              aria-label="Filename formats to copy manually"
+              readonly
+              hidden
+            ></textarea>
+          </div>
           <div class="filename-systems">
             <article
               class="filename-system"
@@ -638,6 +726,16 @@
           <div class="features">
             <article class="feature">
               <div class="feature-icon">01</div>
+              <h3>Auto Image to PDF Convertion</h3>
+              <p>
+                Switch on to compress images first and convert them to PDF
+                within the final file-size limit. Switch off to keep images as
+                images, compressing oversized images only. Your preference is
+                saved; changing it re-prepares selected images.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">02</div>
               <h3>Automatic Upload Start</h3>
               <p>
                 Automatically initiate the upload workflow after file
@@ -645,7 +743,7 @@
               </p>
             </article>
             <article class="feature">
-              <div class="feature-icon">02</div>
+              <div class="feature-icon">03</div>
               <h3>Skip Existing Documents</h3>
               <p>
                 Check the VAHAN document workflow and skip documents identified
@@ -653,7 +751,7 @@
               </p>
             </article>
             <article class="feature">
-              <div class="feature-icon">03</div>
+              <div class="feature-icon">04</div>
               <h3>Automatic Final Submission</h3>
               <p>
                 Optionally continue the final submission workflow after uploads
@@ -916,6 +1014,20 @@
             </p>
           </div>
           <div class="faq-grid">
+            <details>
+              <summary>
+                How does automatic image to PDF conversion work?
+              </summary>
+              <p>
+                Enable AUTO img to PDF CONVERTION in the extension. It is
+                disabled by default. Images are compressed before PDF creation,
+                and the final PDF must fit within 400 KB (400,000 bytes), or the
+                smaller existing Form 20 limit. If needed, the source image is
+                compressed further before creating a new PDF. Unsuccessful files
+                are skipped. With the setting disabled, images stay in image
+                format.
+              </p>
+            </details>
             <details>
               <summary>What is NDC VAHAN TOOL?</summary>
               <p>

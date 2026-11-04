@@ -4517,3 +4517,17 @@ footer {
     padding: 20px;
   }
 }
+/* Filename reference actions follow the existing dark and gold palette. */
+.filename-actions { width: min(1160px, calc(100% - 40px)); margin: 24px auto; padding: 20px; border: 1px solid rgba(210,175,100,.28); border-radius: 16px; background: rgba(210,175,100,.04); }
+.filename-action-group { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.filename-action-group + .filename-action-group { margin-top: 14px; }
+.filename-actions .btn { font-size: 13px; padding: 10px 15px; min-height: 44px; }
+.filename-actions [role="status"] { margin: 12px 0 0; color: #e1c879; font-size: 13px; }
+.filename-actions [role="status"]:empty { display: none; }
+#filename-copy-fallback { width: 100%; min-height: 190px; margin-top: 12px; padding: 12px; background: #111; color: #eee; border: 1px solid #a88745; border-radius: 8px; }
+.filename-copy-one { margin-left: 8px; padding: 5px 8px; min-height: 32px; background: transparent; color: #e1c879; border: 1px solid rgba(210,175,100,.35); border-radius: 6px; cursor: pointer; font-size: 11px; }
+.filename-copy-one:hover { background: rgba(210,175,100,.16); }
+.filename-copy-one:focus-visible, .filename-actions .btn:focus-visible { outline: 2px solid #e1c879; outline-offset: 3px; }
+@media (max-width: 540px) { .filename-actions { padding: 14px; } .filename-actions .btn { flex: 1 1 auto; justify-content: center; } .filename-action-group > span { flex-basis: 100%; } }
+
+@media (max-width: 540px) { .filename-guide > .section-head { padding-left: 20px; padding-right: 20px; } }

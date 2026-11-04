@@ -1,0 +1,11 @@
+Website update
+
+The Features, Automation and FAQ sections now describe the optional AUTO img to PDF CONVERTION setting, image-first compression, strict final size checks, saved preference, conversion success notices, PDF display tiles and enabled-setting highlights in the extension.
+
+The filename guide now provides Copy all formats, Copy full filenames, Copy quick filenames, 24 individual filename copy buttons, and PDF / Excel (.xlsx) / Word (.docx) / TXT downloads. If clipboard access is unavailable, selected text is shown for manual copying.
+
+Deployment
+Replace the matching website files with this archive's contents. Keep filename-guide.js and the downloads folder alongside index.html. Existing account, subscription and server configuration is unchanged. The live website has not been deployed by this update.
+
+Validation
+Browser checks passed for clipboard actions, denied clipboard fallback, all download URLs and mobile layout. PDF and Excel layouts were visually reviewed. All 12 mappings were verified in Word, Excel and PDF. Word visual rendering could not run because LibreOffice is unavailable on this machine; the DOCX structure and table content were checked.
