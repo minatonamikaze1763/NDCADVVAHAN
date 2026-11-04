@@ -13,9 +13,9 @@
     <script src="auth.js" defer></script>
     <script src="plan-catalog.js" defer></script>
     <script src="customer-panel.js" defer></script>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="email-tools.js" defer></script>
-</head>
+  </head>
 
   <body>
     <div class="ndc-portal-overlay">
@@ -44,7 +44,9 @@
               My Profile
             </button>
 
-            <button type="button" data-section="setup"><span>↗</span>Setup guide</button>
+            <button type="button" data-section="setup">
+              <span>↗</span>Setup guide
+            </button>
 
             <button type="button" data-section="subscription">
               <span>◇</span>
@@ -106,6 +108,19 @@
                 id="ndcLogoutButton"
                 class="ndc-logout-button"
               >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M9 5H5v14h4M14 8l4 4-4 4M9 12h9" />
+                </svg>
                 Sign out
               </button>
             </div>
@@ -122,8 +137,6 @@
           <footer class="ndc-portal-footer">
             © <span id="ndcPortalYear"></span>
             Next Dimension Customs
-            <span>·</span>
-            Wear What Defines You
           </footer>
         </main>
       </div>

@@ -1731,7 +1731,7 @@ footer {
 .ndc-auth-card button[type="submit"],
 #ndcLogoutButton {
   width: 100%;
-  margin-top: 18px;
+
   padding: 12px;
   border: 0;
   border-radius: 8px;
@@ -4518,16 +4518,156 @@ footer {
   }
 }
 /* Filename reference actions follow the existing dark and gold palette. */
-.filename-actions { width: min(1160px, calc(100% - 40px)); margin: 24px auto; padding: 20px; border: 1px solid rgba(210,175,100,.28); border-radius: 16px; background: rgba(210,175,100,.04); }
-.filename-action-group { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.filename-action-group + .filename-action-group { margin-top: 14px; }
-.filename-actions .btn { font-size: 13px; padding: 10px 15px; min-height: 44px; }
-.filename-actions [role="status"] { margin: 12px 0 0; color: #e1c879; font-size: 13px; }
-.filename-actions [role="status"]:empty { display: none; }
-#filename-copy-fallback { width: 100%; min-height: 190px; margin-top: 12px; padding: 12px; background: #111; color: #eee; border: 1px solid #a88745; border-radius: 8px; }
-.filename-copy-one { margin-left: 8px; padding: 5px 8px; min-height: 32px; background: transparent; color: #e1c879; border: 1px solid rgba(210,175,100,.35); border-radius: 6px; cursor: pointer; font-size: 11px; }
-.filename-copy-one:hover { background: rgba(210,175,100,.16); }
-.filename-copy-one:focus-visible, .filename-actions .btn:focus-visible { outline: 2px solid #e1c879; outline-offset: 3px; }
-@media (max-width: 540px) { .filename-actions { padding: 14px; } .filename-actions .btn { flex: 1 1 auto; justify-content: center; } .filename-action-group > span { flex-basis: 100%; } }
+.filename-actions {
+  width: min(1160px, calc(100% - 40px));
+  margin: 24px auto;
+  padding: 20px;
+  border: 1px solid rgba(210, 175, 100, 0.28);
+  border-radius: 16px;
+  background: rgba(210, 175, 100, 0.04);
+}
+.filename-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.filename-action-group + .filename-action-group {
+  margin-top: 14px;
+}
+.filename-actions .btn {
+  font-size: 13px;
+  padding: 10px 15px;
+  min-height: 44px;
+}
+.filename-actions [role="status"] {
+  margin: 12px 0 0;
+  color: #e1c879;
+  font-size: 13px;
+}
+.filename-actions [role="status"]:empty {
+  display: none;
+}
+#filename-copy-fallback {
+  width: 100%;
+  min-height: 190px;
+  margin-top: 12px;
+  padding: 12px;
+  background: #111;
+  color: #eee;
+  border: 1px solid #a88745;
+  border-radius: 8px;
+}
+.filename-copy-one {
+  margin-left: 8px;
+  padding: 5px 8px;
+  min-height: 32px;
+  background: transparent;
+  color: #e1c879;
+  border: 1px solid rgba(210, 175, 100, 0.35);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+}
+.filename-copy-one:hover {
+  background: rgba(210, 175, 100, 0.16);
+}
+.filename-copy-one:focus-visible,
+.filename-actions .btn:focus-visible {
+  outline: 2px solid #e1c879;
+  outline-offset: 3px;
+}
+@media (max-width: 540px) {
+  .filename-actions {
+    padding: 14px;
+  }
+  .filename-actions .btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .filename-action-group > span {
+    flex-basis: 100%;
+  }
+}
 
-@media (max-width: 540px) { .filename-guide > .section-head { padding-left: 20px; padding-right: 20px; } }
+@media (max-width: 540px) {
+  .filename-guide > .section-head {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* Customer portal feature counts and actions */
+.ndc-portal-overlay
+  .ndc-topbar-right
+  :is(.ndc-home-button, .ndc-logout-button) {
+  box-sizing: border-box;
+  width: 132px;
+  flex: 0 0 132px;
+  min-height: 42px;
+}
+.ndc-portal-overlay .ndc-feature-summary {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 18px 22px;
+  border: 1px solid #e0c37a40;
+  border-radius: 12px;
+  background: #e0c37a0d;
+  color: #f1e0b1;
+  font-size: clamp(18px, 3vw, 24px);
+  font-weight: 600;
+}
+.ndc-portal-overlay .ndc-feature-summary strong {
+  font-size: clamp(32px, 5vw, 46px);
+  line-height: 1;
+}
+.ndc-portal-overlay .ndc-feature-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.ndc-portal-overlay .ndc-feature .ndc-feature-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: #e0c37a14;
+  color: #e0c37a;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.ndc-portal-overlay .ndc-setup-guide a.ndc-extension-button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 46px;
+  padding: 12px 20px !important;
+  margin: 8px 0;
+  border: 1px solid #e0c37a !important;
+  border-radius: 9px;
+  background: #e0c37a !important;
+  color: #17140d !important;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none !important;
+  text-align: center;
+}
+.ndc-portal-overlay .ndc-setup-guide a.ndc-extension-button:hover {
+  background: #f1d991 !important;
+}
+.ndc-portal-overlay
+  :is(
+    .ndc-extension-button,
+    .ndc-home-button,
+    .ndc-logout-button
+  ):focus-visible {
+  outline: 2px solid #f1d991;
+  outline-offset: 4px;
+}

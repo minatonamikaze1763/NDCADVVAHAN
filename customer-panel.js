@@ -18,32 +18,32 @@
   }
   function subscriptionVisual(account) {
     const expiry = Date.parse(account.expiresAt), now = Date.now() + serverClockOffset;
-    const remaining = Number.isFinite(expiry) ? Math.max(0, expiry-now) : null;
+    const remaining = Number.isFinite(expiry) ? Math.max(0, expiry - now) : null;
     const start = Date.parse(account.plan?.startedAt || account.createdAt);
-    const span = Number.isFinite(start) && start < expiry ? expiry-start : Math.max(30*86400000, remaining || 0);
-    const percent = remaining == null ? 100 : Math.max(0, Math.min(100, remaining/span*100));
-    const text = remaining == null ? "No expiry date" : remaining > 0 ? `${Math.floor(remaining/86400000)} days · ${Math.floor(remaining/3600000)%24} hours left` : "Paid access has ended";
+    const span = Number.isFinite(start) && start < expiry ? expiry - start : Math.max(30 * 86400000, remaining || 0);
+    const percent = remaining == null ? 100 : Math.max(0, Math.min(100, remaining / span * 100));
+    const text = remaining == null ? "No expiry date" : remaining > 0 ? `${Math.floor(remaining / 86400000)} days · ${Math.floor(remaining / 3600000) % 24} hours left` : "Paid access has ended";
     const blocked = account.disabled || account.banned || account.approved !== true;
-    return `<section class="ndc-subscription-visual"><div class="ndc-subscription-top"><span class="ndc-eyebrow">YOUR MEMBERSHIP</span><span class="ndc-membership-state">${esc(blocked ? account.status || "Access restricted" : remaining===0 ? "Renewal due" : "Active membership")}</span></div>
-      ${account.scheduledPlan ? `<p class="ndc-renewal-preview">Scheduled change: ${esc(NDCPlans.all.find(p=>p.id===account.scheduledPlan.planId)?.name || account.scheduledPlan.planId)} from ${esc(date(account.scheduledPlan.startsAt))}. Your current login limit remains until then.</p>` : ""}<div class="ndc-membership-head"><div><h2>${esc(account.plan?.name || "Your subscription")}</h2><p>${esc(money(account.plan?.price))}<span> / 30-day month</span></p></div><div class="ndc-device-orbit"><strong>${Number(account.maxDevices)||1}</strong><span>device logins</span></div></div>
+    return `<section class="ndc-subscription-visual"><div class="ndc-subscription-top"><span class="ndc-eyebrow">YOUR MEMBERSHIP</span><span class="ndc-membership-state">${esc(blocked ? account.status || "Access restricted" : remaining === 0 ? "Renewal due" : "Active membership")}</span></div>
+      ${account.scheduledPlan ? `<p class="ndc-renewal-preview">Scheduled change: ${esc(NDCPlans.all.find(p => p.id === account.scheduledPlan.planId)?.name || account.scheduledPlan.planId)} from ${esc(date(account.scheduledPlan.startsAt))}. Your current login limit remains until then.</p>` : ""}<div class="ndc-membership-head"><div><h2>${esc(account.plan?.name || "Your subscription")}</h2><p>${esc(money(account.plan?.price))}<span> / 30-day month</span></p></div><div class="ndc-device-orbit"><strong>${Number(account.maxDevices) || 1}</strong><span>device logins</span></div></div>
       <p class="ndc-time-left" data-ndc-time-left>${esc(text)}</p><div class="ndc-access-track" role="progressbar" aria-label="Paid access time remaining" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(percent)}" aria-valuetext="${esc(text)}"><span style="width:${percent.toFixed(2)}%"></span></div>
-      <div class="ndc-membership-dates"><div><small>PAID ACCESS ENDS</small><strong>${Number.isFinite(expiry)?esc(date(account.expiresAt)):"No expiry assigned"}</strong></div><div><small>PANEL RENEWAL WINDOW ENDS</small><strong>${Number.isFinite(expiry)?esc(date(account.panelExpiresAt || new Date(expiry+5*86400000))):"No expiry assigned"}</strong></div></div>
-      <p class="ndc-membership-foot">${blocked?"Your account restrictions still apply. Contact support for access assistance.":"Your extension uses paid access. The extra 5 days are for panel renewal only."}</p></section>`;
+      <div class="ndc-membership-dates"><div><small>PAID ACCESS ENDS</small><strong>${Number.isFinite(expiry) ? esc(date(account.expiresAt)) : "No expiry assigned"}</strong></div><div><small>PANEL RENEWAL WINDOW ENDS</small><strong>${Number.isFinite(expiry) ? esc(date(account.panelExpiresAt || new Date(expiry + 5 * 86400000))) : "No expiry assigned"}</strong></div></div>
+      <p class="ndc-membership-foot">${blocked ? "Your account restrictions still apply. Contact support for access assistance." : "Your extension uses paid access. The extra 5 days are for panel renewal only."}</p></section>`;
   }
   function renewalPreview() {
-    const root=$("ndcRenewalPreview"),account=dashboardData?.account;
-    if(!root || !account) return;
-    const planId=document.querySelector('input[name="renewalPlan"]:checked')?.value;
-    const plan=NDCPlans.all.find(p=>p.id===planId),months=Number(document.querySelector('input[name="renewalMonths"]:checked')?.value || 1);
-    if(!plan) {root.textContent="Choose an available plan to preview your renewal.";return;}
-    const now=Date.now()+serverClockOffset,current=Date.parse(account.expiresAt),base=Number.isFinite(current)?Math.max(now,current):now;
-    const end=new Date(base+plan.durationDays*months*86400000);
-    const upgrade=Number(plan.maxDevices)>Number(account.maxDevices);
-    const downgrade=Number(plan.maxDevices)<Number(account.maxDevices)&&current>now;
-    const switchAt=account.scheduledPlan?.startsAt || account.expiresAt;
-    root.innerHTML=`<div class="ndc-preview-heading"><span class="ndc-eyebrow">LIVE RENEWAL PREVIEW</span><span>Updates as you choose</span></div><h3>${esc(plan.name)} · ${months} month${months===1?"":"s"}</h3>
-      <div class="ndc-preview-comparison"><div><small>CURRENT PAID EXPIRY</small><strong>${Number.isFinite(current)?esc(date(account.expiresAt)):"No expiry assigned"}</strong><span>${Number(account.maxDevices)||1} device logins</span></div><b aria-hidden="true">→</b><div><small>AFTER SUCCESSFUL PAYMENT</small><strong>${esc(date(end))}</strong><span>${downgrade ? `${account.maxDevices} logins until ${esc(date(switchAt))}; then ${plan.maxDevices} logins` : `${plan.maxDevices} device logins`} · +${months*plan.durationDays} days</span></div></div>
-      <div class="ndc-preview-total"><span>Total payment</span><strong>${esc(money(plan.monthlyPrice*months))}</strong></div><p>${downgrade?`You keep all features and ${account.maxDevices} logins until ${esc(date(switchAt))}. Then your added duration uses ${plan.maxDevices} logins. `:""}${upgrade?`Your device limit increases to ${plan.maxDevices} after payment confirmation. `:""}${Number.isFinite(current)&&current>now?"Your remaining paid time is preserved; new days start from your current expiry.":Number.isFinite(current)?"Your new paid period starts when payment is confirmed.":"Your current account has no expiry. This purchase sets a paid expiry starting from payment confirmation."} Preview dates are estimates until the server confirms payment.</p>`;
+    const root = $("ndcRenewalPreview"), account = dashboardData?.account;
+    if (!root || !account) return;
+    const planId = document.querySelector('input[name="renewalPlan"]:checked')?.value;
+    const plan = NDCPlans.all.find(p => p.id === planId), months = Number(document.querySelector('input[name="renewalMonths"]:checked')?.value || 1);
+    if (!plan) { root.textContent = "Choose an available plan to preview your renewal."; return; }
+    const now = Date.now() + serverClockOffset, current = Date.parse(account.expiresAt), base = Number.isFinite(current) ? Math.max(now, current) : now;
+    const end = new Date(base + plan.durationDays * months * 86400000);
+    const upgrade = Number(plan.maxDevices) > Number(account.maxDevices);
+    const downgrade = Number(plan.maxDevices) < Number(account.maxDevices) && current > now;
+    const switchAt = account.scheduledPlan?.startsAt || account.expiresAt;
+    root.innerHTML = `<div class="ndc-preview-heading"><span class="ndc-eyebrow">LIVE RENEWAL PREVIEW</span><span>Updates as you choose</span></div><h3>${esc(plan.name)} · ${months} month${months === 1 ? "" : "s"}</h3>
+      <div class="ndc-preview-comparison"><div><small>CURRENT PAID EXPIRY</small><strong>${Number.isFinite(current) ? esc(date(account.expiresAt)) : "No expiry assigned"}</strong><span>${Number(account.maxDevices) || 1} device logins</span></div><b aria-hidden="true">→</b><div><small>AFTER SUCCESSFUL PAYMENT</small><strong>${esc(date(end))}</strong><span>${downgrade ? `${account.maxDevices} logins until ${esc(date(switchAt))}; then ${plan.maxDevices} logins` : `${plan.maxDevices} device logins`} · +${months * plan.durationDays} days</span></div></div>
+      <div class="ndc-preview-total"><span>Total payment</span><strong>${esc(money(plan.monthlyPrice * months))}</strong></div><p>${downgrade ? `You keep all features and ${account.maxDevices} logins until ${esc(date(switchAt))}. Then your added duration uses ${plan.maxDevices} logins. ` : ""}${upgrade ? `Your device limit increases to ${plan.maxDevices} after payment confirmation. ` : ""}${Number.isFinite(current) && current > now ? "Your remaining paid time is preserved; new days start from your current expiry." : Number.isFinite(current) ? "Your new paid period starts when payment is confirmed." : "Your current account has no expiry. This purchase sets a paid expiry starting from payment confirmation."} Preview dates are estimates until the server confirms payment.</p>`;
   }
 
   function emailSettings(account) {
@@ -57,7 +57,7 @@
         <button type="submit" class="ndc-home-button" disabled>Resend email</button><p role="status" data-email-status></p>
       </form>
       <div class="ndc-email-secondary"><h3>Need a password reset?</h3><p>Send a secure, one-time reset link to your registered email. Your account remains signed in until the password is reset.</p>
-      <button type="button" class="ndc-home-button" data-ndc-send-reset data-username="${esc(account.username)}" data-email="${esc(account.email || '')}" ${!account.email?'disabled':''}>Email me a reset link</button><p role="status" data-reset-status></p></div>
+      <button type="button" class="ndc-home-button" data-ndc-send-reset data-username="${esc(account.username)}" data-email="${esc(account.email || '')}" ${!account.email ? 'disabled' : ''}>Email me a reset link</button><p role="status" data-reset-status></p></div>
       <details><summary>Recent email activity</summary><div data-ndc-email-activity><button type="button" class="ndc-home-button" data-ndc-load-emails>Load email activity</button><div data-email-records></div></div></details>
     </section>`;
   }
@@ -254,6 +254,32 @@
   // DASHBOARD RENDERER
   // ---------------------------------------------------------
 
+  // Email guide section numbers include account sections omitted from the portal.
+  function formatSetupGuide(content) {
+    const guide = content.querySelector(".ndc-setup-guide");
+    if (!guide) return;
+    let step = 0;
+    guide.querySelectorAll("h1, h2, h3, h4, h5, h6").forEach(heading => {
+      const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) {
+        if (!node.textContent.trim()) continue;
+        const prefix = /^(\s*)(?:step\s+)?\d+\s*[.)\-:·]\s*/i;
+        if (prefix.test(node.textContent)) {
+          node.textContent = node.textContent.replace(prefix, (_, space) => `${space}${++step}. `);
+        }
+        break;
+      }
+    });
+    guide.querySelectorAll("a[href]").forEach(link => {
+      const label = link.textContent.trim();
+      if (!/install|open.*(?:ext|chrome)|click here.*(?:ext|chrome)/i.test(label) &&
+        !/chromewebstore\.google\.com|chrome\.google\.com\/webstore/i.test(link.getAttribute("href"))) return;
+      link.classList.add("ndc-extension-button");
+      link.textContent = /install/i.test(label) ? "Install extension ↗" : "Click here to open extension ↗";
+    });
+  }
+
   function currentPlanId(account) {
     // Never silently switch a customer with an unrecognised plan.
     const name = String(account.plan?.id || account.plan?.name || "").trim().toLowerCase();
@@ -341,11 +367,14 @@
     // -------------------------------------------------------
 
     const featureEntries = [
-      ...Object.entries(account.features || {}),
+      ...Object.entries(account.features || {}).filter(([key]) => key !== "maxDevices"),
       ["maxDevices", Number(account.maxDevices) || 1]
     ];
 
-    const features = featureEntries.map(([key, value]) => {
+    const enabledFeatureCount = featureEntries.filter(([key, value]) => key !== "maxDevices" && Boolean(value)).length;
+    const featureSummary = `<div class="ndc-feature-summary"><strong>${enabledFeatureCount + 1}</strong><span>Feature${enabledFeatureCount === 1 ? "" : "s"} enabled</span></div>`;
+
+    const features = featureEntries.map(([key, value], index) => {
       const isMaxDevices = key === "maxDevices";
 
       const label = isMaxDevices
@@ -354,7 +383,7 @@
 
       return `
     <div class="ndc-feature">
-      <span>${esc(label)}</span>
+      <span class="ndc-feature-name"><span class="ndc-feature-number">${index + 1}</span><span>${esc(label)}</span></span>
       <b class="${isMaxDevices ? "is-on" : value ? "is-on" : "is-off"}">
         ${isMaxDevices ? `${value} Device${value === 1 ? "" : "s"}` : value ? "Enabled" : "Disabled"}
       </b>
@@ -668,6 +697,7 @@
 
           </div>
 
+          ${featureSummary}
           <div class="ndc-feature-grid">
             ${features}
           </div>
@@ -791,7 +821,7 @@
             <h3>Manage your subscription</h3>
             <p>Upgrades increase logins immediately after verified payment. A lower plan starts after your current paid entitlement ends. Existing paid time is preserved. Payments are processed securely through Razorpay.</p>
             <form id="ndcRenewalForm" tabindex="-1">
-              <aside class="ndc-shared-features"><h3>Included in every plan</h3><ul>${Object.entries(NDCPlans.all[0]?.features || {}).filter(([,v])=>v===true).map(([k])=>`<li>${esc(NDCPlans.label(k))}</li>`).join('')}</ul></aside><fieldset class="ndc-choice-group"><legend>01 · Choose your plan</legend>
+              <aside class="ndc-shared-features"><h3>Included in every plan</h3><ul>${Object.entries(NDCPlans.all[0]?.features || {}).filter(([, v]) => v === true).map(([k]) => `<li>${esc(NDCPlans.label(k))}</li>`).join('')}</ul></aside><fieldset class="ndc-choice-group"><legend>01 · Choose your plan</legend>
               <div class="ndc-plan-options">${availablePlans(account).map((p, i) => `<label class="ndc-choice ndc-plan-choice"><input type="radio" name="renewalPlan" value="${esc(p.id)}" ${i === 0 ? "checked" : ""} required><span><small>${p.id === 'test' ? 'AUTHORIZED TESTING' : 'MONTHLY MEMBERSHIP'}</small><strong>${esc(p.name)}</strong><b>${esc(money(p.monthlyPrice))}<small> / month</small></b><em>${esc(p.maxDevices)} devices · ${esc(p.durationDays)} days/month</em></span></label>`).join('')}</div></fieldset>
               <fieldset class="ndc-choice-group"><legend>02 · Add more time</legend><p>Each month adds 30 days. Choose 1–12 months.</p>
               <div class="ndc-month-options">${Array.from({ length: 12 }, (_, i) => `<label class="ndc-choice ndc-month-choice"><input type="radio" name="renewalMonths" value="${i + 1}" ${i === 0 ? 'checked' : ''}><span><strong>${i + 1}</strong><small>${i === 0 ? 'month' : 'months'}</small></span></label>`).join('')}</div></fieldset>
@@ -899,6 +929,7 @@
 
         <section class="ndc-panel-card">
 
+          ${featureSummary}
           <div class="ndc-feature-grid">
             ${features}
           </div>
@@ -989,6 +1020,7 @@
 
     if (["profile", "security", "payments"].includes(activeSection)) sectionHTML += emailSettings(account);
     content.innerHTML = sectionHTML;
+    if (activeSection === "setup") formatSetupGuide(content);
 
     const assignedPlan = currentPlanId(account);
     const selectedRadio = document.querySelector(`input[name="renewalPlan"][value="${assignedPlan}"]`);
@@ -1098,8 +1130,8 @@
 
   const RENEWAL_PRICES = {};
   function renewalTotal() {
-    const plan=document.querySelector('input[name="renewalPlan"]:checked')?.value,months=Number(document.querySelector('input[name="renewalMonths"]:checked')?.value || 1);
-    if($("ndcRenewalTotal") && RENEWAL_PRICES[plan]) $("ndcRenewalTotal").textContent=`Total: ${money(RENEWAL_PRICES[plan]*months)} · ${months} month(s)`;
+    const plan = document.querySelector('input[name="renewalPlan"]:checked')?.value, months = Number(document.querySelector('input[name="renewalMonths"]:checked')?.value || 1);
+    if ($("ndcRenewalTotal") && RENEWAL_PRICES[plan]) $("ndcRenewalTotal").textContent = `Total: ${money(RENEWAL_PRICES[plan] * months)} · ${months} month(s)`;
     renewalPreview();
   }
 
