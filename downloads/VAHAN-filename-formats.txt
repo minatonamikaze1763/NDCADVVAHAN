@@ -1,0 +1,35 @@
+NDC VAHAN TOOL filename formats
+
+Use either the full or quick filename below to help match documents to their VAHAN upload categories.
+
+Full filenames
+AADHAR	Address Proof
+CHASSIS	Photo of Chassis
+form20	Form 20 (Finance)
+FORM21	Form 21
+form22	Form 22
+FRONTPHOTO	Owner's Photo with Vehicle
+INSPECTION	FORM 20 (CHASSIS + SIGNED)
+INSURANCE	Certificate of Insurance
+invoice	Dealer's Invoice
+PAN	PAN Card
+PHOTO	Owner's Photo
+SIGN	Owner's Signature
+
+Quick filenames
+AADHAR	Address Proof
+CHAS	Photo of Chassis
+20	Form 20 (Finance)
+21	Form 21
+22	Form 22
+CWVP	Owner's Photo with Vehicle
+INSP	FORM 20 (CHASSIS + SIGNED)
+INS	Certificate of Insurance
+INV	Dealer's Invoice
+PAN	PAN Card
+PHOTO	Owner's Photo
+SN	Owner's Signature
+
+Add .jpg, .png, .webp or .pdf to match your actual file format. Names are case-insensitive. Review assigned categories before uploading.
+
+When AUTO img to PDF CONVERTION is enabled, images are compressed first and then converted to PDF. Final files must fit within 400 KB (400,000 bytes); Form 20 uses its smaller existing limit. The setting is disabled by default.
