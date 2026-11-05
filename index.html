@@ -58,6 +58,7 @@
     <script src="email-tools.js" defer></script>
     <script src="filename-guide.js" defer></script>
     <link rel="stylesheet" href="offer-code.css">
+    <link rel="stylesheet" href="offers-showcase.css">
 </head>
   <body>
     <header class="topbar">
@@ -74,6 +75,7 @@
           <a href="#home">Home</a><a href="#features">Features</a
           ><a href="#how-it-works">How It Works</a
           ><a href="#tutorial">Tutorial</a><a href="#pricing">Pricing</a
+          ><a href="#offers">Offers</a
           ><a href="#faq">FAQ</a
           ><a href="privacy-policy.html">Privacy Policy</a>
         </nav>
@@ -873,6 +875,17 @@
           </div>
         </div>
       </section>
+      <section id="offers" class="ndc-offers-showcase" aria-labelledby="ndcOffersTitle">
+        <div class="container">
+          <div class="ndc-offers-heading"><div><span class="ndc-offers-eyebrow">MORE VALUE. SAME NDC.</span><h2 id="ndcOffersTitle">A little extra.<br><span>For your next subscription.</span></h2><p>Explore live offers, find your code, and see exactly what you get before you pay.</p></div><a class="btn btn-outline" href="#ndcOffersHow">How to use a code ↗</a></div>
+          <p id="ndcOffersStatus" class="ndc-offers-status" role="status" aria-live="polite">Loading current offers…</p>
+          <div id="ndcOffersCards" class="ndc-offers-cards"></div>
+          <div class="ndc-offers-more"><button id="ndcOffersMore" class="btn btn-outline" type="button" hidden>Show more offers</button><button id="ndcOffersRetry" class="btn btn-outline" type="button" hidden>Try again</button></div>
+          <div id="ndcOffersHow" class="ndc-offers-how"><div><span class="ndc-offers-eyebrow">THREE SIMPLE STEPS</span><h3>Your code. Your benefit.</h3><p>Every offer shows its required plan, duration and conditions.</p></div><ol><li><b>01</b><div><strong>Choose your offer</strong><p>Copy an offer code or select “Use this offer” to apply it at signup.</p></div></li><li><b>02</b><div><strong>Apply before paying</strong><p>Use the optional offer-code field at signup or in your customer panel’s Subscription section. The required plan and months are selected for you.</p></div></li><li><b>03</b><div><strong>Review your benefits</strong><p>Check the discount, total and device limit, then complete payment. Your offer confirmation is emailed separately.</p></div></li></ol></div>
+          <p class="ndc-offers-footnote">One offer per payment, once per account. Account eligibility and each offer’s conditions apply. Already a customer? Apply your code in the customer panel.</p>
+        </div>
+      </section>
+
       <section class="payment-section" id="payment">
         <div class="container">
           <div class="payment-heading">
@@ -1006,6 +1019,7 @@
       <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
       <script src="plan-catalog.js" defer></script>
       <script src="signup.js" defer></script>
+      <script src="offers-showcase.js" defer></script>
       <section id="faq">
         <div class="container">
           <div class="section-head">

@@ -36,6 +36,6 @@
     input.addEventListener('input', () => { revision++; if (applied) { applied = false; result.hidden = true; clear.hidden = true; onClear(); } status.textContent = ''; });
     input.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); apply.click(); } });
     clear.onclick = () => { if (!isBusy()) reset('Offer removed. Standard pricing applies.'); };
-    return { setBusy, clear: reset, isLoading: () => loading, hasUnapplied: () => !!input.value.trim() && !applied };
+    return { applyCode: async code => { if (loading || isBusy()) return false; input.value = code; await apply.onclick(); return applied; }, setBusy, clear: reset, isLoading: () => loading, hasUnapplied: () => !!input.value.trim() && !applied };
   } };
 })();

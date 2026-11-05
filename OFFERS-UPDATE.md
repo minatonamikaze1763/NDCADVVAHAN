@@ -15,3 +15,5 @@ Valid 5 November 2026 through 1 January 2027 inclusive, India Standard Time.
 One redemption per account. No existing user records are migrated.
 
 See ndcserver/OFFERS.md for API details, superuser operation and deployment checks.
+
+The landing page now includes a live Offers showcase. Publish offers-showcase.js and offers-showcase.css too, and deploy the backend offers.js update providing GET /api/public/offers. Only active offers within their validity dates are shown. Copy code / Use this offer actions connect to signup. Both the showcase and offer-code controls use the site's existing root color variables.

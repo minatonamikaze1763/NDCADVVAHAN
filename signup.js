@@ -58,6 +58,12 @@
             onApply: offer => { if(!plans[offer.planId]) throw Error('This offer plan is unavailable. Refresh and try again.'); appliedOffer=offer; selected=offer.planId; $('signupMonths').value=offer.months; update(); },
             onClear: () => { appliedOffer=null; update(); }
         }); $('ndcSignupForm').addEventListener('submit', begin); $('ndcSignupLogin').onclick = () => $('ndcUserButton')?.click();
+        window.NDCApplySignupOffer = async code => {
+            if (state !== 'idle' || !offerWidget) { status('Finish your current checkout before choosing another offer.'); return false; }
+            const applied = await offerWidget.applyCode(code);
+            if (applied) $('ndcSignupOffer').scrollIntoView({ behavior:'smooth', block:'center' });
+            return applied;
+        };
         if (saved?.proof && saved?.details) { state = ['complete', 'review'].includes(saved.state) ? saved.state : 'pending'; update(); if (saved.acknowledged) banner(); else if (state === 'complete' || state === 'review') show(state === 'complete' ? 'success' : 'review', 'Your payment was already received.'); else void verify(); } else update();
     });
 })();

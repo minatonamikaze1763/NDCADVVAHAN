@@ -1,0 +1,60 @@
+.ndc-offers-showcase { background:var(--bg); border-top:1px solid var(--line); padding:90px 0; }
+.ndc-offers-showcase [hidden] { display:none !important; }
+.ndc-offers-heading { display:flex; justify-content:space-between; align-items:flex-end; gap:30px; margin-bottom:32px; }
+.ndc-offers-eyebrow { font-size:10px; font-weight:750; letter-spacing:2px; color:var(--gold); }
+.ndc-offers-heading h2 { font-size:clamp(30px,4vw,44px); line-height:1.18; letter-spacing:-1.2px; margin:16px 0; }
+.ndc-offers-heading h2 span { color:var(--light); }
+.ndc-offers-heading p { color:var(--muted); max-width:610px; margin:0; }
+.ndc-offers-heading>a { flex-shrink:0; }
+.ndc-offers-status { color:var(--muted); font-size:13px; line-height:1.8; margin:0 0 22px; }
+.ndc-offers-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+.ndc-offer-showcard { padding:30px; border:1px solid var(--line); border-radius:20px; background:linear-gradient(145deg,var(--panel2),var(--panel)); min-width:0; }
+.ndc-offer-showcard:only-child { grid-column:1/-1; max-width:760px; width:100%; }
+.ndc-offer-card-top { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; }
+.ndc-offer-saving { color:var(--green); padding:5px 10px; border:1px solid var(--line); border-radius:7px; font-size:12px; font-weight:650; }
+.ndc-offer-showcard h3 { font-size:27px; line-height:1.3; letter-spacing:-.7px; margin:24px 0 12px; color:var(--text); }
+.ndc-offer-description { color:var(--muted); font-size:14px; line-height:1.9; margin:0; }
+.ndc-offer-showprice { display:flex; align-items:baseline; flex-wrap:wrap; gap:10px 14px; padding:24px 0; margin:20px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.ndc-offer-showprice strong { color:var(--light); font-size:38px; line-height:1.2; letter-spacing:-1px; }
+.ndc-offer-showprice del { color:var(--muted); font-size:15px; }
+.ndc-offer-showprice>span { flex-basis:100%; color:var(--muted); font-size:12px; }
+.ndc-offer-benefits { display:grid; gap:12px; padding:0; margin:0 0 26px; list-style:none; }
+.ndc-offer-benefits li { display:flex; align-items:baseline; gap:12px; font-size:13px; line-height:1.8; color:var(--text); }
+.ndc-offer-benefits li::before { content:'✓'; color:var(--green); flex-shrink:0; }
+.ndc-offer-public-code { display:flex; justify-content:space-between; align-items:center; gap:14px; background:var(--bg); border:1px dashed var(--gold); border-radius:10px; padding:14px 16px; margin-bottom:16px; }
+.ndc-offer-public-code code { color:var(--light); letter-spacing:1.5px; font:700 18px ui-monospace,Consolas,monospace; overflow-wrap:anywhere; min-width:0; }
+.ndc-offer-public-code button { padding:8px 12px; border:1px solid var(--line); border-radius:7px; background:var(--panel2); color:var(--text); font-size:12px; cursor:pointer; flex-shrink:0; }
+.ndc-offer-public-code button:hover { border-color:var(--gold); }
+.ndc-offer-showcard>.btn { width:100%; justify-content:center; }
+.ndc-offer-card-notice { color:var(--green); font-size:12px; line-height:1.8; margin:12px 0; }
+.ndc-offer-card-notice:empty { display:none; }
+.ndc-offer-validity { color:var(--muted); font-size:11px; line-height:1.8; margin:16px 0; }
+.ndc-offer-public-rules { padding-top:16px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); }
+.ndc-offer-public-rules summary { cursor:pointer; color:var(--text); }
+.ndc-offer-public-rules p { white-space:pre-wrap; line-height:1.9; overflow-wrap:anywhere; }
+.ndc-offers-more { display:flex; gap:12px; margin-top:24px; }
+.ndc-offers-how { display:grid; grid-template-columns:1fr 1.5fr; gap:50px; margin-top:50px; padding:32px; border:1px solid var(--line); border-radius:18px; background:var(--panel); }
+.ndc-offers-how h3 { font-size:25px; line-height:1.3; letter-spacing:-.5px; margin:14px 0; }
+.ndc-offers-how p { font-size:13px; color:var(--muted); line-height:1.9; margin:8px 0 0; }
+.ndc-offers-how ol { display:grid; gap:22px; list-style:none; margin:0; padding:0; }
+.ndc-offers-how li { display:flex; gap:18px; }
+.ndc-offers-how li>b { color:var(--gold); font:600 12px ui-monospace,Consolas,monospace; padding-top:5px; }
+.ndc-offers-how strong { font-size:14px; }
+.ndc-offers-footnote { font-size:11px; line-height:1.9; color:var(--muted); margin-top:22px; }
+.ndc-offers-showcase button:focus-visible,.ndc-offers-showcase a:focus-visible,.ndc-offers-showcase summary:focus-visible { outline:2px solid var(--light); outline-offset:4px; }
+.ndc-offers-showcase button:disabled { opacity:.55; cursor:default; }
+@media(max-width:760px) { .ndc-offers-showcase { padding:60px 0; } .ndc-offers-heading { flex-direction:column; align-items:flex-start; gap:22px; } .ndc-offers-cards,.ndc-offers-how { grid-template-columns:1fr; } .ndc-offer-showcard { padding:24px; } .ndc-offers-how { gap:26px; padding:24px; } .ndc-offer-showcard h3 { font-size:24px; } }
+@media(max-width:400px) { .ndc-offer-showcard,.ndc-offers-how { padding:20px; } .ndc-offer-public-code { padding:12px; gap:10px; } .ndc-offer-public-code code { font-size:16px; } }
+@media (min-width: 900px) {
+  .ndc-offer-showcard:only-child { max-width:none; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); column-gap:44px; }
+  .ndc-offer-showcard:only-child .ndc-offer-card-top { grid-column:1/-1; grid-row:1; }
+  .ndc-offer-showcard:only-child h3 { grid-column:1; grid-row:2; }
+  .ndc-offer-showcard:only-child .ndc-offer-description { grid-column:1; grid-row:3; }
+  .ndc-offer-showcard:only-child .ndc-offer-showprice { grid-column:1; grid-row:4; }
+  .ndc-offer-showcard:only-child .ndc-offer-benefits { grid-column:2; grid-row:2/4; align-self:center; margin:24px 0 0; }
+  .ndc-offer-showcard:only-child .ndc-offer-public-code { grid-column:2; grid-row:4; align-self:center; margin:0; }
+  .ndc-offer-showcard:only-child > .btn { grid-column:2; grid-row:5; align-self:start; }
+  .ndc-offer-showcard:only-child .ndc-offer-card-notice { grid-column:2; grid-row:6; }
+  .ndc-offer-showcard:only-child .ndc-offer-validity { grid-column:1; grid-row:5; align-self:center; margin:0; }
+  .ndc-offer-showcard:only-child .ndc-offer-public-rules { grid-column:1; grid-row:6; margin-top:16px; }
+}
