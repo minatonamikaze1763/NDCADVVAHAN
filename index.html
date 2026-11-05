@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
+  <script src="offer-code.js" defer></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#080808" />
@@ -56,7 +57,8 @@
     <title>NDC VAHAN TOOL | Smarter VAHAN Document Workflows</title>
     <script src="email-tools.js" defer></script>
     <script src="filename-guide.js" defer></script>
-  </head>
+    <link rel="stylesheet" href="offer-code.css">
+</head>
   <body>
     <header class="topbar">
       <div class="container nav">
@@ -894,7 +896,7 @@
                 <span id="selectedPlanLogins"
                   >Choose a subscription plan to continue.</span
                 >
-                <span>30-Day Subscription</span>
+                <span>Each month adds 30 days</span>
               </div>
             </div>
             <form id="ndcSignupForm" class="payment-credentials">
@@ -940,6 +942,7 @@
                 <label for="signupMonths">Subscription duration</label
                 ><select id="signupMonths" required></select>
               </div>
+              <div id="ndcSignupOffer"></div>
               <button
                 class="payment-proceed"
                 id="paymentProceed"

@@ -11,6 +11,8 @@
   let activeSection = "overview";
   let redirecting = false;
   let paymentBusy = false;
+  let appliedOffer = null, offerWidget = null;
+  const planDevices = (account, plan) => Math.min(20, plan.maxDevices + Math.max(0, ...(account?.offerBenefits || []).filter(b => b.planId === plan.id && (b.retainDevicesOnRenewal || Date.parse(b.expiresAt) > Date.now() + serverClockOffset)).map(b => Number(b.extraDevices) || 0)));
   let serverClockOffset = 0;
 
   function availablePlans(account) {
@@ -38,12 +40,13 @@
     if (!plan) { root.textContent = "Choose an available plan to preview your renewal."; return; }
     const now = Date.now() + serverClockOffset, current = Date.parse(account.expiresAt), base = Number.isFinite(current) ? Math.max(now, current) : now;
     const end = new Date(base + plan.durationDays * months * 86400000);
-    const upgrade = Number(plan.maxDevices) > Number(account.maxDevices);
-    const downgrade = Number(plan.maxDevices) < Number(account.maxDevices) && current > now;
+    const deviceLimit = appliedOffer?.maxDevices || planDevices(account, plan);
+    const upgrade = Number(deviceLimit) > Number(account.maxDevices);
+    const downgrade = Number(deviceLimit) < Number(account.maxDevices) && current > now;
     const switchAt = account.scheduledPlan?.startsAt || account.expiresAt;
     root.innerHTML = `<div class="ndc-preview-heading"><span class="ndc-eyebrow">LIVE RENEWAL PREVIEW</span><span>Updates as you choose</span></div><h3>${esc(plan.name)} · ${months} month${months === 1 ? "" : "s"}</h3>
-      <div class="ndc-preview-comparison"><div><small>CURRENT PAID EXPIRY</small><strong>${Number.isFinite(current) ? esc(date(account.expiresAt)) : "No expiry assigned"}</strong><span>${Number(account.maxDevices) || 1} device logins</span></div><b aria-hidden="true">→</b><div><small>AFTER SUCCESSFUL PAYMENT</small><strong>${esc(date(end))}</strong><span>${downgrade ? `${account.maxDevices} logins until ${esc(date(switchAt))}; then ${plan.maxDevices} logins` : `${plan.maxDevices} device logins`} · +${months * plan.durationDays} days</span></div></div>
-      <div class="ndc-preview-total"><span>Total payment</span><strong>${esc(money(plan.monthlyPrice * months))}</strong></div><p>${downgrade ? `You keep all features and ${account.maxDevices} logins until ${esc(date(switchAt))}. Then your added duration uses ${plan.maxDevices} logins. ` : ""}${upgrade ? `Your device limit increases to ${plan.maxDevices} after payment confirmation. ` : ""}${Number.isFinite(current) && current > now ? "Your remaining paid time is preserved; new days start from your current expiry." : Number.isFinite(current) ? "Your new paid period starts when payment is confirmed." : "Your current account has no expiry. This purchase sets a paid expiry starting from payment confirmation."} Preview dates are estimates until the server confirms payment.</p>`;
+      <div class="ndc-preview-comparison"><div><small>CURRENT PAID EXPIRY</small><strong>${Number.isFinite(current) ? esc(date(account.expiresAt)) : "No expiry assigned"}</strong><span>${Number(account.maxDevices) || 1} device logins</span></div><b aria-hidden="true">→</b><div><small>AFTER SUCCESSFUL PAYMENT</small><strong>${esc(date(end))}</strong><span>${downgrade ? `${account.maxDevices} logins until ${esc(date(switchAt))}; then ${deviceLimit} logins` : `${deviceLimit} device logins`} · +${months * plan.durationDays} days</span></div></div>
+      <div class="ndc-preview-total"><span>Total payment</span><strong>${esc(money(appliedOffer ? appliedOffer.amountPaise / 100 : plan.monthlyPrice * months))}</strong></div><p>${downgrade ? `You keep all features and ${account.maxDevices} logins until ${esc(date(switchAt))}. Then your added duration uses ${deviceLimit} logins. ` : ""}${upgrade ? `Your device limit increases to ${deviceLimit} after payment confirmation. ` : ""}${Number.isFinite(current) && current > now ? "Your remaining paid time is preserved; new days start from your current expiry." : Number.isFinite(current) ? "Your new paid period starts when payment is confirmed." : "Your current account has no expiry. This purchase sets a paid expiry starting from payment confirmation."} Preview dates are estimates until the server confirms payment.</p>`;
   }
 
   function emailSettings(account) {
@@ -822,9 +825,10 @@
             <p>Upgrades increase logins immediately after verified payment. A lower plan starts after your current paid entitlement ends. Existing paid time is preserved. Payments are processed securely through Razorpay.</p>
             <form id="ndcRenewalForm" tabindex="-1">
               <aside class="ndc-shared-features"><h3>Included in every plan</h3><ul>${Object.entries(NDCPlans.all[0]?.features || {}).filter(([, v]) => v === true).map(([k]) => `<li>${esc(NDCPlans.label(k))}</li>`).join('')}</ul></aside><fieldset class="ndc-choice-group"><legend>01 · Choose your plan</legend>
-              <div class="ndc-plan-options">${availablePlans(account).map((p, i) => `<label class="ndc-choice ndc-plan-choice"><input type="radio" name="renewalPlan" value="${esc(p.id)}" ${i === 0 ? "checked" : ""} required><span><small>${p.id === 'test' ? 'AUTHORIZED TESTING' : 'MONTHLY MEMBERSHIP'}</small><strong>${esc(p.name)}</strong><b>${esc(money(p.monthlyPrice))}<small> / month</small></b><em>${esc(p.maxDevices)} devices · ${esc(p.durationDays)} days/month</em></span></label>`).join('')}</div></fieldset>
+              <div class="ndc-plan-options">${availablePlans(account).map((p, i) => `<label class="ndc-choice ndc-plan-choice"><input type="radio" name="renewalPlan" value="${esc(p.id)}" ${i === 0 ? "checked" : ""} required><span><small>${p.id === 'test' ? 'AUTHORIZED TESTING' : 'MONTHLY MEMBERSHIP'}</small><strong>${esc(p.name)}</strong><b>${esc(money(p.monthlyPrice))}<small> / month</small></b><em>${esc(planDevices(account, p))} devices · ${esc(p.durationDays)} days/month</em></span></label>`).join('')}</div></fieldset>
               <fieldset class="ndc-choice-group"><legend>02 · Add more time</legend><p>Each month adds 30 days. Choose 1–12 months.</p>
               <div class="ndc-month-options">${Array.from({ length: 12 }, (_, i) => `<label class="ndc-choice ndc-month-choice"><input type="radio" name="renewalMonths" value="${i + 1}" ${i === 0 ? 'checked' : ''}><span><strong>${i + 1}</strong><small>${i === 0 ? 'month' : 'months'}</small></span></label>`).join('')}</div></fieldset>
+              <div id="ndcRenewalOffer"></div>
               <div id="ndcRenewalPreview" class="ndc-renewal-preview" aria-live="polite"></div>
               <p id="ndcRenewalTotal" aria-live="polite"></p>
               <button class="ndc-home-button" id="ndcRenewalSubmit" type="submit">Continue to secure payment</button>
@@ -1025,6 +1029,7 @@
     const assignedPlan = currentPlanId(account);
     const selectedRadio = document.querySelector(`input[name="renewalPlan"][value="${assignedPlan}"]`);
     if (selectedRadio) selectedRadio.checked = true;
+    mountRenewalOffer();
     renewalTotal();
     $("ndcQuickRenew")?.addEventListener("click", () => {
       const planId = currentPlanId(dashboardData.account);
@@ -1128,15 +1133,32 @@
     renewalTotal();
   }
 
+  function mountRenewalOffer() {
+    appliedOffer = null; offerWidget = null;
+    const root = $("ndcRenewalOffer");
+    if (!root || !window.NDCOfferCode) return;
+    offerWidget = NDCOfferCode.mount(root, {
+      request: code => api('/api/panel/offers/preview', {method:'POST', body:JSON.stringify({code})}), isBusy: () => paymentBusy,
+      onApply: offer => {
+        const plan = [...document.querySelectorAll('input[name="renewalPlan"]')].find(n => n.value === offer.planId);
+        const months = [...document.querySelectorAll('input[name="renewalMonths"]')].find(n => Number(n.value) === offer.months);
+        if (!plan || !months) throw Error('This offer is not available for your account.');
+        appliedOffer = offer; plan.checked = true; months.checked = true; renewalTotal();
+      },
+      onClear: () => { appliedOffer = null; renewalTotal(); }
+    });
+    offerWidget.setBusy(paymentBusy);
+  }
   const RENEWAL_PRICES = {};
   function renewalTotal() {
     const plan = document.querySelector('input[name="renewalPlan"]:checked')?.value, months = Number(document.querySelector('input[name="renewalMonths"]:checked')?.value || 1);
-    if ($("ndcRenewalTotal") && RENEWAL_PRICES[plan]) $("ndcRenewalTotal").textContent = `Total: ${money(RENEWAL_PRICES[plan] * months)} · ${months} month(s)`;
+    if ($("ndcRenewalTotal") && RENEWAL_PRICES[plan]) $("ndcRenewalTotal").textContent = `Total: ${money(appliedOffer ? appliedOffer.amountPaise / 100 : RENEWAL_PRICES[plan] * months)} · ${months} month(s)`;
     renewalPreview();
   }
 
   function setPaymentBusy(busy) {
     paymentBusy = busy;
+    offerWidget?.setBusy(busy);
     document.querySelectorAll('input[name="renewalPlan"], input[name="renewalMonths"]').forEach(input => input.disabled = busy);
     const quick = $("ndcQuickRenew");
     const account = dashboardData?.account || {};
@@ -1153,6 +1175,7 @@
 
   async function renewSubscription(event) {
     event.preventDefault();
+    if(offerWidget?.isLoading() || offerWidget?.hasUnapplied()) { $("ndcRenewalStatus").textContent = 'Apply or remove your offer code before continuing.'; return; }
     await startRenewalPayment(document.querySelector('input[name="renewalPlan"]:checked').value, Number(document.querySelector('input[name="renewalMonths"]:checked').value), "ndcRenewalStatus");
   }
 
@@ -1163,6 +1186,13 @@
       const node = $(statusId) || $("ndcQuickRenewStatus") || $("ndcRenewalStatus");
       if (node) node.textContent = text;
     };
+    if (offerWidget?.isLoading() || offerWidget?.hasUnapplied()) {
+      message("Apply or remove your offer code before continuing."); return;
+    }
+    if (statusId !== "ndcRenewalStatus" && appliedOffer) {
+      message("An offer is applied. Use Continue to secure payment in the offer checkout below.");
+      $("ndcRenewalForm")?.scrollIntoView({ behavior: "smooth", block: "center" }); return;
+    }
     if (typeof Razorpay !== "function") {
       message("Razorpay Checkout did not load. Refresh and retry.");
       return;
@@ -1171,7 +1201,7 @@
     message("Creating secure payment order…");
     try {
       const result = await api("/api/panel/payments/orders", {
-        method: "POST", body: JSON.stringify({ planId, months })
+        method: "POST", body: JSON.stringify({ planId, months, ...(statusId === "ndcRenewalStatus" && appliedOffer?.planId === planId && appliedOffer?.months === months ? {offerCode:appliedOffer.code} : {}) })
       });
       const order = result.data || result;
       if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error("Invalid payment order response.");
@@ -1253,7 +1283,7 @@
 
   document.addEventListener("DOMContentLoaded", async () => {
 
-    document.addEventListener("change", e => { if (e.target?.name === "renewalPlan" || e.target?.name === "renewalMonths") renewalTotal(); });
+    document.addEventListener("change", e => { if (e.target?.name === "renewalPlan" || e.target?.name === "renewalMonths") { if(appliedOffer) offerWidget?.clear("Offer removed because your selection changed."); renewalTotal(); } });
     document.addEventListener("submit", e => {
       if (e.target?.id === "ndcRenewalForm") renewSubscription(e);
       if (e.target?.id === "ndcPasswordForm") changePassword(e);
