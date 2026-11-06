@@ -11,8 +11,9 @@
       article.append(node('blockquote',row.description));
       const person=node('div',null,'ndc-review-person'),initials=node('span',row.displayName.split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase(),'ndc-review-initials');initials.setAttribute('aria-hidden','true');person.append(initials);
       if(row.logoUrl&&/^\/api\/public\/review-logos\/[a-f0-9]{24}$/i.test(row.logoUrl)){
-        const img=node('img');img.src=api+row.logoUrl;img.alt=(row.company||row.displayName)+' logo';img.loading='lazy';img.decoding='async';img.width=64;img.height=64;img.hidden=true;
-        img.onload=()=>{img.hidden=false;initials.hidden=true;};img.onerror=()=>{img.hidden=true;initials.hidden=false;};person.append(img);
+        // Use CORS for the API's same-origin resource policy. Hidden images must load eagerly.
+        const img=node('img');img.crossOrigin='anonymous';img.alt=(row.company||row.displayName)+' logo';img.loading='eager';img.decoding='async';img.width=64;img.height=64;img.hidden=true;
+        img.onload=()=>{img.hidden=false;initials.hidden=true;};img.onerror=()=>{img.hidden=true;initials.hidden=false;};img.src=api+row.logoUrl;person.append(img);
       }
       const identity=node('div',null,'ndc-review-identity');const name=node('div',null,'ndc-review-name');name.append(node('strong',row.displayName));
       if(row.purchasedAccount){const badge=node('span','✓','ndc-review-verified');badge.setAttribute('aria-label','Verified paying customer');badge.title='Verified paying NDC customer';name.append(badge);}
