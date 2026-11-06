@@ -41,3 +41,11 @@ test('public offer API lists active in-window terms only, without customer or pu
  const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>server.close());const response=await fetch(`http://127.0.0.1:${server.address().port}/api/public/offers`),body=await response.json();
  assert.equal(response.status,200);assert.equal(response.headers.get('cache-control'),'no-store');assert.equal(body.total,1);assert.deepEqual(body.records.map(r=>r.code),['6PLUS1']);assert.equal(body.records[0].amountPaise,99500);assert.equal(body.records[0].userId,undefined);assert.equal(body.records[0].status,undefined);
 });
+
+
+test('offer effects differ across cards, stay stable on refresh and cannot block actions',async t=>{
+ const f=await ui(t,Array.from({length:5},(_,i)=>({...offer,offerId:String(i),code:'OFFER'+i})));
+ const cards=[...f.d.querySelectorAll('.ndc-offer-showcard')],effects=cards.map(card=>card.dataset.effect);
+ assert.equal(new Set(effects).size,5);for(const card of cards){assert.equal(card.querySelector('.ndc-offer-decoration').getAttribute('aria-hidden'),'true');assert.ok(card.querySelector('button.btn-primary'));}
+ Object.defineProperty(f.d,'hidden',{value:false});f.d.dispatchEvent(new f.w.Event('visibilitychange'));await tick();assert.deepEqual([...f.d.querySelectorAll('.ndc-offer-showcard')].map(card=>card.dataset.effect),effects);
+});

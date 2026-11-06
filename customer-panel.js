@@ -534,6 +534,7 @@
       sectionHTML = `
         ${subscriptionVisual(account)}
         ${renewalCard(account)}
+        <section class="ndc-renewal-card" aria-label="Referral rewards"><h3>Give 10 days. Get 10 days.</h3><p>Share your referral code: <strong style="overflow-wrap:anywhere;user-select:all">${esc(account.referralCode || 'Available after refreshing your account')}</strong></p><p>Each new customer can use one code at their first payment. You both receive 10 extra days after payment is confirmed. Share your code with as many new customers as you like.</p><p>${Number(account.successfulReferrals)||0} successful referrals · ${Number(account.referralBonusDays)||0} bonus days earned.</p></section>
 
 
         <div class="ndc-welcome">
@@ -810,6 +811,7 @@
     else if (activeSection === "subscription") {
       sectionHTML = `
         ${renewalCard(account)}
+        <section class="ndc-renewal-card" aria-label="Referral rewards"><h3>Give 10 days. Get 10 days.</h3><p>Share your referral code: <strong style="overflow-wrap:anywhere;user-select:all">${esc(account.referralCode || 'Available after refreshing your account')}</strong></p><p>Each new customer can use one code at their first payment. You both receive 10 extra days after payment is confirmed. Share your code with as many new customers as you like.</p><p>${Number(account.successfulReferrals)||0} successful referrals · ${Number(account.referralBonusDays)||0} bonus days earned.</p></section>
 
 
         <div class="ndc-page-heading">

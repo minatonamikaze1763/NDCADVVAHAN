@@ -7,14 +7,16 @@
     const node=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
     function card(row){
       const article=node('article',null,'ndc-review-card');
-      if(row.rating){const rating=node('div','★'.repeat(row.rating)+'☆'.repeat(5-row.rating),'ndc-review-stars');rating.setAttribute('role','img');rating.setAttribute('aria-label',`${row.rating} out of 5 stars`);article.append(rating);}
+      if(row.rating){const rating=node('div','★'.repeat(row.rating)+'☆'.repeat(5-row.rating),'ndc-review-stars');rating.setAttribute('role','img');rating.setAttribute('aria-label',`${row.rating} out of 5 stars`);rating.append(node('b', `${row.rating.toFixed(1)} / 5`, 'ndc-review-score'));article.append(rating);}
       article.append(node('blockquote',row.description));
       const person=node('div',null,'ndc-review-person'),initials=node('span',row.displayName.split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase(),'ndc-review-initials');initials.setAttribute('aria-hidden','true');person.append(initials);
       if(row.logoUrl&&/^\/api\/public\/review-logos\/[a-f0-9]{24}$/i.test(row.logoUrl)){
         const img=node('img');img.src=api+row.logoUrl;img.alt=(row.company||row.displayName)+' logo';img.loading='lazy';img.decoding='async';img.width=64;img.height=64;img.hidden=true;
         img.onload=()=>{img.hidden=false;initials.hidden=true;};img.onerror=()=>{img.hidden=true;initials.hidden=false;};person.append(img);
       }
-      const identity=node('div',null,'ndc-review-identity');identity.append(node('strong',row.displayName));
+      const identity=node('div',null,'ndc-review-identity');const name=node('div',null,'ndc-review-name');name.append(node('strong',row.displayName));
+      if(row.purchasedAccount){const badge=node('span','✓','ndc-review-verified');badge.setAttribute('aria-label','Verified paying customer');badge.title='Verified paying NDC customer';name.append(badge);}
+      identity.append(name);
       const company=[row.designation,row.company].filter(Boolean).join(' · ');if(company)identity.append(node('span',company));
       if(row.userSince)identity.append(node('small','User since '+new Date(row.userSince+'T00:00:00Z').toLocaleDateString('en-IN',{month:'long',year:'numeric',timeZone:'UTC'})));
       if(row.purchasedAccount)identity.append(node('small','NDC customer','ndc-review-customer'));
