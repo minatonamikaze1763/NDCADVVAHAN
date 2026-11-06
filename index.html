@@ -52,7 +52,7 @@
     <link rel="stylesheet" href="style.css" />
     <meta
       name="description"
-      content="NDC VAHAN TOOL helps automobile dealerships prepare and upload VAHAN documents with smart matching, compression, already-uploaded detection, optional final submission and ZIP downloads."
+      content="NDC VAHAN TOOL helps dealerships prepare documents, follow live upload activity, review locally saved submission summaries and optionally copy application details, with RTA office information after automatic submission."
     />
     <title>NDC VAHAN TOOL | Smarter VAHAN Document Workflows</title>
     <script src="email-tools.js" defer></script>
@@ -137,8 +137,10 @@
               registration teams. Prepare and match documents, compress
               supported files, upload them through the VAHAN workflow, skip
               documents already uploaded, and optionally automate the final
-              submission step.
+              submission step. Follow clear activity updates and keep a readable
+              application summary when the work is done.
             </p>
+            <a class="ndc-new-feature-link" href="#latest-features">New: live activity, summaries &amp; clean copying ↗</a>
             <div class="hero-actions">
               <a class="btn btn-primary" href="#pricing"
                 >◉ &nbsp; View Subscription Plans</a
@@ -221,10 +223,9 @@
               <h3>Optional Auto Image to PDF Conversion</h3>
               <p>
                 Enable AUTO img to PDF CONVERTION in the extension settings.
-                Images are compressed first, then converted to PDF. The final
-                PDF is checked against the size limit; retries start with the
-                source image. The option is off by default and your choice is
-                saved.
+                Prepare supported images as PDFs with a saved preference that
+                fits your team. Review clear preparation results before
+                continuing with your documents.
               </p>
             </article>
             <article class="feature">
@@ -282,8 +283,8 @@
               <div class="feature-icon">▤</div>
               <h3>Smart Document Identification</h3>
               <p>
-                Use filename hints and document-matching logic to help assign
-                selected files to supported VAHAN document categories.
+                Match supported files to their VAHAN document categories, with
+                filename guidance and manual assignment when you need it.
               </p>
             </article>
             <article class="feature">
@@ -342,12 +343,44 @@
         </div>
       </section>
 
+      <section class="ndc-latest-features" id="latest-features" aria-labelledby="ndcLatestHeading">
+        <div class="container">
+          <div class="section-head">
+            <div class="kicker">New in Your Dealership Toolkit</div>
+            <h2 class="section-title" id="ndcLatestHeading">Clear progress. <span class="gold">Useful details.</span></h2>
+            <p class="section-desc">From the first upload to the final summary, stay informed and carry the details you need into your next task.</p>
+          </div>
+          <div class="features">
+            <article class="feature ndc-latest-card">
+              <div class="feature-icon" aria-hidden="true">✓</div>
+              <span class="ndc-feature-tag">LIVE ACTIVITY</span>
+              <h3>Know where your uploads stand</h3>
+              <p>Follow readable activity updates and uploaded, skipped and pending counts. Recovery assistance helps with supported interruptions, while collapsible logs keep the page tidy.</p>
+            </article>
+            <article class="feature ndc-latest-card">
+              <div class="feature-icon" aria-hidden="true">▤</div>
+              <span class="ndc-feature-tag">SUBMISSION SUMMARY</span>
+              <h3>A clear record, ready to read</h3>
+              <p>Review application, customer, chassis and date details alongside owner, insurance and finance information. Automatic submission adds the destination RTA office. Details are saved locally in your browser.</p>
+            </article>
+            <article class="feature ndc-latest-card">
+              <div class="feature-icon" aria-hidden="true">⇧</div>
+              <span class="ndc-feature-tag">OPTIONAL AUTO COPY</span>
+              <h3>Copy the details. Carry on.</h3>
+              <p>Enable automatic clipboard copying or use Copy details when you need it. Get clean, line-by-line application details without activity messages, branding or timestamps.</p>
+            </article>
+          </div>
+          <p class="ndc-latest-footnote">Choose summary display and automatic copying separately in the extension settings. Clipboard copying is optional and stays off until you enable it.</p>
+          <a class="btn btn-outline" href="#automation">Explore automation options ↗</a>
+        </div>
+      </section>
+
       <section class="workflow" id="how-it-works">
         <div class="container">
           <div class="section-head">
             <div class="kicker">A More Organized Process</div>
             <h2 class="section-title">
-              How <span class="gold">NDC VAHAN TOOL</span> Works
+              From Documents to a <span class="gold">Clear Result</span>
             </h2>
             <p class="section-desc">
               A simple overview of the typical document workflow, from selecting
@@ -379,8 +412,8 @@
             <article class="step">
               <h3>Review the Result</h3>
               <p>
-                Check the processing summary and verify the final status on the
-                official VAHAN portal.
+                Review your application summary, optionally copy the details,
+                and confirm the final status on the official VAHAN portal.
               </p>
             </article>
           </div>
@@ -733,10 +766,9 @@
               <div class="feature-icon">01</div>
               <h3>Auto Image to PDF Convertion</h3>
               <p>
-                Switch on to compress images first and convert them to PDF
-                within the final file-size limit. Switch off to keep images as
-                images, compressing oversized images only. Your preference is
-                saved; changing it re-prepares selected images.
+                Choose PDFs for supported images or keep their original image
+                format. Your saved preference makes daily document preparation
+                more consistent for your team.
               </p>
             </article>
             <article class="feature">
@@ -763,6 +795,16 @@
                 are processed. Always verify the details and final status on the
                 portal.
               </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">05</div>
+              <h3>Show Log on Page After Submission</h3>
+              <p>Keep a readable application summary on the page after your work is complete. Show or hide it when you need more room; automatic submission includes the RTA office.</p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">06</div>
+              <h3>Auto Copy Logs to Clipboard</h3>
+              <p>Choose automatic copying of application details for your next task. The copied summary contains the details alone, and this setting is off by default.</p>
             </article>
           </div>
           <p class="notice">
@@ -1047,16 +1089,13 @@
           <div class="faq-grid">
             <details>
               <summary>
-                How does automatic image to PDF conversion work?
+                Can I convert images to PDF?
               </summary>
               <p>
-                Enable AUTO img to PDF CONVERTION in the extension. It is
-                disabled by default. Images are compressed before PDF creation,
-                and the final PDF must fit within 400 KB (400,000 bytes), or the
-                smaller existing Form 20 limit. If needed, the source image is
-                compressed further before creating a new PDF. Unsuccessful files
-                are skipped. With the setting disabled, images stay in image
-                format.
+                Yes. Enable Auto Image to PDF Conversion to prepare supported
+                images as PDFs. It is off by default, and your preference is
+                saved. With it off, images keep their image format. Review the
+                preparation results and applicable document size limits before uploading.
               </p>
             </details>
             <details>
@@ -1102,10 +1141,19 @@
             <details>
               <summary>Does the tool provide an upload summary?</summary>
               <p>
-                Yes. The workflow reports the number of documents processed and
-                the number of documents identified as already uploaded and
-                skipped.
+                Yes. Follow live upload activity and document counts, then view a
+                readable application summary with customer, chassis, date, owner,
+                insurance and finance details. Automatic submission includes the
+                destination RTA office. Summary details are saved locally in your browser.
               </p>
+            </details>
+            <details>
+              <summary>Can I copy the application details automatically?</summary>
+              <p>Yes. Enable Auto Copy Logs to Clipboard in the extension settings, or use Copy details in the summary. You get only the application details, without activity messages, branding or timestamps. Automatic copying is optional and off by default.</p>
+            </details>
+            <details>
+              <summary>Can I hide the logs or summary?</summary>
+              <p>Yes. Activity logs can be collapsed while updates continue. You can also choose whether the application summary appears on the page, independently of the automatic clipboard setting.</p>
             </details>
             <details>
               <summary>Can I download my prepared documents?</summary>

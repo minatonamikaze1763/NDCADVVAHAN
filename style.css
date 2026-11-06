@@ -4671,3 +4671,12 @@ footer {
   outline: 2px solid #f1d991;
   outline-offset: 4px;
 }
+
+/* Latest extension benefits, using the existing site palette and card grid. */
+.ndc-latest-features{background:var(--panel);border-block:1px solid var(--line)}
+.ndc-latest-card{border-top:2px solid var(--gold);position:relative}
+.ndc-feature-tag{display:block;color:var(--gold);font-size:9px;font-weight:750;letter-spacing:1.5px;margin:16px 0 10px}
+.ndc-latest-card h3{margin-top:0}
+.ndc-latest-footnote{max-width:820px;color:var(--muted);font-size:12px;line-height:1.8;margin:24px 0 20px}
+
+.ndc-new-feature-link{display:inline-block;color:var(--gold);font-size:12px;font-weight:650;margin:0 0 16px}.ndc-new-feature-link:hover{text-decoration:underline}.ndc-new-feature-link:focus-visible{outline:2px solid var(--light);outline-offset:4px}

@@ -1,7 +1,15 @@
 /* Server-owned plan values; session-only test preview. */
 window.NDCPlans = (() => {
   let plans = [];
-  const label = key => key.replace(/([A-Z])/g, " $1").replace(/^./, c => c.toUpperCase());
+  const labels = {
+    automaticUploadRecovery: "Upload recovery assistance",
+    liveUploadActivityLogs: "Live upload activity logs",
+    submissionSummary: "Readable submission summary",
+    localApplicationDetails: "Locally saved application details",
+    rtaOfficeSummary: "RTA office in your summary",
+    autoCopySubmissionDetails: "Optional clipboard copy of application details"
+  };
+  const label = key => labels[key] || key.replace(/([A-Z])/g, " $1").replace(/^./, c => c.toUpperCase());
   const ready = fetch("https://server.nextdimensioncustoms.in/api/public/subscription-plans", { cache: "no-store" })
     .then(async response => {
       if (!response.ok) throw Error("Unable to load subscription plans.");
