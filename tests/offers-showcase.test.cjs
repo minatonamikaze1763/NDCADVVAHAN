@@ -43,9 +43,9 @@ test('public offer API lists active in-window terms only, without customer or pu
 });
 
 
-test('offer effects differ across cards, stay stable on refresh and cannot block actions',async t=>{
+test('offer cards use only two alternating lightweight effects, stable on refresh without blocking actions',async t=>{
  const f=await ui(t,Array.from({length:5},(_,i)=>({...offer,offerId:String(i),code:'OFFER'+i})));
  const cards=[...f.d.querySelectorAll('.ndc-offer-showcard')],effects=cards.map(card=>card.dataset.effect);
- assert.equal(new Set(effects).size,5);for(const card of cards){assert.equal(card.querySelector('.ndc-offer-decoration').getAttribute('aria-hidden'),'true');assert.ok(card.querySelector('button.btn-primary'));}
+ assert.deepEqual([...new Set(effects)].sort(),['pulse','shine']);assert.ok(effects.every((effect,i)=>i===0||effect!==effects[i-1]));for(const card of cards){assert.equal(card.querySelector('.ndc-offer-decoration').getAttribute('aria-hidden'),'true');assert.ok(card.querySelector('button.btn-primary'));}
  Object.defineProperty(f.d,'hidden',{value:false});f.d.dispatchEvent(new f.w.Event('visibilitychange'));await tick();assert.deepEqual([...f.d.querySelectorAll('.ndc-offer-showcard')].map(card=>card.dataset.effect),effects);
 });

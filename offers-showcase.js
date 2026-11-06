@@ -7,7 +7,7 @@
     let offers = [], page = 0, total = 0, busy = false, clockOffset = 0;
     const node = (tag, value, className) => { const n = document.createElement(tag); if (value != null) n.textContent = value; if (className) n.className = className; return n; };
     const money = (paise, currency = 'INR') => new Intl.NumberFormat('en-IN', { style: 'currency', currency }).format(paise / 100);
-    const effects = ['aurora','shine','embers','stars','ribbon'];
+    const effects = ['pulse','shine'];
     for(let i=effects.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[effects[i],effects[j]]=[effects[j],effects[i]];}
     const effectById=new Map();
     const endDate = value => new Date(Date.parse(value) - 1).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }) + ' IST';
@@ -18,7 +18,7 @@
       for (const offer of live) {
         const card = node('article', null, 'ndc-offer-showcard');
         const key=offer.offerId||offer.code;
-        if(!effectById.has(key))effectById.set(key,{name:effects[effectById.size%effects.length],delay:-(Math.random()*6),duration:5+Math.random()*4});
+        if(!effectById.has(key))effectById.set(key,{name:effects[effectById.size%effects.length],delay:-(Math.random()*8),duration:8+Math.random()*4});
         const effect=effectById.get(key);card.dataset.effect=effect.name;card.style.setProperty('--offer-delay',effect.delay+'s');card.style.setProperty('--offer-duration',effect.duration+'s');
         const decoration=node('span',null,'ndc-offer-decoration');decoration.setAttribute('aria-hidden','true');card.append(decoration);
         const top = node('div', null, 'ndc-offer-card-top'); top.append(node('span', 'LIVE OFFER', 'ndc-offers-eyebrow'), node('span', `Save ${money(offer.discountPaise, offer.currency)}`, 'ndc-offer-saving'));
