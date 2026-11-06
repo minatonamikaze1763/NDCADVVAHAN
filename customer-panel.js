@@ -32,6 +32,20 @@
       <div class="ndc-membership-dates"><div><small>PAID ACCESS ENDS</small><strong>${Number.isFinite(expiry) ? esc(date(account.expiresAt)) : "No expiry assigned"}</strong></div><div><small>PANEL RENEWAL WINDOW ENDS</small><strong>${Number.isFinite(expiry) ? esc(date(account.panelExpiresAt || new Date(expiry + 5 * 86400000))) : "No expiry assigned"}</strong></div></div>
       <p class="ndc-membership-foot">${blocked ? "Your account restrictions still apply. Contact support for access assistance." : "Your extension uses paid access. The extra 5 days are for panel renewal only."}</p></section>`;
   }
+  function referralCard(account) {
+    const code = account.referralCode || '';
+    return `<section class="ndc-referral-card" aria-label="Referral rewards">
+      <div class="ndc-referral-top"><span class="ndc-eyebrow">YOUR REFERRAL REWARDS</span><span class="ndc-referral-perk">+10 DAYS EACH</span></div>
+      <h2>Give 10 days. <span>Get 10 days.</span></h2>
+      <p>A little extra time, for both of you. Invite a new customer to NDC.</p>
+      <div class="ndc-referral-ticket"><div><span class="ndc-referral-label">YOUR EXCLUSIVE CODE</span>${code ? `<code data-referral-code tabindex="0">${esc(code)}</code>` : '<span class="ndc-referral-pending">Refresh your account to get your code.</span>'}</div>
+      <button type="button" class="ndc-referral-copy" data-copy-referral ${code ? '' : 'disabled'}>Copy code <span aria-hidden="true">⧉</span></button></div>
+      <p class="ndc-referral-status" data-referral-status role="status" aria-live="polite"></p>
+      <div class="ndc-referral-stats"><span><strong>${Number(account.successfulReferrals)||0}</strong> successful referrals</span><span><strong>${Number(account.referralBonusDays)||0}</strong> bonus days earned</span></div>
+      <details class="ndc-referral-details"><summary>How rewards work</summary><p>Each new customer can use one referral code at their first payment. You both receive 10 extra days after payment is confirmed. Share your code with as many new customers as you like.</p></details>
+    </section>`;
+  }
+
   function renewalPreview() {
     const root = $("ndcRenewalPreview"), account = dashboardData?.account;
     if (!root || !account) return;
@@ -534,7 +548,7 @@
       sectionHTML = `
         ${subscriptionVisual(account)}
         ${renewalCard(account)}
-        <section class="ndc-renewal-card" aria-label="Referral rewards"><h3>Give 10 days. Get 10 days.</h3><p>Share your referral code: <strong style="overflow-wrap:anywhere;user-select:all">${esc(account.referralCode || 'Available after refreshing your account')}</strong></p><p>Each new customer can use one code at their first payment. You both receive 10 extra days after payment is confirmed. Share your code with as many new customers as you like.</p><p>${Number(account.successfulReferrals)||0} successful referrals · ${Number(account.referralBonusDays)||0} bonus days earned.</p></section>
+        ${referralCard(account)}
 
 
         <div class="ndc-welcome">
@@ -811,7 +825,7 @@
     else if (activeSection === "subscription") {
       sectionHTML = `
         ${renewalCard(account)}
-        <section class="ndc-renewal-card" aria-label="Referral rewards"><h3>Give 10 days. Get 10 days.</h3><p>Share your referral code: <strong style="overflow-wrap:anywhere;user-select:all">${esc(account.referralCode || 'Available after refreshing your account')}</strong></p><p>Each new customer can use one code at their first payment. You both receive 10 extra days after payment is confirmed. Share your code with as many new customers as you like.</p><p>${Number(account.successfulReferrals)||0} successful referrals · ${Number(account.referralBonusDays)||0} bonus days earned.</p></section>
+        ${referralCard(account)}
 
 
         <div class="ndc-page-heading">
@@ -1025,7 +1039,22 @@
     if (!content) return;
 
     if (["profile", "security", "payments"].includes(activeSection)) sectionHTML += emailSettings(account);
+    sectionHTML += '<aside class="ndc-security-note" aria-label="Security information"><span class="ndc-security-icon" aria-hidden="true">🔒</span><div><h2>Security information</h2><p>NDC does not store your uploaded documents or the customer and bank details contained in those documents on our server.</p><p>Our server validates the document-upload process so the tool can follow the required upload steps. This validation does not mean your documents or their sensitive contents are stored on our server. Your documents are submitted to the intended Vahan portal only as part of your workflow.</p><p class="ndc-security-foot">Account, subscription and login security records are maintained separately to provide and protect your access. <a href="privacy-policy.html">Read our privacy policy ↗</a></p></div></aside>';
     content.innerHTML = sectionHTML;
+    content.querySelector('[data-copy-referral]')?.addEventListener('click', async (event) => {
+      const button = event.currentTarget, code = content.querySelector('[data-referral-code]');
+      const status = content.querySelector('[data-referral-status]');
+      if (!code || !account.referralCode) return;
+      button.disabled = true;
+      try {
+        await navigator.clipboard.writeText(String(account.referralCode));
+        status.textContent = 'Code copied. Ready to share!';
+      } catch {
+        const selection = window.getSelection(), range = document.createRange();
+        code.focus();range.selectNodeContents(code);selection?.removeAllRanges();selection?.addRange(range);
+        status.textContent = 'Select and copy the highlighted code to share it.';
+      } finally { button.disabled = false; }
+    });
     if (activeSection === "setup") formatSetupGuide(content);
 
     const assignedPlan = currentPlanId(account);
