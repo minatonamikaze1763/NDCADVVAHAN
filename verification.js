@@ -17,15 +17,32 @@
     message.hidden = !text;
   }
 
+  let loginTrigger = null;
+  let previousOverflow = "";
+
   function openLogin() {
     if (!modal) return;
 
+    loginTrigger = document.activeElement;
+    previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     modal.hidden = false;
     $("ndcLoginUsername")?.focus();
   }
 
   function closeLogin() {
-    if (modal) modal.hidden = true;
+    if (!modal || modal.hidden) return;
+    modal.hidden = true;
+    document.body.style.overflow = previousOverflow;
+    const password = $("ndcLoginPassword");
+    if (password) password.type = "password";
+    const toggle = modal.querySelector(".ndc-password-toggle");
+    if (toggle) {
+      toggle.textContent = "Show";
+      toggle.setAttribute("aria-label", "Show password");
+      toggle.setAttribute("aria-pressed", "false");
+    }
+    loginTrigger?.focus();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -61,8 +78,17 @@
 
     // Escape key closes the login modal.
     document.addEventListener("keydown", (event) => {
+      if (!modal || modal.hidden) return;
       if (event.key === "Escape") {
+        event.preventDefault();
         closeLogin();
+      }
+      if (event.key === "Tab") {
+        const focusable = [...modal.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),summary')]
+          .filter(element => element.getClientRects().length);
+        const first = focusable[0], last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
       }
     });
 

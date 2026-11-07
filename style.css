@@ -4680,3 +4680,55 @@ footer {
 .ndc-latest-footnote{max-width:820px;color:var(--muted);font-size:12px;line-height:1.8;margin:24px 0 20px}
 
 .ndc-new-feature-link{display:inline-block;color:var(--gold);font-size:12px;font-weight:650;margin:0 0 16px}.ndc-new-feature-link:hover{text-decoration:underline}.ndc-new-feature-link:focus-visible{outline:2px solid var(--light);outline-offset:4px}
+
+/* Current extension release and update notes */
+.ndc-release-strip, .ndc-release-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.ndc-release-strip { margin: 20px 0 24px; }
+.ndc-release-strip a { color: var(--light); text-decoration: underline; text-underline-offset: 4px; }
+.ndc-version-badge {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--light);
+  background: rgba(215, 182, 79, .1);
+}
+.ndc-release-section { padding: 80px 0; border-block: 1px solid var(--line); background: var(--panel); }
+.ndc-release-meta { margin-bottom: 28px; }
+.ndc-release-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.ndc-release-card { padding: 28px; border: 1px solid var(--line); border-radius: 18px; background: var(--bg); }
+.ndc-release-category { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: 1.4px; }
+.ndc-release-card h3 { margin: 12px 0; font-size: 20px; line-height: 1.4; }
+.ndc-release-card p, .ndc-release-note { color: var(--muted); font-size: 14px; }
+.ndc-release-card p { margin: 0; }
+.ndc-release-note { margin: 24px 0 0; }
+@media (max-width: 640px) {
+  .ndc-release-grid { grid-template-columns: 1fr; }
+  .ndc-release-card { padding: 22px; }
+  .ndc-release-section { padding: 56px 0; }
+}
+/* Chrome Web Store access */
+.ndc-access-section { padding: 72px 0; }
+.ndc-access-card { display: grid; grid-template-columns: minmax(180px, .7fr) minmax(0, 1.6fr); gap: 48px; align-items: center; padding: 48px; border: 1px solid var(--line); border-radius: 24px; background: radial-gradient(ellipse at top left, rgba(215,182,79,.1), transparent 65%), var(--panel); }
+.ndc-chrome-art { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 28px 0; color: var(--text); font-weight: 600; }
+.ndc-chrome-logo { display: block; width: 140px; height: 140px; filter: drop-shadow(0 12px 24px rgba(0,0,0,.3)); }
+.ndc-access-copy h2 { margin: 12px 0 18px; font-size: clamp(28px, 3.5vw, 42px); line-height: 1.2; }
+.ndc-access-copy > p { color: var(--muted); margin: 0 0 24px; }
+.ndc-access-copy .ndc-access-note { margin: 16px 0 0; font-size: 12px; }
+.ndc-access-copy .btn { max-width: 100%; white-space: normal; text-align: center; }
+@media (max-width: 700px) {
+  .ndc-access-section { padding: 48px 0; }
+  .ndc-access-card { grid-template-columns: 1fr; gap: 20px; padding: 28px; }
+  .ndc-chrome-art { padding: 8px 0; }
+  .ndc-chrome-logo { width: 100px; height: 100px; }
+}

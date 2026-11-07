@@ -1,3 +1,0 @@
-add to our adv page as a user mangement panel to check thier subcritpions
-and current logged in sessions and future payments 
-everything for panel
