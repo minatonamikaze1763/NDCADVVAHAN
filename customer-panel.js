@@ -41,7 +41,7 @@
       <div class="ndc-referral-ticket"><div><span class="ndc-referral-label">YOUR EXCLUSIVE CODE</span>${code ? `<code data-referral-code tabindex="0">${esc(code)}</code>` : '<span class="ndc-referral-pending">Refresh your account to get your code.</span>'}</div>
       <button type="button" class="ndc-referral-copy" data-copy-referral ${code ? '' : 'disabled'}>Copy code <span aria-hidden="true">⧉</span></button></div>
       <p class="ndc-referral-status" data-referral-status role="status" aria-live="polite"></p>
-      <div class="ndc-referral-stats"><span><strong>${Number(account.successfulReferrals)||0}</strong> successful referrals</span><span><strong>${Number(account.referralBonusDays)||0}</strong> bonus days earned</span></div>
+      <div class="ndc-referral-stats"><span><strong>${Number(account.successfulReferrals) || 0}</strong> successful referrals</span><span><strong>${Number(account.referralBonusDays) || 0}</strong> bonus days earned</span></div>
       <details class="ndc-referral-details"><summary>How rewards work</summary><p>Each new customer can use one referral code at their first payment. You both receive 10 extra days after payment is confirmed. Share your code with as many new customers as you like.</p></details>
     </section>`;
   }
@@ -1039,7 +1039,7 @@
     if (!content) return;
 
     if (["profile", "security", "payments"].includes(activeSection)) sectionHTML += emailSettings(account);
-    sectionHTML += '<aside class="ndc-security-note" aria-label="Security information"><span class="ndc-security-icon" aria-hidden="true">🔒</span><div><h2>Security information</h2><p>NDC does not store your uploaded documents or the customer and bank details contained in those documents on our server.</p><p>Our server validates the document-upload process so the tool can follow the required upload steps. This validation does not mean your documents or their sensitive contents are stored on our server. Your documents are submitted to the intended Vahan portal only as part of your workflow.</p><p class="ndc-security-foot">Account, subscription and login security records are maintained separately to provide and protect your access. <a href="privacy-policy.html">Read our privacy policy ↗</a></p></div></aside>';
+    sectionHTML += '<aside class="ndc-security-note" aria-label="Security information"><span class="ndc-security-icon" aria-hidden="true">🔒</span><div><h2>Security information</h2><p>NDC does not store your uploaded documents or the customer and any other details contained in those documents on our server.</p><p>Our server validates the document-upload process so the tool can follow the required upload steps. This validation does not mean your documents or their sensitive contents are stored on our server. Your documents are submitted to the intended Vahan portal only as part of your workflow.</p><p class="ndc-security-foot">Account, subscription and login security records are maintained separately to provide and protect your access. <a href="privacy-policy.html">Read our privacy policy ↗</a></p></div></aside>';
     content.innerHTML = sectionHTML;
     content.querySelector('[data-copy-referral]')?.addEventListener('click', async (event) => {
       const button = event.currentTarget, code = content.querySelector('[data-referral-code]');
@@ -1051,7 +1051,7 @@
         status.textContent = 'Code copied. Ready to share!';
       } catch {
         const selection = window.getSelection(), range = document.createRange();
-        code.focus();range.selectNodeContents(code);selection?.removeAllRanges();selection?.addRange(range);
+        code.focus(); range.selectNodeContents(code); selection?.removeAllRanges(); selection?.addRange(range);
         status.textContent = 'Select and copy the highlighted code to share it.';
       } finally { button.disabled = false; }
     });
@@ -1169,7 +1169,7 @@
     const root = $("ndcRenewalOffer");
     if (!root || !window.NDCOfferCode) return;
     offerWidget = NDCOfferCode.mount(root, {
-      request: code => api('/api/panel/offers/preview', {method:'POST', body:JSON.stringify({code})}), isBusy: () => paymentBusy,
+      request: code => api('/api/panel/offers/preview', { method: 'POST', body: JSON.stringify({ code }) }), isBusy: () => paymentBusy,
       onApply: offer => {
         const plan = [...document.querySelectorAll('input[name="renewalPlan"]')].find(n => n.value === offer.planId);
         const months = [...document.querySelectorAll('input[name="renewalMonths"]')].find(n => Number(n.value) === offer.months);
@@ -1206,7 +1206,7 @@
 
   async function renewSubscription(event) {
     event.preventDefault();
-    if(offerWidget?.isLoading() || offerWidget?.hasUnapplied()) { $("ndcRenewalStatus").textContent = 'Apply or remove your offer code before continuing.'; return; }
+    if (offerWidget?.isLoading() || offerWidget?.hasUnapplied()) { $("ndcRenewalStatus").textContent = 'Apply or remove your offer code before continuing.'; return; }
     await startRenewalPayment(document.querySelector('input[name="renewalPlan"]:checked').value, Number(document.querySelector('input[name="renewalMonths"]:checked').value), "ndcRenewalStatus");
   }
 
@@ -1232,7 +1232,7 @@
     message("Creating secure payment order…");
     try {
       const result = await api("/api/panel/payments/orders", {
-        method: "POST", body: JSON.stringify({ planId, months, ...(statusId === "ndcRenewalStatus" && appliedOffer?.planId === planId && appliedOffer?.months === months ? {offerCode:appliedOffer.code} : {}) })
+        method: "POST", body: JSON.stringify({ planId, months, ...(statusId === "ndcRenewalStatus" && appliedOffer?.planId === planId && appliedOffer?.months === months ? { offerCode: appliedOffer.code } : {}) })
       });
       const order = result.data || result;
       if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error("Invalid payment order response.");
@@ -1314,7 +1314,7 @@
 
   document.addEventListener("DOMContentLoaded", async () => {
 
-    document.addEventListener("change", e => { if (e.target?.name === "renewalPlan" || e.target?.name === "renewalMonths") { if(appliedOffer) offerWidget?.clear("Offer removed because your selection changed."); renewalTotal(); } });
+    document.addEventListener("change", e => { if (e.target?.name === "renewalPlan" || e.target?.name === "renewalMonths") { if (appliedOffer) offerWidget?.clear("Offer removed because your selection changed."); renewalTotal(); } });
     document.addEventListener("submit", e => {
       if (e.target?.id === "ndcRenewalForm") renewSubscription(e);
       if (e.target?.id === "ndcPasswordForm") changePassword(e);
