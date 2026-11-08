@@ -65,6 +65,8 @@
     <script src="screenshots-showcase.js" defer></script>
     <link rel="stylesheet" href="landing-redesign.css?v=20261108-contact-20261107-login3" />
     <script src="landing-redesign.js?v=20261107-login3" defer></script>
+      <link rel="stylesheet" href="preview-showcase.css" />
+    <script src="preview-showcase.js" defer></script>
   </head>
   <body class="ndc-redesign">
     <svg
@@ -615,20 +617,18 @@
         </div>
       </section>
 
-      <section class="section ndc-document-preview-showcase" aria-labelledby="ndcPreviewFeatureTitle">
-  <div class="container">
-    <div class="section-head"><span class="eyebrow">NEW · DOCUMENT REVIEW</span><h2 id="ndcPreviewFeatureTitle">See your documents before the next step.</h2><p>Open PDFs and images across the entire workspace, then use Close preview to return to your files.</p></div>
-    <div class="feature-grid">
-      <article class="feature"><h3>Preview from every file list</h3><p>Review documents in your workspace, in the customer root-folder selection list, and in the upload monitor. Prepared files show the copy being sent to VAHAN.</p></article>
-      <article class="feature"><h3>Cancel preparation</h3><p>Stop document preparation with one button. Its red hover state makes the action clear. Processing stops at a safe point, completed documents stay available, and queued uploads do not start.</p></article>
-      <article class="feature"><h3>Try a full-screen preview</h3><p>Explore the viewer using a sample document. This demo does not access your local files.</p><button type="button" class="btn" id="ndcTryDocumentPreview">Preview sample document</button></article>
-    </div>
-  </div>
-</section>
-<dialog id="ndcSamplePreview" aria-label="Sample document preview" style="position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:24px;box-sizing:border-box;background:#111827;color:#fff;border:0;">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;"><strong>Sample document · demonstration only</strong><button type="button" class="btn" id="ndcCloseDocumentPreview">Close preview</button></div>
-  <div style="height:calc(100% - 70px);overflow:auto;display:grid;place-items:center;padding:20px;box-sizing:border-box;"><article style="width:min(100%,600px);min-height:60vh;padding:36px;box-sizing:border-box;background:#fff;color:#172033;box-shadow:0 10px 40px #0006;"><p>SAMPLE DOCUMENT</p><h2>Review with confidence</h2><hr><p>Open a PDF or image from any supported document list in the extension.</p><p>Check that the scan is readable and belongs to the correct customer before continuing.</p><p><strong>Demonstration only — no customer information.</strong></p></article></div>
-</dialog>
+      <section class="ndc-document-preview-showcase" id="document-preview" aria-labelledby="ndcPreviewFeatureTitle">
+        <div class="container">
+          <div class="section-head"><div class="kicker">EXPLORE THE WORKSPACE</div><h2 class="section-title" id="ndcPreviewFeatureTitle">Every document.<br><span class="gold">A clearer next step.</span></h2><p class="section-desc">Choose a file, review the prepared copy, and follow its progress. Try the updated settings and make the workflow your own.</p></div>
+          <div class="ndc-demo" id="ndcInteractiveDemo">
+            <div class="ndc-demo-top"><div><span class="ndc-demo-mark">ND</span><strong>VAHAN TOOL <small>Interactive workspace</small></strong></div><span class="ndc-demo-badge">SAMPLE SESSION</span></div>
+            <div class="ndc-demo-layout"><aside class="ndc-demo-sidebar"><span class="ndc-demo-caption">YOUR WORKSPACE</span><button type="button" data-demo-view="workspace" aria-pressed="true">▤ Documents</button><button type="button" data-demo-view="folder" aria-pressed="false">▱ Customer folder</button><button type="button" data-demo-view="monitor" aria-pressed="false">↥ Upload monitor</button><button type="button" data-demo-view="settings" aria-pressed="false">⚙ Settings</button><p>Prepared locally.<br>Originals stay unchanged.</p></aside><div class="ndc-demo-content" id="ndcDemoContent"></div></div>
+            <div class="ndc-demo-footer"><span>Demonstration only · No customer files or portal access</span><button type="button" id="ndcDemoReset">Reset demo ↻</button></div>
+          </div>
+          <div class="ndc-demo-benefits"><article><span>01 / REVIEW</span><h3>Preview wherever you work</h3><p>Open a PDF or image from documents, customer folders, or the upload monitor.</p></article><article><span>02 / CONTROL</span><h3>Pause the next step</h3><p>Cancel preparation safely. Completed files remain available and queued uploads stay stopped.</p></article><article><span>03 / PERSONALIZE</span><h3>Your workflow, your settings</h3><p>Explore preferences, log contents, filename hints, and session details.</p></article></div>
+        </div>
+      </section>
+      <dialog id="ndcSamplePreview" class="ndc-demo-viewer" aria-labelledby="ndcViewerTitle"><header><div><small>DOCUMENT PREVIEW · SAMPLE</small><strong id="ndcViewerTitle">Address proof.pdf</strong></div><button type="button" id="ndcCloseDocumentPreview">✕ <span>Close preview</span></button></header><div class="ndc-demo-viewer-body"><article class="ndc-demo-paper" id="ndcDemoPaper"></article></div><footer>Sample document · Demonstration only · Originals stay unchanged</footer></dialog>
 <section
         class="ndc-latest-features"
         id="latest-features"
