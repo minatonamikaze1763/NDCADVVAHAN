@@ -82,3 +82,11 @@
   files.forEach(file => file.addEventListener('change', update));
   update();
 })();
+
+(() => {
+  const dialog = document.getElementById('ndcSamplePreview');
+  const trigger = document.getElementById('ndcTryDocumentPreview');
+  trigger?.addEventListener('click', () => dialog.showModal());
+  document.getElementById('ndcCloseDocumentPreview')?.addEventListener('click', () => dialog.close());
+  dialog?.addEventListener('close', () => trigger.focus());
+})();
