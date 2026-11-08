@@ -61,12 +61,12 @@
     <link rel="stylesheet" href="offer-code.css" />
     <link rel="stylesheet" href="offers-showcase.css" />
     <link rel="stylesheet" href="reviews-showcase.css" />
-    <link rel="stylesheet" href="screenshots-showcase.css" />
-    <script src="screenshots-showcase.js" defer></script>
+    <link rel="stylesheet" href="screenshots-showcase.css?v=520-current" />
+    <script src="screenshots-showcase.js?v=520-current" defer></script>
     <link rel="stylesheet" href="landing-redesign.css?v=20261108-contact-20261107-login3" />
     <script src="landing-redesign.js?v=20261107-login3" defer></script>
-      <link rel="stylesheet" href="preview-showcase.css" />
-    <script src="preview-showcase.js" defer></script>
+      <link rel="stylesheet" href="preview-showcase.css?v=520-current" />
+    <script src="preview-showcase.js?v=520-current" defer></script>
   </head>
   <body class="ndc-redesign">
     <svg
@@ -225,143 +225,7 @@
               <span><i></i> A CLOSER LOOK AT YOUR WORKSPACE</span
               ><span>01 / 03</span>
             </div>
-            <div
-              class="ndc-workspace-preview"
-              aria-label="Interactive illustration of the updated extension, using sample documents"
-            >
-              <div class="ndc-landing-preview-top">
-                <img src="logo.png" width="36" height="36" alt="NDC" />
-                <div>
-                  <strong>VAHAN NDC TOOL <span>5.2.0</span></strong
-                  ><small>Vehicle registration document uploader</small>
-                </div>
-                <button
-                  type="button"
-                  class="ndc-landing-preview-settings"
-                  aria-label="Preview workspace settings"
-                  aria-controls="ndcPreviewSettings"
-                  aria-expanded="false"
-                >
-                  <svg class="ndc-icon" aria-hidden="true">
-                    <use href="#ndc-i-settings" />
-                  </svg>
-                </button>
-              </div>
-              <div id="ndcPreviewDocuments">
-                <div class="ndc-landing-preview-welcome">
-                  <small>YOUR DOCUMENT WORKSPACE</small>
-                  <h2>Welcome back, <span>Team.</span></h2>
-                  <p>Prepare your documents and keep every step in view.</p>
-                </div>
-                <ol class="ndc-landing-preview-stages">
-                  <li class="done"><b>✓</b> Select</li>
-                  <li class="done"><b>✓</b> Prepare</li>
-                  <li class="current"><b>3</b> Upload</li>
-                </ol>
-                <div class="ndc-landing-preview-picker">
-                  <svg class="ndc-icon" aria-hidden="true">
-                    <use href="#ndc-i-file" />
-                  </svg>
-                  <div>
-                    <strong>Add your documents</strong
-                    ><small>PDF or images · Up to 12 files</small>
-                  </div>
-                  <span
-                    ><svg class="ndc-icon" aria-hidden="true">
-                      <use href="#ndc-i-plus" /></svg
-                  ></span>
-                </div>
-                <div class="ndc-landing-preview-total">
-                  <span>3 documents prepared</span
-                  ><strong>Ready to upload</strong>
-                </div>
-                <div class="ndc-landing-preview-files">
-                  <div>
-                    <svg class="ndc-icon" aria-hidden="true">
-                      <use href="#ndc-i-file" /></svg
-                    ><span
-                      ><strong>Address proof.pdf</strong
-                      ><small>Address Proof · 248 KB</small></span
-                    ><b>Ready</b>
-                  </div>
-                  <div>
-                    <svg class="ndc-icon" aria-hidden="true">
-                      <use href="#ndc-i-file" /></svg
-                    ><span
-                      ><strong>Insurance.pdf</strong
-                      ><small>Insurance Certificate · 186 KB</small></span
-                    ><b>Ready</b>
-                  </div>
-                  <div>
-                    <svg class="ndc-icon" aria-hidden="true">
-                      <use href="#ndc-i-file" /></svg
-                    ><span
-                      ><strong>Dealer invoice.pdf</strong
-                      ><small>Dealer Invoice · 312 KB</small></span
-                    ><b>Ready</b>
-                  </div>
-                </div>
-                <div class="ndc-landing-preview-tags">
-                  <span>✓ Automatic upload</span><span>✓ Skip existing</span>
-                </div>
-                <div class="ndc-landing-preview-start">
-                  Start uploading
-                  <svg class="ndc-icon" aria-hidden="true">
-                    <use href="#ndc-i-arrow" />
-                  </svg>
-                </div>
-                <div class="ndc-landing-preview-bottom">
-                  <span>Prepared locally. Originals stay unchanged.</span
-                  ><span>⇩ ZIP</span>
-                </div>
-              </div>
-              <div id="ndcPreviewSettings" hidden>
-                <button class="ndc-landing-preview-back" type="button">
-                  ← Back to documents
-                </button>
-                <div class="ndc-landing-preview-welcome">
-                  <small>MAKE IT YOURS</small>
-                  <h2>Workspace settings</h2>
-                  <p>Your preferences, document guide, and session activity.</p>
-                </div>
-                <div class="ndc-landing-preview-tabs">
-                  <span>Preferences</span><span>Log contents</span
-                  ><span>Filename hints</span><span>Session</span>
-                </div>
-                <div class="ndc-landing-preview-setting-row">
-                  <span
-                    ><strong>Convert images to PDF</strong
-                    ><small
-                      >Prepare supported images within 400 KB.</small
-                    ></span
-                  ><i></i>
-                </div>
-                <div class="ndc-landing-preview-setting-row">
-                  <span
-                    ><strong>Automatic upload</strong
-                    ><small
-                      >Start once your documents are prepared.</small
-                    ></span
-                  ><i class="on"></i>
-                </div>
-                <div class="ndc-landing-preview-setting-row">
-                  <span
-                    ><strong>Skip already uploaded documents</strong
-                    ><small>Keep existing documents in place.</small></span
-                  ><i class="on"></i>
-                </div>
-                <div class="ndc-landing-preview-setting-row">
-                  <span
-                    ><strong>Automatic file movement &amp; submission</strong
-                    ><small>Choose how your workflow finishes.</small></span
-                  ><i></i>
-                </div>
-                <p class="ndc-landing-preview-sample-note">
-                  Illustrative settings preview. Your preferences are managed in
-                  the extension.
-                </p>
-              </div>
-            </div>
+            <div class="ndc-source-hero" id="ndcHeroMockup"></div>
             <div class="ndc-scene-foot">
               <span
                 ><svg class="ndc-icon" aria-hidden="true">
@@ -371,7 +235,7 @@
               ><a href="#screenshots">See real screenshots ↗</a>
             </div>
             <p class="ndc-scene-disclaimer">
-              Illustrative preview · Sample documents · Try the settings icon
+              Workspace preview · Sample documents · Try Settings
             </p>
           </div>
         </div>
@@ -619,16 +483,15 @@
 
       <section class="ndc-document-preview-showcase" id="document-preview" aria-labelledby="ndcPreviewFeatureTitle">
         <div class="container">
-          <div class="section-head"><div class="kicker">EXPLORE THE WORKSPACE</div><h2 class="section-title" id="ndcPreviewFeatureTitle">Every document.<br><span class="gold">A clearer next step.</span></h2><p class="section-desc">Choose a file, review the prepared copy, and follow its progress. Try the updated settings and make the workflow your own.</p></div>
-          <div class="ndc-demo" id="ndcInteractiveDemo">
-            <div class="ndc-demo-top"><div><span class="ndc-demo-mark">ND</span><strong>VAHAN TOOL <small>Interactive workspace</small></strong></div><span class="ndc-demo-badge">SAMPLE SESSION</span></div>
-            <div class="ndc-demo-layout"><aside class="ndc-demo-sidebar"><span class="ndc-demo-caption">YOUR WORKSPACE</span><button type="button" data-demo-view="workspace" aria-pressed="true">▤ Documents</button><button type="button" data-demo-view="folder" aria-pressed="false">▱ Customer folder</button><button type="button" data-demo-view="monitor" aria-pressed="false">↥ Upload monitor</button><button type="button" data-demo-view="settings" aria-pressed="false">⚙ Settings</button><p>Prepared locally.<br>Originals stay unchanged.</p></aside><div class="ndc-demo-content" id="ndcDemoContent"></div></div>
-            <div class="ndc-demo-footer"><span>Demonstration only · No customer files or portal access</span><button type="button" id="ndcDemoReset">Reset demo ↻</button></div>
+          <div class="section-head"><div class="kicker">EXPLORE THE WORKSPACE</div><h2 class="section-title" id="ndcPreviewFeatureTitle">Every document.<br><span class="gold">A clearer next step.</span></h2><p class="section-desc">Take a closer look at document review, progress, and the updated settings. Try the tabs and sample preview controls.</p></div>
+          <div class="ndc-source-showcase" id="ndcInteractiveDemo">
+            <div class="ndc-source-toolbar" aria-label="Explore extension screens"><button type="button" data-scene="documents" aria-pressed="true">Documents</button><button type="button" data-scene="folder" aria-pressed="false">Customer folder</button><button type="button" data-scene="matching" aria-pressed="false">Prepared files</button><button type="button" data-scene="preparation" aria-pressed="false">Cancel preparation</button><button type="button" data-scene="monitor-progress" aria-pressed="false">Upload monitor</button><button type="button" data-scene="preferences" aria-pressed="false">Settings</button><button type="button" data-scene="log-upload" aria-pressed="false">Final log</button></div>
+            <div class="ndc-source-stage"><div id="ndcLimitedPreview" class="ndc-limited-preview" aria-live="polite"></div></div>
+            <div class="ndc-source-note"><span>Illustrative preview · Sample data · Display controls only</span><button type="button" id="ndcSourceReset">Reset preview ↻</button></div>
           </div>
           <div class="ndc-demo-benefits"><article><span>01 / REVIEW</span><h3>Preview wherever you work</h3><p>Open a PDF or image from documents, customer folders, or the upload monitor.</p></article><article><span>02 / CONTROL</span><h3>Pause the next step</h3><p>Cancel preparation safely. Completed files remain available and queued uploads stay stopped.</p></article><article><span>03 / PERSONALIZE</span><h3>Your workflow, your settings</h3><p>Explore preferences, log contents, filename hints, and session details.</p></article></div>
         </div>
       </section>
-      <dialog id="ndcSamplePreview" class="ndc-demo-viewer" aria-labelledby="ndcViewerTitle"><header><div><small>DOCUMENT PREVIEW · SAMPLE</small><strong id="ndcViewerTitle">Address proof.pdf</strong></div><button type="button" id="ndcCloseDocumentPreview">✕ <span>Close preview</span></button></header><div class="ndc-demo-viewer-body"><article class="ndc-demo-paper" id="ndcDemoPaper"></article></div><footer>Sample document · Demonstration only · Originals stay unchanged</footer></dialog>
 <section
         class="ndc-latest-features"
         id="latest-features"
@@ -883,10 +746,10 @@
                 aria-label="View member access screenshot"
               >
                 <img
-                  src="screenshots/01-member-access.png"
+                  src="screenshots/01-member-access.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: member access, shown with sample data"
+                  alt="VAHAN 5.2.0 — Member access with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -906,10 +769,10 @@
                 aria-label="View document selection screenshot"
               >
                 <img
-                  src="screenshots/02-document-selection.png"
+                  src="screenshots/02-document-selection.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: document selection, shown with sample data"
+                  alt="VAHAN 5.2.0 — Document selection with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -926,13 +789,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="2"
-                aria-label="View automatic document matching screenshot"
+                aria-label="View document matching & previews screenshot"
               >
                 <img
-                  src="screenshots/03-document-matching.png"
+                  src="screenshots/03-document-matching.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: automatic document matching, shown with sample data"
+                  alt="VAHAN 5.2.0 — Document matching & previews with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -941,7 +804,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">03</span>
-                <h3>Automatic document matching</h3>
+                <h3>Document matching & previews</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="documents">
@@ -949,13 +812,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="3"
-                aria-label="View local document preparation screenshot"
+                aria-label="View preparation & cancellation screenshot"
               >
                 <img
-                  src="screenshots/04-local-preparation.png"
+                  src="screenshots/04-local-preparation.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: local document preparation, shown with sample data"
+                  alt="VAHAN 5.2.0 — Preparation & cancellation with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -964,7 +827,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">04</span>
-                <h3>Local document preparation</h3>
+                <h3>Preparation & cancellation</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="documents">
@@ -975,10 +838,10 @@
                 aria-label="View upload progress screenshot"
               >
                 <img
-                  src="screenshots/05-upload-progress.png"
+                  src="screenshots/05-upload-progress.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: upload progress, shown with sample data"
+                  alt="VAHAN 5.2.0 — Upload progress with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -998,10 +861,10 @@
                 aria-label="View upload complete screenshot"
               >
                 <img
-                  src="screenshots/06-upload-complete.png"
+                  src="screenshots/06-upload-complete.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: upload complete, shown with sample data"
+                  alt="VAHAN 5.2.0 — Upload complete with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1018,13 +881,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="6"
-                aria-label="View conversion settings screenshot"
+                aria-label="View workspace preferences screenshot"
               >
                 <img
-                  src="screenshots/07-conversion-settings.png"
+                  src="screenshots/07-conversion-settings.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: conversion settings, shown with sample data"
+                  alt="VAHAN 5.2.0 — Workspace preferences with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1033,7 +896,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">07</span>
-                <h3>Conversion settings</h3>
+                <h3>Workspace preferences</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="workspace">
@@ -1041,13 +904,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="7"
-                aria-label="View submission settings screenshot"
+                aria-label="View log contents settings screenshot"
               >
                 <img
-                  src="screenshots/08-submission-settings.png"
+                  src="screenshots/08-submission-settings.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: submission settings, shown with sample data"
+                  alt="VAHAN 5.2.0 — Log contents settings with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1056,7 +919,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">08</span>
-                <h3>Submission settings</h3>
+                <h3>Log contents settings</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="documents">
@@ -1064,13 +927,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="8"
-                aria-label="View address proof filename guide screenshot"
+                aria-label="View customer folder selection screenshot"
               >
                 <img
-                  src="screenshots/09-address-proof-guide.png"
+                  src="screenshots/09-address-proof-guide.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: address proof filename guide, shown with sample data"
+                  alt="VAHAN 5.2.0 — Customer folder selection with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1079,7 +942,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">09</span>
-                <h3>Address proof filename guide</h3>
+                <h3>Customer folder selection</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="documents">
@@ -1087,13 +950,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="9"
-                aria-label="View document filename guide screenshot"
+                aria-label="View full-screen document preview screenshot"
               >
                 <img
-                  src="screenshots/10-document-name-guide.png"
+                  src="screenshots/10-document-name-guide.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: document filename guide, shown with sample data"
+                  alt="VAHAN 5.2.0 — Full-screen document preview with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1102,7 +965,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">10</span>
-                <h3>Document filename guide</h3>
+                <h3>Full-screen document preview</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="monitor">
@@ -1110,13 +973,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="10"
-                aria-label="View document upload monitor screenshot"
+                aria-label="View document monitor screenshot"
               >
                 <img
-                  src="screenshots/11-document-monitor.png"
+                  src="screenshots/11-document-monitor.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: document upload monitor, shown with sample data"
+                  alt="VAHAN 5.2.0 — Document monitor with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1125,7 +988,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">11</span>
-                <h3>Document upload monitor</h3>
+                <h3>Document monitor</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="monitor">
@@ -1136,10 +999,10 @@
                 aria-label="View skipped documents screenshot"
               >
                 <img
-                  src="screenshots/12-skipped-documents.png"
+                  src="screenshots/12-skipped-documents.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: skipped documents, shown with sample data"
+                  alt="VAHAN 5.2.0 — Skipped documents with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1159,10 +1022,10 @@
                 aria-label="View minimized monitor screenshot"
               >
                 <img
-                  src="screenshots/13-minimized-monitor.png"
+                  src="screenshots/13-minimized-monitor.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: minimized monitor, shown with sample data"
+                  alt="VAHAN 5.2.0 — Minimized monitor with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1182,10 +1045,10 @@
                 aria-label="View review required screenshot"
               >
                 <img
-                  src="screenshots/14-review-required.png"
+                  src="screenshots/14-review-required.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: review required, shown with sample data"
+                  alt="VAHAN 5.2.0 — Review required with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1205,10 +1068,10 @@
                 aria-label="View final upload log screenshot"
               >
                 <img
-                  src="screenshots/15-final-upload-log.png"
+                  src="screenshots/15-final-upload-log.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: final upload log, shown with sample data"
+                  alt="VAHAN 5.2.0 — Final upload log with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1225,13 +1088,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="15"
-                aria-label="View final submission summary screenshot"
+                aria-label="View final submission log screenshot"
               >
                 <img
-                  src="screenshots/16-final-submission-log.png"
+                  src="screenshots/16-final-submission-log.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: final submission summary, shown with sample data"
+                  alt="VAHAN 5.2.0 — Final submission log with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1240,7 +1103,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">16</span>
-                <h3>Final submission summary</h3>
+                <h3>Final submission log</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="logs">
@@ -1251,10 +1114,10 @@
                 aria-label="View copy final details screenshot"
               >
                 <img
-                  src="screenshots/17-copy-final-details.png"
+                  src="screenshots/17-copy-final-details.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: copy final details, shown with sample data"
+                  alt="VAHAN 5.2.0 — Copy final details with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1271,13 +1134,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="17"
-                aria-label="View two-second progress message screenshot"
+                aria-label="View two-second progress indicator screenshot"
               >
                 <img
-                  src="screenshots/18-two-second-progress.png"
+                  src="screenshots/18-two-second-progress.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: two-second progress message, shown with sample data"
+                  alt="VAHAN 5.2.0 — Two-second progress indicator with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1286,7 +1149,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">18</span>
-                <h3>Two-second progress message</h3>
+                <h3>Two-second progress indicator</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="indicators">
@@ -1294,13 +1157,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="18"
-                aria-label="View two-second success message screenshot"
+                aria-label="View two-second success indicator screenshot"
               >
                 <img
-                  src="screenshots/19-two-second-success.png"
+                  src="screenshots/19-two-second-success.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: two-second success message, shown with sample data"
+                  alt="VAHAN 5.2.0 — Two-second success indicator with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1309,7 +1172,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">19</span>
-                <h3>Two-second success message</h3>
+                <h3>Two-second success indicator</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="indicators">
@@ -1317,13 +1180,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="19"
-                aria-label="View two-second attention message screenshot"
+                aria-label="View two-second attention indicator screenshot"
               >
                 <img
-                  src="screenshots/20-two-second-attention.png"
+                  src="screenshots/20-two-second-attention.png?v=520-current"
                   width="2400"
                   height="1500"
-                  alt="VAHAN NDC Tool: two-second attention message, shown with sample data"
+                  alt="VAHAN 5.2.0 — Two-second attention indicator with sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1332,7 +1195,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">20</span>
-                <h3>Two-second attention message</h3>
+                <h3>Two-second attention indicator</h3>
               </figcaption>
             </figure>
           </div>
@@ -1683,9 +1546,9 @@
           <button
             type="button"
             class="ndc-viewer-close"
-            aria-label="Close screenshot viewer"
+            aria-label="Close preview"
           >
-            Close ×
+            ✕ Close preview
           </button>
         </div>
         <div class="ndc-viewer-image">
@@ -1698,8 +1561,6 @@
             aria-label="Previous screenshot"
           >
             ← Previous</button
-          ><a id="ndcShotOriginal" target="_blank" rel="noopener"
-            >Open original ↗</a
           ><button type="button" id="ndcShotNext" aria-label="Next screenshot">
             Next →
           </button>

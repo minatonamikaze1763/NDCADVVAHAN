@@ -25,17 +25,6 @@
   });
   // Align the existing menu's resize behavior with this design's breakpoint.
   matchMedia('(min-width: 1181px)').addEventListener('change', event => { if (event.matches) closeNav(); });
-  const settingsButton = document.querySelector('.ndc-landing-preview-settings');
-  const documents = document.getElementById('ndcPreviewDocuments');
-  const settings = document.getElementById('ndcPreviewSettings');
-  const showSettings = open => {
-    documents.hidden = open;
-    settings.hidden = !open;
-    settingsButton.setAttribute('aria-expanded', String(open));
-    settingsButton.setAttribute('aria-label', open ? 'Preview document workspace' : 'Preview workspace settings');
-  };
-  settingsButton?.addEventListener('click', () => showSettings(settings.hidden));
-  document.querySelector('.ndc-landing-preview-back')?.addEventListener('click', () => { showSettings(false); settingsButton.focus(); });
   const passwordToggle = document.querySelector('.ndc-password-toggle');
   passwordToggle?.addEventListener('click', () => {
     const password = document.getElementById('ndcLoginPassword');

@@ -6,7 +6,7 @@
   const cards = [...section.querySelectorAll('.ndc-shot')];
   const filters = [...section.querySelectorAll('[data-shot-filter]')];
   const image = document.getElementById('ndcShotImage');
-  let selected = 0;
+  let selected = 0, opener;
   const visible = () => cards.map((card, index) => card.hidden ? -1 : index).filter(index => index >= 0);
   function display(index) {
     selected = index;
@@ -17,7 +17,7 @@
     document.getElementById('ndcShotTitle').textContent = card.querySelector('h3').textContent;
     const items = visible();
     document.getElementById('ndcShotPosition').textContent = `${items.indexOf(index) + 1} / ${items.length}`;
-    document.getElementById('ndcShotOriginal').href = image.src;
+
   }
   function move(direction) {
     const items = visible();
@@ -31,12 +31,14 @@
     document.getElementById('ndcShotCount').textContent = `${count} screenshot${count === 1 ? '' : 's'}`;
   }));
   cards.forEach((card, index) => card.querySelector('button').addEventListener('click', () => {
+    opener = card.querySelector('button');
     display(index);
     dialog.showModal();
+    dialog.querySelector('.ndc-viewer-close').focus();
     document.documentElement.classList.add('ndc-gallery-open');
   }));
   dialog.querySelector('.ndc-viewer-close').addEventListener('click', () => dialog.close());
-  dialog.addEventListener('close', () => document.documentElement.classList.remove('ndc-gallery-open'));
+  dialog.addEventListener('close', () => {document.documentElement.classList.remove('ndc-gallery-open');opener?.focus();});
   dialog.addEventListener('click', event => {
     const rect = dialog.getBoundingClientRect();
     if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) dialog.close();
