@@ -1,0 +1,25 @@
+.ndc-brand-logo{object-fit:contain;border-radius:10px}.ndc-menu-toggle,.ndc-menu-close,.ndc-mobile-logo,.ndc-menu-backdrop{display:none}.ndc-ip-alias{display:grid;gap:8px;margin:16px 0;overflow-wrap:anywhere}.ndc-ip-alias input{width:100%;min-height:44px;padding:12px;color:inherit;background:#151515;border:1px solid #49402d;border-radius:10px}
+@media(max-width:760px){
+body.ndc-menu-open{overflow:hidden}
+.ndc-portal-overlay .ndc-sidebar{position:fixed;inset:0 0 0 auto;width:min(340px,90vw);height:100dvh;padding:24px;z-index:1002;background:#101010;overflow-y:auto;visibility:hidden;transform:translateX(100%);transition:transform .2s,visibility .2s;border-left:1px solid #443c2c}
+.ndc-portal-overlay .ndc-sidebar.is-open{visibility:visible;transform:translateX(0)}
+.ndc-portal-overlay .ndc-sidebar-brand{padding:36px 0 24px;display:flex;gap:12px}
+.ndc-portal-overlay .ndc-sidebar-bottom{display:block;margin-top:24px}
+.ndc-portal-overlay .ndc-side-nav{display:grid;overflow:visible;gap:6px}
+.ndc-portal-overlay .ndc-side-nav button{width:100%;min-height:46px;text-align:left;font-size:14px}
+.ndc-portal-overlay .ndc-side-nav button span{display:inline-block}
+.ndc-menu-close{display:block;position:absolute;right:18px;top:14px;background:transparent;color:white;border:1px solid #49402d;border-radius:10px;width:44px;height:44px}
+.ndc-menu-backdrop:not([hidden]){display:block;position:fixed;inset:0;width:100%;height:100dvh;background:#000a;z-index:1001;border:0}
+.ndc-portal-overlay .ndc-portal-topbar{display:flex;flex-wrap:nowrap;gap:12px;padding:14px 16px;position:sticky;top:0;z-index:20;background:#101010}
+.ndc-mobile-logo{display:block;object-fit:contain;flex-shrink:0;border-radius:9px}
+.ndc-portal-topbar>div:first-of-type{min-width:0;flex:1}.ndc-portal-topbar .ndc-eyebrow{font-size:9px;letter-spacing:1px}.ndc-portal-topbar b{font-size:14px;overflow-wrap:anywhere}
+.ndc-menu-toggle{display:flex;align-items:center;gap:6px;min-height:44px;padding:10px 12px;border:1px solid #665634;border-radius:10px;background:#242017;color:#f5dfaa;margin-left:auto}
+.ndc-portal-overlay .ndc-topbar-right{display:none}
+.ndc-portal-overlay .ndc-dashboard-content{padding:22px 16px 32px;min-width:0}.ndc-portal-overlay .ndc-portal-main{min-width:0}
+.ndc-portal-overlay .ndc-detail-line{flex-wrap:wrap;gap:8px}.ndc-portal-overlay .ndc-detail-line b{overflow-wrap:anywhere;min-width:0}
+.ndc-portal-overlay :is(.ndc-membership-head,.ndc-referral-top,.ndc-session){flex-wrap:wrap;gap:16px}.ndc-portal-overlay :is(.ndc-referral-ticket,.ndc-membership-dates,.ndc-stat-grid){grid-template-columns:minmax(0,1fr)}
+.ndc-portal-overlay :is(input,select,textarea){font-size:16px;max-width:100%}.ndc-portal-overlay .ndc-panel-card{padding:20px 16px}.ndc-portal-overlay table{display:block;max-width:100%;overflow-x:auto}
+}
+@media(prefers-reduced-motion:reduce){.ndc-portal-overlay .ndc-sidebar{transition:none}}
+
+.ndc-device-alias-form{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin-top:12px}.ndc-device-alias-form label{display:grid;gap:6px;font-size:12px}.ndc-device-alias-form input{background:#171b20;color:#f1f1f1;border:1px solid #363c43;border-radius:8px;padding:10px;min-height:44px;max-width:100%}.ndc-device-alias-form button{min-height:44px}.ndc-device-alias-form [role=status]{flex-basis:100%}

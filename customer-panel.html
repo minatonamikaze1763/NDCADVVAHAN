@@ -12,21 +12,23 @@
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="customer-trust.css?v=20261106-company" />
 
-    <script src="auth.js" defer></script>
+    <script src="auth.js?v=20261108-device-names" defer></script>
     <script src="plan-catalog.js" defer></script>
-    <script src="customer-panel.js?v=20261106-referrals" defer></script>
+    <script src="customer-panel.js?v=20261108-device-names" defer></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="email-tools.js" defer></script>
     <link rel="stylesheet" href="offer-code.css">
+<link rel="stylesheet" href="customer-mobile.css?v=20261108-device-names" />
 </head>
 
   <body>
     <div class="ndc-portal-overlay">
       <div class="ndc-portal-shell">
         <!-- SIDEBAR -->
-        <aside class="ndc-sidebar">
+        <aside class="ndc-sidebar" id="ndcNavigation">
+<button type="button" id="ndcMenuClose" class="ndc-menu-close" aria-label="Close menu">✕</button>
           <div class="ndc-sidebar-brand">
-            <span class="ndc-brand-mark">NDC</span>
+            <img src="logo.png" alt="NDC logo" class="ndc-brand-logo" width="44" height="44" />
 
             <div>
               <b>NEXT DIMENSION</b>
@@ -75,6 +77,8 @@
               <span>⬡</span>
               Security & Status
             </button>
+<button type="button" data-section="contact"><span>✉</span>Contact</button>
+<button type="button" data-menu-logout><span>↪</span>Sign out</button>
           </nav>
 
           <div class="ndc-sidebar-bottom">
@@ -93,14 +97,17 @@
           </div>
         </aside>
 
+<button type="button" id="ndcMenuBackdrop" class="ndc-menu-backdrop" aria-label="Close menu" hidden></button>
         <!-- MAIN DASHBOARD -->
         <main class="ndc-portal-main">
           <header class="ndc-portal-topbar">
+<img src="logo.png" alt="NDC logo" class="ndc-mobile-logo" width="40" height="40" />
             <div>
               <span class="ndc-eyebrow">NEXT DIMENSION CUSTOMS</span>
               <b id="ndcCustomerWelcome">Welcome back</b>
             </div>
 
+<button type="button" id="ndcMenuToggle" class="ndc-menu-toggle" aria-controls="ndcNavigation" aria-expanded="false">☰ Menu</button>
             <div class="ndc-topbar-right">
               <span class="ndc-secure-label"> ● Secure session </span>
 

@@ -471,7 +471,11 @@
 
               <div class="ndc-session-main">
 
-                <b>${sessionTitle}</b>
+                <b>${esc(session.alias || sessionTitle)}</b>
+                <form class="ndc-device-alias-form" data-device-session="${esc(session.id)}" data-device-type="${esc(session.type)}">
+                  <label>Device name<input name="alias" maxlength="80" placeholder="e.g. Nandhu’s laptop" value="${esc(session.alias || '')}" aria-label="Name this device" /></label>
+                  <button type="submit" class="ndc-text-button">Save name</button><small role="status"></small>
+                </form>
 
                 <span>
                   ${esc(
@@ -1034,6 +1038,7 @@
     // INSERT SECTION
     // -------------------------------------------------------
 
+    if (activeSection === "contact") sectionHTML = `<section class="ndc-panel-card"><span class="ndc-eyebrow">WE ARE HERE TO HELP</span><h1>Contact NDC</h1><p>Get help with your account, setup, subscription or payments.</p><a class="ndc-home-button" href="https://wa.me/919052691719" target="_blank" rel="noopener noreferrer">Message support on WhatsApp ↗</a></section>`;
     const content = $("ndcDashboardContent");
 
     if (!content) return;
@@ -1041,6 +1046,15 @@
     if (["profile", "security", "payments"].includes(activeSection)) sectionHTML += emailSettings(account);
     sectionHTML += '<aside class="ndc-security-note" aria-label="Security information"><span class="ndc-security-icon" aria-hidden="true">🔒</span><div><h2>Security information</h2><p>NDC does not store your uploaded documents or the customer and any other details contained in those documents on our server.</p><p>Our server validates the document-upload process so the tool can follow the required upload steps. This validation does not mean your documents or their sensitive contents are stored on our server. Your documents are submitted to the intended Vahan portal only as part of your workflow.</p><p class="ndc-security-foot">Account, subscription and login security records are maintained separately to provide and protect your access. <a href="privacy-policy.html">Read our privacy policy ↗</a></p></div></aside>';
     content.innerHTML = sectionHTML;
+    content.querySelectorAll('.ndc-device-alias-form').forEach(form => form.addEventListener('submit', async event => {
+      event.preventDefault(); const button = form.querySelector('button'), status = form.querySelector('[role="status"]');
+      button.disabled = true;
+      try {
+        await api(`/api/panel/sessions/${encodeURIComponent(form.dataset.deviceSession)}/alias`, { method: "PUT", body: JSON.stringify({ type: form.dataset.deviceType, alias: form.elements.alias.value }) });
+        // Update every row for this device from fresh server data.
+        await loadDashboard();
+      } catch (error) { status.textContent = error.message; button.disabled = false; }
+    }));
     content.querySelector('[data-copy-referral]')?.addEventListener('click', async (event) => {
       const button = event.currentTarget, code = content.querySelector('[data-referral-code]');
       const status = content.querySelector('[data-referral-status]');
@@ -1151,7 +1165,8 @@
       "payments",
       "sessions",
       "features",
-      "security"
+      "security",
+      "contact"
     ];
 
     if (!allowedSections.includes(section)) {
@@ -1313,6 +1328,29 @@
   // ---------------------------------------------------------
 
   document.addEventListener("DOMContentLoaded", async () => {
+    const toggle = $("ndcMenuToggle"), sidebar = $("ndcNavigation"), backdrop = $("ndcMenuBackdrop");
+    function menu(open) {
+      sidebar.classList.toggle("is-open", open); toggle.setAttribute("aria-expanded", String(open));
+      backdrop.hidden = !open; document.body.classList.toggle("ndc-menu-open", open);
+      if (open) $("ndcMenuClose").focus(); else toggle.focus();
+    }
+    toggle.addEventListener("click", () => menu(toggle.getAttribute("aria-expanded") !== "true"));
+    $("ndcMenuClose").addEventListener("click", () => menu(false));
+    backdrop.addEventListener("click", () => menu(false));
+    sidebar.addEventListener("click", event => { if (event.target.closest('[data-section]') && toggle.getAttribute('aria-expanded') === 'true') menu(false); });
+    document.addEventListener("keydown", event => {
+      if (toggle.getAttribute('aria-expanded') !== 'true') return;
+      if (event.key === 'Escape') menu(false);
+      if (event.key === 'Tab') {
+        const items = [...sidebar.querySelectorAll('button, a[href]')].filter(el => el.getClientRects().length);
+        const first = items[0], last = items[items.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
+    });
+    window.matchMedia?.('(max-width: 760px)').addEventListener('change', () => { if (toggle.getAttribute('aria-expanded') === 'true') menu(false); });
+    document.querySelector('[data-menu-logout]').addEventListener('click', () => $("ndcLogoutButton").click());
+
 
     document.addEventListener("change", e => { if (e.target?.name === "renewalPlan" || e.target?.name === "renewalMonths") { if (appliedOffer) offerWidget?.clear("Offer removed because your selection changed."); renewalTotal(); } });
     document.addEventListener("submit", e => {

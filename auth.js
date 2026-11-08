@@ -57,6 +57,11 @@
     }
   }
 
+  function deviceId() {
+    let id = localStorage.getItem("ndc_portal_device_id");
+    if (!id) { id = crypto.randomUUID(); localStorage.setItem("ndc_portal_device_id", id); }
+    return id;
+  }
   async function login(username, password) {
     const cleanUsername = String(username || "").trim().toLowerCase();
     if (!cleanUsername.endsWith("_admin")) {
@@ -65,7 +70,7 @@
     if (!password) throw new Error("Enter your password.");
     const data = await request("/api/panel/auth/login", {
       method: "POST",
-      body: JSON.stringify({ username: cleanUsername, password }),
+      body: JSON.stringify({ username: cleanUsername, password, deviceId: deviceId() }),
     });
     return saveSession(data);
   }
