@@ -379,6 +379,10 @@ section {
   color: var(--light);
   font-size: 19px;
 }
+.feature-icon-merge {
+  font-size: 15px;
+  white-space: nowrap;
+}
 .feature h3 {
   margin: 0 0 8px;
   font-size: 16px;
