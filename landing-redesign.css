@@ -297,3 +297,42 @@
 .ndc-contact-logo { display: block; width: 48px; height: 48px; object-fit: contain; flex-shrink: 0; }
 #contact .ndc-contact-logo-wrap { width: 48px; height: 48px; padding: 0; border: 0; background: transparent; overflow: hidden; }
 .ndc-contact-logo-wrap img { display: block; width: 44px; height: 44px; object-fit: contain; }
+
+/* Keep the filename introduction on the same content rail as the extension section. */
+.ndc-redesign .filename-guide.container { width: min(var(--max), calc(100% - 64px)); margin-inline: auto; scroll-margin-top: 120px; }
+.ndc-redesign .filename-guide > .section-head { margin-inline: 0; padding-inline: 0; }
+.ndc-redesign .filename-guide .section-desc { margin-inline: 0; }
+.ndc-redesign #contact { scroll-margin-top: 120px; }
+.ndc-redesign .ndc-contact { padding: 96px 0 64px; border-top: 1px solid var(--line); background: radial-gradient(ellipse at 15% 40%, #d7b64f08, transparent 60%); }
+.ndc-contact-heading { display: grid; grid-template-columns: 1.15fr 1fr; gap: 64px; align-items: end; margin-bottom: 44px; }
+.ndc-contact-heading .section-title { margin-bottom: 0; }
+.ndc-contact-heading > p { color: var(--muted, #aaa); line-height: 1.8; max-width: 430px; margin: 0 0 6px; }
+.ndc-contact-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 24px; }
+.ndc-contact-main { padding: 40px; border: 1px solid #d7b64f40; border-radius: 22px; background: linear-gradient(135deg, #d7b64f0c, #111 65%); }
+.ndc-contact-brand { display: flex; align-items: center; gap: 14px; font-size: 11px; font-weight: 750; letter-spacing: .08em; }
+.ndc-contact-brand img { object-fit: contain; border-radius: 8px; }
+.ndc-contact-brand small { display: block; color: #aaa; font-size: 11px; font-weight: 400; letter-spacing: 0; margin-top: 5px; }
+.ndc-contact-channel { display: block; color: var(--gold, #d7b64f); font-size: 10px; letter-spacing: .16em; font-weight: 750; margin-top: 40px; }
+.ndc-contact-main h3 { font-size: clamp(28px, 3vw, 38px); letter-spacing: -.04em; line-height: 1.15; margin: 14px 0 18px; }
+.ndc-contact-main > p { color: #aaa; line-height: 1.8; font-size: 14px; max-width: 440px; margin: 0 0 26px; }
+.ndc-contact-main .btn { gap: 24px; }
+.ndc-contact-safety { display: block; font-size: 11px; color: #999; margin-top: 18px; line-height: 1.6; }
+.ndc-contact-options { display: grid; gap: 16px; }
+.ndc-contact-option { display: grid; grid-template-columns: 40px minmax(0,1fr) 18px; gap: 16px; align-items: center; padding: 28px; border: 1px solid #ffffff16; border-radius: 18px; background: #111; color: inherit; text-decoration: none; transition: border-color .2s, background .2s; }
+.ndc-contact-option:hover { border-color: #d7b64f80; background: #17160f; }
+.ndc-contact-option-icon { display: grid; place-items: center; height: 40px; border: 1px solid #d7b64f30; border-radius: 12px; color: #d7b64f; font-size: 21px; }
+.ndc-contact-option small { display: block; font-size: 9px; font-weight: 700; letter-spacing: .12em; color: #d7b64f; }
+.ndc-contact-option strong { display: block; font-size: clamp(13px, 1.2vw, 17px); margin: 10px 0 7px; overflow-wrap: anywhere; }
+.ndc-contact-option span > span { color: #999; font-size: 12px; line-height: 1.6; }
+.ndc-contact-bottom { display: flex; flex-wrap: wrap; gap: 18px 28px; align-items: center; padding-top: 26px; margin-top: 28px; border-top: 1px solid #ffffff12; font-size: 12px; }
+.ndc-contact-bottom > span { color: #999; margin-right: auto; }.ndc-contact-bottom a { color: #d7b64f; text-decoration: none; }
+.ndc-contact :is(a,button):focus-visible { outline: 2px solid #e5c65c; outline-offset: 5px; }
+@media(max-width: 900px) { .ndc-contact-heading { gap: 28px; }.ndc-contact-grid { grid-template-columns: 1fr; }.ndc-contact-options { grid-template-columns: 1fr; } }
+@media(max-width: 600px) {
+.ndc-redesign .filename-guide.container { width: calc(100% - 40px); }
+.ndc-redesign .ndc-contact { padding: 64px 0 40px; }.ndc-contact-heading { grid-template-columns: 1fr; gap: 20px; margin-bottom: 28px; }
+.ndc-contact-main { padding: 26px 22px; }.ndc-contact-option { padding: 22px 18px; gap: 12px; grid-template-columns: 36px minmax(0,1fr) 14px; }
+.ndc-contact-channel { margin-top: 30px; }.ndc-contact-bottom { gap: 18px; }.ndc-contact-bottom > span { width: 100%; }.ndc-contact-main .btn { width: 100%; justify-content: space-between; }
+}
+
+.ndc-redesign .filename-guide > :is(.filename-actions,.filename-systems) { width: 100%; }
