@@ -174,7 +174,7 @@
         <div class="container hero-grid">
           <div class="ndc-hero-content">
             <a class="ndc-hero-announcement" href="#updates"
-              ><span class="ndc-status-dot"></span> MEET YOUR NEW WORKSPACE
+              ><span class="ndc-status-dot"></span> NEW: CUSTOMER FOLDER MATCHING
               <span>v5.2.0 ↗</span></a
             >
             <div class="eyebrow">NDC VAHAN TOOL / BUILT FOR DEALERSHIPS</div>
@@ -186,9 +186,9 @@
               >
             </h1>
             <p class="hero-copy">
-              Turn a folder of documents into a smoother VAHAN workflow.
-              Prepare, match, and upload with less repetitive work — and a clear
-              view of every step.
+              Set your customer root folder once. Find the matching customer
+              documents from the name on VAHAN, choose your files, and prepare
+              them for upload with a clear view of every step.
             </p>
             <div class="hero-actions">
               <a class="btn btn-primary" href="#access"
@@ -214,7 +214,7 @@
             </div>
             <div class="ndc-hero-version">
               <span>v5.2.0</span> Updated
-              <time datetime="2026-11-07">7 Nov 2026</time
+              <time datetime="2026-11-08">8 Nov 2026</time
               ><a href="#updates">What's new ↗</a>
             </div>
           </div>
@@ -402,8 +402,9 @@
             <article class="step">
               <h3>Select Your Documents</h3>
               <p>
-                Choose the required files for the vehicle registration document
-                workflow.
+                Set your customer root folder in Settings → Preferences. Choose
+                documents finds the folder matching the customer name on VAHAN.
+                Pick individual files or select all; manual browsing stays available.
               </p>
             </article>
             <article class="step">
@@ -434,6 +435,32 @@
         </div>
       </section>
 
+      <section id="customer-folders" class="ndc-customer-showcase" aria-labelledby="customerFoldersHeading">
+        <div class="container ndc-customer-grid">
+          <div>
+            <div class="kicker">NEW · CUSTOMER FOLDER MATCHING</div>
+            <h2 class="section-title" id="customerFoldersHeading">Your customer.<br /><span class="gold">Their documents.</span><br />Already found.</h2>
+            <p class="section-desc">Spend less time searching through folders. Choose documents reads the customer name on VAHAN and finds the matching folder under your saved root.</p>
+            <ol class="ndc-customer-steps">
+              <li><strong>Set your root folder once</strong><span>Choose the folder containing your customer folders in Settings → Preferences.</span></li>
+              <li><strong>Match the customer on VAHAN</strong><span>Customer folder names match the name on the page. Case and punctuation do not matter.</span></li>
+              <li><strong>Review, select, and prepare</strong><span>Pick files individually or select all documents. Browse manually is always one click away.</span></li>
+            </ol>
+            <a class="btn btn-primary" href="#access">Get the Chrome extension →</a>
+          </div>
+          <div class="ndc-customer-demo" aria-label="Interactive customer document selector preview">
+            <div class="ndc-customer-demo-heading"><span>TRY THE SELECTOR</span><span>Interactive preview</span></div>
+            <div class="ndc-customer-path">Customer Documents / <strong>Sample Customer</strong></div>
+            <h3>Documents in Sample Customer</h3>
+            <div class="ndc-customer-demo-toolbar"><button type="button" id="customerDemoSelectAll">Select all documents</button><span id="customerDemoCount" role="status" aria-live="polite">0 / 3 selected</span></div>
+            <label class="ndc-customer-demo-file"><input type="checkbox" data-customer-demo-file /><span>INVOICE.pdf<small>PDF document</small></span></label>
+            <label class="ndc-customer-demo-file"><input type="checkbox" data-customer-demo-file /><span>INSURANCE.pdf<small>PDF document</small></span></label>
+            <label class="ndc-customer-demo-file"><input type="checkbox" data-customer-demo-file /><span>CHASSIS.jpg<small>Image document</small></span></label>
+            <p class="ndc-customer-demo-note">Preview only. No local files are accessed here. In the extension, your selection enters the document preparation workflow.</p>
+          </div>
+        </div>
+      </section>
+
       <section id="features">
         <div class="container">
           <div class="section-head">
@@ -448,6 +475,16 @@
             </p>
           </div>
           <div class="features">
+            <article class="feature">
+              <div class="feature-icon" aria-hidden="true">↳</div>
+              <h3>Automatic Customer Folder Matching</h3>
+              <p>Choose your customer root folder once. The extension matches the VAHAN customer name to a folder, ignoring case and punctuation. Browse manually whenever you need another location.</p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon" aria-hidden="true">✓</div>
+              <h3>Select Documents Together</h3>
+              <p>Review supported documents from the matched folder. Select individual files, select all, or deselect all, with a live selection count before adding files to preparation.</p>
+            </article>
             <article class="feature">
               <div class="feature-icon">PDF</div>
               <h3>Optional Auto Image to PDF Conversion</h3>
@@ -2285,8 +2322,8 @@
               What's new in <span class="gold">v5.2.0</span>
             </h2>
             <p class="section-desc">
-              A clearer workspace, easier access to preferences, and more
-              control over your workflow.
+              New customer folder matching, a document selector with Select all,
+              and stacked choose and manual browse controls.
             </p>
           </div>
           <div class="ndc-release-meta">
@@ -2295,10 +2332,15 @@
             >
             <span
               >Last updated:
-              <time datetime="2026-11-07">7 November 2026</time></span
+              <time datetime="2026-11-08">8 November 2026</time></span
             >
           </div>
           <div class="ndc-release-grid">
+            <article class="ndc-release-card">
+              <span class="ndc-release-category">NEW · CUSTOMER FOLDERS</span>
+              <h3>The right customer folder, ready to choose</h3>
+              <p>Save a root folder with read-only access in Settings. Choose documents uses the live customer name on VAHAN to find a matching folder. Review individual files or use Select all documents before adding them.</p>
+            </article>
             <article class="ndc-release-card">
               <span class="ndc-release-category">WORKSPACE</span>
               <h3>A refreshed document workspace</h3>
@@ -2355,6 +2397,14 @@
             </p>
           </div>
           <div class="faq-grid">
+            <details>
+              <summary>How do I set up automatic customer folders?</summary>
+              <p>Open Settings → Preferences → Choose root folder and grant read-only access to the folder containing your customer folders. Name each customer folder like the customer name on VAHAN. Click Choose documents to open the matching folder’s document list. Case and punctuation are ignored; only folders directly inside the root are matched.</p>
+            </details>
+            <details>
+              <summary>What if a customer folder cannot be matched?</summary>
+              <p>The extension shows a message when the name is missing, no folder matches, or multiple folders match. Use Browse manually below Choose documents to select the correct files. Chrome may ask you to restore folder access, and setup can open in a separate workspace tab.</p>
+            </details>
             <details>
               <summary>Can I convert images to PDF?</summary>
               <p>

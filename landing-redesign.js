@@ -62,3 +62,23 @@
     nodes.forEach(node => node.classList.remove('ndc-enter'));
   });
 })();
+
+// An illustrative selector; this never requests access to customer files.
+(() => {
+  const button = document.getElementById('customerDemoSelectAll');
+  const count = document.getElementById('customerDemoCount');
+  const files = [...document.querySelectorAll('[data-customer-demo-file]')];
+  if (!button || !count || !files.length) return;
+  const update = () => {
+    const selected = files.filter(file => file.checked).length;
+    count.textContent = `${selected} / ${files.length} selected`;
+    button.textContent = selected === files.length ? 'Deselect all documents' : 'Select all documents';
+  };
+  button.addEventListener('click', () => {
+    const checked = !files.every(file => file.checked);
+    files.forEach(file => { file.checked = checked; });
+    update();
+  });
+  files.forEach(file => file.addEventListener('change', update));
+  update();
+})();
