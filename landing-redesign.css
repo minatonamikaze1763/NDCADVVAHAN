@@ -365,3 +365,30 @@
 
 .ndc-customer-demo-toolbar #customerDemoAutoImport { background: var(--gold); border-color: var(--gold); color: var(--bg); font-weight: 700; }
 .ndc-customer-demo-toolbar button:focus-visible { outline: 2px solid var(--light); outline-offset: 3px; }
+
+/* Document routes and workspace-opening automation use the NDC landing palette. */
+.ndc-document-choices { padding: 88px 0; border-top: 1px solid var(--line); }
+.ndc-choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.ndc-choice-card { display: flex; flex-direction: column; padding: 26px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+.ndc-choice-card-primary { background: linear-gradient(145deg, #d7b64f12, var(--panel) 65%); border-color: var(--gold); }
+.ndc-choice-number { color: var(--gold); font-size: 10px; font-weight: 700; letter-spacing: .1em; }
+.ndc-choice-card h3 { margin: 14px 0; font-size: 20px; letter-spacing: -.025em; }
+.ndc-choice-card p, .ndc-choice-benefit span { color: var(--muted); font-size: 13px; line-height: 1.85; }
+.ndc-choice-card p { margin: 0 0 20px; }
+.ndc-choice-benefit { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--line); }
+.ndc-choice-benefit strong, .ndc-choice-benefit span { display: block; }
+.ndc-choice-benefit strong { font-size: 13px; margin-bottom: 6px; color: var(--light); }
+.ndc-choice-card > small { margin-top: 18px; color: var(--muted); font-size: 11px; line-height: 1.7; }
+.ndc-choice-footnote { max-width: 850px; margin: 22px 0 36px; color: var(--muted); font-size: 12px; line-height: 1.85; }
+.ndc-opening-automation { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding: 32px; border: 1px solid #ff777740; border-left: 3px solid #ff7777; border-radius: 14px; background: linear-gradient(130deg, #ff777708, var(--panel)); }
+.ndc-automation-badge { display: block; color: #ff9999; font-size: 10px; font-weight: 700; letter-spacing: .09em; }
+.ndc-opening-automation h3 { font-size: 24px; line-height: 1.4; letter-spacing: -.025em; margin: 14px 0 18px; }
+.ndc-opening-automation p, .ndc-automation-controls li span { color: var(--muted); font-size: 13px; line-height: 1.85; }
+.ndc-opening-automation p strong { color: var(--text); }
+.ndc-automation-controls h4 { margin: 0 0 18px; font-size: 16px; }
+.ndc-automation-controls ol { margin: 0; padding-left: 20px; }
+.ndc-automation-controls li { padding-left: 5px; margin-bottom: 16px; color: var(--gold); }
+.ndc-automation-controls li strong, .ndc-automation-controls li span { display: block; }
+.ndc-automation-controls li strong { font-size: 13px; color: var(--text); }
+@media (max-width: 900px) { .ndc-choice-grid { grid-template-columns: 1fr; } .ndc-opening-automation { grid-template-columns: 1fr; gap: 20px; } }
+@media (max-width: 600px) { .ndc-document-choices { padding: 56px 0; } .ndc-choice-card, .ndc-opening-automation { padding: 22px; } .ndc-opening-automation h3 { font-size: 21px; } }

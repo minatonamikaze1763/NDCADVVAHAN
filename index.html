@@ -58,10 +58,10 @@
     <link rel="stylesheet" href="reviews-showcase.css" />
     <link rel="stylesheet" href="screenshots-showcase.css?v=520-current" />
     <script src="screenshots-showcase.js?v=520-current" defer></script>
-    <link rel="stylesheet" href="landing-redesign.css?v=20261109-auto-import" />
-    <script src="landing-redesign.js?v=20261109-auto-import" defer></script>
-      <link rel="stylesheet" href="preview-showcase.css?v=20261109-auto-import" />
-    <script src="preview-showcase.js?v=20261109-auto-import" defer></script>
+    <link rel="stylesheet" href="landing-redesign.css?v=20261109-cx-preference" />
+    <script src="landing-redesign.js?v=20261109-cx-preference" defer></script>
+      <link rel="stylesheet" href="preview-showcase.css?v=20261109-cx-preference" />
+    <script src="preview-showcase.js?v=20261109-cx-preference" defer></script>
   </head>
   <body class="ndc-redesign">
     <svg
@@ -307,7 +307,7 @@
               <li><strong>Match the customer on VAHAN</strong><span>Customer folder names match the name on the page. Case and punctuation do not matter.</span></li>
               <li><strong>Import what is available</strong><span>Auto-import available selects one unique match per category, up to 12. Duplicate matches stay out for manual review. Choose documents lets you preview and select files yourself.</span></li>
             </ol>
-            <a class="btn btn-primary" href="#access">Get the Chrome extension →</a>
+            <a class="btn btn-primary" href="#document-choices">Compare the three document buttons →</a>
           </div>
           <div class="ndc-customer-demo" aria-label="Interactive customer document selector preview">
             <div class="ndc-customer-demo-heading"><span>TRY THE SELECTOR</span><span>Interactive preview</span></div>
@@ -318,6 +318,58 @@
             <label class="ndc-customer-demo-file"><input type="checkbox" data-customer-demo-file /><span>INSURANCE.pdf<small>PDF document</small></span></label>
             <label class="ndc-customer-demo-file"><input type="checkbox" data-customer-demo-file /><span>CHASSIS.jpg<small>Image document</small></span></label>
             <p class="ndc-customer-demo-note">Try auto-import with just 3 sample documents. The extension imports available unique matches without waiting for all 12. This preview never accesses local files.</p>
+          </div>
+        </div>
+      </section>
+
+
+      <section id="document-choices" class="ndc-document-choices" aria-labelledby="documentChoicesHeading">
+        <div class="container">
+          <div class="section-head">
+            <div class="kicker">THREE BUTTONS · THREE WAYS TO START</div>
+            <h2 class="section-title" id="documentChoicesHeading">Review it. <span class="gold">Import it.</span><br />Or browse for it.</h2>
+            <p class="section-desc">Some customers need a closer look. Others have a folder ready to go. The three buttons let you choose how documents enter preparation.</p>
+          </div>
+          <div class="ndc-choice-grid">
+            <article class="ndc-choice-card">
+              <span class="ndc-choice-number">01 / REVIEW FIRST</span>
+              <h3>Choose documents</h3>
+              <p>Finds the folder matching the customer name on VAHAN under your saved root. Opens the available files so you can preview them, tick individual documents or Select all, then add your selection.</p>
+              <div class="ndc-choice-benefit"><strong>Best for careful selection</strong><span>Choose the correct version when a category has multiple files, or select only the documents you need.</span></div>
+              <small>No root folder saved? This button opens the normal file picker.</small>
+            </article>
+            <article class="ndc-choice-card ndc-choice-card-primary">
+              <span class="ndc-choice-number">02 / FEWER CLICKS</span>
+              <h3>Auto-import available</h3>
+              <p>Reads the matched customer folder and imports one unique filename match per document category. Preparation starts immediately. It works with fewer than 12 categories; there is no need to wait for a complete set.</p>
+              <div class="ndc-choice-benefit"><strong>Best for ready customer folders</strong><span>Skip repeated file selection. Categories with multiple matches are skipped so you can review them with Choose documents.</span></div>
+              <small>Requires a saved root folder and read access. Unrecognized files are left for manual selection.</small>
+            </article>
+            <article class="ndc-choice-card">
+              <span class="ndc-choice-number">03 / CHOOSE ANY LOCATION</span>
+              <h3>Browse files manually</h3>
+              <p>Opens the normal file picker directly. Select documents from any location, without using the saved root folder or matching a customer name.</p>
+              <div class="ndc-choice-benefit"><strong>Best for exceptions and extra files</strong><span>Add a document from Downloads, another folder, or a location outside the usual customer folder.</span></div>
+              <small>Your selection enters the same document preparation workflow.</small>
+            </article>
+          </div>
+          <p class="ndc-choice-footnote">All three routes prepare selected files locally. Uploading starts automatically only when Automatic Upload is enabled; otherwise use Start. Your original files stay unchanged.</p>
+          <div class="ndc-opening-automation" aria-labelledby="openingAutomationHeading">
+            <div>
+              <span class="ndc-automation-badge">NEW PREFERENCE · OFF BY DEFAULT</span>
+              <h3 id="openingAutomationHeading">Auto import/prepare/upload matched documents in CX folder</h3>
+              <p>Enable this red-highlighted option in <strong>Settings → Preferences</strong>. After sign-in, opening the document workspace automatically triggers Auto-import available once. The extension matches the customer folder and prepares the available unique matches.</p>
+              <p><strong>Why enable it?</strong> Remove the repeated import click when working through customers whose folders are already organized. Partial sets can start preparation immediately.</p>
+            </div>
+            <div class="ndc-automation-controls">
+              <h4>Choose how far automation goes</h4>
+              <ol>
+                <li><strong>Import on opening</strong><span>The new CX folder preference triggers the import. Save your root folder first; folder permission may still need your click.</span></li>
+                <li><strong>Prepare selected files</strong><span>Preparation follows import. Enable Convert images to PDF separately if you want that format.</span></li>
+                <li><strong>Upload when ready</strong><span>Enable Automatic Upload to continue without pressing Start. Leave it off to review prepared files first.</span></li>
+              </ol>
+              <p>Automatic File Movement &amp; Submission remains a separate preference. The new option does not switch it on or change your upload settings.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -2199,8 +2251,8 @@
               What's new in <span class="gold">v5.2.0</span>
             </h2>
             <p class="section-desc">
-              Available-document auto-import, customer folder matching, and three
-              clear, equally sized document selection buttons.
+              Import available documents, choose how to select them, and optionally
+              start the matched-folder workflow when your workspace opens.
             </p>
           </div>
           <div class="ndc-release-meta">
@@ -2229,12 +2281,8 @@
             </article>
             <article class="ndc-release-card">
               <span class="ndc-release-category">SETTINGS</span>
-              <h3>Your preferences in one place</h3>
-              <p>
-                Open a dedicated settings view for upload preferences, filename
-                hints, and session monitoring, then return directly to your
-                documents.
-              </p>
+              <h3>Start importing when the workspace opens</h3>
+              <p>The new red-highlighted CX folder preference triggers Auto-import available once after sign-in. It is off by default. Preparation follows import; Automatic Upload separately controls whether uploading starts when files are ready.</p>
             </article>
             <article class="ndc-release-card">
               <span class="ndc-release-category">UPLOADS</span>
@@ -2274,6 +2322,9 @@
             </p>
           </div>
           <div class="faq-grid">
+            <details><summary>Why are there three document selection buttons?</summary><p>Choose documents opens the matched customer folder for preview and selection. Auto-import available selects unique category matches and starts preparation, even with fewer than 12 categories. Browse files manually opens the normal file picker for any location.</p></details>
+            <details><summary>Does the new CX folder preference upload immediately?</summary><p>It triggers Auto-import available once when the signed-in document workspace opens, then prepares available matched files. Upload starts after preparation only if Automatic Upload is enabled. Automatic File Movement &amp; Submission is controlled separately. The CX folder preference is off by default.</p></details>
+            <details><summary>What if a customer folder has missing or duplicate documents?</summary><p>Available unique matches are imported without waiting for all 12 categories. Categories with multiple matches and unrecognized filenames are left for manual review. Use Choose documents to preview and select those files, or Browse files manually to add documents from another location.</p></details>
             <details>
               <summary>How do I set up automatic customer folders?</summary>
               <p>Open Settings → Preferences → Choose root folder and grant read-only access to the folder containing your customer folders. Name each customer folder like the customer name on VAHAN. Click Choose documents to open the matching folder’s document list. Case and punctuation are ignored; only folders directly inside the root are matched.</p>

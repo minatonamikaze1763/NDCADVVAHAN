@@ -9,3 +9,8 @@
 .mock-picker-actions .mock-gold { white-space: normal; }
 .mock-import-status:empty { display: none; }
 @media (max-width: 420px) { .mock-picker-actions { grid-template-columns: 1fr; } }
+
+.mock-danger-preference { padding: 12px; border: 1px solid #ff777740; border-left: 3px solid #ff7777; border-radius: 8px; background: #ff777708; gap: 12px; }
+.mock-danger-preference strong { color: #ff9999; font-size: 11px; font-weight: 600; }
+.mock-danger-preference small { display: block; margin-top: 5px; font-size: 10px; color: #a5a5a5; line-height: 1.6; }
+.mock-danger-preference input { accent-color: #ff7777; flex-shrink: 0; }
