@@ -392,3 +392,5 @@
 .ndc-automation-controls li strong { font-size: 13px; color: var(--text); }
 @media (max-width: 900px) { .ndc-choice-grid { grid-template-columns: 1fr; } .ndc-opening-automation { grid-template-columns: 1fr; gap: 20px; } }
 @media (max-width: 600px) { .ndc-document-choices { padding: 56px 0; } .ndc-choice-card, .ndc-opening-automation { padding: 22px; } .ndc-opening-automation h3 { font-size: 21px; } }
+
+.ndc-release-coming-soon { display: inline-flex; align-items: center; padding: 8px 12px; border: 1px solid var(--gold); border-radius: 8px; background: #d7b64f12; color: var(--light); font-size: 12px; font-weight: 600; line-height: 1.6; }
