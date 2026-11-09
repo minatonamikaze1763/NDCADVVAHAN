@@ -68,6 +68,11 @@
     files.forEach(file => { file.checked = checked; });
     update();
   });
+  document.getElementById('customerDemoAutoImport')?.addEventListener('click', () => {
+    files.forEach(file => { file.checked = true; });
+    update();
+    count.textContent = `${files.length} / 12 categories imported (sample)`;
+  });
   files.forEach(file => file.addEventListener('change', update));
   update();
 })();

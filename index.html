@@ -6,12 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#080808" />
     <!-- Primary Meta Tags -->
-    <meta name="title" content="NDC VAHAN TOOL | Smarter Document Workflows" />
-    <meta
-      name="description"
-      content="Prepare, match, and upload VAHAN documents with NDC VAHAN TOOL for Google Chrome."
-    />
-    <meta name="theme-color" content="#080808" />
+    <meta name="description" content="Match customer folders, auto-import available documents, merge Aadhaar front and back, and follow VAHAN document preparation and uploads with NDC VAHAN TOOL for Chrome." />
+    <meta name="title" content="NDC VAHAN TOOL | Customer Documents, Ready to Upload" />
+
+
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="logo.png" />
@@ -22,10 +20,10 @@
 
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Next Dimension Customs" />
+    <meta property="og:title" content="NDC VAHAN TOOL | Customer Documents, Ready to Upload" />
     <meta
       property="og:description"
-      content="Less repetitive work. Smoother VAHAN document workflows."
+      content="Match customer folders, auto-import available documents, merge Aadhaar front and back, and follow VAHAN document preparation and uploads with NDC VAHAN TOOL for Chrome."
     />
     <meta
       property="og:image"
@@ -36,10 +34,10 @@
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Next Dimension Customs" />
+    <meta name="twitter:title" content="NDC VAHAN TOOL | Customer Documents, Ready to Upload" />
     <meta
       name="twitter:description"
-      content="Smarter VAHAN document workflows."
+      content="Match customer folders, auto-import available documents, merge Aadhaar front and back, and follow VAHAN document preparation and uploads with NDC VAHAN TOOL for Chrome."
     />
     <meta
       name="twitter:image"
@@ -51,11 +49,8 @@
     <link rel="canonical" href="https://nextdimensioncustoms.in/" />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="customer-trust.css?v=20261106-company" />
-    <meta
-      name="description"
-      content="NDC VAHAN TOOL helps dealerships prepare documents, follow live upload activity, review locally saved submission summaries and optionally copy application details, with RTA office information after automatic submission."
-    />
-    <title>NDC VAHAN TOOL | Smarter VAHAN Document Workflows</title>
+
+    <title>NDC VAHAN TOOL | Customer Documents, Ready to Upload</title>
     <script src="email-tools.js" defer></script>
     <script src="filename-guide.js" defer></script>
     <link rel="stylesheet" href="offer-code.css" />
@@ -63,10 +58,10 @@
     <link rel="stylesheet" href="reviews-showcase.css" />
     <link rel="stylesheet" href="screenshots-showcase.css?v=520-current" />
     <script src="screenshots-showcase.js?v=520-current" defer></script>
-    <link rel="stylesheet" href="landing-redesign.css?v=20261108-contact-20261107-login3" />
-    <script src="landing-redesign.js?v=20261107-login3" defer></script>
-      <link rel="stylesheet" href="preview-showcase.css?v=520-current" />
-    <script src="preview-showcase.js?v=520-current" defer></script>
+    <link rel="stylesheet" href="landing-redesign.css?v=20261109-auto-import" />
+    <script src="landing-redesign.js?v=20261109-auto-import" defer></script>
+      <link rel="stylesheet" href="preview-showcase.css?v=20261109-auto-import" />
+    <script src="preview-showcase.js?v=20261109-auto-import" defer></script>
   </head>
   <body class="ndc-redesign">
     <svg
@@ -189,8 +184,8 @@
             </h1>
             <p class="hero-copy">
               Set your customer root folder once. Find the matching customer
-              documents from the name on VAHAN, choose your files, and prepare
-              them for upload with a clear view of every step.
+              documents from the name on VAHAN, auto-import the available matches,
+              and prepare them for upload with a clear view of every step.
             </p>
             <div class="hero-actions">
               <a class="btn btn-primary" href="#access"
@@ -306,11 +301,11 @@
           <div>
             <div class="kicker">NEW · CUSTOMER FOLDER MATCHING</div>
             <h2 class="section-title" id="customerFoldersHeading">Your customer.<br /><span class="gold">Their documents.</span><br />Already found.</h2>
-            <p class="section-desc">Spend less time searching through folders. Choose documents reads the customer name on VAHAN and finds the matching folder under your saved root.</p>
+            <p class="section-desc">Spend less time searching through folders. Match the customer name on VAHAN to your saved root, then auto-import the available documents—even when fewer than 12 are ready.</p>
             <ol class="ndc-customer-steps">
               <li><strong>Set your root folder once</strong><span>Choose the folder containing your customer folders in Settings → Preferences.</span></li>
               <li><strong>Match the customer on VAHAN</strong><span>Customer folder names match the name on the page. Case and punctuation do not matter.</span></li>
-              <li><strong>Review, select, and prepare</strong><span>Preview each document full-screen before choosing it. Pick files individually or select all documents. Browse manually is always one click away.</span></li>
+              <li><strong>Import what is available</strong><span>Auto-import available selects one unique match per category, up to 12. Duplicate matches stay out for manual review. Choose documents lets you preview and select files yourself.</span></li>
             </ol>
             <a class="btn btn-primary" href="#access">Get the Chrome extension →</a>
           </div>
@@ -318,11 +313,11 @@
             <div class="ndc-customer-demo-heading"><span>TRY THE SELECTOR</span><span>Interactive preview</span></div>
             <div class="ndc-customer-path">Customer Documents / <strong>Sample Customer</strong></div>
             <h3>Documents in Sample Customer</h3>
-            <div class="ndc-customer-demo-toolbar"><button type="button" id="customerDemoSelectAll">Select all documents</button><span id="customerDemoCount" role="status" aria-live="polite">0 / 3 selected</span></div>
+            <div class="ndc-customer-demo-toolbar"><button type="button" id="customerDemoSelectAll">Select all documents</button><button type="button" id="customerDemoAutoImport">Auto-import available</button><span id="customerDemoCount" role="status" aria-live="polite">0 / 3 selected</span></div>
             <label class="ndc-customer-demo-file"><input type="checkbox" data-customer-demo-file /><span>INVOICE.pdf<small>PDF document</small></span></label>
             <label class="ndc-customer-demo-file"><input type="checkbox" data-customer-demo-file /><span>INSURANCE.pdf<small>PDF document</small></span></label>
             <label class="ndc-customer-demo-file"><input type="checkbox" data-customer-demo-file /><span>CHASSIS.jpg<small>Image document</small></span></label>
-            <p class="ndc-customer-demo-note">Preview only. No local files are accessed here. In the extension, your selection enters the document preparation workflow.</p>
+            <p class="ndc-customer-demo-note">Try auto-import with just 3 sample documents. The extension imports available unique matches without waiting for all 12. This preview never accesses local files.</p>
           </div>
         </div>
       </section>
@@ -348,8 +343,8 @@
             </article>
             <article class="feature">
               <div class="feature-icon" aria-hidden="true">✓</div>
-              <h3>Select Documents Together</h3>
-              <p>Preview PDFs and images from the matched folder in a full-workspace viewer with a Close preview button. Select individual files, select all, or deselect all, with a live selection count before preparation.</p>
+              <h3>Auto-import Available Documents</h3>
+              <p>Import available unique document matches from the customer folder in one click, even with fewer than 12 categories. Duplicate matches are skipped for review. Choose documents opens the preview and manual selection workflow.</p>
             </article>
             <article class="feature">
               <div class="feature-icon feature-icon-merge" aria-hidden="true">1 + 2</div>
@@ -2204,8 +2199,8 @@
               What's new in <span class="gold">v5.2.0</span>
             </h2>
             <p class="section-desc">
-              New customer folder matching, a document selector with Select all,
-              and stacked choose and manual browse controls.
+              Available-document auto-import, customer folder matching, and three
+              clear, equally sized document selection buttons.
             </p>
           </div>
           <div class="ndc-release-meta">
@@ -2214,22 +2209,22 @@
             >
             <span
               >Last updated:
-              <time datetime="2026-11-08">8 November 2026</time></span
+              <time datetime="2026-11-09">9 November 2026</time></span
             >
           </div>
           <div class="ndc-release-grid">
             <article class="ndc-release-card">
               <span class="ndc-release-category">NEW · CUSTOMER FOLDERS</span>
               <h3>The right customer folder, ready to choose</h3>
-              <p>Save a root folder with read-only access in Settings. Choose documents uses the live customer name on VAHAN to find a matching folder. Review individual files or use Select all documents before adding them.</p>
+              <p>Save a root folder with read-only access in Settings. Choose documents uses the live customer name on VAHAN to find a matching folder. Auto-import available brings in unique matches even when fewer than 12 documents are ready. Review skipped duplicate matches with Choose documents.</p>
             </article>
             <article class="ndc-release-card">
               <span class="ndc-release-category">WORKSPACE</span>
               <h3>A refreshed document workspace</h3>
               <p>
                 A redesigned layout with a personal welcome, clearer document
-                selection, and visible steps for selecting, preparing, and
-                uploading files.
+                selection with equal-width Choose documents, Auto-import available,
+                and Browse files manually buttons, plus visible preparation and upload steps.
               </p>
             </article>
             <article class="ndc-release-card">

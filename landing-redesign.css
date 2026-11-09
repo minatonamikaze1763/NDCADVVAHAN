@@ -362,3 +362,6 @@
 .ndc-customer-demo-note { margin: 20px 0 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
 @media (max-width: 800px) { .ndc-customer-grid { grid-template-columns: 1fr; gap: 32px; } }
 @media (max-width: 480px) { .ndc-customer-demo { padding: 20px; } }
+
+.ndc-customer-demo-toolbar #customerDemoAutoImport { background: var(--gold); border-color: var(--gold); color: var(--bg); font-weight: 700; }
+.ndc-customer-demo-toolbar button:focus-visible { outline: 2px solid var(--light); outline-offset: 3px; }
