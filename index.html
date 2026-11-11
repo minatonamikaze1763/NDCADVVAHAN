@@ -203,8 +203,7 @@
         <div class="container hero-grid">
           <div class="ndc-hero-content">
             <a class="ndc-hero-announcement" href="#updates"
-              ><span class="ndc-status-dot"></span> NEW: CUSTOMER FOLDER
-              MATCHING <span>v5.2.0 ↗</span></a
+              ><span class="ndc-status-dot"></span> NEW: RESPONSIVE WORKSPACE, DRAG & DROP, UPLOAD HISTORY, CUSTOM ALIASES & MORE <span>v5.3.0 ↗</span></a
             >
             <div class="eyebrow">NDC VAHAN TOOL / BUILT FOR DEALERSHIPS</div>
             <h1 id="ndcHeroHeading">
@@ -246,8 +245,8 @@
               >
             </div>
             <div class="ndc-hero-version">
-              <span>v5.2.0</span> Updated
-              <time datetime="2026-11-08">8 Nov 2026</time
+              <span>v5.3.0</span> Updated
+              <time datetime="2026-11-11">11 Nov 2026</time
               ><a href="#updates">What's new ↗</a>
             </div>
           </div>
@@ -734,6 +733,106 @@
               <p>
                 Choose the automation options that suit your workflow instead of
                 being locked into one fixed process.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">▧</div>
+              <h3>Responsive Workspace Layout</h3>
+              <p>
+                The extension now adapts fluidly from 320px to 650px wide. No horizontal scrolling on small screens. Settings tabs stack on narrow views, document tables become scrollable, and dropzones reflow automatically.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">⇳</div>
+              <h3>Drag & Drop File Selection</h3>
+              <p>
+                Drag files directly onto the dropzone with visual feedback (gold border, gradient highlight). Keyboard accessible: press Enter or Space to open the file picker. Works alongside the existing click-to-browse workflow.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">🔍</div>
+              <h3>Searchable Filename Hints</h3>
+              <p>
+                Real-time filtering for Address Proof and Other Documents keyword tables. Type to filter rows, matching text is highlighted. Escape clears search. Context-aware placeholders guide you (e.g., "Search Address Proof keywords...").
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">↻</div>
+              <h3>Per-File Retry & Granular Recovery</h3>
+              <p>
+                Failed or skipped files show a Retry (↻) button. Click to re-prepare just that file without resetting the whole batch. Inline error messages show exactly what went wrong. Remove button stays active during preparation.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon feature-icon-merge" aria-hidden="true">
+                1 + 2
+              </div>
+              <h3>Aadhaar Merge Visibility</h3>
+              <p>
+                Merged Aadhaar files now show a "Merged (2)" badge with tooltip listing original filenames (front/back). Preview button is disabled until merge completes. Page count reflects the combined PDF.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">📜</div>
+              <h3>Upload History & Session Reload</h3>
+              <p>
+                Last 50 upload sessions saved locally with customer name, timestamps, counts (uploaded/skipped/failed), file list, and full log. Reload any session to restore the file set with prepared data. Copy log or delete individual entries.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">➕</div>
+              <h3>Custom Filename Aliases (Add-Only)</h3>
+              <p>
+                Add your own filename → category mappings in Settings → Filename Hints. Keywords are matched as whole words and never override built-in aliases. Real-time integration with the document matcher. Delete unwanted aliases anytime.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">✎</div>
+              <h3>Bulk Rename Assistant</h3>
+              <p>
+                One-click "Auto-rename" suggests CustomerName_Category.pdf names based on matched slots. Preview modal shows original → suggested with checkboxes. Applies to both original and prepared file objects. Pulls customer name from workspace.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">☑</div>
+              <h3>Printable Checklist Generator</h3>
+              <p>
+                Generates a clean HTML checklist (20 rows: 12 VAHAN slots + 9 Address Proof subcategories) with filename hints and status checkmarks for matched files. Opens in printable window (800x600) with Print/Save as PDF button.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">⌨</div>
+              <h3>Keyboard Shortcuts (Global)</h3>
+              <p>
+                Six persistent shortcuts via Chrome Commands API: Ctrl/Cmd+O (open files), Ctrl/Cmd+Enter (start upload), Ctrl/Cmd+S (download ZIP), Escape (cancel/close), ArrowLeft/Right (navigate settings tabs). Work even when popup is closed.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">🔊</div>
+              <h3>Completion Sound</h3>
+              <p>
+                Optional Web Audio API chime (880Hz sine wave, 0.5s decay) when all uploads complete successfully. Toggle in Settings → Preferences. Silent fallback if AudioContext unavailable.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">🔧</div>
+              <h3>Advanced Settings Panel</h3>
+              <p>
+                New Advanced tab: enableExperimentalFeatures (bulk rename, offline queue), debugMode (verbose logging + internal states), customUserAgent (override for VAHAN requests). Stored separately in chrome.storage.local.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">📋</div>
+              <h3>Granular Log Controls</h3>
+              <p>
+                Four new toggles in Settings → Log Contents: include filenames, file sizes, timestamps, and Address Proof subcategory names. Each defaults to on. Fine-tune your submission summaries.
+              </p>
+            </article>
+            <article class="feature">
+              <div class="feature-icon">⚙</div>
+              <h3>DMS Retry & Timeout Controls</h3>
+              <p>
+                Configure max retries for "DMS services not responding" (default 4, range 1-10) and VAHAN page wait timeout (default 20s, range 5s-120s). Auto-retry failed uploads once. Confirm dialog before File Movement.
               </p>
             </article>
           </div>
@@ -2558,12 +2657,10 @@
           <div class="section-head">
             <div class="kicker">Version &amp; Updates</div>
             <h2 class="section-title" id="ndcReleaseHeading">
-              What's new in <span class="gold">v5.2.0</span>
+              What's new in <span class="gold">v5.3.0</span>
             </h2>
             <p class="section-desc">
-              Import available documents, choose how to select them, and
-              optionally start the matched-folder workflow when your workspace
-              opens.
+              Responsive workspace, drag & drop, searchable hints, granular recovery, upload history, custom aliases, bulk rename, checklist generator, keyboard shortcuts, and advanced settings.
             </p>
           </div>
           <div class="ndc-release-meta">
@@ -2571,11 +2668,11 @@
               >Available for public download</span
             >
             <span class="ndc-version-badge"
-              >Current version <strong>5.2.0</strong></span
+              >Current version <strong>5.3.0</strong></span
             >
             <span
               >Last updated:
-              <time datetime="2026-11-09">9 November 2026</time></span
+              <time datetime="2026-11-11">11 November 2026</time></span
             >
           </div>
           <div class="ndc-release-grid">
