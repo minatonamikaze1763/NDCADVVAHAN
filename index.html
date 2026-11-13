@@ -8,7 +8,7 @@
     <!-- Primary Meta Tags -->
     <meta
       name="description"
-      content="Match customer folders, auto-import available documents, merge Aadhaar front and back, and follow VAHAN document preparation and uploads with NDC VAHAN TOOL for Chrome."
+      content="Match customer folders, scan VAHAN, import only unuploaded documents, merge Aadhaar front and back, and prepare uploads with NDC VAHAN TOOL for Chrome."
     />
     <meta
       name="title"
@@ -144,7 +144,7 @@
               </svg>
             </summary>
             <div class="ndc-nav-dropdown">
-              <a href="#document-choices">Three document buttons</a>
+              <a href="#document-choices">Four document buttons</a>
               <a href="#automation">Automation</a>
               <a href="#tutorial">Video tutorial</a>
               <a href="#filename-guide">Document filenames</a>
@@ -215,13 +215,13 @@
             </h1>
             <p class="hero-copy">
               Set your customer root folder once. Find the matching customer
-              documents from the name on VAHAN, auto-import the available
-              matches, and prepare them for upload with a clear view of every
-              step.
+              documents from the name on VAHAN, scan which categories are still
+              unuploaded, and prepare only the matches VAHAN needs with a clear
+              view of every step.
             </p>
             <div class="hero-actions">
               <a class="btn ndc-hero-secondary" href="#document-choices"
-                >How the three document buttons work ↓</a
+                >How the four document buttons work ↓</a
               >
               <a class="btn btn-primary" href="#access"
                 >Get the Chrome extension
@@ -374,7 +374,7 @@
               </li>
             </ol>
             <a class="btn btn-primary" href="#document-choices"
-              >Compare the three document buttons →</a
+              >Compare the four document buttons →</a
             >
           </div>
           <div
@@ -428,16 +428,16 @@
       >
         <div class="container">
           <div class="section-head">
-            <div class="kicker">THREE BUTTONS · THREE WAYS TO START</div>
+            <div class="kicker">FOUR BUTTONS · FOUR WAYS TO START</div>
             <h2 class="section-title" id="documentChoicesHeading">
-              The three document buttons.<br /><span class="gold"
+              The four document buttons.<br /><span class="gold"
                 >What each one does.</span
               >
             </h2>
             <p class="section-desc">
               Choose documents for review. Auto-import available for quick
-              matching. Browse files manually for any folder. Here is exactly
-              how each button works and when to use it.
+              matching. Import unuploaded docs to scan VAHAN first. Browse files
+              manually for any folder. Here is exactly how each button works.
             </p>
           </div>
           <div class="ndc-choice-grid">
@@ -484,8 +484,29 @@
                 files are left for manual selection.</small
               >
             </article>
+            <article class="ndc-choice-card ndc-choice-card-primary">
+              <span class="ndc-choice-number">03 / VAHAN-AWARE IMPORT</span>
+              <h3>Import unuploaded docs</h3>
+              <p>
+                Scans the VAHAN document sequence from the first slot and builds
+                a list of categories that still show Upload File. The scan stops
+                at the first Modify File slot because that slot and the remaining
+                slots are already uploaded.
+              </p>
+              <div class="ndc-choice-benefit">
+                <strong>Best for avoiding repeat preparation</strong
+                ><span
+                  >Imports only unique customer-folder matches for categories
+                  VAHAN still needs, then starts normal local preparation.</span
+                >
+              </div>
+              <small
+                >A lightweight scanning barrier prevents other document actions
+                until VAHAN returns to the first document.</small
+              >
+            </article>
             <article class="ndc-choice-card">
-              <span class="ndc-choice-number">03 / CHOOSE ANY LOCATION</span>
+              <span class="ndc-choice-number">04 / CHOOSE ANY LOCATION</span>
               <h3>Browse files manually</h3>
               <p>
                 Opens the normal file picker directly. Select documents from any
@@ -506,7 +527,7 @@
             </article>
           </div>
           <p class="ndc-choice-footnote">
-            All three routes prepare selected files locally. Uploading starts
+            All four routes prepare selected files locally. Uploading starts
             automatically only when Automatic Upload is enabled; otherwise use
             Start. Your original files stay unchanged.
           </p>
@@ -519,14 +540,14 @@
                 >NEW PREFERENCE · OFF BY DEFAULT</span
               >
               <h3 id="openingAutomationHeading">
-                Auto import/prepare/upload matched documents in CX folder
+                Auto import unuploaded/prepare/upload documents in CX folder
               </h3>
               <p>
                 Enable this red-highlighted option in
                 <strong>Settings → Preferences</strong>. After sign-in, opening
-                the document workspace automatically triggers Auto-import
-                available once. The extension matches the customer folder and
-                prepares the available unique matches.
+                the document workspace automatically triggers Import unuploaded
+                docs once. The extension scans VAHAN, matches the customer folder
+                and prepares only the unique categories that still need files.
               </p>
               <p>
                 <strong>Why enable it?</strong> Remove the repeated import click
@@ -540,9 +561,9 @@
                 <li>
                   <strong>Import on opening</strong
                   ><span
-                    >The new CX folder preference triggers the import. Save your
-                    root folder first; folder permission may still need your
-                    click.</span
+                    >The CX folder preference scans VAHAN and triggers the
+                    unuploaded-only import. Save your root folder first; folder
+                    permission may still need your click.</span
                   >
                 </li>
                 <li>
@@ -2798,8 +2819,8 @@
               <h3>A refreshed document workspace</h3>
               <p>
                 A redesigned layout with a personal welcome, clearer document
-                selection with equal-width Choose documents, Auto-import
-                available, and Browse files manually buttons, plus visible
+                selection with Choose documents, Auto-import available, Import
+                unuploaded docs, and Browse files manually buttons, plus visible
                 preparation and upload steps.
               </p>
             </article>
@@ -2807,10 +2828,10 @@
               <span class="ndc-release-category">SETTINGS</span>
               <h3>Start importing when the workspace opens</h3>
               <p>
-                The new red-highlighted CX folder preference triggers
-                Auto-import available once after sign-in. It is off by default.
-                Preparation follows import; Automatic Upload separately controls
-                whether uploading starts when files are ready.
+                The red-highlighted CX folder preference triggers Import
+                unuploaded docs once after sign-in. It scans VAHAN first and is
+                off by default. Preparation follows import; Automatic Upload
+                separately controls whether uploading starts when files are ready.
               </p>
             </article>
             <article class="ndc-release-card">
@@ -2852,13 +2873,14 @@
           </div>
           <div class="faq-grid">
             <details>
-              <summary>Why are there three document selection buttons?</summary>
+              <summary>Why are there four document selection buttons?</summary>
               <p>
                 Choose documents opens the matched customer folder for preview
                 and selection. Auto-import available selects unique category
                 matches and starts preparation, even with fewer than 12
-                categories. Browse files manually opens the normal file picker
-                for any location.
+                categories. Import unuploaded docs first scans VAHAN and imports
+                only categories that still need files. Browse files manually
+                opens the normal file picker for any location.
               </p>
             </details>
             <details>
@@ -2866,8 +2888,9 @@
                 Does the new CX folder preference upload immediately?
               </summary>
               <p>
-                It triggers Auto-import available once when the signed-in
-                document workspace opens, then prepares available matched files.
+                It triggers Import unuploaded docs once when the signed-in
+                document workspace opens, then prepares only matched files for
+                VAHAN categories that are not already uploaded.
                 Upload starts after preparation only if Automatic Upload is
                 enabled. Automatic File Movement &amp; Submission is controlled
                 separately. The CX folder preference is off by default.
