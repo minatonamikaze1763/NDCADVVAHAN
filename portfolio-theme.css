@@ -30,3 +30,21 @@ body.ndc-portfolio-page { background:var(--bg); color:var(--text); font:400 16px
 .ndc-portfolio-page .ndc-contact-bottom { width:100%; }
 @media(max-width:720px) { .ndc-portfolio-page.ndc-redesign main > section:not(.hero) { padding-block:60px; } .ndc-portfolio-page.ndc-redesign .hero { padding-top:48px; } .ndc-portfolio-page.ndc-redesign .nav-links { font-size:13px; } }
 @media(max-width:480px) { .ndc-portfolio-page .container,.ndc-portfolio-page.ndc-redesign .container,.ndc-portfolio-page.ndc-redesign .topbar .container,.ndc-portfolio-page.ndc-redesign .filename-guide.container { width:calc(100% - 32px); } }
+
+/* Shared features stay in the left panel; the plan grid matches its height. */
+#pricing .ndc-pricing-layout { align-items:stretch; }
+#pricing .pricing-wrap { display:flex; flex-direction:column; min-width:0; }
+#pricing .pricing { display:grid; flex:1; grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-rows:1fr; gap:20px; }
+#pricing .pricing .plan { min-width:0; min-height:280px; justify-content:center; padding:30px 24px; }
+#pricing .pricing .plan .plan-label { margin-top:auto; }
+#pricing .pricing .plan ul { margin:8px 0 28px; }
+#pricing .pricing .plan .btn { margin-top:0; margin-bottom:auto; width:100%; }
+#pricing .pricing-wrap > .notice { margin:16px 0 0; }
+@media(max-width:850px) {
+  #pricing .pricing { flex:initial; grid-auto-rows:auto; }
+  #pricing .pricing .plan { min-height:300px; }
+}
+@media(max-width:520px) {
+  #pricing .pricing { grid-template-columns:1fr; }
+  #pricing .pricing .plan { min-height:270px; padding:26px 22px; }
+}

@@ -63,7 +63,7 @@
                 const price = document.createElement('div'); price.className = 'price'; price.textContent = money(p.monthlyPrice);
                 const per = document.createElement('div'); per.className = 'per'; per.textContent = `per ${p.durationDays} days`;
                 const ul = document.createElement('ul');
-                for (const text of [`${p.maxDevices} device login(s)`, ...Object.entries(p.features || {}).filter(([,v]) => v === true).map(([key]) => NDCPlans.featureLabel(p,key))]) {
+                for (const text of [`${p.maxDevices} device login${p.maxDevices === 1 ? "" : "s"}`]) {
                     const li = document.createElement('li'); li.textContent = text; ul.append(li);
                 }
                 const button = document.createElement('button'); button.type = 'button'; button.className = 'btn btn-outline'; button.textContent = 'Choose ' + p.name; button.onclick = () => window.selectPlan(p.id);
