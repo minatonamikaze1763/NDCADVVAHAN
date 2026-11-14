@@ -30,3 +30,32 @@
 .ndc-tour-session strong { display:block; font-size:13px; font-weight:550; }
 .ndc-tour-session small { display:block; color:var(--muted); font-size:12px; margin-top:6px; }
 .ndc-tour-card:last-child:nth-child(odd) { grid-column:1 / -1; }
+
+/* Customer folder showcase shares the landing page's type and color tokens. */
+.ndc-folder-showcase { padding-block:80px; background:var(--bg); border-top:1px solid var(--line); }
+.ndc-fs-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+.ndc-fs-panel { min-width:0; padding:28px; background:var(--panel); border:1px solid var(--line); border-radius:16px; }
+.ndc-fs-prepared { border-color:var(--gold); }
+.ndc-fs-panel-top { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+.ndc-fs-badge { font-size:10px; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:4px 9px; }
+.ndc-fs-prepared .ndc-fs-badge { color:var(--gold); }
+.ndc-folder-showcase .ndc-fs-panel h3 { margin:22px 0 18px; font-size:24px; font-weight:550; line-height:1.25; letter-spacing:-.035em; }
+.ndc-fs-path { display:flex; align-items:center; gap:10px; padding:12px; background:var(--bg); border:1px solid var(--line); border-radius:8px; color:var(--light); font-size:12px; overflow-wrap:anywhere; }
+.ndc-fs-path svg { width:20px; height:20px; flex-shrink:0; fill:none; stroke:var(--gold); stroke-width:1.5; stroke-linejoin:round; }
+.ndc-fs-columns { display:flex; justify-content:space-between; margin:22px 0 4px; color:var(--muted); font-size:10px; letter-spacing:.06em; text-transform:uppercase; }
+.ndc-fs-files { list-style:none; margin:0; padding:0; }
+.ndc-fs-file { display:grid; grid-template-columns:34px minmax(0,1fr) auto; gap:12px; align-items:center; min-height:94px; padding:16px 0; border-bottom:1px solid var(--line); }
+.ndc-fs-type { padding:8px 0; color:var(--gold); border:1px solid var(--line); border-radius:6px; text-align:center; font-size:9px; font-weight:600; }
+.ndc-fs-name strong { display:block; color:var(--text); font-size:12px; font-weight:500; line-height:1.6; overflow-wrap:anywhere; }
+.ndc-fs-name small { display:block; color:var(--muted); font-size:11px; margin-top:4px; }
+.ndc-fs-size { color:var(--muted); font-size:11px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.ndc-fs-prepared .ndc-fs-size { color:var(--light); }
+.ndc-fs-folder,.ndc-fs-summary { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:18px; color:var(--gold); font-size:12px; }
+.ndc-fs-folder strong,.ndc-fs-summary strong { font-weight:550; }
+.ndc-fs-folder small { color:var(--muted); font-size:11px; }
+.ndc-fs-summary { justify-content:space-between; }
+.ndc-fs-notes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; margin-top:22px; }
+.ndc-fs-notes p { margin:0; color:var(--muted); font-size:13px; line-height:1.8; }
+.ndc-fs-notes strong { color:var(--text); font-weight:550; }
+.ndc-fs-disclaimer { color:var(--muted); font-size:11px; margin:20px 0 0; line-height:1.8; }
+@media(max-width:760px) { .ndc-folder-showcase { padding-block:48px; } .ndc-fs-grid,.ndc-fs-notes { grid-template-columns:1fr; } .ndc-fs-panel { padding:20px; } .ndc-fs-file { gap:9px; } }
