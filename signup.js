@@ -55,19 +55,26 @@
             await NDCPlans.ready;
             const container = document.querySelector('.pricing');
             const custom = container.querySelector('.plan');
+            const iconMarkup = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>';
+            custom.classList.add('ndc-custom-plan');
+            const customIcon = document.createElement('span'); customIcon.className = 'ndc-plan-icon'; customIcon.innerHTML = iconMarkup; custom.prepend(customIcon);
+            custom.querySelector('h4')?.remove();
+            custom.querySelector('ul').innerHTML = '<li><strong>Flexible</strong><span>device limits, tailored to you</span></li>';
+            custom.querySelector('.plan-label').textContent = 'Custom';
             $('ndcPlanLoading')?.remove();
             for (const p of NDCPlans.visible) {
                 plans[p.id] = p;
                 const card = document.createElement('article'); card.className = 'plan';
+                const icon = document.createElement('span'); icon.className = 'ndc-plan-icon'; icon.innerHTML = iconMarkup;
                 const heading = document.createElement('div'); heading.className = 'plan-label'; heading.textContent = p.name;
-                const price = document.createElement('div'); price.className = 'price'; price.textContent = money(p.monthlyPrice);
+                const price = document.createElement('div'); price.className = 'price'; price.textContent = new Intl.NumberFormat('en-IN', {style:'currency',currency:'INR',maximumFractionDigits:2,minimumFractionDigits:0}).format(p.monthlyPrice);
                 const per = document.createElement('div'); per.className = 'per'; per.textContent = `per ${p.durationDays} days`;
                 const ul = document.createElement('ul');
                 for (const text of [`${p.maxDevices} device login${p.maxDevices === 1 ? "" : "s"}`]) {
-                    const li = document.createElement('li'); li.textContent = text; ul.append(li);
+                    const li = document.createElement('li'); const count = document.createElement('strong'); count.textContent = p.maxDevices; const caption = document.createElement('span'); caption.textContent = p.maxDevices === 1 ? 'device login' : 'device logins'; li.append(count,caption); ul.append(li);
                 }
                 const button = document.createElement('button'); button.type = 'button'; button.className = 'btn btn-outline'; button.textContent = 'Choose ' + p.name; button.onclick = () => window.selectPlan(p.id);
-                card.append(heading,price,per,document.createElement('hr'),ul,button); container.insertBefore(card,custom);
+                card.append(icon,heading,price,per,document.createElement('hr'),ul,button); container.insertBefore(card,custom);
             }
             if (!NDCPlans.visible.length) status('No subscription plans are currently available.');
         } catch (error) { $('ndcPlanLoading').textContent = 'Plans are unavailable. Refresh to retry.'; status(error.message); return; }

@@ -48,3 +48,31 @@ body.ndc-portfolio-page { background:var(--bg); color:var(--text); font:400 16px
   #pricing .pricing { grid-template-columns:1fr; }
   #pricing .pricing .plan { min-height:270px; padding:26px 22px; }
 }
+
+/* Pricing cards: clear hierarchy, large device allowance, anchored actions. */
+#pricing .pricing .plan {
+  position:relative; overflow:hidden; justify-content:flex-start; padding:32px;
+  border:1px solid rgba(218,190,94,.2); border-radius:22px;
+  background:radial-gradient(ellipse at 100% 0,rgba(214,185,84,.075),transparent 65%),#111211;
+  box-shadow:0 12px 32px rgba(0,0,0,.12); transition:border-color .2s,box-shadow .2s;
+}
+#pricing .pricing .plan:hover { border-color:rgba(218,190,94,.55); box-shadow:0 16px 40px rgba(0,0,0,.24); }
+#pricing .pricing .plan::after { content:''; position:absolute; top:0; left:32px; right:32px; height:2px; background:linear-gradient(90deg,transparent,rgba(224,196,103,.65),transparent); }
+#pricing .pricing .ndc-plan-icon { display:grid; place-items:center; width:46px; height:46px; border:1px solid rgba(218,190,94,.23); background:rgba(218,190,94,.07); border-radius:14px; color:#dec56e; margin-bottom:20px; }
+#pricing .pricing .plan .plan-label { margin:0 0 14px; font-family:var(--portfolio-heading); font-size:23px; font-weight:600; letter-spacing:-.025em; text-transform:none; color:#f4f0e5; }
+#pricing .pricing .plan .price { font-family:var(--portfolio-heading); font-size:clamp(32px,3vw,44px); line-height:1.15; font-weight:600; letter-spacing:-.045em; margin:0; color:#f5f1e8; }
+#pricing .pricing .plan .per { margin:8px 0 0; min-height:0; font-size:12px; line-height:1.6; color:#aaa69b; }
+#pricing .pricing .plan hr { width:100%; margin:24px 0; border:0; border-top:1px solid rgba(221,196,119,.14); }
+#pricing .pricing .plan ul { list-style:none; padding:0; margin:0 0 28px; }
+#pricing .pricing .plan li { display:flex; align-items:center; gap:12px; padding:0; margin:0; }
+#pricing .pricing .plan li::before { display:none; }
+#pricing .pricing .plan li strong { font-family:var(--portfolio-heading); font-size:36px; font-weight:500; letter-spacing:-.035em; line-height:1.2; color:#e3cc82; }
+#pricing .pricing .plan li span { font-size:13px; line-height:1.5; color:#c4c0b6; }
+#pricing .pricing .plan .btn { margin: auto 0 0; width:100%; min-height:48px; border:1px solid rgba(223,198,111,.35); border-radius:12px; background:#242219; color:#eddfb0; font-size:13px; }
+#pricing .pricing .plan .btn:hover { background:#dfc56d; color:#15130b; }
+#pricing .pricing .ndc-custom-plan { background:radial-gradient(ellipse at 100% 0,rgba(214,185,84,.13),transparent 75%),#15140f; }
+#pricing .pricing .ndc-custom-plan li { align-items:flex-start; flex-direction:column; gap:6px; }
+#pricing .pricing .ndc-custom-plan li strong { font-size:27px; }
+@media(max-width:1100px) { #pricing .pricing .plan { padding:26px; } }
+@media(max-width:850px) { #pricing .pricing .plan { min-height:390px; } }
+@media(prefers-reduced-motion:reduce) { #pricing .pricing .plan { transition:none; } }
