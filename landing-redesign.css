@@ -401,3 +401,12 @@
 .ndc-redesign .feature :is(h3,p,code) { min-width:0; overflow-wrap:anywhere; }
 .ndc-redesign .feature-icon { display:grid; place-items:center; width:46px; height:46px; min-width:46px; padding:11px; flex-shrink:0; line-height:1; }
 .ndc-redesign .feature-icon .ndc-feature-svg { display:block; width:22px; height:22px; max-width:100%; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+
+/* One compact SVG system across feature, workflow, release and contact areas. */
+.ndc-ui-icon { display:inline-block; width:20px; height:20px; flex-shrink:0; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; vertical-align:middle; }
+.ndc-redesign .step h3 { display:flex; align-items:flex-start; gap:10px; }
+.ndc-redesign .step .ndc-heading-icon { margin-top:2px; color:var(--gold); }
+.ndc-choice-number,.ndc-release-category { display:inline-flex; align-items:center; gap:8px; max-width:100%; }
+.ndc-choice-number .ndc-ui-icon,.ndc-release-category .ndc-ui-icon { width:16px; height:16px; }
+.ndc-fs-type .ndc-ui-icon { width:18px; height:18px; }
+.ndc-contact-link-icon { width:16px; height:16px; margin-right:8px; color:var(--gold); }
