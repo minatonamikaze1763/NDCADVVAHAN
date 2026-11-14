@@ -410,3 +410,12 @@
 .ndc-choice-number .ndc-ui-icon,.ndc-release-category .ndc-ui-icon { width:16px; height:16px; }
 .ndc-fs-type .ndc-ui-icon { width:18px; height:18px; }
 .ndc-contact-link-icon { width:16px; height:16px; margin-right:8px; color:var(--gold); }
+
+/* Contact cards have exactly three slots: icon, readable copy, arrow. */
+.ndc-contact-grid,.ndc-contact-options,.ndc-contact-option { min-width:0; }
+.ndc-contact-option-icon { grid-column:1; grid-row:1; width:40px; }
+.ndc-contact-option-icon .ndc-ui-icon { width:20px; height:20px; margin:0; }
+.ndc-contact-option > span:not(.ndc-contact-option-icon):not([aria-hidden]) { grid-column:2; grid-row:1; min-width:0; }
+.ndc-contact-option > span[aria-hidden]:not(.ndc-contact-option-icon) { grid-column:3; grid-row:1; }
+.ndc-contact-option strong { word-break:normal; overflow-wrap:anywhere; }
+@media(max-width:600px) { .ndc-contact-option-icon { width:36px; } }
