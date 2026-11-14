@@ -24,3 +24,9 @@
 .ndc-tour-card .ndc-tour-footnote { margin:20px 0 0; font-size:12px; line-height:1.7; }
 @media(max-width:760px) { .ndc-feature-tour { padding-block:48px; } .ndc-tour-grid { grid-template-columns:1fr; } .ndc-tour-card { padding:24px; } }
 @media(prefers-reduced-motion:reduce) { .ndc-feature-tour * { transition:none; } }
+
+.ndc-tour-session { display:flex; gap:12px; align-items:flex-start; padding:16px; margin:24px 0 0; border:1px solid var(--line); border-radius:10px; background:var(--bg); cursor:pointer; }
+.ndc-tour-session input { width:16px; height:16px; margin:3px 0 0; flex-shrink:0; accent-color:var(--gold); }
+.ndc-tour-session strong { display:block; font-size:13px; font-weight:550; }
+.ndc-tour-session small { display:block; color:var(--muted); font-size:12px; margin-top:6px; }
+.ndc-tour-card:last-child:nth-child(odd) { grid-column:1 / -1; }

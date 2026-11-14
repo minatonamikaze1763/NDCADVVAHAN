@@ -74,9 +74,9 @@
       rel="stylesheet"
       href="preview-showcase.css?v=540-smart-cache"
     />
-    <script src="preview-showcase.js?v=540-smart-cache" defer></script>
-    <link rel="stylesheet" href="feature-tour.css?v=540" />
-    <script src="feature-tour.js?v=540" defer></script>
+    <script src="preview-showcase.js?v=540-compressed" defer></script>
+    <link rel="stylesheet" href="feature-tour.css?v=540-compressed" />
+    <script src="feature-tour.js?v=540-compressed" defer></script>
   </head>
   <body class="ndc-redesign">
     <svg
@@ -205,7 +205,7 @@
         <div class="container hero-grid">
           <div class="ndc-hero-content">
             <a class="ndc-hero-announcement" href="#updates"
-              ><span class="ndc-status-dot"></span> NEW: SMART CUSTOMER CACHE, FLEXIBLE AUTO IMPORT & CUSTOMER FILE RENAMING <span>v5.4.0 ↗</span></a
+              ><span class="ndc-status-dot"></span> NEW: COMPRESSED FILE REUSE, CUSTOMER FOLDER SAVING & SESSION CONTROLS <span>v5.4.0 ↗</span></a
             >
             <div class="eyebrow">NDC VAHAN TOOL / BUILT FOR DEALERSHIPS</div>
             <h1 id="ndcHeroHeading">
@@ -753,7 +753,10 @@
             </article>
             <article class="feature"><div class="feature-icon" aria-hidden="true">50</div><h3>Smart Customer Document Cache</h3><p>Keep up to 50 customers on this device, identified by chassis number and checked against the customer name. Saved remaining categories help resume partial document work.</p></article>
             <article class="feature"><div class="feature-icon" aria-hidden="true">AUTO</div><h3>Flexible Automatic Import</h3><p>With no valid customer cache, automatic import selects available documents. With a matching cache, it selects Import unuploaded docs. Preparation follows; Automatic Upload remains a separate setting.</p></article>
-            <article class="feature"><div class="feature-icon" aria-hidden="true">NAME</div><h3>Optional Customer File Renaming</h3><p>Enable Auto Rename Files Using Customer Name to name prepared copies such as suresh_form20.pdf. Original files stay unchanged, and the extension keeps the file extension unless preparation changes the format.</p></article>
+            <article class="feature"><div class="feature-icon" aria-hidden="true">NAME</div><h3>Automatic Customer &amp; Chassis Filenames</h3><p>Prepared copies always use customername_assigneddocument_chassisnumber.extension, such as suresh_form20_MBLHAW427THH02338.pdf. Renaming is automatic with no user toggle. Original files remain unchanged.</p></article>
+            <article class="feature"><div class="feature-icon" aria-hidden="true">SAVE</div><h3>Save Prepared Copies to the Customer Folder</h3><p>Enable Always store prepared docs in customer folder and grant write access. Ready copies are saved under Customer Root / Customer Name / Compressed. Same-name prepared files are replaced; original documents stay unchanged.</p></article>
+            <article class="feature"><div class="feature-icon" aria-hidden="true">REUSE</div><h3>Reuse Prepared Documents</h3><p>Choose documents, Auto-import available, and Import unuploaded docs check Compressed for matching customer and chassis files. Reuse usable copies and prepare originals for missing categories. Choose documents continues to show original filenames.</p></article>
+            <article class="feature"><div class="feature-icon" aria-hidden="true">SESSION</div><h3>Prepare Originals Again When Needed</h3><p>The session-only Use original files and prepare again checkbox ignores Compressed, selects main-folder originals, and writes replacement prepared copies after processing. It resets with a new workspace and is never saved as a permanent preference.</p></article>
             <article class="feature"><div class="feature-icon" aria-hidden="true">SYNC</div><h3>Cache Updates After Upload</h3><p>Confirmed uploads remove their categories from the remaining list. Completing all documents clears the customer record. Stale records expire, and the oldest entries are removed when the cache exceeds 50 customers.</p></article>
             <article class="feature"><div class="feature-icon" aria-hidden="true">LOG</div><h3>Submission Logs</h3><p>Choose the customer and application details shown in submission logs. Review completed work and copy the details you need.</p></article>
             <article class="feature"><div class="feature-icon" aria-hidden="true">PDF</div><h3>Document Previews</h3><p>Review supported images and PDFs before uploading, check document assignments, and select files manually when a filename cannot be recognized.</p></article>
@@ -933,7 +936,7 @@
           <div class="section-head">
             <div class="kicker">Try the Features</div>
             <h2 class="section-title" id="ndcInteractiveDemosHeading">Less repeat work.<br><span class="gold">A smoother return visit.</span></h2>
-            <p class="section-desc">Explore two features in v5.4.0 with sample data. These examples explain the workflow; actual document preparation and uploads happen inside the extension on VAHAN.</p>
+            <p class="section-desc">Explore the latest features in v5.4.0 with sample data. These examples explain the workflow; actual document preparation and uploads happen inside the extension on VAHAN.</p>
           </div>
           <div class="ndc-tour-grid">
             <article class="ndc-tour-card">
@@ -952,16 +955,24 @@
               <p class="ndc-tour-footnote">Missing or expired cache? The setting uses available documents. Uploading starts only when Automatic Upload is enabled.</p>
             </article>
             <article class="ndc-tour-card">
-              <div class="ndc-tour-top"><span class="kicker">02 / Prepared copies</span><span class="ndc-tour-chip">Optional setting</span></div>
+              <div class="ndc-tour-top"><span class="kicker">02 / Prepared copies</span><span class="ndc-tour-chip">Always automatic</span></div>
               <h3>A familiar name on every file.</h3>
-              <p>Use the customer name already shown on VAHAN and the assigned document category to name prepared copies.</p>
+              <p>Prepared copies automatically include the live customer name, assigned category, and chassis number. There is no rename setting to switch on.</p>
               <label class="ndc-tour-label" for="ndcRenameExample">Sample customer name</label>
               <input id="ndcRenameExample" class="ndc-tour-input" type="text" value="Suresh" maxlength="60" autocomplete="off" spellcheck="false" />
               <div class="ndc-tour-sample" aria-live="polite" aria-atomic="true">
                 <span class="ndc-tour-label">Example prepared filenames</span>
-                <ul id="ndcRenameResults" class="ndc-tour-filenames"><li>suresh_aadhar.pdf</li><li>suresh_form20.pdf</li><li>suresh_chassis.jpg</li><li>suresh_insurance.pdf</li></ul>
+                <ul id="ndcRenameResults" class="ndc-tour-filenames"><li>suresh_aadhar_MBLHAW427THH02338.pdf</li><li>suresh_form20_MBLHAW427THH02338.pdf</li><li>suresh_chassis_MBLHAW427THH02338.jpg</li><li>suresh_insurance_MBLHAW427THH02338.pdf</li></ul>
               </div>
               <p class="ndc-tour-footnote">Import, recognize, rename, prepare, upload. Original files stay unchanged. Format conversion can change the prepared file's extension.</p>
+            </article>
+            <article class="ndc-tour-card">
+              <div class="ndc-tour-top"><span class="kicker">03 / Prepared documents</span><span class="ndc-tour-chip">Sample workflow</span></div>
+              <h3>Reuse the work. Refresh when needed.</h3>
+              <p>Matching prepared copies can skip repeat compression. Original filenames stay visible in Choose documents.</p>
+              <label class="ndc-tour-session" for="ndcOriginalsExample"><input type="checkbox" id="ndcOriginalsExample" /><span><strong>Use original files and prepare again</strong><small>Sample session control. Resets on page reload.</small></span></label>
+              <div class="ndc-tour-sample" aria-live="polite" aria-atomic="true"><span class="ndc-tour-label">Document source</span><strong id="ndcPreparedSource">Prefer matching Compressed copies</strong><p id="ndcPreparedBehavior">Reuse prepared files where available. Prepare originals for missing categories.</p></div>
+              <p class="ndc-tour-footnote">Saving requires folder write access in the extension. This website example does not read or write your files.</p>
             </article>
           </div>
         </div>
@@ -2621,7 +2632,7 @@
               What's new in <span class="gold">v5.4.0</span>
             </h2>
             <p class="section-desc">
-              Smart customer caching, flexible automatic import, and optional customer-name file renaming for partial document workflows.
+              Customer-folder saving, reuse of matching Compressed files, automatic chassis-based filenames, and a session-only option to prepare originals again.
             </p>
           </div>
           <div class="ndc-release-meta">
@@ -2637,8 +2648,12 @@
             >
           </div>
           <div class="ndc-release-grid">
+            <article class="ndc-release-card"><span class="ndc-release-category">NEW / SAVE TO CUSTOMER FOLDER</span><h3>Your prepared documents, beside the originals</h3><p>Optional automatic saving creates Compressed inside the matched customer folder. The Allow saving to customer root checkbox grants write access and enables saving. Approval can require the standalone workspace tab.</p></article>
+            <article class="ndc-release-card"><span class="ndc-release-category">NEW / FASTER RETURN VISITS</span><h3>Reuse prepared bytes instead of processing again</h3><p>All three customer-folder imports check for usable prepared copies. Matching copies avoid repeat compression; missing categories use originals. Newer originals, oversized copies, and duplicate prepared candidates fall back to preparation.</p></article>
+            <article class="ndc-release-card"><span class="ndc-release-category">NEW / SESSION CONTROL</span><h3>Start from originals for this workspace</h3><p>Use original files and prepare again bypasses Compressed for the current session and replaces same-name prepared copies after processing. Write access is required. The original filename remains visible during document selection.</p></article>
+
             <article class="ndc-release-card"><span class="ndc-release-category">NEW / CUSTOMER CACHE</span><h3>Resume work for up to 50 customers</h3><p>A single local customer cache stores the name, chassis number, remaining document categories, and last update time. Records expire after 24 hours. The oldest records are removed beyond 50 customers.</p></article>
-            <article class="ndc-release-card"><span class="ndc-release-category">NEW / FILE RENAMING</span><h3>Customer names on prepared copies</h3><p>Optional automatic renaming follows customername_assigneddocument.extension after category recognition and before preparation. Original files remain unchanged.</p></article>
+            <article class="ndc-release-card"><span class="ndc-release-category">NEW / FILE RENAMING</span><h3>Customer names on prepared copies</h3><p>Renaming is always enabled and hidden from settings. Prepared copies use customername_assigneddocument_chassisnumber.extension. Original files remain unchanged.</p></article>
             <article class="ndc-release-card"><span class="ndc-release-category">NEW / CACHE MAINTENANCE</span><h3>Remaining documents stay up to date</h3><p>Document scans save remaining categories. Confirmed uploads update the record, and completing all 12 categories removes it. Customer identity checks and stale-record invalidation keep return visits tied to the right record.</p></article>
 
             <article class="ndc-release-card">
@@ -2706,6 +2721,11 @@
             </p>
           </div>
           <div class="faq-grid">
+            <details><summary>Where are prepared documents saved?</summary><p>Under Customer Root / Customer Name / Compressed, for example Suresh / Compressed / suresh_aadhar_MBLHAW427THH02338.pdf. Enable Always store prepared docs in customer folder and approve write access with Allow saving to customer root. Original documents are not overwritten.</p></details>
+            <details><summary>Will it reuse files that were already prepared?</summary><p>Yes. Choose documents, Auto-import available, and Import unuploaded docs check Compressed for matching prepared copies. Missing categories use originals. Choose documents keeps original filenames visible. The extension checks the customer name, chassis, category, size, and whether an original is newer.</p></details>
+            <details><summary>How do I force fresh preparation?</summary><p>Check Use original files and prepare again in the document workspace before importing. It ignores Compressed files for this session, prepares the main-folder originals, and writes same-name replacement copies with write access. This option is not stored as a permanent setting.</p></details>
+            <details><summary>Can automatic renaming be switched off?</summary><p>No. Renaming is automatic and has no visible setting. Prepared filenames contain the customer name, assigned category, and chassis number. Original disk filenames stay unchanged.</p></details>
+
             <details>
               <summary>Why are there four document selection buttons?</summary>
               <p>

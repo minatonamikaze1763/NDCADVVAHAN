@@ -19,7 +19,14 @@
   input.addEventListener("input", () => {
     const name = input.value.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "_").replace(/^_+|_+$/g, "").slice(0,100) || "customer";
     document.getElementById("ndcRenameResults").replaceChildren(...["aadhar.pdf", "form20.pdf", "chassis.jpg", "insurance.pdf"].map(file => {
-      const row = document.createElement("li"); row.textContent = name + "_" + file; return row;
+      const row = document.createElement("li"); const dot = file.lastIndexOf("."); row.textContent = name + "_" + file.slice(0,dot) + "_MBLHAW427THH02338" + file.slice(dot); return row;
     }));
+  });
+  const originals = document.getElementById("ndcOriginalsExample");
+  originals.addEventListener("change", () => {
+    document.getElementById("ndcPreparedSource").textContent = originals.checked ? "Use main-folder originals" : "Prefer matching Compressed copies";
+    document.getElementById("ndcPreparedBehavior").textContent = originals.checked
+      ? "Ignore Compressed for this sample session. Prepare originals again and replace same-name prepared copies with write access."
+      : "Reuse prepared files where available. Prepare originals for missing categories.";
   });
 })();
