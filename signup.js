@@ -51,7 +51,26 @@
     }
     document.addEventListener('DOMContentLoaded', async () => {
         $('paymentProceed').disabled = true;
-        try { await NDCPlans.ready; for (const p of NDCPlans.all) plans[p.id] = p; const cards = document.querySelectorAll('.pricing .plan'); NDCPlans.visible.forEach((p, i) => { const card = cards[i]; if (!card) return; card.querySelector('.plan-label').textContent = p.name + ' PLAN'; card.querySelector('.price').textContent = money(p.monthlyPrice); const ul = card.querySelector('ul'); ul.replaceChildren(); for (const text of [p.maxDevices + ' device login' + (p.maxDevices === 1 ? '' : 's')]) { const li = document.createElement('li'); li.textContent = text; ul.append(li); } const b = card.querySelector('button'); b.removeAttribute('onclick'); b.textContent = 'Choose ' + p.name; b.onclick = () => window.selectPlan(p.id); }); } catch (error) { status(error.message); return; }
+        try {
+            await NDCPlans.ready;
+            const container = document.querySelector('.pricing');
+            const custom = container.querySelector('.plan');
+            $('ndcPlanLoading')?.remove();
+            for (const p of NDCPlans.visible) {
+                plans[p.id] = p;
+                const card = document.createElement('article'); card.className = 'plan';
+                const heading = document.createElement('div'); heading.className = 'plan-label'; heading.textContent = p.name;
+                const price = document.createElement('div'); price.className = 'price'; price.textContent = money(p.monthlyPrice);
+                const per = document.createElement('div'); per.className = 'per'; per.textContent = `per ${p.durationDays} days`;
+                const ul = document.createElement('ul');
+                for (const text of [`${p.maxDevices} device login(s)`, ...Object.entries(p.features || {}).filter(([,v]) => v === true).map(([key]) => NDCPlans.featureLabel(p,key))]) {
+                    const li = document.createElement('li'); li.textContent = text; ul.append(li);
+                }
+                const button = document.createElement('button'); button.type = 'button'; button.className = 'btn btn-outline'; button.textContent = 'Choose ' + p.name; button.onclick = () => window.selectPlan(p.id);
+                card.append(heading,price,per,document.createElement('hr'),ul,button); container.insertBefore(card,custom);
+            }
+            if (!NDCPlans.visible.length) status('No subscription plans are currently available.');
+        } catch (error) { $('ndcPlanLoading').textContent = 'Plans are unavailable. Refresh to retry.'; status(error.message); return; }
         $('signupMonths').replaceChildren(); for (let i = 1; i <= 12; i++) { const o = document.createElement('option'); o.value = i; o.textContent = `${i} month${i === 1 ? '' : 's'}`; $('signupMonths').append(o); } $('signupMonths').onchange = () => { if(appliedOffer && appliedOffer.months !== Number($('signupMonths').value)) offerWidget?.clear('Offer removed because the duration changed.'); update(); };
         if(window.NDCOfferCode && $('ndcSignupOffer')) offerWidget = NDCOfferCode.mount($('ndcSignupOffer'), {
             request: code => post('/api/public/offers/preview', {code}), isBusy: () => state !== 'idle',

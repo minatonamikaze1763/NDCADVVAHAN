@@ -1,4 +1,4 @@
-/* Server-owned plan values; session-only test preview. */
+/* Display catalog only. The server calculates every checkout and entitlement. */
 window.NDCPlans = (() => {
   let plans = [];
   const labels = {
@@ -14,18 +14,19 @@ window.NDCPlans = (() => {
     .then(async response => {
       if (!response.ok) throw Error("Unable to load subscription plans.");
       const data = await response.json();
-      if (!Array.isArray(data.plans) || !data.plans.length) throw Error("Subscription plans are unavailable.");
-      plans = data.plans; return plans;
+      if (!Array.isArray(data.plans)) throw Error("Subscription plans are unavailable.");
+      plans = data.plans.filter(p => p.status === "active"); return plans;
     });
   ready.catch(() => { });
   return {
     ready,
     label,
+    featureLabel: (plan, key) => plan.featureLabels?.[key] || label(key),
     get all() {
-      return plans.filter(p => ["basic", "starter", "pro"].includes(p.id));
+      return structuredClone(plans);
     },
     get visible() {
-      return plans.filter(p => ["basic", "starter", "pro"].includes(p.id));
+      return structuredClone(plans);
     }
   };
 

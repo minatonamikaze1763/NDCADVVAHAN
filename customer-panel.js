@@ -16,7 +16,7 @@
   let serverClockOffset = 0;
 
   function availablePlans(account) {
-    return NDCPlans.visible.filter(p => p.id !== "basic" || !(Number(account.minimumRenewalTier) >= 1 || Number(account.plan?.price) >= 499));
+    return NDCPlans.visible.filter(p => p.id !== "basic" || !(Number(account.minimumRenewalTier) >= 1));
   }
   function subscriptionVisual(account) {
     const expiry = Date.parse(account.expiresAt), now = Date.now() + serverClockOffset;
@@ -844,8 +844,8 @@
             <h3>Manage your subscription</h3>
             <p>Upgrades increase logins immediately after verified payment. A lower plan starts after your current paid entitlement ends. Existing paid time is preserved. Payments are processed securely through Razorpay.</p>
             <form id="ndcRenewalForm" tabindex="-1">
-              <aside class="ndc-shared-features"><h3>Included in every plan</h3><ul>${Object.entries(NDCPlans.all[0]?.features || {}).filter(([, v]) => v === true).map(([k]) => `<li>${esc(NDCPlans.label(k))}</li>`).join('')}</ul></aside><fieldset class="ndc-choice-group"><legend>01 · Choose your plan</legend>
-              <div class="ndc-plan-options">${availablePlans(account).map((p, i) => `<label class="ndc-choice ndc-plan-choice"><input type="radio" name="renewalPlan" value="${esc(p.id)}" ${i === 0 ? "checked" : ""} required><span><small>${p.id === 'test' ? 'AUTHORIZED TESTING' : 'MONTHLY MEMBERSHIP'}</small><strong>${esc(p.name)}</strong><b>${esc(money(p.monthlyPrice))}<small> / month</small></b><em>${esc(planDevices(account, p))} devices · ${esc(p.durationDays)} days/month</em></span></label>`).join('')}</div></fieldset>
+              <aside class="ndc-shared-features"><h3>Included in every plan</h3><ul>${Object.entries(NDCPlans.all[0]?.features || {}).filter(([k, v]) => v === true && NDCPlans.all.every(p => p.features?.[k] === true)).map(([k]) => `<li>${esc(NDCPlans.label(k))}</li>`).join('')}</ul></aside><fieldset class="ndc-choice-group"><legend>01 · Choose your plan</legend>
+              <div class="ndc-plan-options">${availablePlans(account).map((p, i) => `<label class="ndc-choice ndc-plan-choice"><input type="radio" name="renewalPlan" value="${esc(p.id)}" ${i === 0 ? "checked" : ""} required><span><small>${p.id === 'test' ? 'AUTHORIZED TESTING' : 'MONTHLY MEMBERSHIP'}</small><strong>${esc(p.name)}</strong><b>${esc(money(p.monthlyPrice))}<small> / month</small></b><em>${esc(planDevices(account, p))} devices · ${esc(p.durationDays)} days/month</em><ul>${Object.entries(p.features || {}).filter(([,v]) => v === true).map(([key]) => `<li>${esc(NDCPlans.featureLabel(p,key))}</li>`).join('')}</ul></span></label>`).join('')}</div></fieldset>
               <fieldset class="ndc-choice-group"><legend>02 · Add more time</legend><p>Each month adds 30 days. Choose 1–12 months.</p>
               <div class="ndc-month-options">${Array.from({ length: 12 }, (_, i) => `<label class="ndc-choice ndc-month-choice"><input type="radio" name="renewalMonths" value="${i + 1}" ${i === 0 ? 'checked' : ''}><span><strong>${i + 1}</strong><small>${i === 0 ? 'month' : 'months'}</small></span></label>`).join('')}</div></fieldset>
               <div id="ndcRenewalOffer"></div>
