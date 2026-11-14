@@ -59,3 +59,26 @@
 .ndc-fs-notes strong { color:var(--text); font-weight:550; }
 .ndc-fs-disclaimer { color:var(--muted); font-size:11px; margin:20px 0 0; line-height:1.8; }
 @media(max-width:760px) { .ndc-folder-showcase { padding-block:48px; } .ndc-fs-grid,.ndc-fs-notes { grid-template-columns:1fr; } .ndc-fs-panel { padding:20px; } .ndc-fs-file { gap:9px; } }
+
+/* Current settings catalog and before/after submission examples. */
+.ndc-settings-catalog { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+.ndc-setting-guide { padding:24px; border:1px solid var(--line); border-radius:14px; background:var(--panel); min-width:0; }
+.ndc-setting-kind { color:var(--gold); font-size:10px; letter-spacing:.06em; }
+.ndc-setting-guide h3 { font-size:16px; line-height:1.4; font-weight:550; margin:14px 0 12px; }
+.ndc-setting-guide p { font-size:13px; color:var(--muted); line-height:1.8; margin:0; overflow-wrap:anywhere; }
+.ndc-log-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+.ndc-log-example { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:28px; min-width:0; }
+.ndc-log-example h3 { font-size:23px; font-weight:550; line-height:1.3; letter-spacing:-.03em; }
+.ndc-log-state { color:var(--green); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:16px; font-size:12px; line-height:1.8; }
+.ndc-log-example dl { display:grid; grid-template-columns:minmax(100px,.8fr) minmax(0,1.2fr); gap:14px; margin:24px 0; font-size:12px; }
+.ndc-log-example dt { color:var(--muted); }
+.ndc-log-example dd { margin:0; overflow-wrap:anywhere; }
+.ndc-log-detail { border-top:1px solid var(--line); padding:16px 0; font-size:12px; }
+.ndc-log-detail strong { color:var(--gold); font-weight:550; }
+.ndc-log-detail p { color:var(--muted); margin-bottom:0; }
+.ndc-log-action { display:flex; align-items:center; flex-wrap:wrap; gap:12px; padding-top:12px; }
+.ndc-log-action > span { background:var(--gold); color:var(--bg); padding:9px 12px; border-radius:7px; font-size:12px; font-weight:550; }
+.ndc-log-action small,.ndc-log-note { font-size:12px; color:var(--muted); line-height:1.8; }
+.ndc-log-note { margin-top:24px; }
+@media(max-width:900px) { .ndc-settings-catalog { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:650px) { .ndc-settings-catalog,.ndc-log-grid { grid-template-columns:1fr; } .ndc-log-example { padding:22px; } }

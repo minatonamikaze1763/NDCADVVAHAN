@@ -66,8 +66,8 @@
     <link rel="stylesheet" href="offer-code.css" />
     <link rel="stylesheet" href="offers-showcase.css" />
     <link rel="stylesheet" href="reviews-showcase.css" />
-    <link rel="stylesheet" href="screenshots-showcase.css?v=520-current" />
-    <script src="screenshots-showcase.js?v=520-current" defer></script>
+    <link rel="stylesheet" href="screenshots-showcase.css?v=540-current-behavior" />
+    <script src="screenshots-showcase.js?v=540-current-behavior" defer></script>
     <link rel="stylesheet" href="landing-redesign.css?v=540-contact-grid-fix" />
     <script src="landing-redesign.js?v=20261109-cx-preference" defer></script>
     <link
@@ -75,7 +75,7 @@
       href="preview-showcase.css?v=540-smart-cache"
     />
     <script src="preview-showcase.js?v=540-compressed" defer></script>
-    <link rel="stylesheet" href="feature-tour.css?v=540-folder-showcase" />
+    <link rel="stylesheet" href="feature-tour.css?v=540-settings-logs" />
     <script src="feature-tour.js?v=540-compressed" defer></script>
   </head>
   <body class="ndc-redesign">
@@ -1031,79 +1031,10 @@
         </div>
       </section>
 
-      <section id="automation">
-        <div class="container">
-          <div class="section-head">
-            <div class="kicker">Simple. Flexible. Configurable.</div>
-            <h2 class="section-title">
-              <span class="gold">Automation</span> on Your Terms
-            </h2>
-            <p class="section-desc">
-              Enable the options that fit your process. Automation settings are
-              optional and can be reviewed before running the workflow.
-            </p>
-          </div>
-          <div class="features">
-            <article class="feature">
-              <div class="feature-icon" aria-hidden="true"><svg class="ndc-icon ndc-ui-icon ndc-feature-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ndc-i-image"/></svg></div>
-              <h3>Auto Image to PDF Convertion</h3>
-              <p>
-                Choose PDFs for supported images or keep their original image
-                format. Your saved preference makes daily document preparation
-                more consistent for your team.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon" aria-hidden="true"><svg class="ndc-icon ndc-ui-icon ndc-feature-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ndc-i-upload"/></svg></div>
-              <h3>Automatic Upload Start</h3>
-              <p>
-                Automatically initiate the upload workflow after file
-                preparation and compression are complete.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon" aria-hidden="true"><svg class="ndc-icon ndc-ui-icon ndc-feature-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ndc-i-settings"/></svg></div>
-              <h3>Skip Existing Documents</h3>
-              <p>
-                Check the VAHAN document workflow and skip documents identified
-                as already uploaded, instead of repeating the same upload step.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon" aria-hidden="true"><svg class="ndc-icon ndc-ui-icon ndc-feature-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ndc-i-settings"/></svg></div>
-              <h3>Automatic Final Submission</h3>
-              <p>
-                Optionally continue the final submission workflow after uploads
-                are processed. Always verify the details and final status on the
-                portal.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon" aria-hidden="true"><svg class="ndc-icon ndc-ui-icon ndc-feature-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ndc-i-check"/></svg></div>
-              <h3>Show Log on Page After Submission</h3>
-              <p>
-                Keep a readable application summary on the page after your work
-                is complete. Show or hide it when you need more room; automatic
-                submission includes the RTA office.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon" aria-hidden="true"><svg class="ndc-icon ndc-ui-icon ndc-feature-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ndc-i-check"/></svg></div>
-              <h3>Auto Copy Logs to Clipboard</h3>
-              <p>
-                Choose automatic copying of application details for your next
-                task. The copied summary contains the details alone, and this
-                setting is off by default.
-              </p>
-            </article>
-          </div>
-          <p class="notice">
-            NDC VAHAN TOOL assists with supported portal actions. Users remain
-            responsible for document accuracy and for confirming all official
-            submission requirements.
-          </p>
-        </div>
-      </section>
+      <section id="automation" aria-labelledby="ndcAutomationTitle">
+        <div class="container"><div class="section-head"><div class="kicker">Preferences, permissions &amp; session controls</div><h2 class="section-title" id="ndcAutomationTitle"><span class="gold">Automation</span> on Your Terms</h2><p class="section-desc">See the current workspace controls in one place. Persistent preferences, browser folder permission and the session-only originals option each serve a different part of the workflow.</p></div><div class="ndc-settings-catalog"><article class="ndc-setting-guide"><span class="ndc-setting-kind">Folder setup</span><h3>Customer root folder</h3><p>Choose or remove the root containing customer folders. Matching uses the customer name from VAHAN.</p></article><article class="ndc-setting-guide"><span class="ndc-setting-kind">Optional / default off</span><h3>Auto import/prepare/upload documents in CX folder</h3><p>On workspace opening, no valid cache imports available documents directly. A matching cache selects unuploaded-only import. Automatic Upload controls the next step.</p></article><article class="ndc-setting-guide"><span class="ndc-setting-kind">Optional / default off</span><h3>Always store prepared docs in customer folder</h3><p>Save ready copies inside the matched customer’s Compressed folder. Same-name prepared copies are replaced. Originals remain unchanged.</p></article><article class="ndc-setting-guide"><span class="ndc-setting-kind">Permission control</span><h3>Allow saving to customer root</h3><p>Approve write access in a standalone workspace if needed. Successful approval enables saving and attempts to save ready documents.</p></article><article class="ndc-setting-guide"><span class="ndc-setting-kind">Optional / default off</span><h3>Convert images to PDF</h3><p>Compress images and convert them to PDF when enabled. Otherwise keep images in an image format unless compression changes it.</p></article><article class="ndc-setting-guide"><span class="ndc-setting-kind">Optional / default off</span><h3>Automatic Upload</h3><p>Start the upload workflow when selected, eligible documents finish preparation.</p></article><article class="ndc-setting-guide"><span class="ndc-setting-kind">Default on</span><h3>Skip Already Uploaded Documents</h3><p>Check each live upload slot and skip files already present on VAHAN.</p></article><article class="ndc-setting-guide"><span class="ndc-setting-kind">Default on</span><h3>Automatic File Movement &amp; Submission</h3><p>Continue through File Movement and confirmation after document uploads. Review VAHAN’s final result.</p></article><article class="ndc-setting-guide"><span class="ndc-setting-kind">Default on</span><h3>Show Log on Page After Submission</h3><p>Show a readable application summary. With submission disabled, it reports uploads completed and manual submission pending.</p></article><article class="ndc-setting-guide"><span class="ndc-setting-kind">Optional / default off</span><h3>Auto Copy Logs to Clipboard</h3><p>Copy selected application details and completion status. Automatic submission waits for RTA office information when available.</p></article><article class="ndc-setting-guide"><span class="ndc-setting-kind">Session only</span><h3>Use original files and prepare again</h3><p>Ignore Compressed for the current workspace, prepare main-folder originals, and write replacement copies with permission. Never stored as a permanent preference.</p></article><article class="ndc-setting-guide"><span class="ndc-setting-kind">Log customization</span><h3>Log contents &amp; custom message</h3><p>Choose customer name, full owner details, insurance details, HP details, chassis number, and application date. Optionally add a custom message up to 1,000 characters. Application number remains included.</p></article><article class="ndc-setting-guide"><span class="ndc-setting-kind">Recognition guide</span><h3>Filename hints &amp; custom aliases</h3><p>Review supported filename keywords and add personal category aliases. Automatic prepared filenames always include the customer, document and chassis.</p></article><article class="ndc-setting-guide"><span class="ndc-setting-kind">Account information</span><h3>Session monitor</h3><p>Review the account and connection details shown in the workspace.</p></article></div><p class="notice">Automatic renaming is always enabled and has no visible toggle. Customer caching and matching prepared-copy reuse are automatic. ZIP download remains available as a tool action; the legacy automatic ZIP preference is hidden in the current extension.</p></div></section>
+
+      <section id="submission-log-showcase" aria-labelledby="ndcLogShowcaseTitle"><div class="container"><div class="section-head"><div class="kicker">Two completion states</div><h2 class="section-title" id="ndcLogShowcaseTitle">One readable log.<br><span class="gold">The right submission status.</span></h2><p class="section-desc">The upload-only summary appears after documents finish uploading when automatic submission is disabled. The submitted summary appears after automatic submission, with RTA office details when available. These are fictional examples, not live VAHAN results.</p></div><div class="ndc-log-grid"><article class="ndc-log-example"><div class="kicker">01 / Automatic submission off</div><h3>After uploads, before submission</h3><div class="ndc-log-state">Status — VAHAN Documents uploaded on 14-Nov-2026 at 10:30:00 AM IST — Submit manually in VAHAN</div><dl><dt>Application No</dt><dd>DEMO-2026-001234</dd><dt>Customer Name</dt><dd>Suresh</dd><dt>Chassis No</dt><dd>MBLHAW427THH02338</dd><dt>Application Date</dt><dd>14-Nov-2026</dd></dl><div class="ndc-log-detail"><strong>Owner / insurance / HP details</strong><p>Shown when enabled and present on the application.</p></div><div class="ndc-log-detail"><strong>Message</strong><p>Your optional custom message appears here.</p></div><div class="ndc-log-action"><span>Copy details</span><small>Available in the extension</small></div></article><article class="ndc-log-example"><div class="kicker">02 / Automatic submission on</div><h3>After final submission</h3><div class="ndc-log-state">Status — VAHAN Documents uploaded and submitted on 14-Nov-2026 at 10:30:00 AM IST</div><dl><dt>Application No</dt><dd>DEMO-2026-001234</dd><dt>RTA Office</dt><dd>Sample RTA Office</dd><dt>Customer Name</dt><dd>Suresh</dd><dt>Chassis No</dt><dd>MBLHAW427THH02338</dd><dt>Application Date</dt><dd>14-Nov-2026</dd></dl><div class="ndc-log-detail"><strong>Owner / insurance / HP details</strong><p>Shown when enabled and present on the application.</p></div><div class="ndc-log-detail"><strong>Message</strong><p>Your optional custom message appears here.</p></div><div class="ndc-log-action"><span>Copy details</span><small>Available in the extension</small></div></article></div><p class="ndc-log-note">Show Log on Page controls the visible summary. Auto Copy Logs to Clipboard controls copying. Both use your enabled log fields; copying includes application details and completion status, rather than activity logs or UI branding. The “before submission” example is after uploading—not a log shown before uploads start.</p></div></section>
 
       <section
         id="screenshots"
@@ -1125,10 +1056,10 @@
             <div
               class="ndc-shot-filters"
               role="group"
-              aria-label="Filter screenshots"
+              aria-label="Filter interface previews"
             >
               <button type="button" data-shot-filter="all" aria-pressed="true">
-                All screenshots</button
+                All previews</button
               ><button
                 type="button"
                 data-shot-filter="documents"
@@ -1161,11 +1092,10 @@
                 2-second indicators
               </button>
             </div>
-            <p id="ndcShotCount" aria-live="polite">20 screenshots</p>
+            <p id="ndcShotCount" aria-live="polite">20 interface previews</p>
           </div>
           <p class="ndc-showcase-note">
-            Product previews use sample data. Select any screenshot to see the
-            details.
+            All 20 interface illustrations reflect v5.4.0 behavior and use fictional sample data. They explain workflow states rather than claiming live portal captures. Select a preview for details.
           </p>
           <div class="ndc-shot-grid">
             <figure class="ndc-shot" data-category="workspace">
@@ -1173,13 +1103,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="0"
-                aria-label="View member access screenshot"
+                aria-label="View member access illustration"
               >
                 <img
-                  src="screenshots/01-member-access.png?v=520-current"
+                  src="screenshots/01-member-access.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Member access with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Member access; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1196,13 +1126,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="1"
-                aria-label="View document selection screenshot"
+                aria-label="View four ways to import illustration"
               >
                 <img
-                  src="screenshots/02-document-selection.png?v=520-current"
+                  src="screenshots/02-document-selection.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Document selection with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Four ways to import; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1211,7 +1141,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">02</span>
-                <h3>Document selection</h3>
+                <h3>Four ways to import</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="documents">
@@ -1219,13 +1149,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="2"
-                aria-label="View document matching & previews screenshot"
+                aria-label="View reuse prepared copies illustration"
               >
                 <img
-                  src="screenshots/03-document-matching.png?v=520-current"
+                  src="screenshots/03-document-matching.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Document matching & previews with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Reuse prepared copies; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1234,7 +1164,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">03</span>
-                <h3>Document matching & previews</h3>
+                <h3>Reuse prepared copies</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="documents">
@@ -1242,13 +1172,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="3"
-                aria-label="View preparation & cancellation screenshot"
+                aria-label="View fresh preparation illustration"
               >
                 <img
-                  src="screenshots/04-local-preparation.png?v=520-current"
+                  src="screenshots/04-local-preparation.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Preparation & cancellation with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Fresh preparation; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1257,7 +1187,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">04</span>
-                <h3>Preparation & cancellation</h3>
+                <h3>Fresh preparation</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="documents">
@@ -1265,13 +1195,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="4"
-                aria-label="View upload progress screenshot"
+                aria-label="View upload progress illustration"
               >
                 <img
-                  src="screenshots/05-upload-progress.png?v=520-current"
+                  src="screenshots/05-upload-progress.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Upload progress with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Upload progress; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1288,13 +1218,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="5"
-                aria-label="View upload complete screenshot"
+                aria-label="View upload complete illustration"
               >
                 <img
-                  src="screenshots/06-upload-complete.png?v=520-current"
+                  src="screenshots/06-upload-complete.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Upload complete with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Upload complete; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1311,13 +1241,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="6"
-                aria-label="View workspace preferences screenshot"
+                aria-label="View workspace preferences illustration"
               >
                 <img
-                  src="screenshots/07-conversion-settings.png?v=520-current"
+                  src="screenshots/07-conversion-settings.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Workspace preferences with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Workspace preferences; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1334,13 +1264,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="7"
-                aria-label="View log contents settings screenshot"
+                aria-label="View log contents illustration"
               >
                 <img
-                  src="screenshots/08-submission-settings.png?v=520-current"
+                  src="screenshots/08-submission-settings.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Log contents settings with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Log contents; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1349,7 +1279,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">08</span>
-                <h3>Log contents settings</h3>
+                <h3>Log contents</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="documents">
@@ -1357,13 +1287,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="8"
-                aria-label="View customer folder selection screenshot"
+                aria-label="View customer folder review illustration"
               >
                 <img
-                  src="screenshots/09-address-proof-guide.png?v=520-current"
+                  src="screenshots/09-address-proof-guide.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Customer folder selection with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Customer folder review; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1372,7 +1302,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">09</span>
-                <h3>Customer folder selection</h3>
+                <h3>Customer folder review</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="documents">
@@ -1380,13 +1310,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="9"
-                aria-label="View full-screen document preview screenshot"
+                aria-label="View prepared filenames illustration"
               >
                 <img
-                  src="screenshots/10-document-name-guide.png?v=520-current"
+                  src="screenshots/10-document-name-guide.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Full-screen document preview with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Prepared filenames; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1395,7 +1325,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">10</span>
-                <h3>Full-screen document preview</h3>
+                <h3>Prepared filenames</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="monitor">
@@ -1403,13 +1333,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="10"
-                aria-label="View document monitor screenshot"
+                aria-label="View document monitor illustration"
               >
                 <img
-                  src="screenshots/11-document-monitor.png?v=520-current"
+                  src="screenshots/11-document-monitor.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Document monitor with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Document monitor; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1426,13 +1356,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="11"
-                aria-label="View skipped documents screenshot"
+                aria-label="View skip uploaded documents illustration"
               >
                 <img
-                  src="screenshots/12-skipped-documents.png?v=520-current"
+                  src="screenshots/12-skipped-documents.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Skipped documents with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Skip uploaded documents; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1441,7 +1371,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">12</span>
-                <h3>Skipped documents</h3>
+                <h3>Skip uploaded documents</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="monitor">
@@ -1449,13 +1379,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="12"
-                aria-label="View minimized monitor screenshot"
+                aria-label="View minimized monitor illustration"
               >
                 <img
-                  src="screenshots/13-minimized-monitor.png?v=520-current"
+                  src="screenshots/13-minimized-monitor.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Minimized monitor with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Minimized monitor; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1472,13 +1402,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="13"
-                aria-label="View review required screenshot"
+                aria-label="View write access required illustration"
               >
                 <img
-                  src="screenshots/14-review-required.png?v=520-current"
+                  src="screenshots/14-review-required.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Review required with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Write access required; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1487,7 +1417,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">14</span>
-                <h3>Review required</h3>
+                <h3>Write access required</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="logs">
@@ -1495,13 +1425,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="14"
-                aria-label="View final upload log screenshot"
+                aria-label="View before final submission illustration"
               >
                 <img
-                  src="screenshots/15-final-upload-log.png?v=520-current"
+                  src="screenshots/15-final-upload-log.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Final upload log with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Before final submission; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1510,7 +1440,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">15</span>
-                <h3>Final upload log</h3>
+                <h3>Before final submission</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="logs">
@@ -1518,13 +1448,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="15"
-                aria-label="View final submission log screenshot"
+                aria-label="View after final submission illustration"
               >
                 <img
-                  src="screenshots/16-final-submission-log.png?v=520-current"
+                  src="screenshots/16-final-submission-log.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Final submission log with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — After final submission; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1533,7 +1463,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">16</span>
-                <h3>Final submission log</h3>
+                <h3>After final submission</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="logs">
@@ -1541,13 +1471,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="16"
-                aria-label="View copy final details screenshot"
+                aria-label="View copy final details illustration"
               >
                 <img
-                  src="screenshots/17-copy-final-details.png?v=520-current"
+                  src="screenshots/17-copy-final-details.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Copy final details with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Copy final details; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1564,13 +1494,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="17"
-                aria-label="View two-second progress indicator screenshot"
+                aria-label="View progress notice illustration"
               >
                 <img
-                  src="screenshots/18-two-second-progress.png?v=520-current"
+                  src="screenshots/18-two-second-progress.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Two-second progress indicator with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Progress notice; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1579,7 +1509,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">18</span>
-                <h3>Two-second progress indicator</h3>
+                <h3>Progress notice</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="indicators">
@@ -1587,13 +1517,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="18"
-                aria-label="View two-second success indicator screenshot"
+                aria-label="View success notice illustration"
               >
                 <img
-                  src="screenshots/19-two-second-success.png?v=520-current"
+                  src="screenshots/19-two-second-success.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Two-second success indicator with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Success notice; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1602,7 +1532,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">19</span>
-                <h3>Two-second success indicator</h3>
+                <h3>Success notice</h3>
               </figcaption>
             </figure>
             <figure class="ndc-shot" data-category="indicators">
@@ -1610,13 +1540,13 @@
                 type="button"
                 class="ndc-shot-open"
                 data-shot="19"
-                aria-label="View two-second attention indicator screenshot"
+                aria-label="View attention notice illustration"
               >
                 <img
-                  src="screenshots/20-two-second-attention.png?v=520-current"
+                  src="screenshots/20-two-second-attention.png?v=540-current-behavior"
                   width="2400"
                   height="1500"
-                  alt="VAHAN 5.2.0 — Two-second attention indicator with sample data"
+                  alt="VAHAN 5.4.0 interface illustration — Attention notice; fictional sample data"
                   loading="lazy"
                   decoding="async"
                 /><span class="ndc-shot-zoom" aria-hidden="true"
@@ -1625,7 +1555,7 @@
               </button>
               <figcaption>
                 <span class="ndc-shot-number">20</span>
-                <h3>Two-second attention indicator</h3>
+                <h3>Attention notice</h3>
               </figcaption>
             </figure>
           </div>

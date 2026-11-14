@@ -28,7 +28,7 @@
     filters.forEach(filter => filter.setAttribute('aria-pressed', String(filter === button)));
     cards.forEach(card => { card.hidden = category !== 'all' && card.dataset.category !== category; });
     const count = visible().length;
-    document.getElementById('ndcShotCount').textContent = `${count} screenshot${count === 1 ? '' : 's'}`;
+    document.getElementById('ndcShotCount').textContent = `${count} preview${count === 1 ? '' : 's'}`;
   }));
   cards.forEach((card, index) => card.querySelector('button').addEventListener('click', () => {
     opener = card.querySelector('button');
