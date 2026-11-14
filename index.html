@@ -72,9 +72,11 @@
     <script src="landing-redesign.js?v=20261109-cx-preference" defer></script>
     <link
       rel="stylesheet"
-      href="preview-showcase.css?v=20261109-cx-preference"
+      href="preview-showcase.css?v=540-smart-cache"
     />
-    <script src="preview-showcase.js?v=20261109-cx-preference" defer></script>
+    <script src="preview-showcase.js?v=540-smart-cache" defer></script>
+    <link rel="stylesheet" href="feature-tour.css?v=540" />
+    <script src="feature-tour.js?v=540" defer></script>
   </head>
   <body class="ndc-redesign">
     <svg
@@ -203,7 +205,7 @@
         <div class="container hero-grid">
           <div class="ndc-hero-content">
             <a class="ndc-hero-announcement" href="#updates"
-              ><span class="ndc-status-dot"></span> NEW: RESPONSIVE WORKSPACE, DRAG & DROP, UPLOAD HISTORY, CUSTOM ALIASES & MORE <span>v5.3.0 ↗</span></a
+              ><span class="ndc-status-dot"></span> NEW: SMART CUSTOMER CACHE, FLEXIBLE AUTO IMPORT & CUSTOMER FILE RENAMING <span>v5.4.0 ↗</span></a
             >
             <div class="eyebrow">NDC VAHAN TOOL / BUILT FOR DEALERSHIPS</div>
             <h1 id="ndcHeroHeading">
@@ -245,8 +247,8 @@
               >
             </div>
             <div class="ndc-hero-version">
-              <span>v5.3.0</span> Updated
-              <time datetime="2026-11-11">11 Nov 2026</time
+              <span>v5.4.0</span> Updated
+              <time datetime="2026-11-14">14 Nov 2026</time
               ><a href="#updates">What's new ↗</a>
             </div>
           </div>
@@ -436,7 +438,7 @@
             </h2>
             <p class="section-desc">
               Choose documents for review. Auto-import available for quick
-              matching. Import unuploaded docs to scan VAHAN first. Browse files
+              matching. Import unuploaded docs to reuse saved categories or scan VAHAN. Browse files
               manually for any folder. Here is exactly how each button works.
             </p>
           </div>
@@ -488,10 +490,7 @@
               <span class="ndc-choice-number">03 / VAHAN-AWARE IMPORT</span>
               <h3>Import unuploaded docs</h3>
               <p>
-                Scans the VAHAN document sequence from the first slot and builds
-                a list of categories that still show Upload File. The scan stops
-                at the first Modify File slot because that slot and the remaining
-                slots are already uploaded.
+                Reuses remaining categories from a valid cache matching the customer name and chassis. Without a usable cache, scans VAHAN from the first slot until the first uploaded document, then saves the remaining categories. Shift-click the button to force a fresh scan.
               </p>
               <div class="ndc-choice-benefit">
                 <strong>Best for avoiding repeat preparation</strong
@@ -540,14 +539,12 @@
                 >NEW PREFERENCE · OFF BY DEFAULT</span
               >
               <h3 id="openingAutomationHeading">
-                Auto import unuploaded/prepare/upload documents in CX folder
+                Auto import/prepare/upload documents in CX folder
               </h3>
               <p>
                 Enable this red-highlighted option in
                 <strong>Settings → Preferences</strong>. After sign-in, opening
-                the document workspace automatically triggers Import unuploaded
-                docs once. The extension scans VAHAN, matches the customer folder
-                and prepares only the unique categories that still need files.
+                the document workspace checks for a valid matching customer cache once. No cache selects Auto-import available; a matching cache selects Import unuploaded docs. Unique matching files are then prepared.
               </p>
               <p>
                 <strong>Why enable it?</strong> Remove the repeated import click
@@ -561,9 +558,7 @@
                 <li>
                   <strong>Import on opening</strong
                   ><span
-                    >The CX folder preference scans VAHAN and triggers the
-                    unuploaded-only import. Save your root folder first; folder
-                    permission may still need your click.</span
+                    >The CX folder preference chooses available or unuploaded-only import based on the matching cache. Save your root folder first; folder permission may still need your click.</span
                   >
                 </li>
                 <li>
@@ -756,106 +751,12 @@
                 being locked into one fixed process.
               </p>
             </article>
-            <article class="feature">
-              <div class="feature-icon">▧</div>
-              <h3>Responsive Workspace Layout</h3>
-              <p>
-                The extension now adapts fluidly from 320px to 650px wide. No horizontal scrolling on small screens. Settings tabs stack on narrow views, document tables become scrollable, and dropzones reflow automatically.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon">⇳</div>
-              <h3>Drag & Drop File Selection</h3>
-              <p>
-                Drag files directly onto the dropzone with visual feedback (gold border, gradient highlight). Keyboard accessible: press Enter or Space to open the file picker. Works alongside the existing click-to-browse workflow.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon">🔍</div>
-              <h3>Searchable Filename Hints</h3>
-              <p>
-                Real-time filtering for Address Proof and Other Documents keyword tables. Type to filter rows, matching text is highlighted. Escape clears search. Context-aware placeholders guide you (e.g., "Search Address Proof keywords...").
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon">↻</div>
-              <h3>Per-File Retry & Granular Recovery</h3>
-              <p>
-                Failed or skipped files show a Retry (↻) button. Click to re-prepare just that file without resetting the whole batch. Inline error messages show exactly what went wrong. Remove button stays active during preparation.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon feature-icon-merge" aria-hidden="true">
-                1 + 2
-              </div>
-              <h3>Aadhaar Merge Visibility</h3>
-              <p>
-                Merged Aadhaar files now show a "Merged (2)" badge with tooltip listing original filenames (front/back). Preview button is disabled until merge completes. Page count reflects the combined PDF.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon">📜</div>
-              <h3>Upload History & Session Reload</h3>
-              <p>
-                Last 50 upload sessions saved locally with customer name, timestamps, counts (uploaded/skipped/failed), file list, and full log. Reload any session to restore the file set with prepared data. Copy log or delete individual entries.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon">➕</div>
-              <h3>Custom Filename Aliases (Add-Only)</h3>
-              <p>
-                Add your own filename → category mappings in Settings → Filename Hints. Keywords are matched as whole words and never override built-in aliases. Real-time integration with the document matcher. Delete unwanted aliases anytime.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon">✎</div>
-              <h3>Bulk Rename Assistant</h3>
-              <p>
-                One-click "Auto-rename" suggests CustomerName_Category.pdf names based on matched slots. Preview modal shows original → suggested with checkboxes. Applies to both original and prepared file objects. Pulls customer name from workspace.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon">☑</div>
-              <h3>Printable Checklist Generator</h3>
-              <p>
-                Generates a clean HTML checklist (20 rows: 12 VAHAN slots + 9 Address Proof subcategories) with filename hints and status checkmarks for matched files. Opens in printable window (800x600) with Print/Save as PDF button.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon">⌨</div>
-              <h3>Keyboard Shortcuts (Global)</h3>
-              <p>
-                Six persistent shortcuts via Chrome Commands API: Ctrl/Cmd+O (open files), Ctrl/Cmd+Enter (start upload), Ctrl/Cmd+S (download ZIP), Escape (cancel/close), ArrowLeft/Right (navigate settings tabs). Work even when popup is closed.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon">🔊</div>
-              <h3>Completion Sound</h3>
-              <p>
-                Optional Web Audio API chime (880Hz sine wave, 0.5s decay) when all uploads complete successfully. Toggle in Settings → Preferences. Silent fallback if AudioContext unavailable.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon">🔧</div>
-              <h3>Advanced Settings Panel</h3>
-              <p>
-                New Advanced tab: enableExperimentalFeatures (bulk rename, offline queue), debugMode (verbose logging + internal states), customUserAgent (override for VAHAN requests). Stored separately in chrome.storage.local.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon">📋</div>
-              <h3>Granular Log Controls</h3>
-              <p>
-                Four new toggles in Settings → Log Contents: include filenames, file sizes, timestamps, and Address Proof subcategory names. Each defaults to on. Fine-tune your submission summaries.
-              </p>
-            </article>
-            <article class="feature">
-              <div class="feature-icon">⚙</div>
-              <h3>DMS Retry & Timeout Controls</h3>
-              <p>
-                Configure max retries for "DMS services not responding" (default 4, range 1-10) and VAHAN page wait timeout (default 20s, range 5s-120s). Auto-retry failed uploads once. Confirm dialog before File Movement.
-              </p>
-            </article>
+            <article class="feature"><div class="feature-icon" aria-hidden="true">50</div><h3>Smart Customer Document Cache</h3><p>Keep up to 50 customers on this device, identified by chassis number and checked against the customer name. Saved remaining categories help resume partial document work.</p></article>
+            <article class="feature"><div class="feature-icon" aria-hidden="true">AUTO</div><h3>Flexible Automatic Import</h3><p>With no valid customer cache, automatic import selects available documents. With a matching cache, it selects Import unuploaded docs. Preparation follows; Automatic Upload remains a separate setting.</p></article>
+            <article class="feature"><div class="feature-icon" aria-hidden="true">NAME</div><h3>Optional Customer File Renaming</h3><p>Enable Auto Rename Files Using Customer Name to name prepared copies such as suresh_form20.pdf. Original files stay unchanged, and the extension keeps the file extension unless preparation changes the format.</p></article>
+            <article class="feature"><div class="feature-icon" aria-hidden="true">SYNC</div><h3>Cache Updates After Upload</h3><p>Confirmed uploads remove their categories from the remaining list. Completing all documents clears the customer record. Stale records expire, and the oldest entries are removed when the cache exceeds 50 customers.</p></article>
+            <article class="feature"><div class="feature-icon" aria-hidden="true">LOG</div><h3>Submission Logs</h3><p>Choose the customer and application details shown in submission logs. Review completed work and copy the details you need.</p></article>
+            <article class="feature"><div class="feature-icon" aria-hidden="true">PDF</div><h3>Document Previews</h3><p>Review supported images and PDFs before uploading, check document assignments, and select files manually when a filename cannot be recognized.</p></article>
           </div>
           <p class="notice">
             Feature availability depends on the supported VAHAN page and the
@@ -1027,109 +928,42 @@
         </div>
       </section>
 
-      <!-- =========================================================
-           INTERACTIVE DEMOS - v5.3.0 Advanced Features
-           ========================================================= -->
-      <section
-        class="ndc-interactive-demos"
-        id="interactive-demos"
-        aria-labelledby="ndcInteractiveDemosHeading"
-      >
+      <section id="interactive-demos" class="ndc-feature-tour" aria-labelledby="ndcInteractiveDemosHeading">
         <div class="container">
           <div class="section-head">
             <div class="kicker">Try the Features</div>
-            <h2 class="section-title" id="ndcInteractiveDemosHeading">
-              Experience the <span class="gold">workspace</span> before you install.
-            </h2>
-            <p class="section-desc">
-              These live demos run entirely in your browser — no extension required.
-              Each mirrors the actual extension UI and behavior from v5.3.0.
-            </p>
+            <h2 class="section-title" id="ndcInteractiveDemosHeading">Less repeat work.<br><span class="gold">A smoother return visit.</span></h2>
+            <p class="section-desc">Explore two features in v5.4.0 with sample data. These examples explain the workflow; actual document preparation and uploads happen inside the extension on VAHAN.</p>
           </div>
-
-          <!-- Demo 1: Drag & Drop + File Selection -->
-          <article class="ndc-demo-section" id="demo-drag-drop">
-            <header class="ndc-demo-header">
-              <div>
-                <span class="ndc-demo-badge">01</span>
-                <h3>Drag & Drop File Selection</h3>
+          <div class="ndc-tour-grid">
+            <article class="ndc-tour-card">
+              <div class="ndc-tour-top"><span class="kicker">01 / Smart import</span><span class="ndc-tour-chip">Up to 50 customers</span></div>
+              <h3>The right import for the next visit.</h3>
+              <p>The automatic setting checks for a valid cache matching the customer's chassis and name.</p>
+              <div class="ndc-tour-switch" role="group" aria-label="Sample customer cache scenario">
+                <button type="button" data-cache-example="new" aria-pressed="true">No saved cache</button>
+                <button type="button" data-cache-example="returning" aria-pressed="false">Matching cache</button>
               </div>
-              <span class="kicker">NEW IN v5.3.0</span>
-            </header>
-            <p class="ndc-demo-desc">
-              Drop files directly onto the zone with visual gold-border feedback.
-              Press <kbd>Enter</kbd> or <kbd>Space</kbd> to open the picker.
-              Files show type badges (PDF/IMG), sizes, and ready status.
-            </p>
-            <div class="ndc-demo-stage" id="demo-dragdrop-stage"></div>
-          </article>
-
-          <!-- Demo 2: Searchable Filename Hints -->
-          <article class="ndc-demo-section" id="demo-search-hints">
-            <header class="ndc-demo-header">
-              <div>
-                <span class="ndc-demo-badge">02</span>
-                <h3>Searchable Filename Hints</h3>
+              <div class="ndc-tour-sample" aria-live="polite" aria-atomic="true">
+                <span class="ndc-tour-label">Automatic action</span><strong id="ndcCacheAction">Auto-import available docs</strong>
+                <p id="ndcCacheExplanation">Import unique document matches from the customer's folder, then prepare the selected files.</p>
+                <div id="ndcCacheCategories" class="ndc-tour-tags"><span>Available folder documents</span></div>
               </div>
-              <span class="kicker">NEW IN v5.3.0</span>
-            </header>
-            <p class="ndc-demo-desc">
-              Real-time filtering for Address Proof and Other Documents tables.
-              Type to filter rows — matching text is highlighted. <kbd>Escape</kbd> clears search.
-            </p>
-            <div class="ndc-demo-stage" id="demo-searchhints-stage"></div>
-          </article>
-
-          <!-- Demo 3: Per-File Retry & Aadhaar Merge -->
-          <article class="ndc-demo-section" id="demo-retry-merge">
-            <header class="ndc-demo-header">
-              <div>
-                <span class="ndc-demo-badge">03</span>
-                <h3>Per-File Retry & Aadhaar Merge</h3>
+              <p class="ndc-tour-footnote">Missing or expired cache? The setting uses available documents. Uploading starts only when Automatic Upload is enabled.</p>
+            </article>
+            <article class="ndc-tour-card">
+              <div class="ndc-tour-top"><span class="kicker">02 / Prepared copies</span><span class="ndc-tour-chip">Optional setting</span></div>
+              <h3>A familiar name on every file.</h3>
+              <p>Use the customer name already shown on VAHAN and the assigned document category to name prepared copies.</p>
+              <label class="ndc-tour-label" for="ndcRenameExample">Sample customer name</label>
+              <input id="ndcRenameExample" class="ndc-tour-input" type="text" value="Suresh" maxlength="60" autocomplete="off" spellcheck="false" />
+              <div class="ndc-tour-sample" aria-live="polite" aria-atomic="true">
+                <span class="ndc-tour-label">Example prepared filenames</span>
+                <ul id="ndcRenameResults" class="ndc-tour-filenames"><li>suresh_aadhar.pdf</li><li>suresh_form20.pdf</li><li>suresh_chassis.jpg</li><li>suresh_insurance.pdf</li></ul>
               </div>
-              <span class="kicker">NEW IN v5.3.0</span>
-            </header>
-            <p class="ndc-demo-desc">
-              Failed/skipped rows show a Retry (↻) button to re-prepare just that file.
-              Merged Aadhaar displays a "Merged (2)" badge with tooltip listing front/back filenames.
-            </p>
-            <div class="ndc-demo-stage" id="demo-retrymerge-stage"></div>
-          </article>
-
-          <!-- Demo 4: Upload History & Custom Aliases -->
-          <article class="ndc-demo-section" id="demo-history-aliases">
-            <header class="ndc-demo-header">
-              <div>
-                <span class="ndc-demo-badge">04</span>
-                <h3>Upload History & Custom Aliases</h3>
-              </div>
-              <span class="kicker">NEW IN v5.3.0</span>
-            </header>
-            <p class="ndc-demo-desc">
-              Last 50 sessions with timestamps, counts, and full logs. Click to copy log,
-              delete entries, or reload a session. Add custom filename → category mappings
-              that never override built-in aliases.
-            </p>
-            <div class="ndc-demo-stage" id="demo-historyaliases-stage"></div>
-          </article>
-
-          <!-- Demo 5: Bulk Rename, Checklist, Shortcuts, Sound, Advanced Settings -->
-          <article class="ndc-demo-section" id="demo-advanced-tools">
-            <header class="ndc-demo-header">
-              <div>
-                <span class="ndc-demo-badge">05</span>
-                <h3>Bulk Rename, Checklist & More</h3>
-              </div>
-              <span class="kicker">NEW IN v5.3.0</span>
-            </header>
-            <p class="ndc-demo-desc">
-              Auto-rename suggests <code>CustomerName_Category.pdf</code> names with preview modal.
-              Printable 20-row checklist with status checkmarks. 6 global keyboard shortcuts.
-              Completion sound preview. Advanced toggles and granular log controls.
-            </p>
-            <div class="ndc-demo-stage" id="demo-advancedtools-stage"></div>
-          </article>
-
+              <p class="ndc-tour-footnote">Import, recognize, rename, prepare, upload. Original files stay unchanged. Format conversion can change the prepared file's extension.</p>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -2784,25 +2618,29 @@
           <div class="section-head">
             <div class="kicker">Version &amp; Updates</div>
             <h2 class="section-title" id="ndcReleaseHeading">
-              What's new in <span class="gold">v5.3.0</span>
+              What's new in <span class="gold">v5.4.0</span>
             </h2>
             <p class="section-desc">
-              Responsive workspace, drag & drop, searchable hints, granular recovery, upload history, custom aliases, bulk rename, checklist generator, keyboard shortcuts, and advanced settings.
+              Smart customer caching, flexible automatic import, and optional customer-name file renaming for partial document workflows.
             </p>
           </div>
           <div class="ndc-release-meta">
             <span class="ndc-release-coming-soon"
-              >Available for public download</span
+              >Latest feature update</span
             >
             <span class="ndc-version-badge"
-              >Current version <strong>5.3.0</strong></span
+              >Current version <strong>5.4.0</strong></span
             >
             <span
               >Last updated:
-              <time datetime="2026-11-11">11 November 2026</time></span
+              <time datetime="2026-11-14">14 November 2026</time></span
             >
           </div>
           <div class="ndc-release-grid">
+            <article class="ndc-release-card"><span class="ndc-release-category">NEW / CUSTOMER CACHE</span><h3>Resume work for up to 50 customers</h3><p>A single local customer cache stores the name, chassis number, remaining document categories, and last update time. Records expire after 24 hours. The oldest records are removed beyond 50 customers.</p></article>
+            <article class="ndc-release-card"><span class="ndc-release-category">NEW / FILE RENAMING</span><h3>Customer names on prepared copies</h3><p>Optional automatic renaming follows customername_assigneddocument.extension after category recognition and before preparation. Original files remain unchanged.</p></article>
+            <article class="ndc-release-card"><span class="ndc-release-category">NEW / CACHE MAINTENANCE</span><h3>Remaining documents stay up to date</h3><p>Document scans save remaining categories. Confirmed uploads update the record, and completing all 12 categories removes it. Customer identity checks and stale-record invalidation keep return visits tied to the right record.</p></article>
+
             <article class="ndc-release-card">
               <span class="ndc-release-category">NEW · CUSTOMER FOLDERS</span>
               <h3>The right customer folder, ready to choose</h3>
@@ -2828,10 +2666,7 @@
               <span class="ndc-release-category">SETTINGS</span>
               <h3>Start importing when the workspace opens</h3>
               <p>
-                The red-highlighted CX folder preference triggers Import
-                unuploaded docs once after sign-in. It scans VAHAN first and is
-                off by default. Preparation follows import; Automatic Upload
-                separately controls whether uploading starts when files are ready.
+                The optional CX folder preference runs once after sign-in. Without a valid cache, it imports available documents. With a matching cache, it imports unuploaded categories. Preparation follows import; Automatic Upload separately controls whether uploads start when files are ready.
               </p>
             </article>
             <article class="ndc-release-card">
@@ -2855,8 +2690,7 @@
             </article>
           </div>
           <p class="ndc-release-note">
-            The updated version shown here is not yet available for public
-            download. It will be available soon.
+            Version 5.4.0 feature overview. Check the version in your installed extension; existing screenshots may show an earlier interface.
           </p>
         </div>
       </section>
@@ -2878,8 +2712,7 @@
                 Choose documents opens the matched customer folder for preview
                 and selection. Auto-import available selects unique category
                 matches and starts preparation, even with fewer than 12
-                categories. Import unuploaded docs first scans VAHAN and imports
-                only categories that still need files. Browse files manually
+                categories. Import unuploaded docs uses a valid saved customer category list, or scans VAHAN when no usable cache exists, and imports only categories that still need files. Browse files manually
                 opens the normal file picker for any location.
               </p>
             </details>
@@ -2888,9 +2721,7 @@
                 Does the new CX folder preference upload immediately?
               </summary>
               <p>
-                It triggers Import unuploaded docs once when the signed-in
-                document workspace opens, then prepares only matched files for
-                VAHAN categories that are not already uploaded.
+                It checks for a matching customer cache once when the signed-in document workspace opens. Without a valid record, it triggers Auto-import available. With a matching record, it triggers Import unuploaded docs using the saved remaining categories.
                 Upload starts after preparation only if Automatic Upload is
                 enabled. Automatic File Movement &amp; Submission is controlled
                 separately. The CX folder preference is off by default.

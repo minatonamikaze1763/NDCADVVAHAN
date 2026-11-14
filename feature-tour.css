@@ -1,0 +1,26 @@
+/* Uses the landing page's shared typography and black/gold tokens. */
+.ndc-feature-tour { padding-block: 80px; border-block: 1px solid var(--line); background: var(--bg); }
+.ndc-tour-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+.ndc-tour-card { min-width:0; padding:32px; border:1px solid var(--line); border-radius:16px; background:var(--panel); }
+.ndc-tour-top { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.ndc-tour-chip { color:var(--gold); border:1px solid var(--line); border-radius:999px; padding:5px 10px; font-size:10px; }
+.ndc-feature-tour .ndc-tour-card h3 { font:inherit; font-size:clamp(21px,2.3vw,28px); font-weight:550; letter-spacing:-.035em; line-height:1.25; margin:24px 0 14px; }
+.ndc-tour-card > p { color:var(--muted); font-size:14px; }
+.ndc-tour-switch { display:flex; gap:8px; margin:24px 0 16px; flex-wrap:wrap; }
+.ndc-tour-switch button { font:inherit; font-size:12px; padding:10px 14px; color:var(--muted); background:transparent; border:1px solid var(--line); border-radius:8px; cursor:pointer; }
+.ndc-tour-switch button[aria-pressed="true"] { color:var(--bg); background:var(--gold); border-color:var(--gold); }
+.ndc-feature-tour :is(button,input):focus-visible { outline:2px solid var(--light); outline-offset:4px; }
+.ndc-tour-sample { background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:22px; margin-top:16px; }
+.ndc-tour-label { display:block; color:var(--muted); font-size:10px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:10px; }
+.ndc-tour-sample strong { display:block; font-size:18px; font-weight:550; letter-spacing:-.025em; color:var(--light); }
+.ndc-tour-sample p { color:var(--muted); font-size:13px; }
+.ndc-tour-tags { display:flex; flex-wrap:wrap; gap:6px; }
+.ndc-tour-tags span { color:var(--gold); background:var(--panel2); border:1px solid var(--line); padding:5px 8px; border-radius:5px; font-size:11px; }
+.ndc-tour-input { display:block; width:100%; min-width:0; font:inherit; font-size:14px; color:var(--text); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-top:8px; }
+.ndc-tour-card > label { margin-top:24px; }
+.ndc-tour-filenames { margin:0; padding:0; list-style:none; }
+.ndc-tour-filenames li { padding:7px 0; font-size:13px; color:var(--light); overflow-wrap:anywhere; border-bottom:1px solid var(--line); }
+.ndc-tour-filenames li:last-child { border:0; }
+.ndc-tour-card .ndc-tour-footnote { margin:20px 0 0; font-size:12px; line-height:1.7; }
+@media(max-width:760px) { .ndc-feature-tour { padding-block:48px; } .ndc-tour-grid { grid-template-columns:1fr; } .ndc-tour-card { padding:24px; } }
+@media(prefers-reduced-motion:reduce) { .ndc-feature-tour * { transition:none; } }
