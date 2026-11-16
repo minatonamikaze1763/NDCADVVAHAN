@@ -1,0 +1,40 @@
+#ndcDashboardContent .ndc-contact {padding:0;color:var(--text)}
+#ndcDashboardContent .ndc-contact>.container {width:100%;max-width:none;margin:0;padding:0}
+#ndcDashboardContent .ndc-contact-heading {display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:30px;margin-bottom:30px}
+#ndcDashboardContent .ndc-contact .kicker,
+#ndcDashboardContent .ndc-contact-channel {display:block;color:var(--gold);font-size:10px;font-weight:600;letter-spacing:.15em}
+#ndcDashboardContent .ndc-contact .section-title {margin:12px 0 0;font:500 clamp(30px,3vw,44px)/1.15 "Space Grotesk",sans-serif;letter-spacing:-.04em}
+#ndcDashboardContent .ndc-contact .gold {color:var(--gold)}
+#ndcDashboardContent .ndc-contact-heading>p {margin:0;max-width:52ch;color:var(--muted);font-size:14px;line-height:1.9}
+#ndcDashboardContent .ndc-contact-grid {display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:stretch}
+#ndcDashboardContent .ndc-contact-main {padding:36px;border:1px solid #d7bd5538;border-radius:22px;background:linear-gradient(140deg,#d7bd5508,transparent 65%),var(--panel)}
+#ndcDashboardContent .ndc-contact-brand {display:flex;align-items:center;gap:14px;margin-bottom:32px}
+#ndcDashboardContent .ndc-contact-brand img {width:48px;height:48px;object-fit:contain;flex:none}
+#ndcDashboardContent .ndc-contact-brand>span {font-size:11px;font-weight:600;letter-spacing:.04em}
+#ndcDashboardContent .ndc-contact-brand small {display:block;margin-top:5px;color:var(--muted);font-size:11px;font-weight:400;letter-spacing:0}
+#ndcDashboardContent .ndc-contact-main h3 {margin:16px 0 20px;font:500 clamp(26px,2.6vw,36px)/1.25 "Space Grotesk",sans-serif;letter-spacing:-.04em}
+#ndcDashboardContent .ndc-contact-main p {max-width:56ch;margin:0 0 26px;color:var(--muted);font-size:14px;line-height:1.9}
+#ndcDashboardContent .ndc-contact-main .btn-primary {display:inline-flex;justify-content:center;align-items:center;gap:22px;min-height:50px;padding:14px 22px;background:var(--gold);color:#171207;border:1px solid var(--gold);border-radius:11px;text-decoration:none;font-size:13px;font-weight:600}
+#ndcDashboardContent .ndc-contact-safety {display:block;margin-top:18px;color:var(--muted);font-size:11px}
+#ndcDashboardContent .ndc-contact-options {display:grid;grid-template-rows:repeat(3,1fr);gap:16px;min-width:0}
+#ndcDashboardContent .ndc-contact-option {display:grid;grid-template-columns:40px minmax(0,1fr) 16px;align-items:center;gap:16px;padding:26px;border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--text);text-decoration:none;min-width:0}
+#ndcDashboardContent .ndc-contact-option:hover {border-color:#d7bd5560;background:#17160f}
+#ndcDashboardContent .ndc-contact-option-icon {display:grid;place-items:center;width:40px;height:40px;border:1px solid #d7bd5533;border-radius:12px;color:var(--gold)}
+#ndcDashboardContent .ndc-contact-option-icon svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#ndcDashboardContent .ndc-contact-option>span:nth-child(2) {min-width:0;grid-column:2;grid-row:1}
+#ndcDashboardContent .ndc-contact-option small {display:block;margin-bottom:10px;color:var(--gold);font-size:9px;letter-spacing:.12em}
+#ndcDashboardContent .ndc-contact-option strong {display:block;font-size:16px;font-weight:500;overflow-wrap:anywhere}
+#ndcDashboardContent .ndc-contact-option>span:nth-child(2)>span {display:block;margin-top:10px;color:var(--muted);font-size:12px;line-height:1.7}
+#ndcDashboardContent .ndc-contact-bottom {display:flex;flex-wrap:wrap;align-items:center;gap:20px;margin-top:26px;padding-top:22px;border-top:1px solid var(--line);font-size:12px}
+#ndcDashboardContent .ndc-contact-bottom>span {margin-right:auto;color:var(--muted)}
+#ndcDashboardContent .ndc-contact-bottom a {color:var(--gold);text-decoration:none}
+@media(max-width:1050px){
+#ndcDashboardContent .ndc-contact-grid {grid-template-columns:1fr}
+#ndcDashboardContent .ndc-contact-options {grid-template-rows:auto}
+}
+@media(max-width:600px){
+#ndcDashboardContent .ndc-contact-heading {grid-template-columns:1fr;gap:18px}
+#ndcDashboardContent .ndc-contact-main {padding:24px}
+#ndcDashboardContent .ndc-contact-option {padding:22px 18px;gap:12px}
+#ndcDashboardContent .ndc-contact-option strong {font-size:14px}
+}

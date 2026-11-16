@@ -1,0 +1,384 @@
+/* Full-screen dashboard shell, with controlled content widths. */
+body.ndc-dashboard-v2 {
+    margin:0;
+}
+.ndc-dashboard-v2 .ndc-portal-overlay {
+    width:100%;
+    min-height:100dvh;
+}
+.ndc-dashboard-v2 .ndc-portal-shell {
+    width:100%;
+    max-width:none;
+    margin:0;
+    grid-template-columns:250px minmax(0,1fr);
+}
+.ndc-dashboard-v2 .ndc-portal-main {
+    width:100%;
+    min-width:0;
+}
+.ndc-dashboard-v2 .ndc-dashboard-content {
+    width:100%;
+    max-width:1600px;
+    margin:0 auto 0 0;
+    padding:32px clamp(24px,2.5vw,48px);
+}
+.ndc-dashboard-v2 .ndc-dashboard-shortcuts {
+    width:100%;
+    max-width:1600px;
+    margin:0 auto 0 0;
+    padding:20px clamp(24px,2.5vw,48px) 0;
+}
+.ndc-dashboard-v2 .ndc-portal-topbar,
+.ndc-dashboard-v2 .ndc-portal-footer {
+    padding-inline:clamp(24px,2.5vw,48px);
+}
+
+/* Subscription section only: consistent left alignment. */
+.ndc-dashboard-v2 .ndc-portal-shell:has(
+    .ndc-side-nav [data-section="subscription"].is-active
+) .ndc-dashboard-content {
+    text-align:left;
+}
+.ndc-dashboard-v2 .ndc-portal-shell:has(
+    .ndc-side-nav [data-section="subscription"].is-active
+) .ndc-dashboard-content :is(h1,h2,h3,h4,p,legend,label) {
+    text-align:left;
+}
+.ndc-dashboard-v2 .ndc-portal-shell:has(
+    .ndc-side-nav [data-section="subscription"].is-active
+) .ndc-detail-line b {
+    text-align:left;
+}
+
+/* Membership remains full width, with readable information blocks. */
+.ndc-dashboard-v2 .ndc-subscription-visual {
+    width:100%;
+    margin:0 0 24px;
+    padding:28px;
+}
+.ndc-dashboard-v2 .ndc-membership-head {
+    gap:24px;
+}
+.ndc-dashboard-v2 .ndc-membership-dates {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px;
+}
+.ndc-dashboard-v2 .ndc-membership-dates > div {
+    display:grid;
+    align-content:start;
+    gap:8px;
+    min-width:0;
+    padding:16px 18px;
+    background:#ffffff03;
+    border:1px solid var(--line);
+    border-radius:12px;
+}
+.ndc-dashboard-v2 .ndc-membership-foot {
+    max-width:85ch;
+}
+
+/* Renewal options use the available space. */
+.ndc-dashboard-v2 .ndc-billing-actions {
+    width:100%;
+    margin-top:24px;
+    padding:28px;
+    text-align:left;
+}
+.ndc-dashboard-v2 .ndc-billing-actions form {
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:22px;
+    width:100%;
+    max-width:none;
+    margin:0;
+}
+.ndc-dashboard-v2 .ndc-billing-actions fieldset {
+    min-width:0;
+    width:100%;
+    margin:0;
+    padding:0;
+    border:0;
+}
+.ndc-dashboard-v2 .ndc-billing-actions legend {
+    margin-bottom:14px;
+    padding:0;
+    font-size:13px;
+    font-weight:500;
+    color:var(--text);
+}
+.ndc-dashboard-v2 .ndc-plan-options {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));
+    gap:14px;
+    width:100%;
+}
+.ndc-dashboard-v2 .ndc-month-options {
+    display:grid;
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    gap:10px;
+    width:100%;
+}
+.ndc-dashboard-v2 .ndc-billing-actions .ndc-plan-choice {
+    min-width:0;
+}
+.ndc-dashboard-v2 .ndc-billing-actions .ndc-month-choice {
+    min-width:0;
+}
+.ndc-dashboard-v2 #ndcRenewalOffer {
+    width:100%;
+    min-width:0;
+}
+
+/* Compact preview with paired comparison cards. */
+.ndc-dashboard-v2 #ndcRenewalPreview {
+    width:100%;
+    max-width:none;
+    margin:0;
+    padding:26px;
+    text-align:left;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-heading {
+    justify-content:flex-start;
+    gap:14px;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);
+    gap:14px;
+    max-width:none;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison > div {
+    padding:18px 20px;
+    text-align:left;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-total {
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:flex-start;
+    gap:8px;
+    margin-top:20px;
+    padding-top:20px;
+    text-align:left;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-total strong {
+    font-size:32px;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-renewal-amount-words {
+    text-align:left;
+    margin-top:8px;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview > p:not(.ndc-renewal-amount-words) {
+    max-width:90ch;
+    margin-top:18px;
+}
+.ndc-dashboard-v2 #ndcRenewalSubmit {
+    width:100%;
+    max-width:360px;
+    justify-self:start;
+    margin:0;
+    min-height:50px;
+}
+.ndc-dashboard-v2 #ndcRenewalStatus {
+    margin:0;
+    text-align:left;
+}
+.ndc-dashboard-v2 #ndcRenewalStatus:empty {
+    display:none;
+}
+
+/* Keep exceptionally wide displays balanced. */
+@media(min-width:2100px) {
+    .ndc-dashboard-v2 .ndc-portal-shell {
+        grid-template-columns:270px minmax(0,1fr);
+    }
+}
+@media(max-width:1100px) {
+    .ndc-dashboard-v2 .ndc-portal-shell {
+        grid-template-columns:220px minmax(0,1fr);
+    }
+    .ndc-dashboard-v2 .ndc-month-options {
+        grid-template-columns:repeat(4,minmax(0,1fr));
+    }
+}
+@media(max-width:760px) {
+    .ndc-dashboard-v2 .ndc-portal-shell {
+        display:block;
+    }
+    .ndc-dashboard-v2 .ndc-portal-overlay .ndc-dashboard-content {
+        padding:24px 18px;
+    }
+    .ndc-dashboard-v2 .ndc-dashboard-shortcuts {
+        padding:16px 18px 0;
+    }
+    .ndc-dashboard-v2 .ndc-portal-overlay .ndc-portal-topbar,
+    .ndc-dashboard-v2 .ndc-portal-footer {
+        padding-inline:18px;
+    }
+    .ndc-dashboard-v2 .ndc-billing-actions,
+    .ndc-dashboard-v2 .ndc-subscription-visual {
+        padding:20px;
+    }
+    .ndc-dashboard-v2 .ndc-membership-dates {
+        grid-template-columns:1fr;
+    }
+}
+@media(max-width:560px) {
+    .ndc-dashboard-v2 .ndc-month-options {
+        grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+    .ndc-dashboard-v2 #ndcRenewalPreview {
+        padding:20px;
+    }
+    .ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison {
+        grid-template-columns:minmax(0,1fr);
+        gap:10px;
+    }
+    .ndc-dashboard-v2 #ndcRenewalSubmit {
+        max-width:none;
+    }
+}
+/* Green renewal preview; retain NDC gold for the payment amount. */
+.ndc-dashboard-v2 #ndcRenewalPreview {
+    background:
+        radial-gradient(ellipse at top left,rgba(61,173,111,.15),transparent 65%),
+        linear-gradient(135deg,#102219,#101713 65%,#101310);
+    border-color:rgba(104,193,139,.30);
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-heading .ndc-eyebrow {
+    color:#a3dfb7;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison > div {
+    background:rgba(5,14,9,.55);
+    border-color:rgba(137,199,158,.15);
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison > div:last-child {
+    background:rgba(64,147,94,.10);
+    border-color:rgba(137,199,158,.30);
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison > b {
+    color:#a3dfb7;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-total {
+    border-top-color:rgba(137,199,158,.18);
+}
+
+/* Match overview card heights within each grid row. */
+.ndc-dashboard-v2 .ndc-portal-shell:has(
+    .ndc-side-nav [data-section="overview"].is-active
+) .ndc-two-col {
+    align-items:stretch;
+}
+.ndc-dashboard-v2 .ndc-portal-shell:has(
+    .ndc-side-nav [data-section="overview"].is-active
+) .ndc-two-col > .ndc-panel-card {
+    align-self:stretch;
+}
+
+/* Compact preview matching the supplied reference. */
+.ndc-dashboard-v2 #ndcRenewalPreview {
+    width:100%;
+    max-width:600px;
+    justify-self:start;
+    margin:0;
+    padding:24px;
+    border:1px solid rgba(115,190,168,.28);
+    border-radius:20px;
+    background:linear-gradient(135deg,#1a302c 0%,#162629 48%,#111b24 100%);
+    text-align:left;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-heading {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:8px;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-heading .ndc-eyebrow {
+    color:var(--gold,#d7bd55);
+}
+.ndc-dashboard-v2 #ndcRenewalPreview h3 {
+    font-size:18px;
+    margin:0 0 18px;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);
+    gap:12px;
+    align-items:center;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison > div,
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison > div:last-child {
+    display:grid;
+    gap:12px;
+    padding:0;
+    background:transparent;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison small {
+    font-size:9px;
+    color:#a8bfca;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison strong {
+    font-size:13px;
+    color:#f5f7f4;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison span {
+    font-size:12px;
+    color:#a4dfcf;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison > b {
+    color:var(--gold,#d7bd55);
+    text-align:center;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-total {
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-top:24px;
+    padding-top:20px;
+    border-top:1px solid rgba(255,255,255,.12);
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-total > span {
+    color:#f4f5ef;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-total strong {
+    font-size:28px;
+    color:var(--gold-light,#f2d889);
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-renewal-amount-words {
+    text-align:left;
+    color:#c6e0d5;
+    font-size:12px;
+    margin-top:10px;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview > p:not(.ndc-renewal-amount-words) {
+    margin:22px 0 0;
+    color:#aac6d2;
+    font-size:12px;
+    line-height:1.85;
+}
+.ndc-dashboard-v2 #ndcRenewalSubmit {
+    width:100%;
+    max-width:600px;
+    justify-self:start;
+    margin:0;
+}
+@media(max-width:560px) {
+    .ndc-dashboard-v2 #ndcRenewalPreview {
+        padding:20px;
+    }
+    .ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison {
+        grid-template-columns:1fr;
+    }
+    .ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-comparison > b {
+        justify-self:start;
+        transform:rotate(90deg);
+    }
+}
