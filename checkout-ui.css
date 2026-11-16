@@ -1,0 +1,264 @@
+/* Checkout only: inherit the NDC portfolio typography and palette. */
+#payment { background:radial-gradient(ellipse at 12% 20%,rgba(215,189,85,.07),transparent 55%),var(--bg,#090909); }
+#payment .payment-heading { text-align:left; max-width:680px; margin:0 0 36px; }
+#payment .payment-kicker,#payment .payment-label { color:var(--gold); font:600 10px/1.6 var(--portfolio-ui); letter-spacing:.17em; }
+#payment .payment-heading h2 { font:600 clamp(32px,4vw,52px)/1.12 var(--portfolio-heading); letter-spacing:-.045em; margin:12px 0 16px; }
+#payment .payment-heading h2 span { color:var(--gold); }
+#payment .payment-heading p,#payment .payment-credentials>p { color:var(--muted); line-height:1.8; }
+#payment .payment-container { display:grid; grid-template-columns:minmax(240px,.8fr) minmax(0,1.5fr); gap:24px; align-items:start; padding:0; background:none; border:0; box-shadow:none; }
+#payment .payment-summary,#payment .payment-credentials,#payment .ndc-email-recovery { box-sizing:border-box; min-width:0; margin:0; border:1px solid var(--line); border-radius:24px; background:var(--panel,#101010); padding:32px; box-shadow:0 20px 60px #0002; }
+#payment .payment-summary { position:sticky; top:108px; background:linear-gradient(145deg,rgba(215,189,85,.1),transparent 65%),var(--panel); }
+#payment h3 { font:500 25px/1.3 var(--portfolio-heading); letter-spacing:-.035em; margin:12px 0 20px; }
+#payment .payment-amount { display:flex; flex-direction:column; align-items:flex-start; gap:10px; padding:24px 0; margin:0; border-block:1px solid var(--line); }
+#payment .payment-amount>span { color:var(--muted); font-size:12px; }
+#payment .payment-amount strong { color:var(--gold); font:500 clamp(28px,3.3vw,42px)/1.2 var(--portfolio-heading); overflow-wrap:anywhere; }
+#payment .payment-summary-info { display:grid; gap:12px; padding-top:22px; color:var(--muted); font-size:13px; }
+#payment .payment-credentials { display:grid; grid-template-columns:1fr 1fr; gap:20px 18px; }
+#payment .payment-credentials>:not(.credential-field),#payment .credential-field:has(#signupEmail),#payment .credential-field:has(#signupReferral),#payment .credential-field:has(#signupMonths) { grid-column:1/-1; }
+#payment .payment-credentials>h3,#payment .payment-credentials>p { margin:0; }
+#payment .payment-credentials>.payment-label { margin-bottom:-10px; }
+#payment .credential-field { min-width:0; display:grid; align-content:start; gap:9px; margin:0; }
+#payment label { color:var(--text); font:500 13px/1.6 var(--portfolio-ui); }
+#payment :is(.credential-field,.ndc-email-recovery) input:not([type=checkbox]) { box-sizing:border-box; width:100%; min-height:50px; border:1px solid var(--line); border-radius:11px; padding:13px 15px; background:#090909; color:var(--text); font:400 14px/1.5 var(--portfolio-ui); transition:border-color .2s,box-shadow .2s; }
+#payment input::placeholder { color:#77746e; }
+#payment :is(input,button,summary):focus-visible { outline:2px solid var(--gold); outline-offset:4px; }
+#payment input:not([type=checkbox]):focus { border-color:var(--gold); box-shadow:0 0 0 3px #d7bd5512; }
+#payment .credential-field small { font-size:12px; line-height:1.7; color:var(--muted); }
+#payment .ndc-month-tiles { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+#payment .ndc-month-tile { min-height:66px; border:1px solid var(--line); border-radius:12px; background:#0c0c0c; color:var(--muted); cursor:pointer; display:grid; place-content:center; gap:2px; transition:background .18s,border-color .18s; }
+#payment .ndc-month-tile strong { font:500 18px/1.3 var(--portfolio-heading); color:var(--text); }
+#payment .ndc-month-tile span { font-size:10px; }
+#payment .ndc-month-tile:hover { border-color:#d7bd5570; }
+#payment .ndc-month-tile[aria-pressed=true] { background:#d7bd5514; border-color:var(--gold); color:var(--gold); }
+#payment .ndc-month-tile[aria-pressed=true] strong { color:var(--gold); }
+#payment button:disabled { opacity:.5; cursor:not-allowed; }
+#payment .payment-proceed { width:100%; min-height:54px; border:0; border-radius:12px; padding:14px 18px; background:var(--gold); color:#171207; font:700 14px/1.5 var(--portfolio-ui); cursor:pointer; box-shadow:0 6px 24px #d7bd5510; }
+#payment .credential-note { font-size:12px; text-align:center; }
+#payment .ndc-email-recovery { grid-column:1/-1; padding:24px 28px; box-shadow:none; }
+#payment .ndc-email-recovery summary { cursor:pointer; font:500 16px/1.6 var(--portfolio-heading); color:var(--text); }
+#payment .ndc-email-recovery[open] summary { padding-bottom:14px; border-bottom:1px solid var(--line); margin-bottom:18px; }
+#payment .ndc-email-recovery>p { font-size:13px; color:var(--muted); }
+#payment [data-ndc-public-setup] { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:20px; }
+#payment [data-ndc-public-setup]>label:not(.ndc-email-check) { display:grid; gap:8px; }
+#payment [data-ndc-public-setup]>.ndc-email-check,#payment [data-email-status] { grid-column:1/-1; }
+#payment .ndc-email-check { display:flex; align-items:flex-start; gap:10px; color:var(--muted); }
+#payment input[type=checkbox] { accent-color:var(--gold); width:17px; height:17px; flex:none; margin-top:3px; }
+.ndc-cart-toast { position:fixed; right:24px; bottom:24px; z-index:1100; display:flex; align-items:center; gap:18px; max-width:min(360px,calc(100vw - 40px)); box-sizing:border-box; padding:17px 20px; border:1px solid #d7bd554d; border-radius:15px; background:#15140f; color:#f7f3e9; box-shadow:0 16px 50px #0008; font:400 13px/1.6 var(--portfolio-ui,sans-serif); }
+.ndc-cart-toast button { background:none; border:0; color:#d7bd55; font-size:20px; cursor:pointer; }
+@media(max-width:760px) { #payment .payment-container { grid-template-columns:1fr; } #payment .payment-summary { position:static; } #payment .payment-summary,#payment .payment-credentials { padding:24px; } }
+@media(max-width:440px) { #payment .payment-credentials,#payment [data-ndc-public-setup] { grid-template-columns:1fr; } #payment .ndc-month-tiles { grid-template-columns:repeat(3,minmax(0,1fr)); } #payment .ndc-email-recovery { padding:22px; } }
+@media(prefers-reduced-motion:reduce) { #payment * { scroll-behavior:auto; transition:none; } }
+
+/* Spacious checkout layout: override the legacy 760px container cap. */
+body #payment > .container { width:min(1320px,calc(100% - 64px)); max-width:1320px; margin-inline:auto; }
+#payment .payment-container { width:100%; max-width:none; margin:0; grid-template-columns:minmax(340px,.85fr) minmax(0,1.65fr); gap:32px; }
+#payment .payment-heading { max-width:800px; margin-bottom:40px; }
+#payment .payment-summary { padding:36px; }
+#payment .payment-credentials { padding:40px; gap:22px 24px; }
+#payment .payment-amount { box-sizing:border-box; width:100%; background:transparent; border-radius:0; padding:28px 0; }
+#payment .payment-amount strong { display:block; max-width:100%; white-space:nowrap; overflow-wrap:normal; word-break:normal; font-size:clamp(26px,2.5vw,40px); letter-spacing:-.04em; font-variant-numeric:tabular-nums; }
+#payment .ndc-amount-words { display:block; color:var(--muted,#a9a49a); font:400 13px/1.75 var(--portfolio-ui,sans-serif); max-width:100%; white-space:normal; overflow-wrap:break-word; letter-spacing:0; }
+#payment .payment-summary-info { margin-top:0; gap:14px; }
+#payment .ndc-month-tiles { grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+#payment .ndc-month-tile { min-height:78px; border-radius:13px; }
+#payment .ndc-month-tile strong { font-size:22px; }
+#payment .ndc-month-tile span { font-size:12px; }
+#payment #ndcSignupOffer { min-width:0; width:100%; }
+#payment #ndcSignupOffer > * { box-sizing:border-box; max-width:100%; }
+#payment .payment-proceed { min-height:58px; font-size:15px; }
+#payment .ndc-email-recovery { padding:28px 36px; }
+@media(min-width:1800px) { body #payment > .container { width:min(1440px,calc(100% - 96px)); max-width:1440px; } }
+@media(max-width:1000px) { #payment .payment-container { grid-template-columns:minmax(285px,.8fr) minmax(0,1.3fr); gap:22px; } #payment .payment-summary,#payment .payment-credentials { padding:26px; } }
+@media(max-width:820px) { body #payment > .container { width:calc(100% - 40px); } #payment .payment-container { grid-template-columns:1fr; } #payment .payment-summary { position:static; } #payment .payment-amount strong { font-size:clamp(26px,6vw,38px); } }
+@media(max-width:480px) { body #payment > .container { width:calc(100% - 28px); } #payment .payment-summary,#payment .payment-credentials,#payment .ndc-email-recovery { padding:22px; } #payment .ndc-month-tiles { grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; } #payment .payment-credentials { grid-template-columns:1fr; } }
+/* Match the normal NDC page container at every screen width. */
+body #payment > .container {
+    width:min(var(--max,1180px),calc(100% - 48px));
+    max-width:var(--max,1180px);
+    margin-inline:auto;
+}
+#payment .payment-container {
+    display:grid;
+    width:100%;
+    max-width:none;
+    grid-template-columns:minmax(0, .85fr) minmax(0, 1.45fr);
+    grid-template-rows:auto auto;
+    align-items:start;
+    gap:28px;
+}
+#payment .payment-container > .payment-summary {
+    position:static;
+    inset:auto;
+    align-self:start;
+    grid-column:1;
+    grid-row:1;
+    width:100%;
+    height:auto;
+    min-height:0;
+    padding:28px;
+    transform:none;
+    z-index:auto;
+}
+#payment .payment-container > .payment-credentials {
+    position:static;
+    grid-column:2;
+    grid-row:1;
+    width:100%;
+    min-width:0;
+    padding:30px;
+}
+#payment .payment-container > .ndc-email-recovery {
+    position:static;
+    grid-column:1 / -1;
+    grid-row:2;
+    width:100%;
+    margin:0;
+    padding:26px 30px;
+    clear:both;
+    transform:none;
+    z-index:auto;
+}
+#payment .payment-amount strong {
+    white-space:nowrap;
+    overflow-wrap:normal;
+    word-break:normal;
+    font-size:clamp(25px,2.4vw,36px);
+}
+#payment .ndc-summary-duration {
+    margin-top:26px;
+    padding-top:24px;
+    border-top:1px solid var(--line,rgba(255,255,255,.11));
+}
+#payment .ndc-summary-duration h4 {
+    margin:0 0 14px;
+    color:var(--text,#f7f3e9);
+    font:500 14px/1.5 var(--portfolio-ui,sans-serif);
+}
+#payment .ndc-summary-duration .ndc-month-tiles {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:9px;
+}
+#payment .ndc-summary-duration .ndc-month-tile {
+    min-height:66px;
+    padding:10px 6px;
+    border-radius:11px;
+}
+#payment .ndc-summary-duration .ndc-month-tile strong {
+    font-size:20px;
+}
+#payment .ndc-summary-duration .ndc-month-tile span {
+    font-size:11px;
+}
+#payment .ndc-duration-original[hidden] {
+    display:none !important;
+}
+#payment .payment-summary-info {
+    padding-top:20px;
+    margin-top:0;
+}
+#payment .payment-credentials {
+    gap:18px;
+}
+#payment .payment-credentials > .credential-field {
+    min-width:0;
+}
+#payment [data-ndc-public-setup] {
+    align-items:start;
+}
+#payment [data-ndc-public-setup] > button {
+    justify-self:start;
+    min-width:220px;
+}
+@media(max-width:900px) {
+    #payment .payment-container {
+        grid-template-columns:minmax(0,.95fr) minmax(0,1.25fr);
+        gap:20px;
+    }
+    #payment .payment-container > .payment-summary,
+    #payment .payment-container > .payment-credentials {
+        padding:24px;
+    }
+    #payment .payment-credentials {
+        grid-template-columns:1fr;
+    }
+}
+@media(max-width:760px) {
+    #payment .payment-container {
+        grid-template-columns:minmax(0,1fr);
+        grid-template-rows:auto;
+    }
+    #payment .payment-container > .payment-summary,
+    #payment .payment-container > .payment-credentials,
+    #payment .payment-container > .ndc-email-recovery {
+        grid-column:1;
+        grid-row:auto;
+    }
+    #payment .ndc-summary-duration .ndc-month-tiles {
+        grid-template-columns:repeat(4,minmax(0,1fr));
+    }
+}
+@media(max-width:480px) {
+    body #payment > .container {
+        width:calc(100% - 32px);
+    }
+    #payment .payment-container > .payment-summary,
+    #payment .payment-container > .payment-credentials,
+    #payment .payment-container > .ndc-email-recovery {
+        padding:22px;
+    }
+    #payment .ndc-summary-duration .ndc-month-tiles {
+        grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+    #payment [data-ndc-public-setup] > button {
+        width:100%;
+        min-width:0;
+    }
+}
+/* Sticky summary bounded by the checkout row, above email recovery. */
+#payment .payment-container > .ndc-summary-rail {
+    grid-column:1;
+    grid-row:1;
+    align-self:stretch;
+    position:relative;
+    min-width:0;
+}
+#payment .payment-container > .ndc-summary-rail > .payment-summary {
+    position:sticky;
+    top:104px;
+    bottom:auto;
+    width:100%;
+    height:auto;
+    max-height:calc(100dvh - 124px);
+    overflow-y:auto;
+    overscroll-behavior-y:auto;
+    scrollbar-width:thin;
+    scrollbar-color:#655a31 transparent;
+    box-sizing:border-box;
+    padding:28px;
+    margin:0;
+    transform:none;
+    z-index:1;
+}
+#payment .payment-container > .ndc-email-recovery {
+    position:relative;
+    grid-column:1 / -1;
+    grid-row:2;
+    margin:0;
+    z-index:auto;
+}
+@media(max-width:760px) {
+    #payment .payment-container > .ndc-summary-rail {
+        grid-column:1;
+        grid-row:auto;
+    }
+    #payment .payment-container > .ndc-summary-rail > .payment-summary {
+        position:static;
+        max-height:none;
+        overflow:visible;
+        padding:24px;
+    }
+    #payment .payment-container > .ndc-email-recovery {
+        grid-row:auto;
+    }
+}

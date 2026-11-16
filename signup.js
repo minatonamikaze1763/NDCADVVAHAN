@@ -16,6 +16,7 @@
         $('paymentProceed').disabled = !p || state !== 'idle'; $('paymentProceed').textContent = ['complete', 'review'].includes(state) ? 'Payment received' : state !== 'idle' ? 'Processing…' : p ? 'Pay securely · ' + money(amount) : 'Select a Plan to Continue';
         $('ndcSignupForm').querySelectorAll('input,select').forEach(n => n.disabled = state !== 'idle');
         offerWidget?.setBusy(state !== 'idle');
+        syncCheckoutUI();
     }
     async function post(path, body) { const r = await fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(body), cache: 'no-store', signal: AbortSignal.timeout(45000) }); const d = await r.json().catch(() => ({})); if (!r.ok || d.success === false) throw Error(d.error || d.message || `Request failed (${r.status})`); return d; }
     function show(kind, message) {
@@ -48,6 +49,59 @@
             const checkout = new Razorpay({ key: order.keyId, order_id: order.orderId, amount: order.amount, currency: order.currency || 'INR', name: 'Next Dimension Customs', description: p.name + ' subscription', prefill: { name: details.name, email: details.email }, theme: { color: '#d7bd55' }, handler: proof => { if (state !== 'checkout') return; saved = { proof, details, purchase: { planName: order.plan?.name || p.name, months: order.months || details.months, offer: order.offer || null, maxDevices: order.plan?.maxDevices || p.maxDevices, amount: Number(order.amount) / 100, currency: order.currency || 'INR' }, state: 'pending', acknowledged: false }; persist(); state = 'pending'; void verify(); }, modal: { ondismiss: () => { if (state !== 'checkout') return; state = 'idle'; update(); status('Checkout closed. If money was deducted, check your email before retrying.'); } } });
             checkout.on('payment.failed', error => { if (state === 'checkout') status((error.error?.description || 'Payment failed.') + ' You can retry inside checkout or close it.'); }); checkout.open();
         } catch (error) { state = 'idle'; update(); status(error.message); }
+    }
+    // Presentation and draft state only. Payment orders and offer validation remain server-owned.
+    const DRAFT_KEY = 'ndcSignupCartV1', draftFields = ['signupName', 'accountUsername', 'signupEmail', 'signupReferral'];
+    let checkoutUIReady = false, monthTiles = null, offerCodeToRestore = '';
+    function syncCheckoutUI() {
+        if (!checkoutUIReady) return;
+        const select = $('signupMonths');
+        monthTiles.querySelectorAll('button').forEach(button => {
+            button.setAttribute('aria-pressed', String(button.dataset.month === select.value));
+            button.disabled = select.disabled || state !== 'idle';
+        });
+        try {
+            if (saved?.proof || state === 'complete' || state === 'review') { localStorage.removeItem(DRAFT_KEY); return; }
+            // Never retain payment proofs, credentials, or validated offer prices in a cart.
+            const fields = Object.fromEntries(draftFields.map(id => [id, $(id).value]));
+            if (!selected && !Object.values(fields).some(Boolean)) return;
+            localStorage.setItem(DRAFT_KEY, JSON.stringify({ version: 1, at: Date.now(), plan: selected, months: select.value, fields, offerCode: String(appliedOffer?.code || $('ndcSignupOffer')?.querySelector('input')?.value || '').trim().toUpperCase().slice(0, 32) }));
+        } catch { /* Checkout remains usable when storage is unavailable. */ }
+    }
+    function mountCheckoutUI() {
+        const select = $('signupMonths');
+        monthTiles = document.createElement('div'); monthTiles.className = 'ndc-month-tiles';
+        monthTiles.setAttribute('role', 'group'); monthTiles.setAttribute('aria-label', 'Subscription duration in months');
+        for (const option of select.options) {
+            const button = document.createElement('button'); button.type = 'button'; button.className = 'ndc-month-tile'; button.dataset.month = option.value;
+            const count = document.createElement('strong'); count.textContent = option.value;
+            const caption = document.createElement('span'); caption.textContent = Number(option.value) === 1 ? 'month' : 'months';
+            button.append(count, caption);
+            button.onclick = () => { if (state !== 'idle' || select.disabled) return; select.value = option.value; select.dispatchEvent(new Event('change', { bubbles: true })); };
+            monthTiles.append(button);
+        }
+        select.hidden = true; select.after(monthTiles);
+        const label = document.querySelector('label[for="signupMonths"]');
+        if (label) { label.id = 'ndcDurationLabel'; monthTiles.setAttribute('aria-labelledby', label.id); label.removeAttribute('for'); }
+        let restored = false;
+        try {
+            const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+            if (saved?.proof) localStorage.removeItem(DRAFT_KEY);
+            else if (draft?.version === 1 && Number.isFinite(draft.at) && Date.now() - draft.at >= 0 && Date.now() - draft.at < 30 * 86400000) {
+                for (const id of draftFields) if (typeof draft.fields?.[id] === 'string' && !$(id).value) { $(id).value = draft.fields[id].slice(0, $(id).maxLength > 0 ? $(id).maxLength : 254); restored = true; }
+                if (typeof draft.offerCode === 'string') offerCodeToRestore = draft.offerCode.trim().toUpperCase().slice(0, 32);
+                if (plans[draft.plan]) { selected = draft.plan; restored = true; }
+                if ([...select.options].some(o => o.value === String(draft.months))) select.value = String(draft.months);
+            } else if (draft) localStorage.removeItem(DRAFT_KEY);
+        } catch { }
+        checkoutUIReady = true;
+        $('ndcSignupForm').addEventListener('input', syncCheckoutUI);
+        if (restored) {
+            const toast = document.createElement('div'); toast.className = 'ndc-cart-toast'; toast.setAttribute('role', 'status');
+            const text = document.createElement('span'); text.textContent = 'Welcome back. Your checkout draft has been restored.';
+            const close = document.createElement('button'); close.type = 'button'; close.setAttribute('aria-label', 'Dismiss notification'); close.textContent = '\u00d7'; close.onclick = () => toast.remove();
+            toast.append(text, close); document.body.append(toast); setTimeout(() => toast.remove(), 6500);
+        }
     }
     document.addEventListener('DOMContentLoaded', async () => {
         $('paymentProceed').disabled = true;
@@ -90,6 +144,11 @@
             if (applied) $('ndcSignupOffer').scrollIntoView({ behavior:'smooth', block:'center' });
             return applied;
         };
+        mountCheckoutUI();
+        if (!saved?.proof && offerCodeToRestore && offerWidget) {
+            await offerWidget.applyCode(offerCodeToRestore);
+            offerCodeToRestore = '';
+        }
         if (saved?.proof && saved?.details) { state = ['complete', 'review'].includes(saved.state) ? saved.state : 'pending'; update(); if (saved.acknowledged) banner(); else if (state === 'complete' || state === 'review') show(state === 'complete' ? 'success' : 'review', 'Your payment was already received.'); else void verify(); } else update();
     });
 })();
