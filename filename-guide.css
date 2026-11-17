@@ -95,3 +95,43 @@
 @media (prefers-reduced-motion: reduce) {
   #filename-guide .ndc-guide-download { transition: none; }
 }
+
+/* Actual PDF page preview with all four downloadable reference formats. */
+#filename-guide .ndc-guide-card {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) minmax(240px, 300px);
+  gap: 28px;
+}
+#filename-guide .ndc-guide-downloads { display: flex; flex-wrap: wrap; gap: 10px; }
+#filename-guide .ndc-guide-download-secondary {
+  color: var(--gold);
+  background: var(--panel2);
+  border-color: var(--line);
+}
+#filename-guide .ndc-guide-download-secondary:hover { background: var(--gold); color: #171207; }
+#filename-guide .ndc-guide-preview { min-width: 0; margin: 0; }
+#filename-guide .ndc-guide-preview > a {
+  display: block; overflow: hidden; border: 1px solid var(--line);
+  border-radius: 12px; background: var(--panel2);
+}
+#filename-guide .ndc-guide-preview img { display: block; width: 100%; height: auto; }
+#filename-guide .ndc-guide-preview a > span {
+  display: flex; justify-content: space-between; padding: 12px 16px;
+  color: var(--gold); font-size: 13px; font-weight: 600;
+}
+#filename-guide .ndc-guide-preview a:hover { border-color: var(--gold); }
+#filename-guide .ndc-guide-preview a:focus-visible { outline: 2px solid var(--light); outline-offset: 4px; }
+#filename-guide .ndc-guide-preview figcaption { margin-top: 10px; color: var(--muted); font-size: 12px; }
+@media (max-width: 1000px) {
+  #filename-guide .ndc-guide-card { grid-template-columns: minmax(0, 1fr) minmax(220px, 280px); }
+  #filename-guide .ndc-guide-icon { grid-column: 1; width: 56px; }
+  #filename-guide .ndc-guide-content { grid-column: 1; }
+  #filename-guide .ndc-guide-preview { grid-column: 2; grid-row: 1 / 3; }
+}
+@media (max-width: 720px) {
+  #filename-guide .ndc-guide-card { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  #filename-guide .ndc-guide-preview { grid-column: 1; grid-row: auto; width: min(100%, 360px); margin-top: 8px; }
+}
+@media (max-width: 480px) {
+  #filename-guide .ndc-guide-downloads { display: grid; grid-template-columns: minmax(0, 1fr); }
+}
