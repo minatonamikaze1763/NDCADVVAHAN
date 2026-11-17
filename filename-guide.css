@@ -1,0 +1,97 @@
+/* Document download card: scoped to preserve the surrounding landing page. */
+#filename-guide {
+  scroll-margin-top: 120px;
+  color: var(--text);
+  font-family: var(--portfolio-ui);
+}
+#filename-guide .ndc-guide-card {
+  box-sizing: border-box;
+  width: min(var(--max), calc(100% - 48px));
+  margin-inline: auto;
+  padding: 40px;
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--panel);
+}
+#filename-guide .ndc-guide-icon {
+  flex: 0 0 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+#filename-guide .ndc-guide-content { min-width: 0; }
+#filename-guide .ndc-guide-label {
+  color: var(--gold);
+  font: 600 10px/1.6 var(--portfolio-ui);
+  letter-spacing: .16em;
+}
+#filename-guide h2 {
+  margin: 14px 0 18px;
+  font: 600 clamp(30px, 3.5vw, 46px)/1.15 var(--portfolio-heading);
+  letter-spacing: -.045em;
+  overflow-wrap: anywhere;
+}
+#filename-guide h2 span { color: var(--gold); }
+#filename-guide .ndc-guide-content > p {
+  max-width: 740px;
+  margin: 0;
+  color: var(--muted);
+  font: 400 16px/1.85 var(--portfolio-ui);
+}
+#filename-guide .ndc-guide-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+  margin: 24px 0;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.65;
+}
+#filename-guide .ndc-guide-download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  min-height: 48px;
+  max-width: 100%;
+  padding: 15px 23px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: var(--gold);
+  color: #171207;
+  text-decoration: none;
+  text-align: center;
+  font: 600 14px/1.5 var(--portfolio-ui);
+  transition: background .2s;
+}
+#filename-guide .ndc-guide-download svg { flex-shrink: 0; }
+#filename-guide .ndc-guide-download:hover { background: var(--light); }
+#filename-guide .ndc-guide-download:focus-visible {
+  outline: 2px solid var(--light);
+  outline-offset: 4px;
+}
+#filename-guide .ndc-guide-content .ndc-guide-note {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+@media (max-width: 720px) {
+  #filename-guide .ndc-guide-card { flex-direction: column; padding: 28px; gap: 20px; }
+  #filename-guide .ndc-guide-icon { flex-basis: auto; width: 56px; }
+}
+@media (max-width: 480px) {
+  #filename-guide .ndc-guide-card { width: calc(100% - 32px); padding: 24px 20px; }
+  #filename-guide .ndc-guide-meta { flex-direction: column; gap: 10px; }
+  #filename-guide .ndc-guide-download { width: 100%; padding-inline: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #filename-guide .ndc-guide-download { transition: none; }
+}
