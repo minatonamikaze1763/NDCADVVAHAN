@@ -1,47 +1,33 @@
 VAHAN NDC TOOL — FILENAME GUIDE
-Name files with these keywords for automatic document matching.
+Short and full filenames are listed for Address Proof and other documents. Both forms are recognized.
 
-ADDRESS PROOF SUBCATEGORIES
-Document | Recognized filename keywords | Example filename
-Aadhaar Card | aadhar / aadhaar | aadhar.jpg | aadhar.pdf
-Bank Passbook with Photo | bankpassbook / passbook | bankpassbook.jpg | bankpassbook.pdf
-Electricity Bill | electricitybill / currentbill | electricitybill.jpg | electricitybill.pdf
-Gas Bill | gasbill | gasbill.jpg | gasbill.pdf
-GST or Company Registered Certificate | gst / gstcertificate | gstcertificate.jpg | gstcertificate.pdf
-Latest Water Bill (Delhi Jal Board) | waterbill | waterbill.jpg | waterbill.pdf
-Passport | passport | passport.jpg | passport.pdf
-Ration Card | rationcard | rationcard.jpg | rationcard.pdf
-Telephone Bill | telephonebill | telephonebill.jpg | telephonebill.pdf
-Voter ID | voterid / voter | voterid.jpg | voterid.pdf
+ADDRESS PROOF FILENAMES
+Document | Easy short filename | Full descriptive filename | Filename keywords
+Aadhaar Card | aadhar.pdf | Aadhaar_Card.pdf | aadhar / aadhaar
+Bank Passbook with Photo | passbook.pdf | Bank_Passbook.pdf | bankpassbook / passbook
+Electricity Bill | currentbill.pdf | Electricity_Bill.pdf | electricitybill / currentbill
+Gas Bill | gasbill.pdf | Gas_Bill.pdf | gasbill
+GST or Company Registered Certificate | gstcertificate.pdf | GST_Certificate.pdf | gst / gstcertificate
+Latest Water Bill (Delhi Jal Board) | waterbill.pdf | Water_Bill.pdf | waterbill
+Passport | passport.pdf | Passport.pdf | passport
+Ration Card | rationcard.pdf | Ration_Card.pdf | rationcard
+Telephone Bill | telephonebill.pdf | Telephone_Bill.pdf | telephonebill
+Voter ID | voterid.pdf | Voter_ID.pdf | voterid / voter
 
-OTHER DOCUMENTS
-Document | Filename keywords | Example filename
-Certificate of Insurance | insurance | insurance.pdf
-Dealer Invoice | invoice | invoice.pdf
-Form 20 (Finance) | form20 | form20.pdf
-Form 20 (Signed + Chassis) | inspection / signedform20 | inspection.pdf
-Form 22 | form22 | form22.pdf
-Form 21 | form21 | form21.pdf
-Owner with Vehicle Photo | frontphoto | frontphoto.jpg
-Photo of Chassis | chassis | chassis.jpg
-Owner Signature | signature | signature.jpg
-PAN Card | pan | pan.pdf
-Owner Photo | ownerphoto | ownerphoto.jpg
+Address Proof matching recognizes 500 additional collision-checked filename aliases. Existing aliases remain supported. Matching ignores case and filename separators.
 
-ADDRESS PROOF FILENAME OPTIONS
-Use either the easy short filename or the full descriptive filename. Both forms are recognized.
-Subcategory | Easy short filename | Full descriptive filename
-Aadhaar Card | aadhar.pdf | Aadhaar_Card.pdf
-Bank Passbook with Photo | passbook.pdf | Bank_Passbook.pdf
-Electricity Bill | currentbill.pdf | Electricity_Bill.pdf
-Gas Bill | gasbill.pdf | Gas_Bill.pdf
-GST or Company Registered Certificate | gstcertificate.pdf | GST_Certificate.pdf
-Latest Water Bill (Delhi Jal Board) | waterbill.pdf | Water_Bill.pdf
-Passport | passport.pdf | Passport.pdf
-Ration Card | rationcard.pdf | Ration_Card.pdf
-Telephone Bill | telephonebill.pdf | Telephone_Bill.pdf
-Voter ID | voterid.pdf | Voter_ID.pdf
+OTHER DOCUMENT FILENAMES
+Document | Easy short filename | Full descriptive filename | Filename keywords
+Certificate of Insurance | INS.pdf | Insurance_Certificate.pdf | insurance / ins
+Dealer Invoice | INV.pdf | Dealer_Invoice.pdf | invoice / inv
+Form 20 (Finance) | F20.pdf | Form20_Finance.pdf | form20 / f20
+Form 20 (Signed + Chassis) | INSP.pdf | Inspection_Signed_Form20_Chassis.pdf | inspection / insp
+Form 22 | F22.pdf | Form22_Road_Worthiness.pdf | form22 / f22
+Form 21 | F21.pdf | Form21_Sale_Certificate.pdf | form21 / f21
+Owner with Vehicle Photo | CWVP.jpg | Owner_With_Vehicle_Photo.jpg | frontphoto / cwvp
+Photo of Chassis | CHAS.jpg | Chassis_Photo.jpg | chassis / chas
+Owner Signature | SN.jpg | Owner_Signature.jpg | signature / sn
+PAN Card | PAN.pdf | PAN_Card.pdf | pan / pancard
+Owner Photo | PIC.jpg | Owner_Photo.jpg | ownerphoto / pic
 
-The extension recognizes 500 additional filename aliases across these subcategories. Existing aliases remain supported. Matching ignores uppercase/lowercase and filename separators. Generated aliases were checked for uniqueness and cross-category collisions.
-
-Tip: Keep the correct customer name and document type in every filename. Matching is case-insensitive and ignores spaces, underscores, and hyphens. Examples: Customer_Aadhaar.jpg, Bike_Invoice.pdf, Form22.pdf.
+Tip: Keep the customer name and document type clear. Matching ignores uppercase/lowercase, spaces, underscores, and hyphens. Examples: Customer_Aadhaar.jpg, Bike_Invoice.pdf, Form22.pdf.
