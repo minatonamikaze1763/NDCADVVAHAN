@@ -15,7 +15,7 @@
       if (kind !== 'all' && kind !== (index ? 'quick' : 'full')) continue;
       sections.push(title + '\n' + systems[index].map(row => row.name + '\t' + row.category).join('\n'));
     }
-    sections.push('Add .jpg, .png, .webp or .pdf to match your actual file format. Names are case-insensitive. Review assigned categories before uploading.');
+    sections.push('Use .pdf with each short filename. Names are case-insensitive. Review assigned categories before uploading.');
     return sections.join('\n\n');
   }
   async function copy(text, message) {
