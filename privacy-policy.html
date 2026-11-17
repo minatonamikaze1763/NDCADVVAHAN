@@ -8,13 +8,13 @@
       name="description"
       content="Privacy Policy for VAHAN NDC TOOL by Next Dimension Customs."
     />
-<!-- Favicon -->
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="logo.png" />
     <link rel="shortcut icon" type="image/png" href="logo.png" />
 
     <!-- Apple / iPhone Icon -->
     <link rel="apple-touch-icon" href="logo.png" />
-    <title>Privacy Policy | VAHAN NDC TOOL</title>
+    <title>Privacy, Terms & Refund Policy | VAHAN NDC TOOL</title>
 
     <style>
       :root {
@@ -366,29 +366,114 @@
         }
       }
     </style>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="portfolio-theme.css?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="portfolio-theme.css?v=1" />
+  <link rel="stylesheet" href="privacy-navigation.css?v=20261117" />
+<script src="privacy-navigation.js?v=20261117" defer></script>
 </head>
 
-  <body class="ndc-portfolio-page">
+  <body class="ndc-portfolio-page ndc-policy-page">
     <header class="topbar">
-      <nav class="nav" aria-label="Main navigation">
-        <a class="brand" href="index.html">NDC <span>/</span> TOOLS</a>
-        <a class="nav-link" href="#contact">Privacy & Contact</a>
-      </nav>
+      <div class="container nav">
+        <a class="brand" href="index.html#home" aria-label="NDC VAHAN TOOL home"
+          ><img
+            class="ndc-nav-logo"
+            src="logo.png"
+            width="44"
+            height="44"
+            alt="Next Dimension Customs"
+          /><span class="brand-name"
+            >VAHAN NDC TOOL<span class="brand-sub"
+              >By Next Dimension Customs</span
+            ></span
+          ></a
+        >
+        <nav class="nav-links" id="primaryNav" aria-label="Main navigation">
+          <a href="index.html#how-it-works">Workflow</a>
+          <a href="index.html#features">Features</a>
+          <a href="index.html#screenshots">Inside the tool</a>
+          <a href="index.html#pricing">Pricing</a>
+          <a href="index.html#offers">Offers</a>
+                <a href="index.html#payment">Checkout</a>
+          <a href="index.html#reviews">Reviews</a>
+          <a href="index.html#faq">FAQ</a>
+          <a href="index.html#contact">Contact</a>
+          <details class="ndc-nav-more">
+            <summary>
+              Explore
+              <svg
+                class="ndc-explore-chevron"
+                viewBox="0 0 16 16"
+                aria-hidden="true"
+              >
+                <path d="m6 4 4 4-4 4" />
+              </svg>
+            </summary>
+            <div class="ndc-nav-dropdown">
+              <a href="index.html#document-choices">Four document buttons</a>
+              <a href="index.html#automation">Automation</a>
+              <a href="index.html#tutorial">Video tutorial</a>
+              <a href="index.html#filename-guide">Document filenames</a>
+              <a href="index.html#security">Privacy &amp; security</a>
+              <a href="index.html#access">Get the extension</a>
+              <a href="index.html#about">About NDC</a>
+              <a href="index.html#updates">Version &amp; updates</a>
+              <a href="privacy-policy.html" aria-current="page">Privacy policy</a>
+            </div>
+          </details>
+        </nav>
+        <div class="nav-actions">
+          <a class="btn btn-primary" href="index.html#pricing">Get Started ↗</a>
+
+          <!-- Customer Login Icon -->
+          <a href="customer-panel.html"
+            class="ndc-user-button"
+            aria-label="Customer login"
+            title="Customer Login"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="21"
+              height="21"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 21a8 8 0 0 0-16 0" />
+              <circle cx="12" cy="8" r="4" />
+            </svg>
+          </a>
+
+          <button
+            class="menu-toggle"
+            id="menuToggle"
+            type="button"
+            aria-label="Open navigation"
+            aria-expanded="false"
+            aria-controls="primaryNav"
+          ><span aria-hidden="true">☰</span></button>
+        </div>
+      </div>
     </header>
 
     <main id="top">
       <section class="hero">
         <div class="eyebrow">Next Dimension Customs</div>
-        <h1>Privacy <span>Policy.</span></h1>
+        <h1>Privacy, terms <span>&amp; policies.</span></h1>
         <p class="hero-description">
           Transparency matters. Learn how VAHAN NDC TOOL handles information
           when you use our Chrome extension and customer panel.
         </p>
-        <div class="updated">LAST UPDATED: OCTOBER 28, 2026</div>
+        <div class="updated">LAST UPDATED: NOVEMBER 17, 2026</div>
       </section>
 
       <div class="layout">
@@ -403,7 +488,10 @@
           <a href="#retention">Data Retention</a>
           <a href="#control">Your Control</a>
           <a href="#changes">Policy Changes</a>
-          <a href="#contact">Contact</a>
+          <a href="#local-data">Local Documents &amp; Cache</a
+          ><a href="#terms">Terms &amp; Conditions</a
+          ><a href="#refunds">No-Refund Policy</a
+          ><a href="#copyright">Copyright</a><a href="#contact">Contact</a>
           <a href="#disclaimer">Disclaimer</a>
         </aside>
 
@@ -418,17 +506,28 @@
 
           <section class="section" id="company">
             <h2>Who We Are</h2>
-            <p><strong>Next Dimension Customs (NDC)</strong> is a virtual software
-              company based in Nizamabad, Telangana. We build tools and software
-              for automobile dealerships and individuals to simplify everyday
-              tasks, reduce manual effort and improve productivity.</p>
-            <p>Our products support a range of everyday workflows and automation
+            <p>
+              <strong>Next Dimension Customs (NDC)</strong> is a virtual
+              software company based in Nizamabad, Telangana. We build tools and
+              software for automobile dealerships and individuals to simplify
+              everyday tasks, reduce manual effort and improve productivity.
+            </p>
+            <p>
+              Our products support a range of everyday workflows and automation
               needs. NDC VAHAN TOOL is one of our products, designed to help
               dealerships with document preparation and uploading on supported
-              VAHAN portal pages.</p>
-            <p><strong>Nandhu Adepu</strong> — Co-founder and Manager<br><strong>Dharshini Nakka</strong> — CEO and Investor</p>
-            <p><strong>Our address:</strong><br>
-              3-10-449, Chandra Nagar, Nizamabad, Telangana, 503001</p>
+              VAHAN portal pages.
+            </p>
+            <p>
+              <strong>Nandhu Adepu</strong> — Co-founder and Manager<br /><strong
+                >Dharshini Nakka</strong
+              >
+              — CEO and Investor
+            </p>
+            <p>
+              <strong>Our address:</strong><br />
+              3-10-449, Chandra Nagar, Nizamabad, Telangana, 503001
+            </p>
           </section>
 
           <section class="section" id="overview">
@@ -443,8 +542,11 @@
 
           <section class="section" id="information">
             <h2><span class="number">02</span> Information We Process</h2>
-            <p>Document processing and NDC account records serve different purposes.
-              Depending on the features you use, the following information may be processed:</p>
+            <p>
+              Document processing and NDC account records serve different
+              purposes. Depending on the features you use, the following
+              information may be processed:
+            </p>
             <ul>
               <li>
                 <strong>Account and subscription information:</strong> Details
@@ -455,7 +557,8 @@
               <li>
                 <strong>Login and security information:</strong> Session tokens
                 or identifiers, IP addresses, browser information and login
-                activity used to verify access, manage sessions and protect accounts.
+                activity used to verify access, manage sessions and protect
+                accounts.
               </li>
               <li>
                 <strong>Extension settings:</strong> Preferences for uploading
@@ -484,8 +587,14 @@
             <p>Information is used as necessary to:</p>
             <ul>
               <li>Authenticate users and enforce account permissions.</li>
-              <li>Manage subscriptions, payment transaction records and referral rewards.</li>
-              <li>Validate the document-upload process so the tool can follow the required upload steps.</li>
+              <li>
+                Manage subscriptions, payment transaction records and referral
+                rewards.
+              </li>
+              <li>
+                Validate the document-upload process so the tool can follow the
+                required upload steps.
+              </li>
               <li>Save extension preferences and settings.</li>
               <li>Prepare, categorize, and optimize selected documents.</li>
               <li>
@@ -504,18 +613,18 @@
           <section class="section" id="storage">
             <h2><span class="number">04</span> Storage & Security</h2>
             <p>
-              <strong>Document privacy:</strong> NDC does not store your uploaded
-              documents or the customer and bank details contained in those
-              documents on our server. Your documents are submitted to the
+              <strong>Document privacy:</strong> NDC does not store your
+              uploaded documents or the customer and bank details contained in
+              those documents on our server. Your documents are submitted to the
               intended VAHAN portal only as part of your workflow. Extension
-              settings may be stored in Chrome's extension storage, and documents
-              may be processed locally for preparation and upload.
+              settings may be stored in Chrome's extension storage, and
+              documents may be processed locally for preparation and upload.
             </p>
             <p>
-              <strong>Workflow validation:</strong> Our server validates the
-              document-upload process so the tool can follow the required upload
-              steps. This validation does not mean your documents or their
-              sensitive contents are stored on our server.
+              <strong>Workflow validation:</strong> Our server checks account
+              access and subscription permissions. Document preparation and
+              portal interactions take place in your browser; access validation
+              does not upload document contents to NDC.
             </p>
             <p>
               <strong>Account and access security:</strong> Authentication
@@ -523,8 +632,8 @@
               Account, subscription, payment transaction and login security
               records are maintained separately to provide and protect your
               access. These records can include IP addresses and browser
-              information; the document-privacy statement does not mean that
-              NDC keeps no account or login records.
+              information; the document-privacy statement does not mean that NDC
+              keeps no account or login records.
             </p>
             <p>
               We take reasonable measures to protect information handled by the
@@ -559,9 +668,8 @@
               bank details contained in them are not retained on the NDC server.
               Server-side account information, subscription and payment
               transaction records, referral records, sessions and security logs
-              may be retained as necessary for
-              authentication, service administration, security, and applicable
-              legal obligations.
+              may be retained as necessary for authentication, service
+              administration, security, and applicable legal obligations.
             </p>
             <p>
               Retention periods depend on the type of information and the
@@ -591,20 +699,159 @@
             </p>
           </section>
 
-          <section class="section" id="disclaimer">
-            <h2>
-              <span class="number">09</span> Third-Party Service Disclaimer
-            </h2>
+          <section class="section" id="local-data">
+            <h2>Local Documents, Cache &amp; Downloads</h2>
             <p>
-              VAHAN NDC TOOL is an independent third-party utility. It is not
-              affiliated with, endorsed by, or officially connected to the
-              Government of India or the Ministry of Road Transport and
-              Highways.
+              <strong>No NDC document archive:</strong> selected document files
+              are prepared on your device and attached to the official VAHAN
+              upload form. They are not routed through an NDC document-storage
+              service. VAHAN handles submitted files under its own policies.
+            </p>
+            <ul>
+              <li>
+                <strong>Customer category cache:</strong> the extension stores
+                up to 50 local records containing customer name, chassis number,
+                remaining document categories and an update time. Records older
+                than 24 hours are excluded and cleaned when the cache is next
+                accessed; this is not a guarantee of immediate deletion at 24
+                hours. This cache contains metadata, not document files.
+              </li>
+              <li>
+                <strong>Folder access:</strong> a selected customer-root folder
+                handle is saved locally in browser IndexedDB. Clear the root in
+                extension settings to remove that reference; this does not
+                delete files.
+              </li>
+              <li>
+                <strong>Prepared copies:</strong> when local saving is enabled
+                and write permission is granted, prepared files can be saved in
+                the customer's local <strong>Compressed</strong> folder and
+                reused later.
+              </li>
+              <li>
+                <strong>ZIP downloads:</strong> archives are created on your
+                device and saved using the browser download mechanism.
+                Downloaded ZIPs and prepared files remain until you delete them;
+                removing the extension does not delete these files.
+              </li>
+              <li>
+                <strong>Application summaries:</strong> enabled log features may
+                display or save application details locally or copy them to your
+                clipboard. Manage local records, clipboard contents and device
+                access carefully.
+              </li>
+            </ul>
+            <p>
+              Use extension settings and your browser's extension/site-data
+              controls to manage local data and permissions. Delete downloaded
+              archives and prepared copies separately in your file manager. Keep
+              customer files only as long as needed and handle them with the
+              customer's authorization.
+            </p>
+          </section>
+          <section class="section" id="terms">
+            <h2>Terms &amp; Conditions</h2>
+            <p>
+              These terms govern use of VAHAN NDC TOOL and the NDC customer
+              panel. Review them before purchasing or using the service.
+              Purchase details shown at checkout, including price, duration and
+              device allowance, form part of your subscription.
+            </p>
+            <ul>
+              <li>
+                Use the tool only with authorized accounts and documents you are
+                entitled to process. Follow applicable law, dealership
+                obligations and VAHAN portal rules. Do not bypass portal
+                security or access controls.
+              </li>
+              <li>
+                You remain responsible for document accuracy, category
+                assignments, readability and the final portal result. Optional
+                automation does not guarantee acceptance, registration approval
+                or uninterrupted availability.
+              </li>
+              <li>
+                Keep credentials private and observe your plan's device limits.
+                Access may be restricted for expiry, non-payment, misuse or
+                security reasons; contact support to resolve access issues.
+              </li>
+              <li>
+                The subscription grants limited use of the software for its
+                purchased period. It does not transfer ownership of the
+                software. Do not redistribute, resell or copy protected software
+                without permission, except as allowed by law.
+              </li>
+              <li>
+                Portal changes, outages and browser restrictions can affect
+                operation. Report faults to support. Nothing in these terms
+                excludes rights or remedies that applicable law does not permit
+                us to exclude.
+              </li>
+            </ul>
+            <p>
+              These terms are governed by applicable Indian law. Future updates
+              will show a revised date and will not remove mandatory rights or
+              retroactively reduce an already purchased entitlement.
+            </p>
+          </section>
+          <section class="section" id="refunds">
+            <h2>No-Refund &amp; Cancellation Policy</h2>
+            <p>
+              <strong
+                >Subscription purchases are generally final once access is
+                activated.</strong
+              >
+              We do not provide discretionary refunds for change of mind, unused
+              time, reduced usage, mistaken plan selection or cancellation
+              during an activated subscription. Please check compatibility, plan
+              details and any available demo before paying.
+            </p>
+            <p>
+              <strong>Exceptions and mandatory rights:</strong> this policy does
+              not exclude refunds or other remedies required by applicable law,
+              including where applicable for deficient service,
+              misrepresentation or failure to provide the purchased service.
+              Duplicate charges, payment errors and paid-but-not-activated
+              purchases will be investigated and corrected, including a refund
+              where appropriate.
+            </p>
+            <p>
+              Contact
+              <a href="mailto:nextdimensioncustoms@gmail.com"
+                >nextdimensioncustoms@gmail.com</a
+              >
+              with your account email, payment ID, payment date and a
+              description of the issue. Never send passwords, OTPs or complete
+              card details. Approved refunds are returned to the original
+              payment method, subject to payment-provider and bank processing
+              times.
+            </p>
+            <p>
+              Contact support to request cancellation or help stopping a
+              recurring mandate, if one exists. Cancellation stops future
+              renewals once confirmed; it does not by itself refund the current
+              activated term. Existing access continues to the paid expiry
+              unless restricted for a valid security or misuse reason.
+            </p>
+          </section>
+          <section class="section" id="copyright">
+            <h2>Copyright &amp; Ownership</h2>
+            <p>
+              &copy; 2026 Next Dimension Customs. All rights reserved in
+              original NDC software, website content, design and branding,
+              subject to applicable law and third-party licences.
+            </p>
+            <p>
+              Customer documents remain the property of their respective owners.
+              Using the tool does not transfer ownership of those documents to
+              NDC. VAHAN, vehicle-brand names, customer logos and other
+              third-party marks belong to their respective owners; their
+              appearance does not imply endorsement.
             </p>
           </section>
 
           <section class="contact-card" id="contact">
-            <h2>Privacy questions?</h2>
+            <h2>Privacy, billing or service questions?</h2>
             <p>
               For privacy-related questions or requests, contact Next Dimension
               Customs using the email address below.

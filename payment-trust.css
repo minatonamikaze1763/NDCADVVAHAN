@@ -1,0 +1,11 @@
+/* Payment-provider reassurance below the existing pay button. */
+#payment .ndc-payment-trust{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;margin:16px 0 4px;padding:20px 22px;border:1px solid rgba(215,189,85,.2);border-radius:14px;background:linear-gradient(145deg,rgba(215,189,85,.045),rgba(255,255,255,.015));text-align:center}
+#payment .ndc-payment-trust-heading{display:flex;align-items:center;justify-content:center;gap:9px;color:#e5d590}
+#payment .ndc-payment-trust-heading strong{font-size:13px;line-height:1.5;font-weight:600}
+#payment .ndc-payment-trust-shield{width:20px;height:20px;flex:0 0 20px}
+#payment .ndc-payment-trust-logo{display:inline-flex;align-items:center;justify-content:center;min-width:142px;min-height:44px;padding:9px 15px;background:#fff;border:1px solid #e7e9ed;border-radius:8px}
+#payment .ndc-payment-trust-logo img{display:block;width:112px;height:26px;max-width:100%;object-fit:contain;color:#172b5d;font-size:16px}
+#payment .ndc-payment-trust p{max-width:510px;margin:0;color:var(--muted,#aaa79c);font-size:12px;line-height:1.85}
+#payment .ndc-payment-trust-note{max-width:500px;color:#98978e;font-size:10px;line-height:1.75}
+#payment .ndc-payment-trust-logo:focus-visible{outline:2px solid var(--gold,#d7bd55);outline-offset:5px}
+@media(max-width:540px){#payment .ndc-payment-trust{padding:18px 14px}#payment .ndc-payment-trust-heading strong{font-size:12px}}

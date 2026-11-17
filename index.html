@@ -65,7 +65,7 @@
     <script src="filename-guide.js" defer></script>
     <link rel="stylesheet" href="offer-code.css" />
     <link rel="stylesheet" href="offers-showcase.css" />
-    <link rel="stylesheet" href="reviews-showcase.css" />
+    <link rel="stylesheet" href="reviews-showcase.css?v=20261117-stories" />
     <link rel="stylesheet" href="screenshots-showcase.css?v=540-current-behavior" />
     <script src="screenshots-showcase.js?v=540-current-behavior" defer></script>
     <link rel="stylesheet" href="landing-redesign.css?v=540-contact-grid-fix" />
@@ -82,6 +82,9 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="portfolio-theme.css?v=3-polished-plans" />
   <link rel="stylesheet" href="checkout-ui.css" />
+<link rel="stylesheet" href="document-workflow.css?v=20261117" />
+<link rel="stylesheet" href="workflow-chart.css?v=20261117-connected" />
+<link rel="stylesheet" href="payment-trust.css?v=20261117" />
 </head>
   <body class="ndc-redesign ndc-portfolio-page">
     <svg
@@ -291,55 +294,39 @@
         </div>
       </section>
 
-      <section class="workflow" id="how-it-works">
-        <div class="container">
-          <div class="section-head">
-            <div class="kicker">A More Organized Process</div>
-            <h2 class="section-title">
-              From Documents to a <span class="gold">Clear Result</span>
-            </h2>
-            <p class="section-desc">
-              A simple overview of the typical document workflow, from selecting
-              files to reviewing the portal result.
-            </p>
-          </div>
-          <div class="steps">
-            <article class="step">
-              <h3><svg class="ndc-icon ndc-ui-icon ndc-heading-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ndc-i-settings"/></svg>Select Your Documents</h3>
-              <p>
-                Set your customer root folder in Settings → Preferences. Choose
-                documents finds the folder matching the customer name on VAHAN.
-                Pick individual files or select all; manual browsing stays
-                available.
-              </p>
-            </article>
-            <article class="step">
-              <h3><svg class="ndc-icon ndc-ui-icon ndc-heading-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ndc-i-search"/></svg>Prepare and Match</h3>
-              <p>
-                Supported files are prepared, compressed where applicable and
-                matched to document categories. Keep the extension open during
-                preparation and assign any unmatched files before starting.
-              </p>
-            </article>
-            <article class="step">
-              <h3><svg class="ndc-icon ndc-ui-icon ndc-heading-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ndc-i-upload"/></svg>Run the Upload Workflow</h3>
-              <p>
-                Start uploads, with the option to skip documents identified as
-                already uploaded. Once the monitor appears, close the popup and
-                work in other tabs or apps. Keep the VAHAN tab open until
-                completion.
-              </p>
-            </article>
-            <article class="step">
-              <h3><svg class="ndc-icon ndc-ui-icon ndc-heading-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ndc-i-check"/></svg>Review the Result</h3>
-              <p>
-                Review your application summary, optionally copy the details,
-                and confirm the final status on the official VAHAN portal.
-              </p>
-            </article>
-          </div>
+      <section class="workflow ndc-wf-section" id="how-it-works" aria-labelledby="ndcWorkflowTitle">
+  <div class="container">
+    <div class="section-head"><div class="kicker">From login to final submission</div><h2 class="section-title" id="ndcWorkflowTitle">Your documents stay on <span class="gold">your route.</span></h2><p class="section-desc">NDC checks your account access. Your browser prepares the documents and uploads them directly to the official VAHAN portal.</p></div>
+    <p class="ndc-wf-scroll-hint">Follow the arrows. On smaller screens, scroll sideways to see the complete chart.</p>
+    <div class="ndc-wf-viewport" tabindex="0" role="region" aria-label="Login to submission workflow chart; scroll horizontally to explore">
+      <div class="ndc-wf-chart">
+        <div class="ndc-wf-lane ndc-wf-auth">
+          <div class="ndc-wf-lane-head"><h3>01 / Account access</h3><span>Authentication connection only</span></div>
+          <ol class="ndc-wf-row ndc-wf-three">
+<li class="ndc-wf-node "><div class="ndc-wf-node-top"><span class="ndc-wf-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg></span><span class="ndc-wf-step">01</span></div><h4>User logs in</h4><p>Enter your NDC account credentials in the extension.</p></li><li class="ndc-wf-node "><div class="ndc-wf-node-top"><span class="ndc-wf-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/><path d="M7 6.5h.01M7 17.5h.01M11 6.5h6M11 17.5h6"/></svg></span><span class="ndc-wf-step">02</span></div><h4>NDC authenticates</h4><p>Checks login, session and subscription access. No document files are sent.</p></li><li class="ndc-wf-node "><div class="ndc-wf-node-top"><span class="ndc-wf-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/><circle cx="12" cy="12" r="10"/></svg></span><span class="ndc-wf-step">03</span></div><h4>Access confirmed</h4><p>The extension is ready to work in your browser.</p></li>
+          </ol>
         </div>
-      </section>
+        <div class="ndc-wf-bridge" aria-hidden="true"><span>Access granted</span><b>↓</b></div>
+        <div class="ndc-wf-lane ndc-wf-local">
+          <div class="ndc-wf-lane-head"><h3>02 / Your device &amp; browser</h3><span>Local document processing</span></div>
+          <ol class="ndc-wf-row ndc-wf-three" start="4">
+<li class="ndc-wf-node "><div class="ndc-wf-node-top"><span class="ndc-wf-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4h6l3 3h9v13H3Z"/></svg></span><span class="ndc-wf-step">04</span></div><h4>Select customer folder</h4><p>Choose the customer’s folder and documents on your device.</p></li><li class="ndc-wf-node "><div class="ndc-wf-node-top"><span class="ndc-wf-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H5v20h14V7Zm0 0v5h5M8 12h8M8 16h5"/></svg></span><span class="ndc-wf-step">05</span></div><h4>Compress &amp; assign</h4><p>The extension prepares files and matches document categories locally.</p></li><li class="ndc-wf-node "><div class="ndc-wf-node-top"><span class="ndc-wf-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4h6l3 3h9v13H3ZM12 10v7m-3-3 3 3 3-3"/></svg></span><span class="ndc-wf-step">06</span></div><h4>Save in the same folder</h4><p>Prepared copies go into the customer folder’s Compressed subfolder when saving and write permission are enabled.</p></li>
+          </ol>
+          <div class="ndc-wf-file-path"><span>LOCAL FILES</span> Customer folder <b>→</b> Compressed <b>→</b> Prepared documents</div>
+        </div>
+        <div class="ndc-wf-bridge ndc-wf-transfer" aria-hidden="true"><span>Prepared files go directly from your browser to VAHAN</span><b>↓</b></div>
+        <div class="ndc-wf-lane ndc-wf-vahan">
+          <div class="ndc-wf-lane-head"><h3>03 / Official VAHAN portal</h3><span>Direct upload &amp; submission</span></div>
+          <ol class="ndc-wf-row ndc-wf-four" start="7">
+<li class="ndc-wf-node "><div class="ndc-wf-node-top"><span class="ndc-wf-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V3m-5 5 5-5 5 5M4 15v6h16v-6"/></svg></span><span class="ndc-wf-step">07</span></div><h4>Upload directly</h4><p>The extension attaches prepared documents to the official VAHAN upload form.</p></li><li class="ndc-wf-node "><div class="ndc-wf-node-top"><span class="ndc-wf-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/><circle cx="12" cy="12" r="10"/></svg></span><span class="ndc-wf-step">08</span></div><h4>VAHAN accepts files</h4><p>Continue after the portal confirms each document upload.</p></li><li class="ndc-wf-node "><div class="ndc-wf-node-top"><span class="ndc-wf-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 18 9-18 9 4-9Zm4 9h14"/></svg></span><span class="ndc-wf-step">09</span></div><h4>Submit application</h4><p>With Auto Submit enabled, the extension follows the final submission steps.</p></li><li class="ndc-wf-node ndc-wf-complete"><div class="ndc-wf-node-top"><span class="ndc-wf-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/><circle cx="12" cy="12" r="10"/></svg></span><span class="ndc-wf-step">10</span></div><h4>Workflow completed</h4><p>VAHAN confirms submission. Verify the final portal status.</p></li>
+          </ol>
+        </div>
+        <div class="ndc-wf-privacy"><span class="ndc-wf-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/><path d="M7 6.5h.01M7 17.5h.01M11 6.5h6M11 17.5h6"/></svg></span><div><strong>NDC servers do not receive or store these customer document files.</strong><p>NDC handles account authentication and access checks. Document preparation and local saving happen on your device; document upload and final acceptance happen on VAHAN.</p></div></div>
+      </div>
+    </div>
+    <p class="ndc-wf-footnote">Account checks may repeat before protected actions. Local saving requires permission; with Auto Submit off, submit manually on VAHAN. ZIP downloads and local caches stay on your device. Submission confirmation is not registration approval. <a href="privacy-policy.html#local-data">Privacy &amp; local storage details ↗</a></p>
+  </div>
+</section>
 
       <section
         id="customer-folders"
@@ -1947,7 +1934,7 @@
 
       <script src="offers-showcase.js" defer></script>
 
-      <script src="reviews-showcase.js?v=20261106-logo-fix" defer></script>
+      <script src="reviews-showcase.js?v=20261117-stories" defer></script>
 
       <section
         id="security"
@@ -1965,31 +1952,20 @@
               information are handled before you get started.
             </p>
           </div>
-          <aside class="ndc-security-note" aria-label="Security information">
-            <span class="ndc-security-icon" aria-hidden="true"
-              ><svg class="ndc-icon" aria-hidden="true">
-                <use href="#ndc-i-shield" /></svg
-            ></span>
-            <div>
-              <h3>Security information</h3>
-              <p>
-                NDC does not store your uploaded documents or the customer and
-                any other details contained in those documents on our server.
-              </p>
-              <p>
-                Our server validates the document-upload process so the tool can
-                follow the required upload steps. This validation does not mean
-                your documents or their sensitive contents are stored on our
-                server. Your documents are submitted to the intended Vahan
-                portal only as part of your workflow.
-              </p>
-              <p class="ndc-security-foot">
-                Account, subscription and login security records are maintained
-                separately to provide and protect your access.
-                <a href="privacy-policy.html">Read our privacy policy ↗</a>
-              </p>
+          <div class="ndc-document-flow">
+            <div class="ndc-flow-summary"><span class="kicker">Document route</span><h3>Device to VAHAN.<br><span class="gold">No document copy on NDC servers.</span></h3><p>Account checks use a separate connection. Your document files stay in the local preparation and official portal upload route below.</p></div>
+            <ol class="ndc-flow-steps" aria-label="Document preparation and upload workflow">
+              <li><span class="ndc-flow-number">01</span><h4>Select on your device</h4><p>Choose files manually or allow access to a matching local customer folder.</p></li>
+              <li><span class="ndc-flow-number">02</span><h4>Prepare in the browser</h4><p>Recognize categories, compress images, optionally merge Aadhaar or convert images to PDF. Review the results.</p></li>
+              <li><span class="ndc-flow-number">03</span><h4>Upload to VAHAN</h4><p>The extension attaches prepared files to the official VAHAN form and follows category steps. VAHAN receives the submitted documents.</p></li>
+              <li><span class="ndc-flow-number">04</span><h4>Confirm the result</h4><p>Finish manually or use optional automatic submission. Verify the final status on VAHAN; enabled summaries stay local or go to your clipboard.</p></li>
+            </ol>
+            <div class="ndc-flow-branches">
+              <article><span class="kicker">Separate access connection</span><h4>Extension &harr; NDC account server</h4><p>Login, session and subscription checks. NDC retains account, payment and security records, such as IP and browser information. These checks do not send the selected document files to NDC.</p></article>
+              <article><span class="kicker">Local side paths</span><h4>Cache, prepared copies &amp; ZIPs</h4><p>Up to 50 local customer category records help resume work. With permission, prepared copies save to your local Compressed folder. ZIP downloads are created locally. These files remain until you delete them.</p></article>
             </div>
-          </aside>
+            <p class="ndc-flow-note">Local processing does not mean no data is saved on your device. VAHAN applies its own storage practices after upload. <a href="privacy-policy.html#local-data">Read local-data details</a> · <a href="privacy-policy.html#terms">Terms</a> · <a href="privacy-policy.html#refunds">Refund policy</a></p>
+          </div>
         </div>
       </section>
 
@@ -2369,6 +2345,18 @@
               >
                 Select a Plan to Continue
               </button>
+              <aside class="ndc-payment-trust" aria-label="Payment security">
+                <div class="ndc-payment-trust-heading">
+                  <svg class="ndc-payment-trust-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z"/><path d="m8 12 3 3 5-6"/></svg>
+                  <strong>Payments secured by Razorpay</strong>
+                </div>
+                <a class="ndc-payment-trust-logo" href="https://razorpay.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit Razorpay (opens in a new tab)">
+                  <img src="https://razorpay.com/assets/razorpay-logo.svg" width="112" height="26" alt="Razorpay" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+                </a>
+                <p>Your payment is processed through Razorpay Checkout. Choose from the payment methods available at checkout and complete authentication with your bank or payment app.</p>
+                <span class="ndc-payment-trust-note">Never share your OTP, UPI PIN or banking password with NDC support.</span>
+              </aside>
+
               <p
                 class="credential-note"
                 id="ndcSignupStatus"
@@ -2430,7 +2418,7 @@
         <div class="container">
           <div class="ndc-reviews-heading">
             <span class="ndc-reviews-eyebrow">OUR TRUSTED USERS</span>
-            <h2>Real customers.<br /><span>Their NDC experience.</span></h2>
+            <h2 id="ndcReviewsTitle">Real customers.<br /><span>Their NDC experience.</span></h2>
             <p>
               Customer stories from the teams using NDC in their daily workflow.
             </p>
@@ -2443,7 +2431,8 @@
           >
             Loading customer stories…
           </p>
-          <div id="ndcReviewCards" class="ndc-review-cards"></div>
+          <div class="ndc-review-navigation" role="group" aria-label="Browse customer stories"><button type="button" id="ndcReviewsPrev" aria-label="Previous customer stories" aria-controls="ndcReviewCards">&larr;</button><span>Swipe or scroll to explore</span><button type="button" id="ndcReviewsNext" aria-label="Next customer stories" aria-controls="ndcReviewCards">&rarr;</button></div>
+          <div id="ndcReviewCards" class="ndc-review-cards" tabindex="0" role="region" aria-label="Customer stories, horizontally scrollable"></div>
           <div class="ndc-reviews-actions">
             <button
               id="ndcReviewsMore"
