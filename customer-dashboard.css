@@ -655,3 +655,14 @@ body.ndc-dashboard-v2 {
 .ndc-checkout-tax-row.is-total strong{color:#e3ca5e;font-size:1.08rem}
 .ndc-checkout-summary-note{display:block;margin-top:10px;color:#a9a398;line-height:1.55}
 @media(max-width:600px){.ndc-checkout-billing-grid{grid-template-columns:1fr}.ndc-checkout-billing-grid .wide{grid-column:auto}.ndc-checkout-payment-summary{padding-left:14px;padding-right:14px}.ndc-checkout-summary-heading{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}}
+
+/* Invoice filtering controls and two-column billing summary headers. */
+.ndc-invoice-filters{display:grid;grid-template-columns:minmax(210px,2fr) minmax(140px,1fr) minmax(140px,1fr) auto auto;gap:12px;align-items:end;margin:4px 0 10px;padding:16px;border:1px solid rgba(215,189,85,.25);border-radius:14px;background:#11110f}
+.ndc-invoice-filters label{display:grid;gap:7px;color:#d6c66f;font-size:.86rem;font-weight:650}
+.ndc-invoice-filters input{min-width:0;box-sizing:border-box;width:100%;border:1px solid #39362b;border-radius:9px;padding:11px;background:#0b0b0a;color:#f7f4e9;font:inherit}
+.ndc-invoice-filters input:focus{outline:2px solid #d7bd55;outline-offset:1px}
+.ndc-invoice-filter-status{margin:0 4px 12px;color:#aaa69d;font-size:.88rem}
+.ndc-invoice-load-error{padding:12px 16px;border:1px solid #805c3c;border-radius:10px;color:#f0c890;background:#211a13}
+.ndc-checkout-summary-columns{display:flex;justify-content:space-between;padding:6px 0 8px;border-bottom:1px solid rgba(215,189,85,.18);color:#a99c62;font-size:.7rem;font-weight:800;letter-spacing:.1em}
+@media(max-width:760px){.ndc-invoice-filters{grid-template-columns:1fr 1fr}.ndc-invoice-filters label:first-child{grid-column:1/-1}.ndc-invoice-filters button{width:100%}}
+@media(max-width:460px){.ndc-invoice-filters{grid-template-columns:1fr}.ndc-invoice-filters label:first-child{grid-column:auto}}
