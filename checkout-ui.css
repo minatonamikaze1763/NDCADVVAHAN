@@ -693,3 +693,35 @@ body #payment > .container {
 @media (max-width: 600px) {
   #payment #signupGstFields { gap: 14px; }
 }
+
+/* Explicit GSTIN lookup controls; manual billing entry stays available until lookup succeeds. */
+#payment .gstin-lookup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 2px;
+}
+#payment .gstin-lookup-button {
+  min-height: 40px;
+  border: 1px solid #d7bd5570;
+  border-radius: 9px;
+  padding: 9px 14px;
+  background: #15140f;
+  color: var(--gold);
+  font: 600 12px/1.4 var(--portfolio-ui);
+  cursor: pointer;
+}
+#payment .gstin-lookup-button:hover {
+  border-color: var(--gold);
+  background: #d7bd5512;
+}
+#payment .gstin-lookup-button:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+#payment .credential-field :is(input, textarea)[readonly] {
+  border-color: #d7bd5545;
+  background: #11110e;
+  color: #c9c5b8;
+  cursor: not-allowed;
+}

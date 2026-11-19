@@ -127,35 +127,63 @@
     document.addEventListener('DOMContentLoaded', async () => {
         $('paymentProceed').disabled = true;
         const gstinField = $("signupGstin"), gstinStatus = $("signupGstinStatus");
-        let gstinLookupPending = false, lastResolvedGstin = "";
-        async function lookupSignupGstin(force = false) {
+        const gstinSearchButton = $("signupGstinSearch"), gstinClearButton = $("signupGstinClear");
+        const fetchedGstFields = ["signupTradeName", "signupBusinessName", "signupBusinessAddress", "signupStateCode"].map(id => $(id));
+        let gstinLookupPending = false, fetchedGstin = "";
+        function clearFetchedGstDetails(showMessage = true) {
+            fetchedGstFields.forEach(field => {
+                field.value = "";
+                field.readOnly = false;
+                field.removeAttribute("aria-readonly");
+            });
+            fetchedGstin = "";
+            gstinClearButton.hidden = true;
+            if (showMessage) gstinStatus.textContent = "Fetched details cleared. You can enter GST billing details manually or search again.";
+        }
+        async function lookupSignupGstin() {
             const gstin = gstinField.value.trim().toUpperCase();
             gstinField.value = gstin;
-            if (!gstin) { lastResolvedGstin = ""; gstinStatus.textContent = "Enter a GSTIN to fill registered business details automatically."; return; }
+            if (!gstin) { gstinStatus.textContent = "Enter a GSTIN before searching."; gstinField.focus(); return; }
             if (!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(gstin)) {
-                gstinStatus.textContent = "Enter a valid 15-character GSTIN.";
+                gstinStatus.textContent = "Enter a valid 15-character GSTIN before searching.";
                 return;
             }
-            if (gstinLookupPending || (!force && lastResolvedGstin === gstin)) return;
-            gstinLookupPending = true; gstinStatus.textContent = "Checking GSTIN…";
+            if (gstinLookupPending) return;
+            gstinLookupPending = true;
+            gstinSearchButton.disabled = true;
+            gstinStatus.textContent = "Searching NDC's GSTIN directory, then the configured lookup provider if needed…";
             try {
                 const result = await post("/api/public/gstin/lookup", { gstin });
                 const data = result.data || {}, address = String(data.address || "").trim();
-                if (data.gstin && data.gstin !== gstin) throw Error("The GST lookup returned a different GSTIN.");
-                if (data.legalName) $("signupBusinessName").value = data.legalName;
-                if (data.tradeName) $("signupTradeName").value = data.tradeName;
-                if (address) $("signupBusinessAddress").value = address;
-                if (data.stateCode) $("signupStateCode").value = data.stateCode;
-                lastResolvedGstin = gstin;
-                const recordSource = result.source === "manual" ? "NDC directory" : "gstinapi.in";
-                gstinStatus.textContent = "Details filled from " + recordSource + (data.status ? " · GST status: " + data.status : "") + ". Please verify before continuing.";
+                if (data.gstin && data.gstin.toUpperCase() !== gstin) throw Error("The GST lookup returned a different GSTIN.");
+                if (!data.legalName || !address || data.stateCode !== gstin.slice(0, 2)) {
+                    throw Error("The lookup returned incomplete business details. You can enter them manually.");
+                }
+                $("signupBusinessName").value = data.legalName;
+                $("signupTradeName").value = data.tradeName || "";
+                $("signupBusinessAddress").value = address;
+                $("signupStateCode").value = data.stateCode;
+                fetchedGstFields.forEach(field => {
+                    field.readOnly = true;
+                    field.setAttribute("aria-readonly", "true");
+                });
+                fetchedGstin = gstin;
+                gstinClearButton.hidden = false;
+                const recordSource = result.source === "manual" ? "NDC's MongoDB directory" : "gstinapi.in";
+                gstinStatus.textContent = "Details loaded from " + recordSource + (data.status ? " · GST status: " + data.status : "") + ". These fields are locked; use Clear fetched details to edit them.";
             } catch (error) {
-                gstinStatus.textContent = error.message || "Could not look up this GSTIN. You can enter the billing details manually.";
-            } finally { gstinLookupPending = false; }
+                gstinStatus.textContent = error.message || "Could not look up this GSTIN. You can enter the GST billing details manually.";
+            } finally {
+                gstinLookupPending = false;
+                gstinSearchButton.disabled = false;
+            }
         }
-        gstinField?.addEventListener("blur", () => { void lookupSignupGstin(); });
-        gstinField?.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") { event.preventDefault(); void lookupSignupGstin(true); }
+        gstinSearchButton?.addEventListener("click", () => { void lookupSignupGstin(); });
+        gstinClearButton?.addEventListener("click", () => clearFetchedGstDetails());
+        gstinField?.addEventListener("input", () => {
+            const value = gstinField.value.trim().toUpperCase();
+            if (fetchedGstin && value !== fetchedGstin) clearFetchedGstDetails(false);
+            gstinField.value = value;
         });
         
         try {

@@ -1900,7 +1900,16 @@
             </div>
             <div id="signupGstFields" class="ndc-gst-checkout-fields">
               <span class="payment-label">GST BILLING DETAILS</span>
-              <div class="credential-field"><label for="signupGstin">GSTIN</label><input id="signupGstin" maxlength="15" autocomplete="off" placeholder="15-character GSTIN" aria-describedby="signupGstinStatus" /><small id="signupGstinStatus" role="status" aria-live="polite">Enter a GSTIN to fill registered business details automatically.</small></div>
+              <div class="credential-field ndc-gstin-field">
+                <label for="signupGstin">GSTIN</label>
+                <input id="signupGstin" maxlength="15" autocomplete="off" placeholder="15-character GSTIN" aria-describedby="signupGstinHelp signupGstinStatus" />
+                <div class="gstin-lookup-actions">
+                  <button type="button" id="signupGstinSearch" class="gstin-lookup-button">Search GSTIN</button>
+                  <button type="button" id="signupGstinClear" class="gstin-lookup-button gstin-clear-button" hidden>Clear fetched details</button>
+                </div>
+                <small id="signupGstinHelp">For automatic fill, enter your GSTIN and select Search GSTIN. Skip Search to enter these details manually.</small>
+                <small id="signupGstinStatus" role="status" aria-live="polite"></small>
+              </div>
               <div class="credential-field"><label for="signupTradeName">Trade name</label><input id="signupTradeName" maxlength="120" autocomplete="organization" /></div>
               <div class="credential-field"><label for="signupBusinessName">Legal business name</label><input id="signupBusinessName" maxlength="160" autocomplete="organization" /></div>
               <div class="credential-field"><label for="signupBusinessAddress">Billing address</label><textarea id="signupBusinessAddress" maxlength="500" rows="3" autocomplete="street-address"></textarea></div>
