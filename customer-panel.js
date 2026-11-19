@@ -871,7 +871,18 @@
               <div class="ndc-month-options">${Array.from({ length: 12 }, (_, i) => `<label class="ndc-choice ndc-month-choice"><input type="radio" name="renewalMonths" value="${i + 1}" ${i === 0 ? 'checked' : ''}><span><strong>${i + 1}</strong><small>${i === 0 ? 'month' : 'months'}</small></span></label>`).join('')}</div></fieldset>
               <div id="ndcRenewalOffer"></div>
               <div id="ndcRenewalPreview" class="ndc-renewal-preview" aria-live="polite"></div>
-              <p id="ndcRenewalTotal" aria-live="polite"></p>
+              <section class="ndc-checkout-billing"><span class="ndc-eyebrow">BILLING DETAILS</span><h3>Save your GST details</h3><p>Enter them now for future invoices. Optional while GST is off; required when GST checkout is enabled.</p>
+                <div class="ndc-checkout-billing-grid">
+                  <label>GSTIN<input id="renewalGstin" maxlength="15" autocomplete="off" value="${esc(dashboardData.gstProfile?.gstin || "")}" ${dashboardData.gstCheckout?.enabled && !dashboardData.gstProfile?.gstin ? "required" : ""} ${dashboardData.gstInvoicelocked ? "readonly" : ""} ${dashboardData.gstProfileLocked ? "disabled" : ""}></label>
+                  <label>Trade name<input id="renewalTradeName" maxlength="120" value="${esc(dashboardData.gstProfile?.tradeName || "")}" ${dashboardData.gstProfileLocked ? "disabled" : ""}></label>
+                  <label>Legal business name<input id="renewalBusinessName" maxlength="160" value="${esc(dashboardData.gstProfile?.businessName || "")}" ${dashboardData.gstCheckout?.enabled && !dashboardData.gstProfile?.businessName ? "required" : ""} ${dashboardData.gstProfileLocked ? "disabled" : ""}></label>
+                  <label class="wide">Billing address<textarea id="renewalBusinessAddress" maxlength="500" rows="3" ${dashboardData.gstCheckout?.enabled && !dashboardData.gstProfile?.businessAddress ? "required" : ""} ${dashboardData.gstProfileLocked ? "disabled" : ""}>${esc(dashboardData.gstProfile?.businessAddress || "")}</textarea></label>
+                  <label>State code<input id="renewalStateCode" inputmode="numeric" maxlength="2" placeholder="36" value="${esc(dashboardData.gstProfile?.stateCode || "")}" ${dashboardData.gstCheckout?.enabled && !dashboardData.gstProfile?.stateCode ? "required" : ""} ${dashboardData.gstProfileLocked ? "disabled" : ""}></label>
+                  <label>Business phone<input id="renewalBusinessPhone" maxlength="20" inputmode="tel" value="${esc(dashboardData.gstProfile?.phone || "")}" ${dashboardData.gstProfileLocked ? "disabled" : ""}></label>
+                </div>
+                ${dashboardData.gstProfileLocked ? '<small>These details were submitted during signup and are locked. Contact support to request a correction.</small>' : ''}
+              </section>
+              <div id="ndcRenewalTotal" class="ndc-checkout-payment-summary" aria-live="polite"></div>
               <button class="ndc-home-button" id="ndcRenewalSubmit" type="submit">Continue to secure payment</button>
               <p id="ndcRenewalStatus" role="status" aria-live="polite"></p>
             </form>
@@ -1117,7 +1128,14 @@
     renewalTotal();
     $("ndcQuickRenew")?.addEventListener("click", () => {
       const planId = currentPlanId(dashboardData.account);
-      if (planId) startRenewalPayment(planId, 1, "ndcQuickRenewStatus");
+      if (!planId) return;
+      if (activeSection !== "subscription") navigate("subscription");
+      const plan = document.querySelector(`input[name="renewalPlan"][value="${planId}"]`);
+      if (plan) plan.checked = true;
+      const month = document.querySelector('input[name="renewalMonths"][value="1"]'); if (month) month.checked = true;
+      renewalTotal();
+      $("ndcRenewalForm")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const message = $("ndcQuickRenewStatus"); if (message) message.textContent = "Review your billing details and payment summary, then continue to checkout.";
     });
     $("ndcMoreMonths")?.addEventListener("click", () => {
       if (activeSection !== "subscription") navigate("subscription");
@@ -1269,12 +1287,20 @@
     if ($("ndcRenewalTotal") && RENEWAL_PRICES[plan]) {
       const list = RENEWAL_PRICES[plan] * months, taxable = appliedOffer ? appliedOffer.amountPaise / 100 : list;
       const gstRate = Number(dashboardData?.gstCheckout?.gstRate) || 18, gst = dashboardData?.gstCheckout?.enabled ? Math.round(taxable * gstRate) / 100 : 0;
-      const total = taxable + gst;
-      $("ndcRenewalTotal").textContent = dashboardData?.gstCheckout?.enabled
-        ? `Plan / offer ${money(list)} · Discount ${money(Math.max(0, list - taxable))} · GST ${gstRate}% ${money(gst)} · Total ${money(total)}`
-        : `Total: ${money(taxable)} · ${months} month(s)`;
+      renderRenewalSummary({ list, taxable, discount: Math.max(0, list - taxable), gst, gstRate, gstEnabled: dashboardData?.gstCheckout?.enabled === true, total: taxable + gst });
     }
     renewalPreview();
+  }
+
+  function renderRenewalSummary(summary) {
+    const root = $("ndcRenewalTotal"); if (!root) return;
+    const rows = [ ["Plan / offer amount", summary.list], ...(summary.discount > 0 ? [["Discount / offer applied", summary.discount]] : []), ["Taxable amount", summary.taxable], [summary.gstEnabled ? "GST (" + summary.gstRate + "%)" : "GST · not charged", summary.gst], ["Total payable", summary.total] ];
+    root.innerHTML = '<div class="ndc-checkout-summary-heading">PAYMENT SUMMARY</div>' + rows.map(([label, value]) => '<div class="ndc-checkout-tax-row' + (label === "Total payable" ? ' is-total' : '') + '"><span>' + esc(label) + '</span><strong>' + esc(money(value)) + '</strong></div>').join('') + '<small class="ndc-checkout-summary-note">' + (summary.gstEnabled ? 'GST is calculated after any plan or offer discount.' : 'GST is currently not charged. The amount shown is the amount you will pay.') + '</small>';
+  }
+
+  function renewalBillingPayload() {
+    const values = { gstin: $("renewalGstin")?.value.trim().toUpperCase() || "", tradeName: $("renewalTradeName")?.value.trim() || "", businessName: $("renewalBusinessName")?.value.trim() || "", businessAddress: $("renewalBusinessAddress")?.value.trim() || "", stateCode: $("renewalStateCode")?.value.trim() || "", phone: $("renewalBusinessPhone")?.value.trim() || "" };
+    return values;
   }
 
   function setPaymentBusy(busy) {
@@ -1322,10 +1348,12 @@
     message("Creating secure payment order…");
     try {
       const result = await api("/api/panel/payments/orders", {
-        method: "POST", body: JSON.stringify({ planId, months, ...(statusId === "ndcRenewalStatus" && appliedOffer?.planId === planId && appliedOffer?.months === months ? { offerCode: appliedOffer.code } : {}) })
+        method: "POST", body: JSON.stringify({ planId, months, ...renewalBillingPayload(), ...(statusId === "ndcRenewalStatus" && appliedOffer?.planId === planId && appliedOffer?.months === months ? { offerCode: appliedOffer.code } : {}) })
       });
       const order = result.data || result;
       if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error("Invalid payment order response.");
+      const quoteGst = order.gst || {};
+      renderRenewalSummary({ list: Number(quoteGst.listPrice || order.baseAmount || order.amount) / 100, discount: Number(quoteGst.discountAmount || 0) / 100, taxable: Number(quoteGst.taxableAmount || order.baseAmount || order.amount) / 100, gst: Number(quoteGst.amount || 0) / 100, gstRate: Number(quoteGst.rate || dashboardData?.gstCheckout?.gstRate || 18), gstEnabled: quoteGst.enabled === true, total: Number(order.amount) / 100 });
       let verificationStarted = false;
       const checkout = new Razorpay({
         key: order.keyId, order_id: order.orderId, amount: order.amount,
