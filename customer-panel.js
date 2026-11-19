@@ -60,7 +60,14 @@
     const switchAt = account.scheduledPlan?.startsAt || account.expiresAt;
     root.innerHTML = `<div class="ndc-preview-heading"><span class="ndc-eyebrow">LIVE RENEWAL PREVIEW</span><span>Updates as you choose</span></div><h3>${esc(plan.name)} · ${months} month${months === 1 ? "" : "s"}</h3>
       <div class="ndc-preview-comparison"><div><small>CURRENT PAID EXPIRY</small><strong>${Number.isFinite(current) ? esc(date(account.expiresAt)) : "No expiry assigned"}</strong><span>${Number(account.maxDevices) || 1} device logins</span></div><b aria-hidden="true">→</b><div><small>AFTER SUCCESSFUL PAYMENT</small><strong>${esc(date(end))}</strong><span>${downgrade ? `${account.maxDevices} logins until ${esc(date(switchAt))}; then ${deviceLimit} logins` : `${deviceLimit} device logins`} · +${months * plan.durationDays} days</span></div></div>
-      <div class="ndc-preview-total"><span>Total payment</span><strong>${esc(money(appliedOffer ? appliedOffer.amountPaise / 100 : plan.monthlyPrice * months))}</strong></div><p>${downgrade ? `You keep all features and ${account.maxDevices} logins until ${esc(date(switchAt))}. Then your added duration uses ${deviceLimit} logins. ` : ""}${upgrade ? `Your device limit increases to ${deviceLimit} after payment confirmation. ` : ""}${Number.isFinite(current) && current > now ? "Your remaining paid time is preserved; new days start from your current expiry." : Number.isFinite(current) ? "Your new paid period starts when payment is confirmed." : "Your current account has no expiry. This purchase sets a paid expiry starting from payment confirmation."} Preview dates are estimates until the server confirms payment.</p>`;
+      const listAmount = Number(plan.monthlyPrice) * months;
+    const finalAmount = appliedOffer ? Number(appliedOffer.amountPaise) / 100 : listAmount;
+    const priceBeforeOffer = appliedOffer && Number.isFinite(listAmount) && Number.isFinite(finalAmount) && finalAmount < listAmount
+      ? `<s class="ndc-preview-price-original">${esc(money(listAmount))}</s>`
+      : "";
+    root.innerHTML = `<div class="ndc-preview-heading"><span class="ndc-eyebrow">LIVE RENEWAL PREVIEW</span><span>Updates as you choose</span></div><h3>${esc(plan.name)} · ${months} month${months === 1 ? "" : "s"}</h3>
+      <div class="ndc-preview-comparison"><div><small>CURRENT PAID EXPIRY</small><strong>${Number.isFinite(current) ? esc(date(account.expiresAt)) : "No expiry assigned"}</strong><span>${Number(account.maxDevices) || 1} device logins</span></div><b aria-hidden="true">→</b><div><small>AFTER SUCCESSFUL PAYMENT</small><strong>${esc(date(end))}</strong><span>${downgrade ? `${account.maxDevices} logins until ${esc(date(switchAt))}; then ${deviceLimit} logins` : `${deviceLimit} device logins`} · +${months * plan.durationDays} days</span></div></div>
+      <div class="ndc-preview-total"><span>Total payment</span><div class="ndc-preview-prices">${priceBeforeOffer}<strong>${esc(money(finalAmount))}</strong></div></div><p>${downgrade ? `You keep all features and ${account.maxDevices} logins until ${esc(date(switchAt))}. Then your added duration uses ${deviceLimit} logins. ` : ""}${upgrade ? `Your device limit increases to ${deviceLimit} after payment confirmation. ` : ""}${Number.isFinite(current) && current > now ? "Your remaining paid time is preserved; new days start from your current expiry." : Number.isFinite(current) ? "Your new paid period starts when payment is confirmed." : "Your current account has no expiry. This purchase sets a paid expiry starting from payment confirmation."} Preview dates are estimates until the server confirms payment.</p>`;<p>${downgrade ? `You keep all features and ${account.maxDevices} logins until ${esc(date(switchAt))}. Then your added duration uses ${deviceLimit} logins. ` : ""}${upgrade ? `Your device limit increases to ${deviceLimit} after payment confirmation. ` : ""}${Number.isFinite(current) && current > now ? "Your remaining paid time is preserved; new days start from your current expiry." : Number.isFinite(current) ? "Your new paid period starts when payment is confirmed." : "Your current account has no expiry. This purchase sets a paid expiry starting from payment confirmation."} Preview dates are estimates until the server confirms payment.</p>`;
   }
 
   function emailSettings(account) {
@@ -872,6 +879,7 @@
               <div class="ndc-month-options">${Array.from({ length: 12 }, (_, i) => `<label class="ndc-choice ndc-month-choice"><input type="radio" name="renewalMonths" value="${i + 1}" ${i === 0 ? 'checked' : ''}><span><strong>${i + 1}</strong><small>${i === 0 ? 'month' : 'months'}</small></span></label>`).join('')}</div></fieldset>
               <div id="ndcRenewalOffer"></div>
               <div id="ndcRenewalPreview" class="ndc-renewal-preview" aria-live="polite"></div>
+              ${dashboardData.gstProfile?.gstin ? "" : `
               <section class="ndc-checkout-billing"><span class="ndc-eyebrow">BILLING DETAILS</span><h3>Save your GST details</h3><p>Enter them now for future invoices. Optional while GST is off; required when GST checkout is enabled.</p>
                 <div class="ndc-checkout-billing-grid">
                   <label>GSTIN<input id="renewalGstin" maxlength="15" autocomplete="off" value="${esc(dashboardData.gstProfile?.gstin || "")}" ${dashboardData.gstCheckout?.enabled && !dashboardData.gstProfile?.gstin ? "required" : ""} ${dashboardData.gstInvoicelocked ? "readonly" : ""} ${dashboardData.gstProfileLocked ? "disabled" : ""}></label>
@@ -883,6 +891,7 @@
                 </div>
                 ${dashboardData.gstProfileLocked ? '<small>These details were submitted during signup and are locked. Contact support to request a correction.</small>' : ''}
               </section>
+              `}
               <div id="ndcRenewalTotal" class="ndc-checkout-payment-summary" aria-live="polite"></div>
               <button class="ndc-home-button" id="ndcRenewalSubmit" type="submit">Continue to secure payment</button>
               <p id="ndcRenewalStatus" role="status" aria-live="polite"></p>
@@ -1340,7 +1349,16 @@
   }
 
   function renewalBillingPayload() {
-    const values = { gstin: $("renewalGstin")?.value.trim().toUpperCase() || "", tradeName: $("renewalTradeName")?.value.trim() || "", businessName: $("renewalBusinessName")?.value.trim() || "", businessAddress: $("renewalBusinessAddress")?.value.trim() || "", stateCode: $("renewalStateCode")?.value.trim() || "", phone: $("renewalBusinessPhone")?.value.trim() || "" };
+    const profile = dashboardData?.gstProfile || {};
+    const value = (id, key) => String($(id)?.value ?? profile[key] ?? "").trim();
+    const values = {
+      gstin: value("renewalGstin", "gstin").toUpperCase(),
+      tradeName: value("renewalTradeName", "tradeName"),
+      businessName: value("renewalBusinessName", "businessName"),
+      businessAddress: value("renewalBusinessAddress", "businessAddress"),
+      stateCode: value("renewalStateCode", "stateCode"),
+      phone: value("renewalBusinessPhone", "phone")
+    };
     return values;
   }
 
