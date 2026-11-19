@@ -1222,6 +1222,7 @@
       "setup",
       "subscription",
       "payments",
+      "gst-invoices",
       "sessions",
       "features",
       "security",
