@@ -161,6 +161,8 @@
                 }
                 $("signupBusinessName").value = data.legalName;
                 $("signupTradeName").value = data.tradeName || "";
+                // Use the registered trade name as the account full name, but keep it editable.
+                $("signupName").value = data.tradeName || data.legalName;
                 $("signupBusinessAddress").value = address;
                 $("signupStateCode").value = data.stateCode;
                 fetchedGstFields.forEach(field => {
