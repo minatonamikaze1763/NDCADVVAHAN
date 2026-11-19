@@ -25,10 +25,10 @@
             taxBox.hidden = !p;
             taxBox.replaceChildren();
             if (p) {
-                const rows = [["Plan / offer amount", displayList], ...(displayDiscount > 0 ? [["Discount / offer applied", displayDiscount]] : []), ["Taxable amount", displayBase], ...(checkoutGst.enabled ? [["GST (" + (orderQuote?.gstRate || checkoutGst.gstRate) + "%)", displayTax]] : [["GST", 0]]), ["Total payable", payable]];
+                const totalGstRate = Number(orderQuote?.gstRate || checkoutGst.gstRate) || 18; const splitGstRate = totalGstRate / 2; const cgstAmount = checkoutGst.enabled ? Math.round(displayTax * 50) / 100 : 0; const sgstAmount = checkoutGst.enabled ? Number((displayTax - cgstAmount).toFixed(2)) : 0; const rows = [["Plan / offer amount", displayList], ...(displayDiscount > 0 ? [["Discount / offer applied", displayDiscount]] : []), ["Taxable amount", displayBase], ["CGST (" + splitGstRate + "%)", cgstAmount], ["SGST (" + splitGstRate + "%)", sgstAmount], ["Total GST (" + totalGstRate + "%)", checkoutGst.enabled ? displayTax : 0], ["Total payable", payable]];
                 const heading = document.createElement("div"); heading.className = "ndc-checkout-summary-heading"; heading.textContent = "PAYMENT SUMMARY"; taxBox.append(heading);
                 const columns = document.createElement("div"); columns.className = "ndc-checkout-summary-columns"; const descCol = document.createElement("span"); descCol.textContent = "DESCRIPTION"; const amountCol = document.createElement("span"); amountCol.textContent = "AMOUNT"; columns.append(descCol, amountCol); taxBox.append(columns);
-                for (const [label, value] of rows) { const row = document.createElement("div"); row.className = "ndc-checkout-tax-row" + (label === "Total payable" ? " is-total" : ""); const name = document.createElement("span"); name.textContent = label === "GST" && !checkoutGst.enabled ? "GST · not charged" : label; const price = document.createElement("strong"); price.textContent = money(value); row.append(name, price); taxBox.append(row); }
+                for (const [label, value] of rows) { const row = document.createElement("div"); row.className = "ndc-checkout-tax-row" + (label === "Total payable" ? " is-total" : ""); const name = document.createElement("span"); name.textContent = !checkoutGst.enabled && /^(CGST|SGST|Total GST)/.test(label) ? label + " · not charged" : label; const price = document.createElement("strong"); price.textContent = money(value); row.append(name, price); taxBox.append(row); }
                 const note = document.createElement("small"); note.className = "ndc-checkout-summary-note"; note.textContent = checkoutGst.enabled ? "GST is calculated after any plan or offer discount." : "GST is currently not charged. The amount shown is the amount you will pay."; taxBox.append(note);
             }
         }
@@ -72,7 +72,7 @@
         } catch (error) { state = 'idle'; orderQuote = null; update(); status(error.message); }
     }
     // Presentation and draft state only. Payment orders and offer validation remain server-owned.
-    const DRAFT_KEY = 'ndcSignupCartV1', draftFields = ['signupName', 'accountUsername', 'signupEmail', 'signupReferral'];
+    const DRAFT_KEY = 'ndcSignupCartV1', draftFields = ['signupName', 'accountUsername', 'signupEmail', 'signupReferral', 'signupGstin', 'signupTradeName', 'signupBusinessName', 'signupBusinessAddress', 'signupStateCode', 'signupBusinessPhone'];
     let checkoutUIReady = false, monthTiles = null, offerCodeToRestore = '';
     function syncCheckoutUI() {
         if (!checkoutUIReady) return;
