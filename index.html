@@ -60,6 +60,19 @@
   <link rel="stylesheet" href="workflow-chart.css?v=20261117-connected" />
   <link rel="stylesheet" href="payment-trust.css?v=20261117" />
   <link rel="stylesheet" href="filename-guide.css?v=20261117-preview" />
+
+<style id="ndc-checkout-summary-styles">
+.ndc-checkout-payment-summary{margin:22px 0 18px;padding:0 18px 14px;border:1px solid rgba(215,189,85,.35);border-radius:16px;background:linear-gradient(145deg,#191813,#101010);color:#f5f1e4;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.ndc-checkout-summary-heading{margin:0 -18px 8px;padding:14px 18px;border-bottom:1px solid rgba(215,189,85,.24);color:#dfc65b;font-size:.78rem;font-weight:800;letter-spacing:.14em}
+.ndc-checkout-tax-row{display:flex;justify-content:space-between;gap:18px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:.92rem;color:#c9c5ba}
+.ndc-checkout-tax-row strong{color:#f5f1e4;text-align:right;font-weight:700;white-space:nowrap}
+.ndc-checkout-tax-row.is-total{margin:4px -4px 0;padding:12px 4px 2px;border-bottom:0;color:#e3ca5e;font-weight:800}
+.ndc-checkout-tax-row.is-total strong{color:#e3ca5e;font-size:1.08rem}
+.ndc-checkout-summary-note{display:block;margin-top:10px;color:#a9a398;line-height:1.55}
+.ndc-gst-checkout-fields{margin:18px 0;padding:18px;border:1px solid rgba(215,189,85,.25);border-radius:14px;background:#11110f}
+.ndc-gst-checkout-fields>p{color:#aaa69d;line-height:1.55}
+@media(max-width:600px){.ndc-checkout-payment-summary{padding-left:14px;padding-right:14px}.ndc-checkout-summary-heading{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}}
+</style>
 </head>
 
 <body class="ndc-redesign ndc-portfolio-page">
@@ -1504,7 +1517,7 @@
     
     <script src="plan-catalog.js?v=20261106-features" defer></script>
     
-    <script src="signup.js?v=20261106-features" defer></script>
+    <script src="signup.js?v=20261119-gst-checkout-summary" defer></script>
     
     <script src="offers-showcase.js" defer></script>
     
@@ -1892,9 +1905,9 @@
               <label for="signupMonths">Subscription duration</label><select id="signupMonths" required></select>
             </div>
             <div id="ndcSignupOffer"></div>
-            <div id="signupGstFields" class="ndc-gst-checkout-fields" hidden>
+            <div id="signupGstFields" class="ndc-gst-checkout-fields">
               <span class="payment-label">GST BILLING DETAILS</span>
-              <p>GST is calculated on the plan or offer amount after the offer discount.</p>
+              <p>Enter your billing details now to keep them on your account for future invoices. These fields are optional while GST is off and required when GST checkout is active.</p>
               <div class="credential-field"><label for="signupGstin">GSTIN</label><input id="signupGstin" maxlength="15" autocomplete="off" placeholder="15-character GSTIN" /></div>
               <div class="credential-field"><label for="signupTradeName">Trade name</label><input id="signupTradeName" maxlength="120" autocomplete="organization" /></div>
               <div class="credential-field"><label for="signupBusinessName">Legal business name</label><input id="signupBusinessName" maxlength="160" autocomplete="organization" /></div>
@@ -1902,7 +1915,7 @@
               <div class="credential-field"><label for="signupStateCode">GST state code</label><input id="signupStateCode" inputmode="numeric" maxlength="2" placeholder="Two digits (must match GSTIN)" /></div>
               <div class="credential-field"><label for="signupBusinessPhone">Business phone (optional)</label><input id="signupBusinessPhone" maxlength="20" inputmode="tel" autocomplete="tel" /></div>
             </div>
-            <div id="signupTaxBreakdown" class="ndc-checkout-tax-breakdown" hidden aria-live="polite"></div>
+            <div id="signupTaxBreakdown" class="ndc-checkout-payment-summary" hidden aria-live="polite"></div>
             <button class="payment-proceed" id="paymentProceed" type="submit" disabled>
               Select a Plan to Continue
             </button>
