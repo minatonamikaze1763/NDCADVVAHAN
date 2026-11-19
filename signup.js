@@ -4,15 +4,29 @@
     const money = (n, c = 'INR') => new Intl.NumberFormat('en-IN', { style: 'currency', currency: c }).format(n);
     let selected = null, state = 'idle', saved = null, dialog = null;
     let appliedOffer = null, offerWidget = null;
+    let checkoutGst = { enabled: false, gstRate: 18 };
     try { saved = JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch { }
     const status = t => { $('ndcSignupStatus').textContent = t; };
     const persist = () => { try { sessionStorage.setItem(KEY, JSON.stringify(saved)); } catch { } };
     function update() {
         const p = plans[selected], m = Number($('signupMonths').value) || 1;
         const amount = appliedOffer ? appliedOffer.amountPaise / 100 : p?.monthlyPrice * m;
+        const tax = checkoutGst.enabled && p ? Math.round(amount * checkoutGst.gstRate) / 100 : 0;
+        const payable = amount + tax;
         const devices = appliedOffer ? appliedOffer.maxDevices : p?.maxDevices;
         const heading = document.querySelector('.payment-heading p'); if(heading) heading.textContent = p ? 'Review your plan, optional offer, and payment details.' : 'Select a plan above to continue with your payment.';
-        $('selectedPlanName').textContent = p ? p.name + ' Plan' : 'No Plan Selected'; $('selectedPlanAmount').textContent = p ? money(amount) : '₹0'; $('selectedPlanLogins').textContent = p ? `1 User · ${devices} devices · ${m} month(s)` : 'Choose a subscription plan to continue.';
+        $('selectedPlanName').textContent = p ? p.name + ' Plan' : 'No Plan Selected'; $('selectedPlanAmount').textContent = p ? money(payable) : '₹0';
+        const taxBox = $('signupTaxBreakdown');
+        if (taxBox) {
+            taxBox.hidden = !checkoutGst.enabled || !p;
+            taxBox.replaceChildren();
+            if (checkoutGst.enabled && p) {
+                const rows = [["Plan / offer amount", amount], ...(amount < (p.monthlyPrice * m) ? [["Offer discount", (p.monthlyPrice * m) - amount]] : []), ["Taxable amount", amount], ["GST (" + checkoutGst.gstRate + "%)", tax], ["Total payable", payable]];
+                for (const [label, value] of rows) { const row = document.createElement("div"); row.className = "ndc-checkout-tax-row"; const name = document.createElement("span"); name.textContent = label; const price = document.createElement("strong"); price.textContent = money(value); row.append(name, price); taxBox.append(row); }
+            }
+        }
+        const gstFields = $('signupGstFields');
+        if (gstFields) { gstFields.hidden = !checkoutGst.enabled; for (const input of gstFields.querySelectorAll('input,textarea')) { input.disabled = state !== 'idle' || !checkoutGst.enabled; input.required = checkoutGst.enabled && input.id !== 'signupTradeName' && input.id !== 'signupBusinessPhone'; } } $('selectedPlanLogins').textContent = p ? `1 User · ${devices} devices · ${m} month(s)` : 'Choose a subscription plan to continue.';
         $('paymentProceed').disabled = !p || state !== 'idle'; $('paymentProceed').textContent = ['complete', 'review'].includes(state) ? 'Payment received' : state !== 'idle' ? 'Processing…' : p ? 'Pay securely · ' + money(amount) : 'Select a Plan to Continue';
         $('ndcSignupForm').querySelectorAll('input,select').forEach(n => n.disabled = state !== 'idle');
         offerWidget?.setBusy(state !== 'idle');
@@ -43,9 +57,9 @@
     window.selectCustomPlan = () => window.open('https://wa.me/919052691719?text=' + encodeURIComponent('Hi, I am interested in a Custom Plan for NDC VAHAN TOOL.'), '_blank', 'noopener');
     async function begin(e) {
         e.preventDefault(); if (state !== 'idle') return; if(offerWidget?.isLoading() || offerWidget?.hasUnapplied()) { status('Apply or remove your offer code before continuing.'); return; } if (!selected) { status('Choose a plan first.'); return; } if (!e.target.reportValidity()) return; if (typeof Razorpay !== 'function') { status('Unable to load Razorpay Checkout.'); return; }
-        const details = { referralCode: $('signupReferral').value.trim().toUpperCase(), name: $('signupName').value.trim(), username: $('accountUsername').value.trim().toLowerCase(), email: $('signupEmail').value.trim(), planId: selected, months: Number($('signupMonths').value), ...(appliedOffer ? {offerCode:appliedOffer.code} : {}) }; state = 'creating'; update(); status('Creating your payment order…');
+        const details = { referralCode: $('signupReferral').value.trim().toUpperCase(), name: $('signupName').value.trim(), username: $('accountUsername').value.trim().toLowerCase(), email: $('signupEmail').value.trim(), planId: selected, months: Number($('signupMonths').value), ...(appliedOffer ? {offerCode:appliedOffer.code} : {}), ...(checkoutGst.enabled ? { gstin: $('signupGstin').value.trim().toUpperCase(), tradeName: $('signupTradeName').value.trim(), businessName: $('signupBusinessName').value.trim(), businessAddress: $('signupBusinessAddress').value.trim(), stateCode: $('signupStateCode').value.trim(), phone: $('signupBusinessPhone').value.trim() } : {}) }; state = 'creating'; update(); status('Creating your payment order…');
         try {
-            const r = await post('/api/public/payments/orders', details), order = r.data || r; if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error('Invalid payment order response.'); const p = plans[order.plan?.id || selected]; state = 'checkout'; update(); status('Complete payment in the secure checkout.');
+            const r = await post('/api/public/payments/orders', details), order = r.data || r; if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error('Invalid payment order response.'); const p = plans[order.plan?.id || selected]; if (order.gst?.enabled) { checkoutGst = { enabled: true, gstRate: Number(order.gst.rate) || checkoutGst.gstRate }; $('selectedPlanAmount').textContent = money(Number(order.amount) / 100); update(); } state = 'checkout'; update(); status('Complete payment in the secure checkout.');
             const checkout = new Razorpay({ key: order.keyId, order_id: order.orderId, amount: order.amount, currency: order.currency || 'INR', name: 'Next Dimension Customs', description: p.name + ' subscription', prefill: { name: details.name, email: details.email }, theme: { color: '#d7bd55' }, handler: proof => { if (state !== 'checkout') return; saved = { proof, details, purchase: { planName: order.plan?.name || p.name, months: order.months || details.months, offer: order.offer || null, maxDevices: order.plan?.maxDevices || p.maxDevices, amount: Number(order.amount) / 100, currency: order.currency || 'INR' }, state: 'pending', acknowledged: false }; persist(); state = 'pending'; void verify(); }, modal: { ondismiss: () => { if (state !== 'checkout') return; state = 'idle'; update(); status('Checkout closed. If money was deducted, check your email before retrying.'); } } });
             checkout.on('payment.failed', error => { if (state === 'checkout') status((error.error?.description || 'Payment failed.') + ' You can retry inside checkout or close it.'); }); checkout.open();
         } catch (error) { state = 'idle'; update(); status(error.message); }
@@ -105,6 +119,10 @@
     }
     document.addEventListener('DOMContentLoaded', async () => {
         $('paymentProceed').disabled = true;
+        try {
+            const gstResponse = await fetch(API + '/api/public/gst-checkout-settings', { cache: 'no-store', headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(12000) });
+            if (gstResponse.ok) { const gstData = await gstResponse.json(); checkoutGst = { enabled: gstData.enabled === true, gstRate: Number(gstData.gstRate) || 18 }; }
+        } catch { /* Server validates the GST setting at order creation. */ }
         try {
             await NDCPlans.ready;
             const container = document.querySelector('.pricing');
