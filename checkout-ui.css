@@ -671,3 +671,25 @@ body #payment > .container {
 #payment #ndcLeftOfferBadge[hidden] {
   display: none !important;
 }
+
+/* GST billing fields: keep labels close to controls and separate each field. */
+#payment #signupGstFields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+#payment #signupGstFields > .payment-label {
+  display: block;
+  margin: 0 0 -8px;
+}
+#payment #signupGstFields > .credential-field {
+  gap: 4px;
+  margin: 0;
+}
+#payment #signupGstFields > .credential-field label {
+  margin: 0;
+  line-height: 1.35;
+}
+@media (max-width: 600px) {
+  #payment #signupGstFields { gap: 14px; }
+}
