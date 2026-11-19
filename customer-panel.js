@@ -239,6 +239,7 @@
       dashboardData.gstCheckout = { enabled: false, gstRate: 18 };
       try { const gst = await fetch(API_BASE + "/api/public/gst-checkout-settings", { cache: "no-store" }); if (gst.ok) { const settings = await gst.json(); dashboardData.gstCheckout = { enabled: settings.enabled === true, gstRate: Number(settings.gstRate) || 18 }; } } catch {}
       dashboardData.gstInvoices = extras[1].status === "fulfilled" ? (extras[1].value.invoices || []) : [];
+      dashboardData.gstInvoiceError = extras[1].status === "rejected" ? (extras[1].reason?.message || "Unable to load invoice records.") : "";
 
       if (!dashboardData?.account) {
         throw new Error("Customer account information is unavailable.");
@@ -896,17 +897,35 @@
     // =======================================================
     else if (activeSection === "gst-invoices") {
       const invoices = Array.isArray(data.gstInvoices) ? data.gstInvoices : [];
-      const rows = invoices.length ? invoices.map((invoice) => `
-        <tr>
-          <td>${esc(date(invoice.date))}</td>
-          <td>${esc(money(invoice.amount, invoice.currency || "INR"))}</td>
-          <td>${esc(invoice.description || "Subscription payment")}</td>
-          <td><span class="ndc-invoice-state ndc-invoice-${esc(invoice.status)}">${invoice.status === "ready" ? "Tax invoice ready" : invoice.status === "ready_no_gst" ? "Invoice ready · no GST" : "Pending"}</span><small class="ndc-invoice-reason">${esc(invoice.reason || invoice.invoiceNumber || "")}</small></td>
-          <td>${["ready", "ready_no_gst"].includes(invoice.status) ? `<button type="button" class="ndc-home-button" data-download-gst-invoice="${esc(invoice.id)}" data-invoice-number="${esc(invoice.invoiceNumber || "")}">Download PDF</button>` : "Complete details to generate"}</td>
-        </tr>`).join("") : `<tr><td colspan="5" class="ndc-empty">No paid transactions are available for invoicing yet.</td></tr>`;
+      const rows = invoices.length ? invoices.map((invoice) => {
+        const invoiceDate = new Date(invoice.date);
+        const filterDate = Number.isNaN(invoiceDate.getTime()) ? "" : invoiceDate.toISOString().slice(0, 10);
+        const invoiceNumber = invoice.invoiceNumber || "";
+        const description = invoice.description || "Subscription payment";
+        return `
+          <tr data-invoice-row data-invoice-number="${esc(invoiceNumber)}" data-invoice-search="${esc((invoiceNumber + " " + description).toLowerCase())}" data-invoice-date="${esc(filterDate)}">
+            <td class="ndc-mono">${esc(invoiceNumber || "Pending")}</td>
+            <td>${esc(date(invoice.date))}</td>
+            <td>${esc(description)}</td>
+            <td>${esc(money(invoice.amount, invoice.currency || "INR"))}</td>
+            <td><span class="ndc-invoice-state ndc-invoice-${esc(invoice.status)}">${invoice.status === "ready" ? "Tax invoice ready" : invoice.status === "ready_no_gst" ? "Invoice ready · no GST" : "Pending"}</span><small class="ndc-invoice-reason">${esc(invoice.reason || invoice.invoiceNumber || "")}</small></td>
+            <td>${["ready", "ready_no_gst"].includes(invoice.status) ? `<button type="button" class="ndc-home-button" data-download-gst-invoice="${esc(invoice.id)}" data-invoice-number="${esc(invoiceNumber)}">Download PDF</button>` : "Complete details to generate"}</td>
+          </tr>`;
+      }).join("") : `<tr><td colspan="6" class="ndc-empty">${data.gstInvoiceError ? "Invoice list could not be loaded. Select Refresh invoices or reload the page." : "No paid transactions are available for invoicing yet."}</td></tr>`;
+      const invoiceError = data.gstInvoiceError ? `<p class="ndc-invoice-load-error" role="status">${esc(data.gstInvoiceError)}</p>` : "";
       sectionHTML = `
-        <div class="ndc-page-heading"><span class="ndc-eyebrow">BILLING RECORDS</span><h1>GST invoices</h1><p>Every paid transaction, including signup, appears here. When GST is off, download a Commercial Invoice / Receipt — Not a GST Tax Invoice; no GST was charged or collected. After GST registration is approved and GST is enabled, new payments include GST calculated on the plan or offer price after any discount. Earlier payments remain at the amount originally paid.</p></div>
-        <section class="ndc-panel-card"><div class="ndc-table-wrap"><table class="ndc-table"><thead><tr><th>Date</th><th>Amount</th><th>Purchase description</th><th>Invoice status</th><th>Download</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+        <div class="ndc-page-heading"><span class="ndc-eyebrow">BILLING RECORDS</span><h1>GST invoices</h1><p>Every paid transaction, including signup, appears here. When GST is off, download a Commercial Invoice / Receipt — Not a GST Tax Invoice. After GST registration is approved and GST is enabled, new payments include GST calculated on the discounted plan or offer amount. Earlier payments keep their original amount.</p></div>
+        ${invoiceError}
+        <section class="ndc-panel-card ndc-invoice-panel">
+          <div class="ndc-invoice-filters" role="search" aria-label="Search invoices">
+            <label>Invoice number or description<input type="search" id="ndcInvoiceSearch" placeholder="Search by invoice number" autocomplete="off"></label>
+            <label>From date<input type="date" id="ndcInvoiceDateFrom"></label>
+            <label>To date<input type="date" id="ndcInvoiceDateTo"></label>
+            <button type="button" class="ndc-renewal-more" id="ndcInvoiceFilterReset">Clear filters</button><button type="button" class="ndc-renewal-more" id="ndcInvoiceRefresh">Refresh invoices</button>
+          </div>
+          <p id="ndcInvoiceFilterStatus" class="ndc-invoice-filter-status" aria-live="polite"></p>
+          <div class="ndc-table-wrap"><table class="ndc-table"><thead><tr><th>Invoice number</th><th>Date</th><th>Description</th><th>Amount</th><th>Invoice status</th><th>Download</th></tr></thead><tbody>${rows}</tbody></table></div>
+        </section>`;
     }
 
     // =======================================================
@@ -1157,6 +1176,28 @@
       } catch (error) { status.textContent = error.message; }
       finally { button.disabled = false; }
     });
+    const invoiceSearch = content.querySelector("#ndcInvoiceSearch");
+    const invoiceFrom = content.querySelector("#ndcInvoiceDateFrom");
+    const invoiceTo = content.querySelector("#ndcInvoiceDateTo");
+    const invoiceRows = [...content.querySelectorAll("[data-invoice-row]")];
+    const applyInvoiceFilters = () => {
+      const term = (invoiceSearch?.value || "").trim().toLowerCase(), from = invoiceFrom?.value || "", to = invoiceTo?.value || "";
+      let visible = 0;
+      for (const row of invoiceRows) {
+        const match = (!term || row.dataset.invoiceSearch.includes(term)) && (!from || row.dataset.invoiceDate >= from) && (!to || row.dataset.invoiceDate <= to);
+        row.hidden = !match; if (match) visible++;
+      }
+      const status = content.querySelector("#ndcInvoiceFilterStatus");
+      if (status) status.textContent = invoicesSummary(visible, invoiceRows.length);
+    };
+    const invoicesSummary = (visible, total) => total ? `Showing ${visible} of ${total} invoice(s).` : (dashboardData?.gstInvoiceError ? "Invoice records could not be loaded." : "No paid invoices yet.");
+    invoiceSearch?.addEventListener("input", applyInvoiceFilters);
+    invoiceFrom?.addEventListener("change", applyInvoiceFilters);
+    invoiceTo?.addEventListener("change", applyInvoiceFilters);
+    content.querySelector("#ndcInvoiceFilterReset")?.addEventListener("click", () => { if (invoiceSearch) invoiceSearch.value = ""; if (invoiceFrom) invoiceFrom.value = ""; if (invoiceTo) invoiceTo.value = ""; applyInvoiceFilters(); });
+    content.querySelector("#ndcInvoiceRefresh")?.addEventListener("click", () => { void loadDashboard(); });
+    applyInvoiceFilters();
+
     content.querySelectorAll("[data-download-gst-invoice]").forEach((button) => button.addEventListener("click", async () => {
       button.disabled = true; const token = sessionStorage.getItem(TOKEN_KEY);
       try {
@@ -1295,7 +1336,7 @@
   function renderRenewalSummary(summary) {
     const root = $("ndcRenewalTotal"); if (!root) return;
     const rows = [ ["Plan / offer amount", summary.list], ...(summary.discount > 0 ? [["Discount / offer applied", summary.discount]] : []), ["Taxable amount", summary.taxable], [summary.gstEnabled ? "GST (" + summary.gstRate + "%)" : "GST · not charged", summary.gst], ["Total payable", summary.total] ];
-    root.innerHTML = '<div class="ndc-checkout-summary-heading">PAYMENT SUMMARY</div>' + rows.map(([label, value]) => '<div class="ndc-checkout-tax-row' + (label === "Total payable" ? ' is-total' : '') + '"><span>' + esc(label) + '</span><strong>' + esc(money(value)) + '</strong></div>').join('') + '<small class="ndc-checkout-summary-note">' + (summary.gstEnabled ? 'GST is calculated after any plan or offer discount.' : 'GST is currently not charged. The amount shown is the amount you will pay.') + '</small>';
+    root.innerHTML = '<div class="ndc-checkout-summary-heading">PAYMENT SUMMARY</div><div class="ndc-checkout-summary-columns"><span>DESCRIPTION</span><span>AMOUNT</span></div>' + rows.map(([label, value]) => '<div class="ndc-checkout-tax-row' + (label === "Total payable" ? ' is-total' : '') + '"><span>' + esc(label) + '</span><strong>' + esc(money(value)) + '</strong></div>').join('') + '<small class="ndc-checkout-summary-note">' + (summary.gstEnabled ? 'GST is calculated after any plan or offer discount.' : 'GST is currently not charged. The amount shown is the amount you will pay.') + '</small>';
   }
 
   function renewalBillingPayload() {
@@ -1358,7 +1399,7 @@
       const checkout = new Razorpay({
         key: order.keyId, order_id: order.orderId, amount: order.amount,
         currency: order.currency || "INR", name: "Next Dimension Customs",
-        description: "Subscription renewal", theme: { color: "#d7bd55" },
+        description: order.description || "VAHAN NDC TOOL - Subscription renewal", theme: { color: "#d7bd55" },
         handler: async payment => {
           if (verificationStarted) return;
           verificationStarted = true;
