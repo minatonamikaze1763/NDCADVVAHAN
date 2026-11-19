@@ -235,6 +235,9 @@
       const extras = await Promise.allSettled([api("/api/panel/gst-profile"), api("/api/panel/gst-invoices")]);
       dashboardData.gstProfile = extras[0].status === "fulfilled" ? extras[0].value.profile : {};
       dashboardData.gstInvoicelocked = extras[0].status === "fulfilled" && extras[0].value.gstinLocked;
+      dashboardData.gstProfileLocked = extras[0].status === "fulfilled" && extras[0].value.profileLocked;
+      dashboardData.gstCheckout = { enabled: false, gstRate: 18 };
+      try { const gst = await fetch(API_BASE + "/api/public/gst-checkout-settings", { cache: "no-store" }); if (gst.ok) { const settings = await gst.json(); dashboardData.gstCheckout = { enabled: settings.enabled === true, gstRate: Number(settings.gstRate) || 18 }; } } catch {}
       dashboardData.gstInvoices = extras[1].status === "fulfilled" ? (extras[1].value.invoices || []) : [];
 
       if (!dashboardData?.account) {
@@ -822,15 +825,15 @@
 
         <section class="ndc-panel-card ndc-gst-profile-card">
           <div class="ndc-card-heading"><div><span class="ndc-eyebrow">BILLING DETAILS</span><h2>GST and business profile</h2></div></div>
-          <p class="ndc-note">Add the billing details for GST invoice generation. Your GSTIN locks after the first save; other business details stay editable.</p>
+          <p class="ndc-note">${dashboardData.gstProfileLocked ? "These GST billing details were submitted during signup and are locked. Contact NDC support if they need correction." : "Add your billing details to complete pending invoices and use GST enabled checkout. GSTIN locks after the first save; other business details can be edited."}</p>
           <form id="ndcGstProfileForm" class="ndc-gst-profile-form">
-            <label>GSTIN<input name="gstin" maxlength="15" autocomplete="off" value="${esc(dashboardData.gstProfile?.gstin || "")}" ${dashboardData.gstInvoicelocked ? "readonly" : ""} required></label>
-            <label>Trade name<input name="tradeName" maxlength="120" value="${esc(dashboardData.gstProfile?.tradeName || "")}"></label>
-            <label>Business name<input name="businessName" maxlength="160" value="${esc(dashboardData.gstProfile?.businessName || "")}" required></label>
-            <label>Business billing address<textarea name="businessAddress" maxlength="500" rows="3" required>${esc(dashboardData.gstProfile?.businessAddress || "")}</textarea></label>
-            <label>State code<input name="stateCode" inputmode="numeric" maxlength="2" value="${esc(dashboardData.gstProfile?.stateCode || "")}" placeholder="For example, 36"></label>
-            <label>Business phone<input name="phone" maxlength="20" inputmode="tel" value="${esc(dashboardData.gstProfile?.phone || "")}"></label>
-            <div class="ndc-gst-form-actions"><button type="submit" class="ndc-home-button">Save business details</button><span role="status" data-gst-profile-status></span></div>
+            <label>GSTIN<input name="gstin" maxlength="15" autocomplete="off" value="${esc(dashboardData.gstProfile?.gstin || "")}" ${dashboardData.gstInvoicelocked ? "readonly" : ""} ${dashboardData.gstProfileLocked ? "disabled" : ""} required></label>
+            <label>Trade name<input name="tradeName" maxlength="120" value="${esc(dashboardData.gstProfile?.tradeName || "")}" ${dashboardData.gstProfileLocked ? "disabled" : ""}></label>
+            <label>Business name<input name="businessName" maxlength="160" value="${esc(dashboardData.gstProfile?.businessName || "")}" required ${dashboardData.gstProfileLocked ? "disabled" : ""}></label>
+            <label>Business billing address<textarea name="businessAddress" maxlength="500" rows="3" required ${dashboardData.gstProfileLocked ? "disabled" : ""}>${esc(dashboardData.gstProfile?.businessAddress || "")}</textarea></label>
+            <label>State code<input name="stateCode" inputmode="numeric" maxlength="2" value="${esc(dashboardData.gstProfile?.stateCode || "")}" placeholder="For example, 36" required ${dashboardData.gstProfileLocked ? "disabled" : ""}></label>
+            <label>Business phone<input name="phone" maxlength="20" inputmode="tel" value="${esc(dashboardData.gstProfile?.phone || "")}" ${dashboardData.gstProfileLocked ? "disabled" : ""}></label>
+            <div class="ndc-gst-form-actions"><button type="submit" class="ndc-home-button" ${dashboardData.gstProfileLocked ? "disabled" : ""}>Save business details</button><span role="status" data-gst-profile-status></span></div>
           </form>
         </section>
       `;
@@ -891,7 +894,7 @@
           <td>${["ready", "ready_no_gst"].includes(invoice.status) ? `<button type="button" class="ndc-home-button" data-download-gst-invoice="${esc(invoice.id)}" data-invoice-number="${esc(invoice.invoiceNumber || "")}">Download PDF</button>` : "Complete details to generate"}</td>
         </tr>`).join("") : `<tr><td colspan="5" class="ndc-empty">No paid transactions are available for invoicing yet.</td></tr>`;
       sectionHTML = `
-        <div class="ndc-page-heading"><span class="ndc-eyebrow">BILLING RECORDS</span><h1>GST invoices</h1><p>Paid transactions and invoice status. While NEXT DIMENSION CUSTOMS GST registration is pending, invoices are issued without tax. For payments marked “Invoice ready · no GST”, GST was not included in the amount charged, so the “GST not charged discount” is ₹0.00. After registration is approved and GST is enabled, GST will apply to future purchases only; past payments will not change.</p></div>
+        <div class="ndc-page-heading"><span class="ndc-eyebrow">BILLING RECORDS</span><h1>GST invoices</h1><p>Every paid transaction, including signup, appears here. When GST is off, download a Commercial Invoice / Receipt — Not a GST Tax Invoice; no GST was charged or collected. After GST registration is approved and GST is enabled, new payments include GST calculated on the plan or offer price after any discount. Earlier payments remain at the amount originally paid.</p></div>
         <section class="ndc-panel-card"><div class="ndc-table-wrap"><table class="ndc-table"><thead><tr><th>Date</th><th>Amount</th><th>Purchase description</th><th>Invoice status</th><th>Download</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
     }
 
@@ -1130,7 +1133,7 @@
       button.disabled = true; status.textContent = "Saving…";
       try {
         const result = await api("/api/panel/gst-profile", { method: "PATCH", body: JSON.stringify(fields) });
-        dashboardData.gstProfile = result.profile; dashboardData.gstInvoicelocked = result.gstinLocked;
+        dashboardData.gstProfile = result.profile; dashboardData.gstInvoicelocked = result.gstinLocked; dashboardData.gstProfileLocked = result.profileLocked === true;
         const invoices = await api("/api/panel/gst-invoices"); dashboardData.gstInvoices = invoices.invoices || [];
         status.textContent = "Business details saved."; renderDashboard();
       } catch (error) { status.textContent = error.message; }
@@ -1263,7 +1266,14 @@
   const RENEWAL_PRICES = {};
   function renewalTotal() {
     const plan = document.querySelector('input[name="renewalPlan"]:checked')?.value, months = Number(document.querySelector('input[name="renewalMonths"]:checked')?.value || 1);
-    if ($("ndcRenewalTotal") && RENEWAL_PRICES[plan]) $("ndcRenewalTotal").textContent = `Total: ${money(appliedOffer ? appliedOffer.amountPaise / 100 : RENEWAL_PRICES[plan] * months)} · ${months} month(s)`;
+    if ($("ndcRenewalTotal") && RENEWAL_PRICES[plan]) {
+      const list = RENEWAL_PRICES[plan] * months, taxable = appliedOffer ? appliedOffer.amountPaise / 100 : list;
+      const gstRate = Number(dashboardData?.gstCheckout?.gstRate) || 18, gst = dashboardData?.gstCheckout?.enabled ? Math.round(taxable * gstRate) / 100 : 0;
+      const total = taxable + gst;
+      $("ndcRenewalTotal").textContent = dashboardData?.gstCheckout?.enabled
+        ? `Plan / offer ${money(list)} · Discount ${money(Math.max(0, list - taxable))} · GST ${gstRate}% ${money(gst)} · Total ${money(total)}`
+        : `Total: ${money(taxable)} · ${months} month(s)`;
+    }
     renewalPreview();
   }
 
