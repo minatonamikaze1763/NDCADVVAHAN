@@ -169,8 +169,7 @@
                 });
                 fetchedGstin = gstin;
                 gstinClearButton.hidden = false;
-                const recordSource = result.source === "manual" ? "NDC's MongoDB directory" : "gstinapi.in";
-                gstinStatus.textContent = "Details loaded from " + recordSource + (data.status ? " · GST status: " + data.status : "") + ". These fields are locked; use Clear fetched details to edit them.";
+                gstinStatus.textContent = "GSTIN successfully verified.";
             } catch (error) {
                 gstinStatus.textContent = error.message || "Could not look up this GSTIN. You can enter the GST billing details manually.";
             } finally {
