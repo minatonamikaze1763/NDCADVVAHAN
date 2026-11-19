@@ -638,3 +638,20 @@ body.ndc-dashboard-v2 {
   .ndc-dashboard-v2 .ndc-gst-profile-form { grid-template-columns:1fr; }
   .ndc-dashboard-v2 .ndc-gst-form-actions { grid-column:auto; align-items:flex-start; flex-direction:column; }
 }
+
+/* Branded billing details and payment summary used above renewal checkout. */
+.ndc-checkout-billing{margin:22px 0;padding:20px;border:1px solid rgba(215,189,85,.3);border-radius:16px;background:linear-gradient(145deg,#171612,#101010);color:#f4f0e2}
+.ndc-checkout-billing h3{margin:8px 0;color:#f3efdf}.ndc-checkout-billing p,.ndc-checkout-billing small{color:#aaa69d;line-height:1.55}
+.ndc-checkout-billing-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}
+.ndc-checkout-billing-grid label{display:grid;gap:7px;color:#d6c66f;font-size:.88rem;font-weight:650}.ndc-checkout-billing-grid .wide{grid-column:1/-1}
+.ndc-checkout-billing-grid input,.ndc-checkout-billing-grid textarea{width:100%;box-sizing:border-box;border:1px solid #39362b;border-radius:10px;padding:12px;background:#0c0c0b;color:#f7f4e9;font:inherit}
+.ndc-checkout-billing-grid input:focus,.ndc-checkout-billing-grid textarea:focus{outline:2px solid #d7bd55;outline-offset:1px}
+.ndc-checkout-billing-grid input:disabled,.ndc-checkout-billing-grid textarea:disabled{opacity:.7}
+.ndc-checkout-payment-summary{margin:20px 0 16px;padding:0 18px 14px;border:1px solid rgba(215,189,85,.35);border-radius:16px;background:linear-gradient(145deg,#191813,#101010);color:#f5f1e4;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+.ndc-checkout-summary-heading{margin:0 -18px 8px;padding:14px 18px;border-bottom:1px solid rgba(215,189,85,.25);color:#dfc65b;font-size:.78rem;font-weight:800;letter-spacing:.14em}
+.ndc-checkout-tax-row{display:flex;justify-content:space-between;gap:18px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:.92rem;color:#c9c5ba}
+.ndc-checkout-tax-row strong{color:#f5f1e4;text-align:right;font-weight:700;white-space:nowrap}
+.ndc-checkout-tax-row.is-total{margin:4px -4px 0;padding:12px 4px 2px;border:0;color:#e3ca5e;font-weight:800}
+.ndc-checkout-tax-row.is-total strong{color:#e3ca5e;font-size:1.08rem}
+.ndc-checkout-summary-note{display:block;margin-top:10px;color:#a9a398;line-height:1.55}
+@media(max-width:600px){.ndc-checkout-billing-grid{grid-template-columns:1fr}.ndc-checkout-billing-grid .wide{grid-column:auto}.ndc-checkout-payment-summary{padding-left:14px;padding-right:14px}.ndc-checkout-summary-heading{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}}
