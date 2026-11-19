@@ -55,7 +55,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="portfolio-theme.css?v=3-polished-plans" />
-  <link rel="stylesheet" href="checkout-ui.css" />
+  <link rel="stylesheet" href="checkout-ui.css?v=20261119-billing-textarea" />
   <link rel="stylesheet" href="document-workflow.css?v=20261117" />
   <link rel="stylesheet" href="workflow-chart.css?v=20261117-connected" />
   <link rel="stylesheet" href="payment-trust.css?v=20261117" />
@@ -1896,19 +1896,10 @@
               <label for="signupEmail">Email</label><input id="signupEmail" type="email" required autocomplete="email" placeholder="name@example.com" />
             </div>
             <div class="credential-field">
-              <label for="signupReferral">Referral code (optional)</label>
-              <input id="signupReferral" name="referralCode" type="text" maxlength="28" placeholder="NDC referral code" autocomplete="off" aria-describedby="signupReferralHelp" />
-              <small id="signupReferralHelp">New accounts can use one referral code at their first
-                payment. You and your referrer each receive 10 extra days.
-                Your own code can be shared with multiple people.</small>
-            </div>
-            <div class="credential-field">
               <label for="signupMonths">Subscription duration</label><select id="signupMonths" required></select>
             </div>
-            <div id="ndcSignupOffer"></div>
             <div id="signupGstFields" class="ndc-gst-checkout-fields">
               <span class="payment-label">GST BILLING DETAILS</span>
-              
               <div class="credential-field"><label for="signupGstin">GSTIN</label><input id="signupGstin" maxlength="15" autocomplete="off" placeholder="15-character GSTIN" /></div>
               <div class="credential-field"><label for="signupTradeName">Trade name</label><input id="signupTradeName" maxlength="120" autocomplete="organization" /></div>
               <div class="credential-field"><label for="signupBusinessName">Legal business name</label><input id="signupBusinessName" maxlength="160" autocomplete="organization" /></div>
@@ -1916,6 +1907,14 @@
               <div class="credential-field"><label for="signupStateCode">GST state code</label><input id="signupStateCode" inputmode="numeric" maxlength="2" placeholder="Two digits (must match GSTIN)" /></div>
               <div class="credential-field"><label for="signupBusinessPhone">Business phone (optional)</label><input id="signupBusinessPhone" maxlength="20" inputmode="tel" autocomplete="tel" /></div>
             </div>
+            <div class="credential-field">
+              <label for="signupReferral">Referral code (optional)</label>
+              <input id="signupReferral" name="referralCode" type="text" maxlength="28" placeholder="NDC referral code" autocomplete="off" aria-describedby="signupReferralHelp" />
+              <small id="signupReferralHelp">New accounts can use one referral code at their first
+                payment. You and your referrer each receive 10 extra days.
+                Your own code can be shared with multiple people.</small>
+            </div>
+            <div id="ndcSignupOffer"></div>
             <div id="signupTaxBreakdown" class="ndc-checkout-payment-summary" hidden aria-live="polite"></div>
             <button class="payment-proceed" id="paymentProceed" type="submit" disabled>
               Select a Plan to Continue
