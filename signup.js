@@ -34,7 +34,7 @@
         }
         const gstFields = $('signupGstFields');
         if (gstFields) { gstFields.hidden = false; for (const input of gstFields.querySelectorAll('input,textarea')) { input.disabled = state !== 'idle'; input.required = checkoutGst.enabled && input.id !== 'signupTradeName' && input.id !== 'signupBusinessPhone'; } } $('selectedPlanLogins').textContent = p ? `1 User · ${devices} devices · ${m} month(s)` : 'Choose a subscription plan to continue.';
-        $('paymentProceed').disabled = !p || state !== 'idle'; $('paymentProceed').textContent = ['complete', 'review'].includes(state) ? 'Payment received' : state !== 'idle' ? 'Processing…' : p ? 'Pay securely · ' + money(amount) : 'Select a Plan to Continue';
+        $('paymentProceed').disabled = !p || state !== 'idle'; $('paymentProceed').textContent = ['complete', 'review'].includes(state) ? 'Payment received' : state !== 'idle' ? 'Processing…' : p ? 'Pay securely · ' + money(payable) : 'Select a Plan to Continue';
         $('ndcSignupForm').querySelectorAll('input,select').forEach(n => n.disabled = state !== 'idle');
         offerWidget?.setBusy(state !== 'idle');
         syncCheckoutUI();
