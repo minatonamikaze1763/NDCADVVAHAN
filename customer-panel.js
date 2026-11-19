@@ -50,24 +50,60 @@
     const root = $("ndcRenewalPreview"), account = dashboardData?.account;
     if (!root || !account) return;
     const planId = document.querySelector('input[name="renewalPlan"]:checked')?.value;
-    const plan = NDCPlans.all.find(p => p.id === planId), months = Number(document.querySelector('input[name="renewalMonths"]:checked')?.value || 1);
+    const plan = NDCPlans.all.find(p => p.id === planId);
+    const months = Number(document.querySelector('input[name="renewalMonths"]:checked')?.value || 1);
     if (!plan) { root.textContent = "Choose an available plan to preview your renewal."; return; }
-    const now = Date.now() + serverClockOffset, current = Date.parse(account.expiresAt), base = Number.isFinite(current) ? Math.max(now, current) : now;
+
+    const now = Date.now() + serverClockOffset;
+    const current = Date.parse(account.expiresAt);
+    const base = Number.isFinite(current) ? Math.max(now, current) : now;
     const end = new Date(base + plan.durationDays * months * 86400000);
     const deviceLimit = appliedOffer?.maxDevices || planDevices(account, plan);
     const upgrade = Number(deviceLimit) > Number(account.maxDevices);
     const downgrade = Number(deviceLimit) < Number(account.maxDevices) && current > now;
     const switchAt = account.scheduledPlan?.startsAt || account.expiresAt;
-    root.innerHTML = `<div class="ndc-preview-heading"><span class="ndc-eyebrow">LIVE RENEWAL PREVIEW</span><span>Updates as you choose</span></div><h3>${esc(plan.name)} · ${months} month${months === 1 ? "" : "s"}</h3>
-      <div class="ndc-preview-comparison"><div><small>CURRENT PAID EXPIRY</small><strong>${Number.isFinite(current) ? esc(date(account.expiresAt)) : "No expiry assigned"}</strong><span>${Number(account.maxDevices) || 1} device logins</span></div><b aria-hidden="true">→</b><div><small>AFTER SUCCESSFUL PAYMENT</small><strong>${esc(date(end))}</strong><span>${downgrade ? `${account.maxDevices} logins until ${esc(date(switchAt))}; then ${deviceLimit} logins` : `${deviceLimit} device logins`} · +${months * plan.durationDays} days</span></div></div>
-      const listAmount = Number(plan.monthlyPrice) * months;
+
+    const listAmount = Number(plan.monthlyPrice) * months;
     const finalAmount = appliedOffer ? Number(appliedOffer.amountPaise) / 100 : listAmount;
-    const priceBeforeOffer = appliedOffer && Number.isFinite(listAmount) && Number.isFinite(finalAmount) && finalAmount < listAmount
-      ? `<s class="ndc-preview-price-original">${esc(money(listAmount))}</s>`
+    const priceBeforeOffer = appliedOffer && Number.isFinite(listAmount) &&
+      Number.isFinite(finalAmount) && finalAmount < listAmount
+      ? '<s class="ndc-preview-price-original">' + esc(money(listAmount)) + '</s>'
       : "";
-    root.innerHTML = `<div class="ndc-preview-heading"><span class="ndc-eyebrow">LIVE RENEWAL PREVIEW</span><span>Updates as you choose</span></div><h3>${esc(plan.name)} · ${months} month${months === 1 ? "" : "s"}</h3>
-      <div class="ndc-preview-comparison"><div><small>CURRENT PAID EXPIRY</small><strong>${Number.isFinite(current) ? esc(date(account.expiresAt)) : "No expiry assigned"}</strong><span>${Number(account.maxDevices) || 1} device logins</span></div><b aria-hidden="true">→</b><div><small>AFTER SUCCESSFUL PAYMENT</small><strong>${esc(date(end))}</strong><span>${downgrade ? `${account.maxDevices} logins until ${esc(date(switchAt))}; then ${deviceLimit} logins` : `${deviceLimit} device logins`} · +${months * plan.durationDays} days</span></div></div>
-      <div class="ndc-preview-total"><span>Total payment</span><div class="ndc-preview-prices">${priceBeforeOffer}<strong>${esc(money(finalAmount))}</strong></div></div><p>${downgrade ? `You keep all features and ${account.maxDevices} logins until ${esc(date(switchAt))}. Then your added duration uses ${deviceLimit} logins. ` : ""}${upgrade ? `Your device limit increases to ${deviceLimit} after payment confirmation. ` : ""}${Number.isFinite(current) && current > now ? "Your remaining paid time is preserved; new days start from your current expiry." : Number.isFinite(current) ? "Your new paid period starts when payment is confirmed." : "Your current account has no expiry. This purchase sets a paid expiry starting from payment confirmation."} Preview dates are estimates until the server confirms payment.</p>`;<p>${downgrade ? `You keep all features and ${account.maxDevices} logins until ${esc(date(switchAt))}. Then your added duration uses ${deviceLimit} logins. ` : ""}${upgrade ? `Your device limit increases to ${deviceLimit} after payment confirmation. ` : ""}${Number.isFinite(current) && current > now ? "Your remaining paid time is preserved; new days start from your current expiry." : Number.isFinite(current) ? "Your new paid period starts when payment is confirmed." : "Your current account has no expiry. This purchase sets a paid expiry starting from payment confirmation."} Preview dates are estimates until the server confirms payment.</p>`;
+    const timingNote = Number.isFinite(current) && current > now
+      ? "Your remaining paid time is preserved; new days start from your current expiry."
+      : Number.isFinite(current)
+        ? "Your new paid period starts when payment is confirmed."
+        : "Your current account has no expiry. This purchase sets a paid expiry starting from payment confirmation.";
+    const deviceNote = downgrade
+      ? "You keep all features and " + (Number(account.maxDevices) || 1) +
+        " logins until " + esc(date(switchAt)) + ". Then your added duration uses " +
+        Number(deviceLimit) + " logins. "
+      : "";
+    const upgradeNote = upgrade
+      ? "Your device limit increases to " + Number(deviceLimit) + " after payment confirmation. "
+      : "";
+    const afterPaymentLogins = downgrade
+      ? Number(account.maxDevices) + " logins until " + esc(date(switchAt)) +
+        "; then " + Number(deviceLimit) + " logins"
+      : Number(deviceLimit) + " device logins";
+
+    root.innerHTML =
+      '<div class="ndc-preview-heading"><span class="ndc-eyebrow">LIVE RENEWAL PREVIEW</span><span>Updates as you choose</span></div>' +
+      '<h3>' + esc(plan.name) + ' · ' + months + ' month' + (months === 1 ? '' : 's') + '</h3>' +
+      '<div class="ndc-preview-comparison">' +
+        '<div><small>CURRENT PAID EXPIRY</small><strong>' +
+          (Number.isFinite(current) ? esc(date(account.expiresAt)) : 'No expiry assigned') +
+          '</strong><span>' + (Number(account.maxDevices) || 1) + ' device logins</span></div>' +
+        '<b aria-hidden="true">→</b>' +
+        '<div><small>AFTER SUCCESSFUL PAYMENT</small><strong>' + esc(date(end)) +
+          '</strong><span>' + afterPaymentLogins + ' · +' +
+          (months * plan.durationDays) + ' days</span></div>' +
+      '</div>' +
+      '<div class="ndc-preview-total"><span>Total payment</span>' +
+        '<div class="ndc-preview-prices">' + priceBeforeOffer +
+          '<strong>' + esc(money(finalAmount)) + '</strong></div></div>' +
+      '<p>' + deviceNote + upgradeNote + timingNote +
+        ' Preview dates are estimates until the server confirms payment.</p>';
   }
 
   function emailSettings(account) {
