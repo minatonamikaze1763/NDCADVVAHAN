@@ -164,3 +164,17 @@
     white-space:nowrap;
     text-decoration-thickness:1.5px;
 }
+
+
+/* Keep the time, offer, preview, and payment area aligned to its preview card. */
+.ndc-dashboard-v2 #ndcRenewalForm .ndc-renewal-purchase-details {
+    width:min(100%,600px);
+    max-width:100%;
+    display:grid;
+    gap:18px;
+}
+.ndc-dashboard-v2 #ndcRenewalForm .ndc-renewal-purchase-details > :is(fieldset,#ndcRenewalOffer,#ndcRenewalPreview,.ndc-checkout-billing,#ndcRenewalTotal,#ndcRenewalSubmit,#ndcRenewalStatus) {
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+}
