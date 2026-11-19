@@ -126,6 +126,38 @@
     }
     document.addEventListener('DOMContentLoaded', async () => {
         $('paymentProceed').disabled = true;
+        const gstinField = $("signupGstin"), gstinStatus = $("signupGstinStatus");
+        let gstinLookupPending = false, lastResolvedGstin = "";
+        async function lookupSignupGstin(force = false) {
+            const gstin = gstinField.value.trim().toUpperCase();
+            gstinField.value = gstin;
+            if (!gstin) { lastResolvedGstin = ""; gstinStatus.textContent = "Enter a GSTIN to fill registered business details automatically."; return; }
+            if (!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(gstin)) {
+                gstinStatus.textContent = "Enter a valid 15-character GSTIN.";
+                return;
+            }
+            if (gstinLookupPending || (!force && lastResolvedGstin === gstin)) return;
+            gstinLookupPending = true; gstinStatus.textContent = "Checking GSTIN…";
+            try {
+                const result = await post("/api/public/gstin/lookup", { gstin });
+                const data = result.data || {}, address = String(data.address || "").trim();
+                if (data.gstin && data.gstin !== gstin) throw Error("The GST lookup returned a different GSTIN.");
+                if (data.legalName) $("signupBusinessName").value = data.legalName;
+                if (data.tradeName) $("signupTradeName").value = data.tradeName;
+                if (address) $("signupBusinessAddress").value = address;
+                if (data.stateCode) $("signupStateCode").value = data.stateCode;
+                lastResolvedGstin = gstin;
+                const recordSource = result.source === "manual" ? "NDC directory" : "gstinapi.in";
+                gstinStatus.textContent = "Details filled from " + recordSource + (data.status ? " · GST status: " + data.status : "") + ". Please verify before continuing.";
+            } catch (error) {
+                gstinStatus.textContent = error.message || "Could not look up this GSTIN. You can enter the billing details manually.";
+            } finally { gstinLookupPending = false; }
+        }
+        gstinField?.addEventListener("blur", () => { void lookupSignupGstin(); });
+        gstinField?.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") { event.preventDefault(); void lookupSignupGstin(true); }
+        });
+        
         try {
             const gstResponse = await fetch(API + '/api/public/gst-checkout-settings', { cache: 'no-store', headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(12000) });
             if (gstResponse.ok) { const gstData = await gstResponse.json(); checkoutGst = { enabled: gstData.enabled === true, gstRate: Number(gstData.gstRate) || 18 }; }
