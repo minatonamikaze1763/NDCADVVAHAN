@@ -60,6 +60,7 @@
   <link rel="stylesheet" href="workflow-chart.css?v=20261117-connected" />
   <link rel="stylesheet" href="payment-trust.css?v=20261117" />
   <link rel="stylesheet" href="filename-guide.css?v=20261117-preview" />
+  <link rel="stylesheet" href="danger-actions.css?v=20261119" />
 
 <style id="ndc-checkout-summary-styles">
 .ndc-checkout-payment-summary{margin:22px 0 18px;padding:0 18px 14px;border:1px solid rgba(215,189,85,.35);border-radius:16px;background:linear-gradient(145deg,#191813,#101010);color:#f5f1e4;box-shadow:0 12px 30px rgba(0,0,0,.28)}
@@ -1905,7 +1906,7 @@
                 <input id="signupGstin" maxlength="15" autocomplete="off" placeholder="15-character GSTIN" aria-describedby="signupGstinHelp signupGstinStatus" />
                 <div class="gstin-lookup-actions">
                   <button type="button" id="signupGstinSearch" class="gstin-lookup-button">Search GSTIN</button>
-                  <button type="button" id="signupGstinClear" class="gstin-lookup-button gstin-clear-button" hidden>Clear fetched details</button>
+                  <button type="button" id="signupGstinClear" class="gstin-lookup-button gstin-clear-button ndc-danger-button" hidden>Clear fetched details</button>
                 </div>
                 <small id="signupGstinHelp">For automatic fill, enter your GSTIN and select Search GSTIN. Skip Search to enter these details manually.</small>
                 <small id="signupGstinStatus" role="status" aria-live="polite"></small>
