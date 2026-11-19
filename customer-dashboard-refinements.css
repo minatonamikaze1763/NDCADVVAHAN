@@ -149,3 +149,18 @@
         text-align:left;
     }
 }
+
+/* Keep discounted renewal prices clear in the live checkout preview. */
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-prices {
+    display:flex;
+    align-items:baseline;
+    justify-content:flex-end;
+    flex-wrap:wrap;
+    gap:12px;
+}
+.ndc-dashboard-v2 #ndcRenewalPreview .ndc-preview-price-original {
+    color:var(--muted);
+    font-size:14px;
+    white-space:nowrap;
+    text-decoration-thickness:1.5px;
+}
