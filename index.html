@@ -1892,6 +1892,17 @@
               <label for="signupMonths">Subscription duration</label><select id="signupMonths" required></select>
             </div>
             <div id="ndcSignupOffer"></div>
+            <div id="signupGstFields" class="ndc-gst-checkout-fields" hidden>
+              <span class="payment-label">GST BILLING DETAILS</span>
+              <p>GST is calculated on the plan or offer amount after the offer discount.</p>
+              <div class="credential-field"><label for="signupGstin">GSTIN</label><input id="signupGstin" maxlength="15" autocomplete="off" placeholder="15-character GSTIN" /></div>
+              <div class="credential-field"><label for="signupTradeName">Trade name</label><input id="signupTradeName" maxlength="120" autocomplete="organization" /></div>
+              <div class="credential-field"><label for="signupBusinessName">Legal business name</label><input id="signupBusinessName" maxlength="160" autocomplete="organization" /></div>
+              <div class="credential-field"><label for="signupBusinessAddress">Billing address</label><textarea id="signupBusinessAddress" maxlength="500" rows="3" autocomplete="street-address"></textarea></div>
+              <div class="credential-field"><label for="signupStateCode">GST state code</label><input id="signupStateCode" inputmode="numeric" maxlength="2" placeholder="Two digits (must match GSTIN)" /></div>
+              <div class="credential-field"><label for="signupBusinessPhone">Business phone (optional)</label><input id="signupBusinessPhone" maxlength="20" inputmode="tel" autocomplete="tel" /></div>
+            </div>
+            <div id="signupTaxBreakdown" class="ndc-checkout-tax-breakdown" hidden aria-live="polite"></div>
             <button class="payment-proceed" id="paymentProceed" type="submit" disabled>
               Select a Plan to Continue
             </button>
