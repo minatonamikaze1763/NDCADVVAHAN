@@ -887,11 +887,11 @@
           <td>${esc(date(invoice.date))}</td>
           <td>${esc(money(invoice.amount, invoice.currency || "INR"))}</td>
           <td>${esc(invoice.description || "Subscription payment")}</td>
-          <td><span class="ndc-invoice-state ndc-invoice-${esc(invoice.status)}">${invoice.status === "ready" ? "Ready" : "Pending"}</span><small class="ndc-invoice-reason">${esc(invoice.reason || invoice.invoiceNumber || "")}</small></td>
-          <td>${invoice.status === "ready" ? `<button type="button" class="ndc-home-button" data-download-gst-invoice="${esc(invoice.id)}">Download PDF</button>` : "Complete details to generate"}</td>
+          <td><span class="ndc-invoice-state ndc-invoice-${esc(invoice.status)}">${invoice.status === "ready" ? "Tax invoice ready" : invoice.status === "ready_no_gst" ? "Invoice ready · no GST" : "Pending"}</span><small class="ndc-invoice-reason">${esc(invoice.reason || invoice.invoiceNumber || "")}</small></td>
+          <td>${["ready", "ready_no_gst"].includes(invoice.status) ? `<button type="button" class="ndc-home-button" data-download-gst-invoice="${esc(invoice.id)}">Download PDF</button>` : "Complete details to generate"}</td>
         </tr>`).join("") : `<tr><td colspan="5" class="ndc-empty">No paid transactions are available for invoicing yet.</td></tr>`;
       sectionHTML = `
-        <div class="ndc-page-heading"><span class="ndc-eyebrow">BILLING RECORDS</span><h1>GST invoices</h1><p>Paid transactions and the status of their invoice. Add your GST details in My Profile to complete pending records.</p></div>
+        <div class="ndc-page-heading"><span class="ndc-eyebrow">BILLING RECORDS</span><h1>GST invoices</h1><p>Paid transactions and invoice status. While NEXT DIMENSION CUSTOMS GST registration is pending, invoices are issued without tax. For payments marked “Invoice ready · no GST”, GST was not included in the amount charged, so the “GST not charged discount” is ₹0.00. After registration is approved and GST is enabled, GST will apply to future purchases only; past payments will not change.</p></div>
         <section class="ndc-panel-card"><div class="ndc-table-wrap"><table class="ndc-table"><thead><tr><th>Date</th><th>Amount</th><th>Purchase description</th><th>Invoice status</th><th>Download</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
     }
 

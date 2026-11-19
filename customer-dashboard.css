@@ -629,7 +629,8 @@ body.ndc-dashboard-v2 {
   display:inline-block; padding:5px 9px; border-radius:8px; background:#d7bd5515;
   color:var(--gold-light); font-size:10px; font-weight:600; text-transform:uppercase;
 }
-.ndc-dashboard-v2 .ndc-invoice-ready { background:#9cd4ad18; color:var(--green); }
+.ndc-dashboard-v2 .ndc-invoice-ready,
+.ndc-dashboard-v2 .ndc-invoice-ready_no_gst { background:#9cd4ad18; color:var(--green); }
 .ndc-dashboard-v2 .ndc-invoice-reason {
   display:block; max-width:260px; margin-top:6px; color:var(--muted); font-size:10px;
 }
