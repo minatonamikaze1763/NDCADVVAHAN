@@ -510,7 +510,7 @@
             ? `
                       <button
                         type="button"
-                        class="ndc-small-danger"
+                        class="ndc-small-danger ndc-danger-button"
                         data-revoke-session="${esc(session.id)}"
                         data-session-type="${esc(session.type || "customer_portal")}"
                       >
