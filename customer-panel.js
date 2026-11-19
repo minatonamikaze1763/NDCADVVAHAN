@@ -232,6 +232,10 @@
       const response = await api("/api/panel/dashboard");
 
       dashboardData = response.dashboard || response;
+      const extras = await Promise.allSettled([api("/api/panel/gst-profile"), api("/api/panel/gst-invoices")]);
+      dashboardData.gstProfile = extras[0].status === "fulfilled" ? extras[0].value.profile : {};
+      dashboardData.gstInvoicelocked = extras[0].status === "fulfilled" && extras[0].value.gstinLocked;
+      dashboardData.gstInvoices = extras[1].status === "fulfilled" ? (extras[1].value.invoices || []) : [];
 
       if (!dashboardData?.account) {
         throw new Error("Customer account information is unavailable.");
@@ -815,6 +819,20 @@
           </div>
 
         </section>
+
+        <section class="ndc-panel-card ndc-gst-profile-card">
+          <div class="ndc-card-heading"><div><span class="ndc-eyebrow">BILLING DETAILS</span><h2>GST and business profile</h2></div></div>
+          <p class="ndc-note">Add the billing details for GST invoice generation. Your GSTIN locks after the first save; other business details stay editable.</p>
+          <form id="ndcGstProfileForm" class="ndc-gst-profile-form">
+            <label>GSTIN<input name="gstin" maxlength="15" autocomplete="off" value="${esc(dashboardData.gstProfile?.gstin || "")}" ${dashboardData.gstInvoicelocked ? "readonly" : ""} required></label>
+            <label>Trade name<input name="tradeName" maxlength="120" value="${esc(dashboardData.gstProfile?.tradeName || "")}"></label>
+            <label>Business name<input name="businessName" maxlength="160" value="${esc(dashboardData.gstProfile?.businessName || "")}" required></label>
+            <label>Business billing address<textarea name="businessAddress" maxlength="500" rows="3" required>${esc(dashboardData.gstProfile?.businessAddress || "")}</textarea></label>
+            <label>State code<input name="stateCode" inputmode="numeric" maxlength="2" value="${esc(dashboardData.gstProfile?.stateCode || "")}" placeholder="For example, 36"></label>
+            <label>Business phone<input name="phone" maxlength="20" inputmode="tel" value="${esc(dashboardData.gstProfile?.phone || "")}"></label>
+            <div class="ndc-gst-form-actions"><button type="submit" class="ndc-home-button">Save business details</button><span role="status" data-gst-profile-status></span></div>
+          </form>
+        </section>
       `;
     }
 
@@ -857,6 +875,24 @@
           </div>
         </section>
       `;
+    }
+
+    // =======================================================
+    // GST INVOICES
+    // =======================================================
+    else if (activeSection === "gst-invoices") {
+      const invoices = Array.isArray(data.gstInvoices) ? data.gstInvoices : [];
+      const rows = invoices.length ? invoices.map((invoice) => `
+        <tr>
+          <td>${esc(date(invoice.date))}</td>
+          <td>${esc(money(invoice.amount, invoice.currency || "INR"))}</td>
+          <td>${esc(invoice.description || "Subscription payment")}</td>
+          <td><span class="ndc-invoice-state ndc-invoice-${esc(invoice.status)}">${invoice.status === "ready" ? "Ready" : "Pending"}</span><small class="ndc-invoice-reason">${esc(invoice.reason || invoice.invoiceNumber || "")}</small></td>
+          <td>${invoice.status === "ready" ? `<button type="button" class="ndc-home-button" data-download-gst-invoice="${esc(invoice.id)}">Download PDF</button>` : "Complete details to generate"}</td>
+        </tr>`).join("") : `<tr><td colspan="5" class="ndc-empty">No paid transactions are available for invoicing yet.</td></tr>`;
+      sectionHTML = `
+        <div class="ndc-page-heading"><span class="ndc-eyebrow">BILLING RECORDS</span><h1>GST invoices</h1><p>Paid transactions and the status of their invoice. Add your GST details in My Profile to complete pending records.</p></div>
+        <section class="ndc-panel-card"><div class="ndc-table-wrap"><table class="ndc-table"><thead><tr><th>Date</th><th>Amount</th><th>Purchase description</th><th>Invoice status</th><th>Download</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
     }
 
     // =======================================================
@@ -1086,6 +1122,29 @@
       document.querySelector('input[name="renewalMonths"]')?.focus({ preventScroll: true });
     });
     setPaymentBusy(paymentBusy);
+
+    content.querySelector("#ndcGstProfileForm")?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget, status = form.querySelector("[data-gst-profile-status]"), button = form.querySelector('button[type="submit"]');
+      const fields = Object.fromEntries(new FormData(form).entries());
+      button.disabled = true; status.textContent = "Saving…";
+      try {
+        const result = await api("/api/panel/gst-profile", { method: "PATCH", body: JSON.stringify(fields) });
+        dashboardData.gstProfile = result.profile; dashboardData.gstInvoicelocked = result.gstinLocked;
+        const invoices = await api("/api/panel/gst-invoices"); dashboardData.gstInvoices = invoices.invoices || [];
+        status.textContent = "Business details saved."; renderDashboard();
+      } catch (error) { status.textContent = error.message; }
+      finally { button.disabled = false; }
+    });
+    content.querySelectorAll("[data-download-gst-invoice]").forEach((button) => button.addEventListener("click", async () => {
+      button.disabled = true; const token = sessionStorage.getItem(TOKEN_KEY);
+      try {
+        const response = await fetch(API_BASE + "/api/panel/gst-invoices/" + encodeURIComponent(button.dataset.downloadGstInvoice) + "/pdf", { headers: { Authorization: "Bearer " + token }, cache: "no-store" });
+        if (!response.ok) { const error = await response.json().catch(() => ({})); throw new Error(error.error || "Invoice download failed."); }
+        const blob = await response.blob(), url = URL.createObjectURL(blob), a = document.createElement("a");
+        a.href = url; a.download = "NDC-GST-Invoice.pdf"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } catch (error) { alert(error.message); } finally { button.disabled = false; }
+    }));
 
     // Update active navigation button.
     document.querySelectorAll("[data-section]").forEach((element) => {

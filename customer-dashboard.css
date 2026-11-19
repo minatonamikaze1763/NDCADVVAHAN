@@ -606,3 +606,34 @@ body.ndc-dashboard-v2 {
         transition:none !important;
     }
 }
+
+/* GST profile and invoice records */
+.ndc-dashboard-v2 .ndc-gst-profile-form {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px;
+}
+.ndc-dashboard-v2 .ndc-gst-profile-form label {
+  display:grid; gap:7px; color:var(--muted); font-size:12px;
+}
+.ndc-dashboard-v2 .ndc-gst-profile-form textarea {
+  width:100%; resize:vertical; padding:12px 14px; border:1px solid #ffffff20;
+  border-radius:10px; background:#0a0a0a; color:var(--text); font:inherit;
+}
+.ndc-dashboard-v2 .ndc-gst-profile-form input[readonly] {
+  color:#aaa69d; background:#151515; cursor:not-allowed;
+}
+.ndc-dashboard-v2 .ndc-gst-form-actions {
+  display:flex; grid-column:1/-1; align-items:center; flex-wrap:wrap; gap:14px;
+}
+.ndc-dashboard-v2 [data-gst-profile-status] { color:var(--gold-light); font-size:12px; }
+.ndc-dashboard-v2 .ndc-invoice-state {
+  display:inline-block; padding:5px 9px; border-radius:8px; background:#d7bd5515;
+  color:var(--gold-light); font-size:10px; font-weight:600; text-transform:uppercase;
+}
+.ndc-dashboard-v2 .ndc-invoice-ready { background:#9cd4ad18; color:var(--green); }
+.ndc-dashboard-v2 .ndc-invoice-reason {
+  display:block; max-width:260px; margin-top:6px; color:var(--muted); font-size:10px;
+}
+@media(max-width:640px) {
+  .ndc-dashboard-v2 .ndc-gst-profile-form { grid-template-columns:1fr; }
+  .ndc-dashboard-v2 .ndc-gst-form-actions { grid-column:auto; align-items:flex-start; flex-direction:column; }
+}
