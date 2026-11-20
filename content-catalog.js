@@ -6,10 +6,10 @@
     ["latestFeatures", "#latest-features .features"],
     ["faq", "#faq .faq-grid"]
   ];
-  fetch("/content-catalog.json", { cache: "no-cache", headers: { Accept: "application/json" } })
+  fetch("https://server.nextdimensioncustoms.in/api/public/vahan/website-content", { cache: "no-store", headers: { Accept: "application/json" } })
     .then(response => { if (!response.ok) throw Error("Content catalog unavailable"); return response.json(); })
     .then(catalog => {
-      if (catalog.schemaVersion !== 1 || !catalog.sections) return;
+      if (catalog.success !== true || catalog.schemaVersion !== 1 || !catalog.sections) return;
       for (const [key, selector] of targets) {
         const root = document.querySelector(selector), markup = catalog.sections[key];
         if (!root || typeof markup !== "string" || !markup.trim() || markup.length > 100000) continue;
