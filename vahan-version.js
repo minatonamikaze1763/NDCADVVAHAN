@@ -31,12 +31,23 @@
     }
   }
   lock();
+  if (heading) heading.textContent = "Checking latest release…";
+  if (description) description.textContent = "Verifying the latest published Chrome Web Store version.";
+  if (badge) badge.textContent = "Checking…";
+  if (grid) grid.replaceChildren();
+  if (note) note.textContent = "Checking release availability.";
   fetch(API, {cache:"no-store",headers:{"Accept":"application/json"}})
     .then(r => { if (!r.ok) throw new Error("Version service unavailable"); return r.json(); })
     .then(data => {
       if (!data.success || !/^\d+\.\d+\.\d+(?:\.\d+)?$/.test(data.latestVersion)) throw new Error("Invalid release");
       if (heading) heading.textContent = "What's new in v" + data.latestVersion;
       if (badge) badge.textContent = data.latestVersion;
+      const heroVersion = document.querySelector(".ndc-hero-version");
+      if (heroVersion) {
+        for (const element of heroVersion.querySelectorAll("strong, b")) {
+          if (/^v?\\d+\\.\\d+\\.\\d+/.test(element.textContent.trim())) element.textContent = "v" + data.latestVersion;
+        }
+      }
       if (description) description.textContent = data.description || "";
       if (grid) {
         grid.replaceChildren();
@@ -58,6 +69,10 @@
       if (note) note.textContent = available ? "Version " + data.latestVersion + " is verified and available in the Chrome Web Store." : "Version " + data.latestVersion + " is awaiting verified Chrome Web Store availability.";
       if (available) unlock(data.download.url);
     }).catch(() => {
+      if (heading) heading.textContent = "Latest release verification unavailable";
+      if (description) description.textContent = "We could not verify the currently published extension version.";
+      if (badge) badge.textContent = "Unverified";
+      if (grid) grid.replaceChildren();
       if (note) note.textContent = "Release verification is temporarily unavailable. Please check again later.";
       lock();
     });
