@@ -7,10 +7,16 @@
   const description = section.querySelector(".section-desc");
   const status = section.querySelector(".ndc-release-coming-soon");
   const badge = section.querySelector(".ndc-version-badge strong");
+  const releaseDownload = section.querySelector("#ndcReleaseDownload");
   const grid = section.querySelector(".ndc-release-grid");
   const note = section.querySelector(".ndc-release-note");
   const downloadLinks = [...document.querySelectorAll('a[href*="chromewebstore.google.com/detail/vahan-ndc-tool/"]')];
   function lock() {
+    if (releaseDownload) {
+      releaseDownload.style.display = "none";
+      releaseDownload.removeAttribute("href");
+      releaseDownload.setAttribute("aria-disabled", "true");
+    }
     if (status) status.textContent = "Currently unavailable for download — coming soon";
     for (const link of downloadLinks) {
       link.dataset.originalHref ||= link.getAttribute("href");
@@ -22,6 +28,12 @@
     }
   }
   function unlock(url) {
+    if (releaseDownload) {
+      releaseDownload.href = url;
+      releaseDownload.style.display = "";
+      releaseDownload.removeAttribute("aria-disabled");
+      releaseDownload.removeAttribute("tabindex");
+    }
     for (const link of downloadLinks) {
       link.href = url;
       link.removeAttribute("aria-disabled");
@@ -42,6 +54,7 @@
       if (!data.success || !/^\d+\.\d+\.\d+(?:\.\d+)?$/.test(data.latestVersion)) throw new Error("Invalid release");
       if (heading) heading.textContent = "What's new in v" + data.latestVersion;
       if (badge) badge.textContent = data.latestVersion;
+      if (releaseDownload) releaseDownload.textContent = "Download v" + data.latestVersion;
       const heroVersion = document.querySelector(".ndc-hero-version");
       if (heroVersion) {
         for (const element of heroVersion.querySelectorAll("strong, b")) {
