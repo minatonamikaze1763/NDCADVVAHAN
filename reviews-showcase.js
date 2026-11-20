@@ -25,7 +25,7 @@
         img.onload=()=>{img.hidden=false;brand.querySelector('strong').hidden=true;};img.onerror=()=>{img.hidden=true;initials.hidden=false;};img.src=api+row.logoUrl;brand.append(img);
       }
       const identity=node('div',null,'ndc-review-identity');const name=node('div',null,'ndc-review-name');name.append(node('strong',row.displayName));
-      if(row.purchasedAccount){const badge=node('span','✓','ndc-review-verified');badge.setAttribute('aria-label','Verified paying customer');badge.title='Verified paying NDC customer';name.append(badge);}
+      if(row.purchasedAccount){const badge=node('span',null,'ndc-review-verified');badge.setAttribute('aria-label','Verified paying customer');badge.title='Verified paying NDC customer';const check=document.createElementNS('http://www.w3.org/2000/svg','svg');check.setAttribute('viewBox','0 0 20 20');check.setAttribute('aria-hidden','true');check.setAttribute('focusable','false');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','m5 10.2 3.2 3.2L15.5 6.7');check.append(path);badge.append(check);name.append(badge);}
       identity.append(name);
       const company=[row.designation,row.company].filter(Boolean).join(' · ');if(company)identity.append(node('span',company));
       if(row.userSince)identity.append(node('small','User since '+new Date(row.userSince+'T00:00:00Z').toLocaleDateString('en-IN',{month:'long',year:'numeric',timeZone:'UTC'})));
