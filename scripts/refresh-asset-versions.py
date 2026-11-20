@@ -9,7 +9,7 @@ import re
 root = Path(__file__).resolve().parents[1]
 index = root / "index.html"
 source = index.read_text(encoding="utf-8")
-pattern = re.compile(r'(?P<prefix>\\b(?:src|href)=")(?P<path>(?!https?://|//|#|data:)[^"?#]+\\.(?:js|css|png|jpg|jpeg|webp|svg))(?P<query>\\?[^"#]*)?(?P<suffix>")', re.I)
+pattern = re.compile(r'(?P<prefix>\b(?:src|href)=")(?P<path>(?!https?://|//|#|data:)[^"?#]+\.(?:js|css|png|jpg|jpeg|webp|svg))(?P<query>\?[^"#]*)?(?P<suffix>")', re.I)
 
 def replace(match):
     path = match.group("path")
