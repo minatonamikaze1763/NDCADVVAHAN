@@ -61,6 +61,39 @@
           if (/^v?\d+\.\d+\.\d+/.test(element.textContent.trim())) element.textContent = "v" + data.latestVersion;
         }
       }
+      // Keep release-specific text synchronized without changing unrelated copy.
+      const announcement = document.querySelector(".ndc-hero-announcement");
+      if (announcement && typeof data.announcement === "string" && data.announcement.trim()) {
+        const statusDot = announcement.querySelector(".ndc-status-dot");
+        const versionTag = announcement.querySelector("span:last-child");
+        if (statusDot && versionTag) {
+          for (const node of [...announcement.childNodes]) {
+            if (node.nodeType === Node.TEXT_NODE) node.remove();
+          }
+          announcement.insertBefore(document.createTextNode(" " + data.announcement + " "), versionTag);
+          versionTag.textContent = "v" + data.latestVersion + " ↗";
+        }
+      }
+      if (heroVersion) {
+        const versionText = [...heroVersion.children].find(el => el.tagName === "SPAN");
+        if (versionText) versionText.textContent = "v" + data.latestVersion;
+      }
+      const tour = document.querySelector("#latest-features")?.previousElementSibling;
+      const tourDescription = document.querySelector("#feature-tour .section-desc, #try-features .section-desc");
+      if (tourDescription) tourDescription.textContent = tourDescription.textContent.replace(/v\d+\.\d+\.\d+/g, "v" + data.latestVersion);
+      if (typeof data.releaseDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data.releaseDate)) {
+        const date = new Date(data.releaseDate + "T12:00:00Z");
+        if (!Number.isNaN(date.getTime())) {
+          const short = new Intl.DateTimeFormat("en-GB", {day:"numeric",month:"short",year:"numeric",timeZone:"UTC"}).format(date);
+          const long = new Intl.DateTimeFormat("en-GB", {day:"numeric",month:"long",year:"numeric",timeZone:"UTC"}).format(date);
+          for (const time of section.querySelectorAll(".ndc-release-meta time")) {
+            time.dateTime = data.releaseDate; time.textContent = long;
+          }
+          for (const time of document.querySelectorAll(".ndc-hero-version time")) {
+            time.dateTime = data.releaseDate; time.textContent = short;
+          }
+        }
+      }
       if (description) description.textContent = data.description || "";
       if (grid) {
         grid.replaceChildren();
