@@ -78,8 +78,7 @@
         const versionText = [...heroVersion.children].find(el => el.tagName === "SPAN");
         if (versionText) versionText.textContent = "v" + data.latestVersion;
       }
-      const tour = document.querySelector("#latest-features")?.previousElementSibling;
-      const tourDescription = document.querySelector("#feature-tour .section-desc, #try-features .section-desc");
+      const tourDescription = document.querySelector("#interactive-demos .section-desc");
       if (tourDescription) tourDescription.textContent = tourDescription.textContent.replace(/v\d+\.\d+\.\d+/g, "v" + data.latestVersion);
       if (typeof data.releaseDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data.releaseDate)) {
         const date = new Date(data.releaseDate + "T12:00:00Z");
