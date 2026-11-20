@@ -45,7 +45,7 @@
       const heroVersion = document.querySelector(".ndc-hero-version");
       if (heroVersion) {
         for (const element of heroVersion.querySelectorAll("strong, b")) {
-          if (/^v?\\d+\\.\\d+\\.\\d+/.test(element.textContent.trim())) element.textContent = "v" + data.latestVersion;
+          if (/^v?\d+\.\d+\.\d+/.test(element.textContent.trim())) element.textContent = "v" + data.latestVersion;
         }
       }
       if (description) description.textContent = data.description || "";
