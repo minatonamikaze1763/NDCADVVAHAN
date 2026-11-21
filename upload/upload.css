@@ -485,3 +485,61 @@ button.quiet:focus-visible, button.danger:focus-visible {
 @media(max-width:680px) {
   .doc-actions button, .customer-controls button { min-height: 46px; }
 }
+
+
+/* Mobile upload workspace brand and pinned customer context. */
+:root { --upload-topbar-height: 68px; }
+.topbar {
+  position: fixed;
+  inset: 0 0 auto;
+  width: 100%;
+  height: var(--upload-topbar-height);
+  z-index: 100;
+}
+.brand-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.brand-copy strong {
+  color: #f7f5ef;
+  font: 700 .78rem/1.1 "Space Grotesk", sans-serif;
+  letter-spacing: .1em;
+  white-space: nowrap;
+}
+.brand-copy small {
+  color: #d9c88f;
+  font: 600 .55rem/1.1 "DM Sans", sans-serif;
+  letter-spacing: .22em;
+}
+.login-lockup .brand-copy strong { font-size: .76rem; }
+.login-lockup .brand-copy small { font-size: .55rem; }
+main { margin-top: calc(var(--upload-topbar-height) + 30px); }
+.customer-card { overflow: visible; }
+.customer-heading {
+  position: sticky;
+  top: var(--upload-topbar-height);
+  z-index: 30;
+  margin: 0 10px;
+  border: 1px solid #67572f;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px #0009;
+}
+.customer-heading .customer-controls { flex: 0 1 auto; }
+@media(max-width:680px) {
+  :root { --upload-topbar-height: 62px; }
+  .brand-copy { gap: 3px; }
+  .brand-copy strong { font-size: .68rem; letter-spacing: .07em; }
+  .brand-copy small { font-size: .49rem; letter-spacing: .2em; }
+  main { margin-top: calc(var(--upload-topbar-height) + 22px); }
+  .customer-heading {
+    margin: 0 8px;
+    padding: 13px 12px;
+    gap: 10px;
+  }
+}
+@media(max-width:420px) {
+  .brand-copy strong { font-size: .61rem; letter-spacing: .045em; }
+  .brand-copy small { font-size: .46rem; letter-spacing: .16em; }
+  .customer-heading { margin: 0 6px; }
+}
