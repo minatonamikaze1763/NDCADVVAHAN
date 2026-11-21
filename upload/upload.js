@@ -80,6 +80,101 @@
     }
     return binary ? response.blob() : type.includes("application/json") ? response.json() : null;
   }
+  const MAX_UPLOAD_BYTES = 400000;
+  const MAX_FORM20_UPLOAD_BYTES = 390 * 1024;
+  function uploadLimit(category) { return category === "form20" ? MAX_FORM20_UPLOAD_BYTES : MAX_UPLOAD_BYTES; }
+  async function prepareUploadFile(file, category) {
+    const targetBytes = uploadLimit(category);
+    const name = String(file.name || "").toLowerCase();
+    const isPdf = file.type === "application/pdf" || name.endsWith(".pdf");
+    const isImage = file.type.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(name);
+    if (isPdf) return file.size > targetBytes ? compressUploadPdf(file, targetBytes) : file;
+    if (isImage) return file.size > targetBytes ? compressUploadImage(file, targetBytes) : file;
+    throw new Error("Only PDF, JPEG, PNG, or WebP documents are supported.");
+  }
+  async function compressUploadImage(file, targetBytes) {
+    let bitmap;
+    try { bitmap = await createImageBitmap(file); }
+    catch { throw new Error("Image could not be decoded for compression."); }
+    try {
+      let width = bitmap.width, height = bitmap.height;
+      const maxDimension = 2200;
+      if (Math.max(width, height) > maxDimension) {
+        const scale = maxDimension / Math.max(width, height);
+        width = Math.max(1, Math.round(width * scale));
+        height = Math.max(1, Math.round(height * scale));
+      }
+      let bestBlob = null;
+      for (let resizeAttempt = 0; resizeAttempt < 8; resizeAttempt++) {
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        const context = canvas.getContext("2d", {alpha:false});
+        if (!context) throw new Error("Could not create the image compression canvas.");
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, width, height);
+        context.drawImage(bitmap, 0, 0, width, height);
+        for (let quality = 0.88; quality >= 0.28; quality -= 0.1) {
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", Math.max(0.2, quality)));
+          if (!blob) continue;
+          if (!bestBlob || blob.size < bestBlob.size) bestBlob = blob;
+          if (blob.size <= targetBytes) return new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), {type:"image/jpeg",lastModified:file.lastModified});
+        }
+        width = Math.max(1, Math.round(width * 0.78));
+        height = Math.max(1, Math.round(height * 0.78));
+      }
+      if (bestBlob && bestBlob.size < file.size && bestBlob.size <= targetBytes) {
+        return new File([bestBlob], file.name.replace(/\.[^.]+$/, ".jpg"), {type:"image/jpeg",lastModified:file.lastModified});
+      }
+      throw new Error("Could not compress this image below the VAHAN file-size limit.");
+    } finally { bitmap.close?.(); }
+  }
+  async function compressUploadPdf(file, targetBytes) {
+    const pdfjs = window.pdfjsLib;
+    const jsPDF = window.jspdf?.jsPDF;
+    if (!pdfjs?.getDocument || !jsPDF) throw new Error("PDF preparation libraries could not be loaded. Refresh the page and try again.");
+    const sourcePdf = await pdfjs.getDocument({data:new Uint8Array(await file.arrayBuffer()),useWorkerFetch:false,isEvalSupported:false,disableWorker:true}).promise;
+    const attempts = [
+      {scale:1.5,quality:0.7},{scale:1.3,quality:0.6},{scale:1.1,quality:0.5},
+      {scale:0.9,quality:0.42},{scale:0.75,quality:0.35}
+    ];
+    try {
+      for (const attempt of attempts) {
+        const output = new jsPDF({orientation:"portrait",unit:"pt",format:"a4",compress:true,putOnlyUsedFonts:true});
+        for (let pageNumber=1;pageNumber<=sourcePdf.numPages;pageNumber++) {
+          const page = await sourcePdf.getPage(pageNumber);
+          const originalViewport = page.getViewport({scale:1});
+          const dimensionScale = Math.min(1,2200/Math.max(originalViewport.width,originalViewport.height));
+          const viewport = page.getViewport({scale:attempt.scale*dimensionScale});
+          const canvas = document.createElement("canvas");
+          canvas.width=Math.max(1,Math.ceil(viewport.width)); canvas.height=Math.max(1,Math.ceil(viewport.height));
+          const context=canvas.getContext("2d",{alpha:false});
+          if (!context) throw new Error("Could not create a PDF rendering canvas.");
+          context.fillStyle="#ffffff"; context.fillRect(0,0,canvas.width,canvas.height);
+          try {
+            await page.render({canvasContext:context,viewport,background:"#ffffff"}).promise;
+            const jpegBlob=await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("Could not encode a PDF page.")),"image/jpeg",attempt.quality));
+            const imageData=await blobToDataUrl(jpegBlob);
+            if (pageNumber>1) output.addPage("a4","portrait");
+            const pageWidth=output.internal.pageSize.getWidth(), pageHeight=output.internal.pageSize.getHeight();
+            const ratio=Math.min(pageWidth/canvas.width,pageHeight/canvas.height);
+            const width=canvas.width*ratio, height=canvas.height*ratio;
+            output.addImage(imageData,"JPEG",(pageWidth-width)/2,(pageHeight-height)/2,width,height,undefined,"FAST");
+          } finally { canvas.width=0; canvas.height=0; page.cleanup(); }
+        }
+        const blob=output.output("blob");
+        if (blob.size<=targetBytes) return new File([blob],file.name,{type:"application/pdf",lastModified:Date.now()});
+      }
+    } finally { await sourcePdf.destroy(); }
+    throw new Error("This PDF could not be prepared below " + Math.ceil(targetBytes / 1024) + " KB. Try a clearer scan with fewer pages.");
+  }
+  function blobToDataUrl(blob) {
+    return new Promise((resolve,reject) => {
+      const reader=new FileReader();
+      reader.onload=()=>resolve(reader.result);
+      reader.onerror=()=>reject(new Error("Could not read a compressed PDF page."));
+      reader.readAsDataURL(blob);
+    });
+  }
   function showLogin() { $("loginView").hidden = false; $("appView").hidden = true; $("logout").hidden = true; $("settingsToggle").hidden = true; }
   function showApp() { $("loginView").hidden = true; $("appView").hidden = false; $("logout").hidden = false; $("settingsToggle").hidden = false; }
   async function loadSettings() {
@@ -472,7 +567,7 @@
       await request("/api/upload-portal/customers/" + customer._id + "/form20/pages/" + (index + 1), {
         method:"PUT",
         headers:{"Content-Type":"application/octet-stream","X-NDC-Original-Type":photo.type,"X-NDC-Original-Filename":photo.name,"X-NDC-Original-Size":String(photo.size),"X-NDC-Original-Last-Modified":String(photo.lastModified || Date.now())},
-        body:photo
+        body:await prepareUploadFile(photo, "form20")
       });
     }
     status(progress, "Combining the Form 20 photos into one PDF…");
@@ -488,7 +583,7 @@
     const result = await request("/api/upload-portal/customers/" + customer._id + "/documents/address-proof", {
       method:"PUT",
       headers:{"Content-Type":"application/octet-stream","X-NDC-Original-Type":"application/pdf","X-NDC-Original-Filename":file.name,"X-NDC-Original-Size":String(file.size),"X-NDC-Original-Last-Modified":String(file.lastModified || Date.now()),"X-NDC-Subcategory":"Aadhaar"},
-      body:file
+      body:await prepareUploadFile(file, "address-proof")
     });
     result.subcategory = "Aadhaar";
     result.uploadedAt = new Date().toISOString();
@@ -922,7 +1017,7 @@
     for (const [category] of categories.filter(([id]) => id !== "form20")) {
       const row = host.querySelector(`[data-doc="${category}"]`); const file = row?._file; if (!file) continue;
       const subcategory = row.querySelector("[data-subcategory]")?.value || ""; if (category === "address-proof" && !subcategory) { failures.push("Address Proof: select a type."); continue; }
-      try { status(result, `Preparing ${row.querySelector("h3").textContent}…`); await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": file.type || "application/octet-stream", "X-NDC-Original-Filename": file.name, "X-NDC-Original-Size": String(file.size), "X-NDC-Original-Last-Modified": String(file.lastModified || Date.now()), ...(subcategory ? { "X-NDC-Subcategory": subcategory } : {}) }, body: file }); saved++; }
+      try { status(result, `Preparing ${row.querySelector("h3").textContent}…`); const prepared = await prepareUploadFile(file, category); await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": file.type || "application/octet-stream", "X-NDC-Original-Filename": file.name, "X-NDC-Original-Size": String(file.size), "X-NDC-Original-Last-Modified": String(file.lastModified || Date.now()), ...(subcategory ? { "X-NDC-Subcategory": subcategory } : {}) }, body: prepared }); saved++; }
       catch (error) { failures.push(`${row.querySelector("h3").textContent}: ${error.message}`); }
     }
     const form20Row = host.querySelector('[data-doc="form20"]');
@@ -931,7 +1026,8 @@
     if (form20File) {
       try {
         status(result, "Preparing Form 20 PDF…");
-        await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": form20File.type || "application/pdf", "X-NDC-Original-Filename": form20File.name, "X-NDC-Original-Size": String(form20File.size), "X-NDC-Original-Last-Modified": String(form20File.lastModified || Date.now()) }, body: form20File }); saved++;
+        const preparedForm20 = await prepareUploadFile(form20File, "form20");
+        await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": form20File.type || "application/pdf", "X-NDC-Original-Filename": form20File.name, "X-NDC-Original-Size": String(form20File.size), "X-NDC-Original-Last-Modified": String(form20File.lastModified || Date.now()) }, body: preparedForm20 }); saved++;
       } catch (error) { failures.push(`Form 20: ${error.message}`); }
     }
     if (pages.length) {
@@ -939,7 +1035,7 @@
       else {
         try {
           await request(`/api/upload-portal/customers/${customer._id}/form20/stage`, { method: "DELETE" });
-          for (let i = 0; i < pages.length; i++) { status(result, `Compressing Form 20 photo ${i + 1} of ${pages.length}…`); await request(`/api/upload-portal/customers/${customer._id}/form20/pages/${i + 1}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": pages[i].type, "X-NDC-Original-Filename": pages[i].name, "X-NDC-Original-Size": String(pages[i].size), "X-NDC-Original-Last-Modified": String(pages[i].lastModified || Date.now()) }, body: pages[i] }); }
+          for (let i = 0; i < pages.length; i++) { status(result, `Compressing Form 20 photo ${i + 1} of ${pages.length}…`); await request(`/api/upload-portal/customers/${customer._id}/form20/pages/${i + 1}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": pages[i].type, "X-NDC-Original-Filename": pages[i].name, "X-NDC-Original-Size": String(pages[i].size), "X-NDC-Original-Last-Modified": String(pages[i].lastModified || Date.now()) }, body: await prepareUploadFile(pages[i], "form20") }); }
           status(result, "Combining Form 20 photos…"); await request(`/api/upload-portal/customers/${customer._id}/form20/complete`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }); saved++;
         } catch (error) { failures.push(`Form 20: ${error.message}`); }
       }
