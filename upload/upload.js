@@ -25,7 +25,7 @@
     const response = await fetch(API + path, { ...options, headers });
     const type = response.headers.get("content-type") || "";
     const data = type.includes("application/json") ? await response.json() : null;
-    if (response.status === 401) { token = ""; sessionStorage.removeItem(tokenKey); showLogin(); }
+    if (response.status === 401 || response.status === 403) { token = ""; sessionStorage.removeItem(tokenKey); showLogin(); }
     if (!response.ok) throw new Error(data?.error || `Request failed (${response.status}).`);
     return data;
   }
