@@ -7,8 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#080808" />
   <!-- Primary Meta Tags -->
-  <meta name="description" content="Match customer folders, scan VAHAN, import only unuploaded documents, merge Aadhaar front and back, and prepare uploads with NDC VAHAN TOOL for Chrome." />
-  <meta name="title" content="NDC VAHAN TOOL | Customer Documents, Ready to Upload" />
+  <meta name="description" content="Upload customer documents to VAHAN Cloud, share compact ZIPs with your registered dealership team, and fetch required files for VAHAN workflows." />
+  <meta name="title" content="VAHAN NDC TOOL | VAHAN Cloud, Ready to Share" />
   
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="logo.png?v=e43be25972f4" />
@@ -48,12 +48,10 @@
   <link rel="stylesheet" href="reviews-showcase.css?v=cefcfcfe96ea" />
   <link rel="stylesheet" href="screenshots-showcase.css?v=b90e211c8c83" />
   <script src="screenshots-showcase.js?v=21583385c493" defer></script>
-  <link rel="stylesheet" href="landing-redesign.css?v=b46dc5018e95" />
+  <link rel="stylesheet" href="landing-redesign.css?v=cloud-workspace-20261121" />
   <script src="landing-redesign.js?v=ab4c33330a84" defer></script>
   <link rel="stylesheet" href="preview-showcase.css?v=07a7674d019a" />
   <script src="preview-showcase.js?v=658ab43eee76" defer></script>
-  <link rel="stylesheet" href="feature-tour.css?v=f314d60346a3" />
-  <script src="feature-tour.js?v=d7dd0a8086b5" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
@@ -191,6 +189,7 @@
             <a href="#automation">Automation</a>
             <a href="#filename-guide">Document filenames</a>
             <a href="#security">Privacy &amp; security</a>
+            <a href="#cloud-workspace">VAHAN Cloud workspace</a>
             <a href="#access">Get the extension</a>
             <a href="#about">About NDC</a>
             <a href="#updates">Version &amp; updates</a>
@@ -220,21 +219,20 @@
       <div class="ndc-hero-grain" aria-hidden="true"></div>
       <div class="container hero-grid">
         <div class="ndc-hero-content">
-          <a class="ndc-hero-announcement" href="#updates"><span class="ndc-status-dot"></span> NEW: DMS ALERT RETRIES & MANDATORY-DOCUMENT SAFETY <span>v5.6.0 ↗</span></a>
+          <a class="ndc-hero-announcement" href="#cloud-workspace"><span class="ndc-status-dot"></span> NEW: VAHAN CLOUD DOCUMENT WORKSPACE <span>v5.7.0 ↗</span></a>
           <div class="eyebrow">NDC VAHAN TOOL / BUILT FOR DEALERSHIPS</div>
           <h1 id="ndcHeroHeading">
-            Less uploading.<br />More
-            <span>moving<br class="ndc-desktop-break" />
-              forward.</span>
+            Customer documents.<br />
+            <span>Ready to move.</span>
           </h1>
           <p class="hero-copy">
-            Set your customer root folder once. Find the matching customer
-            documents from the name on VAHAN, scan which categories are still
-            unuploaded, and prepare only the matches VAHAN needs with a clear
-            view of every step.
+            Upload customer documents from a phone or desktop, keep them grouped
+            by customer, and share a compact ZIP with your registered dealership
+            team. Fetch the files a VAHAN case needs without passing loose files
+            around one by one.
           </p>
           <div class="hero-actions">
-            <a class="btn ndc-hero-secondary" href="#document-choices">How the four document buttons work ↓</a>
+            <a class="btn ndc-hero-secondary" href="#cloud-workspace">Explore VAHAN Cloud ↓</a>
             <a class="btn btn-primary" href="#access">Get the Chrome extension
               <svg class="ndc-icon" aria-hidden="true">
                 <use href="#ndc-i-arrow" />
@@ -244,30 +242,38 @@
             <span><svg class="ndc-icon" aria-hidden="true">
                 <use href="#ndc-i-shield" />
               </svg>
-              Documents prepared locally</span><span><svg class="ndc-icon" aria-hidden="true">
+              Cloud files encrypted at rest</span><span><svg class="ndc-icon" aria-hidden="true">
                 <use href="#ndc-i-bolt" />
               </svg>
-              Built for everyday workflows</span>
+              Share one ZIP with your team</span>
           </div>
           <div class="ndc-hero-version">
-            <span>v5.6.0</span> Updated
-            <time datetime="2026-11-20">20 Nov 2026</time><a href="#updates">What's new ↗</a>
+            <span>v5.7.0</span> Updated
+            <time datetime="2026-11-21">21 Nov 2026</time><a href="#cloud-workspace">Explore Cloud ↗</a>
           </div>
         </div>
         <div class="ndc-workspace-scene">
-          <div class="ndc-scene-caption">
-            <span><i></i> A CLOSER LOOK AT YOUR WORKSPACE</span><span>01 / 03</span>
+          <div class="ndc-cloud-hero-card" aria-label="VAHAN Cloud document workflow preview">
+            <div class="ndc-cloud-card-top">
+              <span class="ndc-cloud-lock" aria-hidden="true">↗</span>
+              <span><strong>VAHAN CLOUD</strong><small>Customer document workspace</small></span>
+              <span class="ndc-cloud-secure"><i></i> ACCOUNT SECURED</span>
+            </div>
+            <div class="ndc-cloud-customer">
+              <span class="ndc-cloud-avatar">ND</span>
+              <span><strong>Customer documents</strong><small>Chassis ending · · · 02338</small></span>
+              <span class="ndc-cloud-count">8 files</span>
+            </div>
+            <div class="ndc-cloud-file-row"><span class="ndc-cloud-file-icon">PDF</span><span><strong>addressproof.pdf</strong><small>Ready to share</small></span><b>✓</b></div>
+            <div class="ndc-cloud-file-row"><span class="ndc-cloud-file-icon">PDF</span><span><strong>insurance.pdf</strong><small>Ready to share</small></span><b>✓</b></div>
+            <div class="ndc-cloud-file-row"><span class="ndc-cloud-file-icon">ZIP</span><span><strong>Customer documents.zip</strong><small>Compressed for transfer</small></span><b>↓</b></div>
+            <div class="ndc-cloud-flow"><span>Upload</span><i></i><span>Store</span><i></i><span>Share</span><i></i><span>Fetch</span></div>
           </div>
-          <div class="ndc-source-hero" id="ndcHeroMockup"></div>
           <div class="ndc-scene-foot">
-            <span><svg class="ndc-icon" aria-hidden="true">
-                <use href="#ndc-i-check" />
-              </svg>
-              Less manual work. More visibility.</span><a href="#screenshots">See real screenshots ↗</a>
+            <span><svg class="ndc-icon" aria-hidden="true"><use href="#ndc-i-check" /></svg>Encrypted storage · Sign-in protected</span>
+            <a href="upload/">Open upload workspace ↗</a>
           </div>
-          <p class="ndc-scene-disclaimer">
-            Workspace preview · Sample documents · Try Settings
-          </p>
+          <p class="ndc-scene-disclaimer">Illustrative preview · Fictional customer data</p>
         </div>
       </div>
       <div class="container ndc-hero-rail">
@@ -398,8 +404,8 @@
                   <rect x="3" y="14" width="18" height="7" rx="2" />
                   <path d="M7 6.5h.01M7 17.5h.01M11 6.5h6M11 17.5h6" />
                 </svg></span>
-              <div><strong>NDC servers do not receive or store these customer document files.</strong>
-                <p>NDC handles account authentication and access checks. Document preparation and local saving happen on your device; document upload and final acceptance happen on VAHAN.</p>
+              <div><strong>This section describes the extension's local-folder workflow.</strong>
+                <p>For this workflow, document matching, preparation, and local saving happen on your device. VAHAN Cloud is a separate, optional workspace that stores files uploaded there for your registered dealership account.</p>
               </div>
             </div>
           </div>
@@ -1060,56 +1066,32 @@
       </div>
     </section>
     
-    <section id="interactive-demos" class="ndc-feature-tour" aria-labelledby="ndcInteractiveDemosHeading">
+    <section id="cloud-workspace" class="ndc-cloud-section" aria-labelledby="ndcCloudHeading">
       <div class="container">
-        <div class="section-head">
-          <div class="kicker">Try the Features</div>
-          <h2 class="section-title" id="ndcInteractiveDemosHeading">Less repeat work.<br><span class="gold">A smoother return visit.</span></h2>
-          <p class="section-desc">Explore the latest features in v5.6.0 with sample data. These examples explain the workflow; actual document preparation and uploads happen inside the extension on VAHAN.</p>
+        <div class="ndc-cloud-intro">
+          <div class="kicker">VAHAN Cloud · The new document handoff</div>
+          <h2 class="section-title" id="ndcCloudHeading">One customer folder.<br><span class="gold">A faster handoff.</span></h2>
+          <p class="section-desc">Keep a customer's available documents together in the cloud workspace. Share them as one compressed ZIP, or let your VAHAN workflow fetch the required files in one transfer.</p>
         </div>
-        <div class="ndc-tour-grid">
-          <article class="ndc-tour-card">
-            <div class="ndc-tour-top"><span class="kicker">01 / Smart import</span><span class="ndc-tour-chip">Up to 50 customers</span></div>
-            <h3>The right import for the next visit.</h3>
-            <p>The automatic setting checks for a valid cache matching the customer's chassis and name.</p>
-            <div class="ndc-tour-switch" role="group" aria-label="Sample customer cache scenario">
-              <button type="button" data-cache-example="new" aria-pressed="true">No saved cache</button>
-              <button type="button" data-cache-example="returning" aria-pressed="false">Matching cache</button>
-            </div>
-            <div class="ndc-tour-sample" aria-live="polite" aria-atomic="true">
-              <span class="ndc-tour-label">Automatic action</span><strong id="ndcCacheAction">Auto-import available docs</strong>
-              <p id="ndcCacheExplanation">Import unique document matches from the customer's folder, then prepare the selected files.</p>
-              <div id="ndcCacheCategories" class="ndc-tour-tags"><span>Available folder documents</span></div>
-            </div>
-            <p class="ndc-tour-footnote">Missing or expired cache? The setting uses available documents. Uploading starts only when Automatic Upload is enabled.</p>
-          </article>
-          <article class="ndc-tour-card">
-            <div class="ndc-tour-top"><span class="kicker">02 / Prepared copies</span><span class="ndc-tour-chip">Always automatic</span></div>
-            <h3>A familiar name on every file.</h3>
-            <p>Prepared copies automatically include the live customer name, assigned category, and chassis number. There is no rename setting to switch on.</p>
-            <label class="ndc-tour-label" for="ndcRenameExample">Sample customer name</label>
-            <input id="ndcRenameExample" class="ndc-tour-input" type="text" value="Suresh" maxlength="60" autocomplete="off" spellcheck="false" />
-            <div class="ndc-tour-sample" aria-live="polite" aria-atomic="true">
-              <span class="ndc-tour-label">Example prepared filenames</span>
-              <ul id="ndcRenameResults" class="ndc-tour-filenames">
-                <li>suresh_aadhar_MBLHAW427THH02338.pdf</li>
-                <li>suresh_form20_MBLHAW427THH02338.pdf</li>
-                <li>suresh_chassis_MBLHAW427THH02338.jpg</li>
-                <li>suresh_insurance_MBLHAW427THH02338.pdf</li>
-              </ul>
-            </div>
-            <p class="ndc-tour-footnote">Import, recognize, rename, prepare, upload. Original files stay unchanged. Format conversion can change the prepared file's extension.</p>
-          </article>
-          <article class="ndc-tour-card">
-            <div class="ndc-tour-top"><span class="kicker">03 / Prepared documents</span><span class="ndc-tour-chip">Sample workflow</span></div>
-            <h3>Reuse the work. Refresh when needed.</h3>
-            <p>Matching prepared copies can skip repeat compression. Original filenames stay visible in Choose documents.</p>
-            <label class="ndc-tour-session" for="ndcOriginalsExample"><input type="checkbox" id="ndcOriginalsExample" /><span><strong>Use original files and prepare again</strong><small>Sample session control. Resets on page reload.</small></span></label>
-            <div class="ndc-tour-sample" aria-live="polite" aria-atomic="true"><span class="ndc-tour-label">Document source</span><strong id="ndcPreparedSource">Prefer matching Compressed copies</strong>
-              <p id="ndcPreparedBehavior">Reuse prepared files where available. Prepare originals for missing categories.</p>
-            </div>
-            <p class="ndc-tour-footnote">Saving requires folder write access in the extension. This website example does not read or write your files.</p>
-          </article>
+        <div class="ndc-cloud-layout">
+          <div class="ndc-cloud-showcase" aria-label="Illustration of customer files packaged as a ZIP for sharing">
+            <div class="ndc-cloud-showcase-top"><span>DOCUMENT HANDOFF</span><span>ZIP · READY</span></div>
+            <div class="ndc-cloud-showcase-customer"><span class="ndc-cloud-avatar">CX</span><div><strong>Customer folder</strong><small>Documents grouped by customer</small></div><span class="ndc-cloud-file-total">08 files</span></div>
+            <div class="ndc-cloud-showcase-files"><span>Address proof</span><b>PDF</b><span>Insurance</span><b>PDF</b><span>Dealer invoice</span><b>PDF</b></div>
+            <div class="ndc-cloud-zip"><span class="ndc-cloud-zip-mark">ZIP</span><div><strong>Customer documents.zip</strong><small>Compressed for an easy handoff</small></div><span aria-hidden="true">↓</span></div>
+            <div class="ndc-cloud-encryption"><span aria-hidden="true">◆</span> Encrypted at rest · Signed-in access</div>
+          </div>
+          <div class="ndc-cloud-details">
+            <article class="ndc-cloud-detail"><span class="ndc-cloud-step">01</span><div><h3>Useful from phone to desk</h3><p>Capture or select documents in the upload workspace, then keep them under the right customer record for your dealership team.</p></div></article>
+            <article class="ndc-cloud-detail"><span class="ndc-cloud-step">02</span><div><h3>Fewer file handoffs</h3><p>Download or share one compressed ZIP instead of sending each document separately. In the extension workflow, request only the documents needed for that case.</p></div></article>
+            <article class="ndc-cloud-detail"><span class="ndc-cloud-step">03</span><div><h3>Simple to use</h3><p>Sign in, create or choose a customer, upload available files, then download the ZIP or fetch the required documents when working in VAHAN.</p></div></article>
+          </div>
+        </div>
+        <div class="ndc-cloud-security">
+          <span class="ndc-cloud-security-icon" aria-hidden="true">◆</span>
+          <div><strong>Encrypted transport and storage. Access controlled by your dealership account.</strong>
+            <p>Files travel over HTTPS and are encrypted at rest in the configured MongoDB Atlas storage. Signed-in members of the registered dealership account can retrieve its customer records. VAHAN Cloud processes file contents to prepare ZIP downloads, so this is protected cloud storage, not end-to-end encryption.</p></div>
+          <a class="btn btn-primary" href="upload/">Open VAHAN Cloud <span aria-hidden="true">↗</span></a>
         </div>
       </div>
     </section>
