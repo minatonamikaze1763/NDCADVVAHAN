@@ -319,21 +319,29 @@
       capture.disabled = true;
     }
   }
-  async function photoAsJpeg(file, maxEdge, quality) {
+  async function photoAsJpeg(file, targetBytes) {
     const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-    const context = canvas.getContext("2d", {alpha:false});
-    if (!context) { bitmap.close?.(); throw new Error("Could not prepare Aadhaar photos as a PDF."); }
-    context.fillStyle = "#fff";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    bitmap.close?.();
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", quality));
-    if (!blob) throw new Error("Could not compress an Aadhaar photo.");
-    return {bytes:new Uint8Array(await blob.arrayBuffer()), width:canvas.width, height:canvas.height};
+    try {
+      let width = bitmap.width, height = bitmap.height;
+      const maxDimension = 2200, longest = Math.max(width, height);
+      if (longest > maxDimension) { const scale = maxDimension / longest; width = Math.max(1, Math.round(width * scale)); height = Math.max(1, Math.round(height * scale)); }
+      let best = null;
+      for (let resizeAttempt = 0; resizeAttempt < 8; resizeAttempt++) {
+        const canvas = document.createElement("canvas"); canvas.width = width; canvas.height = height;
+        const context = canvas.getContext("2d", {alpha:false});
+        if (!context) throw new Error("Could not prepare the camera photo.");
+        context.fillStyle = "#fff"; context.fillRect(0, 0, width, height); context.drawImage(bitmap, 0, 0, width, height);
+        for (let quality = .88; quality >= .28; quality -= .1) {
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", Math.max(.2, quality)));
+          if (!blob) continue;
+          if (!best || blob.size < best.size) best = blob;
+          if (blob.size <= targetBytes) return {bytes:new Uint8Array(await blob.arrayBuffer()), width, height};
+        }
+        width = Math.max(1, Math.round(width * .78)); height = Math.max(1, Math.round(height * .78));
+      }
+      if (best && best.size <= targetBytes) { const last = await createImageBitmap(best); try { return {bytes:new Uint8Array(await best.arrayBuffer()),width:last.width,height:last.height}; } finally { last.close?.(); } }
+      throw new Error("Could not compress the captured photo within the VAHAN file-size limit.");
+    } finally { bitmap.close?.(); }
   }
   function imagePagesPdf(pages) {
     const encoder = new TextEncoder();
@@ -375,14 +383,16 @@
     return new Blob(chunks, {type:"application/pdf"});
   }
   async function createAadhaarPdf(photos, filename) {
-    const profiles = [{edge:1800,quality:.72},{edge:1500,quality:.62},{edge:1250,quality:.52},{edge:1000,quality:.42}];
-    for (const profile of profiles) {
+    const targetBytes = 380000;
+    let imageBudget = Math.floor((targetBytes - 16 * 1024) / photos.length);
+    for (let attempt = 0; attempt < 6 && imageBudget > 0; attempt++) {
       const pages = [];
-      for (const photo of photos) pages.push(await photoAsJpeg(photo, profile.edge, profile.quality));
+      for (const photo of photos) pages.push(await photoAsJpeg(photo, imageBudget));
       const pdf = imagePagesPdf(pages);
-      if (pdf.size <= 380000) return new File([pdf], filename, {type:"application/pdf", lastModified:Date.now()});
+      if (pdf.size <= targetBytes) return new File([pdf], filename, {type:"application/pdf", lastModified:Date.now()});
+      imageBudget = Math.floor(imageBudget * .8);
     }
-    throw new Error("The two-page Aadhaar PDF is still too large. Retake the photos in good light and try again.");
+    throw new Error("The Aadhaar front/back PDF could not be compressed below the VAHAN size limit. Retake the photos in good light and try again.");
   }
   function updateSavedDocumentRow(customer, host, row, category, saved) {
     customer.documents = {...(customer.documents || {}), [category]:saved};
@@ -660,6 +670,25 @@
     if (!closed) close.focus();
   }
 
+  async function renderPdfThumbnail(file, button, mark, hint) {
+    const pdfjs = window.pdfjsLib;
+    if (!pdfjs || typeof pdfjs.getDocument !== "function") return;
+    let loadingTask, pdf;
+    try {
+      loadingTask = pdfjs.getDocument({data:new Uint8Array(await file.arrayBuffer()),useWorkerFetch:false,isEvalSupported:false,disableWorker:true});
+      pdf = await loadingTask.promise;
+      const page = await pdf.getPage(1), base = page.getViewport({scale:1});
+      const viewport = page.getViewport({scale:Math.min(220 / base.width,112 / base.height)});
+      const canvas = document.createElement("canvas"); canvas.className = "pdf-preview-canvas";
+      canvas.width = Math.max(1,Math.ceil(viewport.width)); canvas.height = Math.max(1,Math.ceil(viewport.height)); canvas.setAttribute("aria-hidden","true");
+      const context = canvas.getContext("2d",{alpha:false}); if (!context) return;
+      context.fillStyle = "#fff"; context.fillRect(0,0,canvas.width,canvas.height);
+      await page.render({canvasContext:context,viewport,background:"#fff"}).promise;
+      if (button.isConnected) { mark.hidden = true; hint.textContent = "Page 1 · Open full preview"; button.insertBefore(canvas,hint); }
+      page.cleanup();
+    } catch (_) { hint.textContent = "Open PDF preview"; }
+    finally { if (pdf) await pdf.destroy().catch(()=>{}); else if (loadingTask) await loadingTask.destroy().catch(()=>{}); }
+  }
   function setPreview(box, file, label) {
     if (box._url) URL.revokeObjectURL(box._url);
     box.replaceChildren();
@@ -673,14 +702,21 @@
     } else if (isPdf) {
       const pdfButton = document.createElement("button"); pdfButton.type = "button"; pdfButton.className = "pdf-preview-thumb"; pdfButton.setAttribute("aria-label", `Preview PDF ${file.name || ""} · ${readableSize(file.size)}`);
       const mark = document.createElement("span"); mark.className = "pdf-preview-mark"; mark.textContent = "PDF";
-      const hint = document.createElement("span"); hint.className = "pdf-preview-hint"; hint.textContent = "Custom preview";
+      const hint = document.createElement("span"); hint.className = "pdf-preview-hint"; hint.textContent = "Loading first page…";
       pdfButton.append(mark, hint); pdfButton.addEventListener("click", () => showFullscreenPreview(file)); box.append(pdfButton);
+      void renderPdfThumbnail(file, pdfButton, mark, hint);
     } else {
       const unsupported = document.createElement("span"); unsupported.className = "file-preview-label"; unsupported.textContent = "Preview unavailable"; box.append(unsupported);
     }
     const name = document.createElement("span"); name.className = "file-preview-label"; name.textContent = file.name || "Document"; box.append(name);
     const size = document.createElement("span"); size.className = "file-preview-size"; size.textContent = readableSize(file.size); box.append(size);
     const full = document.createElement("button"); full.type = "button"; full.className = "preview-fullscreen"; full.textContent = "Open preview"; full.addEventListener("click", () => showFullscreenPreview(file)); box.append(full);
+  }
+  function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename; anchor.rel = "noopener";
+    anchor.style.position = "fixed"; anchor.style.left = "-9999px"; document.body.append(anchor); anchor.click(); anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
   function readableSize(value) { const n = Number(value); if (!Number.isFinite(n) || n < 0) return "—"; if (n < 1024) return `${n} B`; if (n < 1024*1024) return `${(n/1024).toFixed(1)} KB`; return `${(n/1024/1024).toFixed(2)} MB`; }
   function addFileDetails(row, saved) {
@@ -695,11 +731,14 @@
     const stored = document.createElement("div"); stored.className = "file-preview";
     if (saved) {
       const tag = document.createElement("span"); tag.className = "file-preview-title"; tag.textContent = "Saved";
-      const open = document.createElement("button"); open.type = "button"; open.className = "preview-open"; open.textContent = "Tap to preview saved file";
+      const open = document.createElement("button"); open.type = "button"; open.className = "preview-open";
+      const openIcon = document.createElement("span"); openIcon.className = "preview-open-icon"; openIcon.textContent = "↗"; openIcon.setAttribute("aria-hidden", "true");
+      const openLabel = document.createElement("span"); openLabel.className = "preview-open-label"; openLabel.textContent = "Preview saved file";
+      open.append(openIcon, openLabel);
       open.addEventListener("click", async () => {
         open.disabled = true;
         try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, {}, true); const savedFile = new File([blob], saved.filename, {type:saved.contentType || blob.type}); setPreview(stored, savedFile, "Saved"); showFullscreenPreview(savedFile); }
-        catch(error) { open.textContent = error.message; }
+        catch(error) { openLabel.textContent = "Preview unavailable"; open.title = error.message; }
         finally { open.disabled = false; }
       });
       stored.append(tag, open);
@@ -757,28 +796,35 @@
     const shareZip = document.createElement("button"); shareZip.type = "button"; shareZip.className = "secondary zip-share"; shareZip.textContent = "Share ZIP"; shareZip.disabled = !zipEnabled;
     const setZipBusy = busy => { zip.disabled = busy || !zipEnabled; shareZip.disabled = busy || !zipEnabled; };
     zip.addEventListener("click", async () => {
-      setZipBusy(true); zip.textContent = "Preparing ZIP…";
+      setZipBusy(true); zip.textContent = "Preparing ZIP…"; zipStatus.hidden = false; status(zipStatus, "Preparing customer ZIP…");
       try {
         const blob = await request("/api/upload-portal/customers/" + customer._id + "/documents.zip", {}, true);
-        const url = URL.createObjectURL(blob);
-        const anchor = document.createElement("a"); anchor.href = url; anchor.download = safeFilenamePart(customer.customerName) + "_" + safeFilenamePart(customer.chassisNumber) + ".zip"; anchor.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      } catch (error) { alert(error.message); }
+        downloadBlob(blob, safeFilenamePart(customer.customerName) + "_" + safeFilenamePart(customer.chassisNumber) + ".zip");
+        status(zipStatus, "Customer ZIP downloaded.", "success");
+      } catch (error) { zipStatus.hidden = false; status(zipStatus, error.message, "error"); }
       finally { zip.textContent = "Download ZIP"; setZipBusy(false); }
     });
-    shareZip.addEventListener("click", async () => {
+        shareZip.addEventListener("click", async () => {
       setZipBusy(true); shareZip.textContent = "Preparing ZIP…"; zipStatus.hidden = false; status(zipStatus, "Preparing customer ZIP…");
+      let blob = null;
+      const filename = safeFilenamePart(customer.customerName) + "_" + safeFilenamePart(customer.chassisNumber) + ".zip";
       try {
-        if (typeof navigator.share !== "function") throw new Error("Sharing isn't supported on this browser. Use Download ZIP instead.");
-        const blob = await request("/api/upload-portal/customers/" + customer._id + "/documents.zip", {}, true);
-        const filename = safeFilenamePart(customer.customerName) + "_" + safeFilenamePart(customer.chassisNumber) + ".zip";
+        blob = await request("/api/upload-portal/customers/" + customer._id + "/documents.zip", {}, true);
         const file = new File([blob], filename, {type:"application/zip"});
-        if (navigator.canShare && !navigator.canShare({files:[file]})) throw new Error("This device cannot share ZIP files. Use Download ZIP instead.");
-        await navigator.share({files:[file], title:customer.customerName + " documents", text:"VAHAN customer documents"});
-        status(zipStatus, "ZIP shared successfully.", "success");
+        const supportsFileShare = typeof navigator.share === "function" && (!navigator.canShare || navigator.canShare({files:[file]}));
+        if (supportsFileShare) {
+          await navigator.share({files:[file], title:customer.customerName + " documents", text:"VAHAN customer documents"});
+          status(zipStatus, "ZIP shared successfully.", "success");
+        } else {
+          downloadBlob(blob, filename);
+          status(zipStatus, "Direct ZIP sharing is unavailable here. The ZIP was downloaded; share it from your Downloads app.", "success");
+        }
       } catch (error) {
         if (error.name === "AbortError") status(zipStatus, "Sharing canceled.");
-        else status(zipStatus, error.message, "error");
+        else if (blob && ["NotAllowedError","SecurityError"].includes(error.name)) {
+          downloadBlob(blob, filename);
+          status(zipStatus, "The browser blocked direct sharing. The ZIP was downloaded; share it from your Downloads app.", "success");
+        } else status(zipStatus, error.message, "error");
       } finally { shareZip.textContent = "Share ZIP"; setZipBusy(false); }
     });
     toolbar.append(label, count, shareZip, zip, zipStatus); host.append(toolbar);

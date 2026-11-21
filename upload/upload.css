@@ -336,3 +336,28 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d9a91d77;border-color
 .camera-flash-toggle[aria-pressed="true"]{border-color:var(--gold2);background:#33280d;color:var(--gold2)}
 .camera-flash-toggle[hidden]{display:none!important}
 @media(max-width:420px){.camera-capture-heading{gap:8px}.camera-flash-toggle{min-height:38px;padding:7px 9px;font-size:.76rem}}
+
+/* Clearer VAHAN document previews and saved-file actions. */
+.preview-open{
+ display:flex;align-items:center;justify-content:center;gap:9px;width:calc(100% - 24px);min-height:44px;margin:12px auto 0;
+ padding:10px 12px;border:1px solid #6c5824;border-radius:10px;
+ background:linear-gradient(135deg,#29220e,#1a1914);color:var(--gold2);
+ font:600 .78rem/1.25 "DM Sans",sans-serif;cursor:pointer;transition:background .18s,border-color .18s,transform .18s
+}
+.preview-open:hover{border-color:var(--gold2);background:#332a12;transform:translateY(-1px)}
+.preview-open:focus-visible,.pdf-preview-thumb:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+.preview-open-icon{display:grid;place-items:center;flex:none;width:25px;height:25px;border:1px solid #6c5824;border-radius:7px;background:#d7bd551c;color:var(--gold2);font-size:1rem}
+.preview-open-label{overflow-wrap:anywhere}
+.file-preview{justify-content:flex-start;padding-top:42px}
+.file-preview-label{overflow-wrap:anywhere}
+.pdf-preview-thumb{position:relative;min-height:112px;padding:8px;border:1px solid #37342b;border-radius:10px;background:linear-gradient(145deg,#242116,#141410);overflow:hidden}
+.pdf-preview-thumb:hover{border-color:#806b2c;background:linear-gradient(145deg,#2b2515,#171611)}
+.pdf-preview-canvas{display:block;max-width:100%;max-height:112px;width:auto;height:auto;margin:0 auto;background:#fff;box-shadow:0 4px 14px #0008}
+.pdf-preview-mark{flex:none}
+.pdf-preview-hint{display:block;color:var(--muted);font-size:.68rem;line-height:1.35}
+@media(max-width:640px){
+ .file-preview{padding-top:40px}
+ .preview-open{width:calc(100% - 16px);min-height:42px;padding:8px 9px}
+ .pdf-preview-thumb{min-height:102px}
+ .pdf-preview-canvas{max-height:96px}
+}
