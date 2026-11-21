@@ -171,7 +171,7 @@
     return new Promise((resolve,reject) => {
       const reader=new FileReader();
       reader.onload=()=>resolve(reader.result);
-      reader.onerror=()=>reject(new Error("Could not read a compressed PDF page."));
+      reader.onerror=()=>reject(new Error("Could not read a prepared document page."));
       reader.readAsDataURL(blob);
     });
   }
@@ -486,51 +486,28 @@
       throw new Error("Could not compress the captured photo within the VAHAN file-size limit.");
     } finally { bitmap.close?.(); }
   }
-  function imagePagesPdf(pages) {
-    const encoder = new TextEncoder();
-    const chunks = [];
-    const offsets = new Array(3 + pages.length * 3).fill(0);
-    let length = 0;
-    const pushBytes = bytes => { chunks.push(bytes); length += bytes.length; };
-    const pushText = text => pushBytes(encoder.encode(text));
-    const addObject = (id, body) => {
-      offsets[id] = length;
-      pushText(id + " 0 obj\n" + body + "\nendobj\n");
-    };
-    pushText("%PDF-1.4\n");
-    const pageIds = pages.map((_, index) => 3 + index * 3);
-    addObject(1, "<< /Type /Catalog /Pages 2 0 R >>");
-    addObject(2, "<< /Type /Pages /Count " + pages.length + " /Kids [" + pageIds.map(id => id + " 0 R").join(" ") + "] >>");
-    pages.forEach((image, index) => {
-      const pageId = 3 + index * 3;
-      const imageId = pageId + 1;
-      const contentId = pageId + 2;
-      const pageWidth = 595.28, pageHeight = 841.89;
+  async function imagePagesPdf(pages) {
+    const jsPDF = window.jspdf?.jsPDF;
+    if (typeof jsPDF !== "function") throw new Error("The browser PDF library did not load. Refresh the page and try again.");
+    const output = new jsPDF({orientation:"portrait",unit:"pt",format:"a4",compress:true,putOnlyUsedFonts:true});
+    for (let index = 0; index < pages.length; index++) {
+      const image = pages[index];
+      if (index > 0) output.addPage("a4", "portrait");
+      const pageWidth = output.internal.pageSize.getWidth();
+      const pageHeight = output.internal.pageSize.getHeight();
       const scale = Math.min(pageWidth / image.width, pageHeight / image.height);
       const width = image.width * scale, height = image.height * scale;
-      const x = (pageWidth - width) / 2, y = (pageHeight - height) / 2;
-      const content = "q\n" + width.toFixed(2) + " 0 0 " + height.toFixed(2) + " " + x.toFixed(2) + " " + y.toFixed(2) + " cm\n/Im0 Do\nQ";
-      const contentLength = encoder.encode(content).length;
-      addObject(pageId, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + pageWidth + " " + pageHeight + "] /Resources << /XObject << /Im0 " + imageId + " 0 R >> >> /Contents " + contentId + " 0 R >>");
-      offsets[imageId] = length;
-      pushText(imageId + " 0 obj\n<< /Type /XObject /Subtype /Image /Width " + image.width + " /Height " + image.height + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + image.bytes.length + " >>\nstream\n");
-      pushBytes(image.bytes);
-      pushText("\nendstream\nendobj\n");
-      addObject(contentId, "<< /Length " + contentLength + " >>\nstream\n" + content + "\nendstream");
-    });
-    const xrefOffset = length;
-    const size = offsets.length;
-    pushText("xref\n0 " + size + "\n0000000000 65535 f \n");
-    for (let id = 1; id < size; id++) pushText(String(offsets[id]).padStart(10, "0") + " 00000 n \n");
-    pushText("trailer\n<< /Size " + size + " /Root 1 0 R >>\nstartxref\n" + xrefOffset + "\n%%EOF\n");
-    return new Blob(chunks, {type:"application/pdf"});
+      const dataUrl = await blobToDataUrl(new Blob([image.bytes], {type:"image/jpeg"}));
+      output.addImage(dataUrl, "JPEG", (pageWidth - width) / 2, (pageHeight - height) / 2, width, height, undefined, "FAST");
+    }
+    return output.output("blob");
   }
   async function createCapturedPhotoPdf(photos, filename, targetBytes, documentName) {
     let imageBudget = Math.floor((targetBytes - 16 * 1024) / photos.length);
     for (let attempt = 0; attempt < 6 && imageBudget > 0; attempt++) {
       const pages = [];
       for (const photo of photos) pages.push(await photoAsJpeg(photo, imageBudget));
-      const pdf = imagePagesPdf(pages);
+      const pdf = await imagePagesPdf(pages);
       if (pdf.size <= targetBytes) return new File([pdf], filename, {type:"application/pdf", lastModified:Date.now()});
       imageBudget = Math.floor(imageBudget * .8);
     }
@@ -1030,21 +1007,19 @@
       if (pages.length < 3) failures.push("Form 20: choose or capture at least three photos.");
       else {
         try {
-          await request(`/api/upload-portal/customers/${customer._id}/form20/stage`, { method: "DELETE" });
-          for (let i = 0; i < pages.length; i++) {
-            status(result, `Compressing Form 20 photo ${i + 1} of ${pages.length}…`);
-            const preparedPage = await prepareUploadFile(pages[i], "form20");
-            await request(`/api/upload-portal/customers/${customer._id}/form20/pages/${i + 1}`, {
-              method: "PUT",
-              headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": pages[i].type, "X-NDC-Upload-Type": preparedPage.type || pages[i].type, "X-NDC-Original-Filename": pages[i].name, "X-NDC-Original-Size": String(pages[i].size), "X-NDC-Original-Last-Modified": String(pages[i].lastModified || Date.now()) },
-              body: preparedPage
-            });
-          }
-          status(result, "Combining Form 20 photos…"); await request(`/api/upload-portal/customers/${customer._id}/form20/complete`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }); saved++;
+          status(result, "Combining Form 20 photos into one PDF in this browser…");
+          const form20Pdf = await createCapturedPhotoPdf(pages, safeFilenamePart(customer.customerName) + "_form20.pdf", MAX_FORM20_UPLOAD_BYTES, "Form 20");
+          const preparedForm20 = await prepareUploadFile(form20Pdf, "form20");
+          await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": "application/pdf", "X-NDC-Upload-Type": preparedForm20.type || form20Pdf.type, "X-NDC-Original-Filename": form20Pdf.name, "X-NDC-Original-Size": String(form20Pdf.size), "X-NDC-Original-Last-Modified": String(form20Pdf.lastModified || Date.now()) },
+            body: preparedForm20
+          });
+          saved++;
         } catch (error) { failures.push(`Form 20: ${error.message}`); }
       }
     }
-    try { const updated = await request(`/api/upload-portal/customers/${customer._id}`); currentCustomer = updated.customer; renderCustomer(currentCustomer); await searchCustomers($("search").value); status($("saveStatus"), failures.length ? `${saved} saved. ${failures.join(" ")}` : `${saved ? `${saved} document${saved === 1 ? "" : "s"} saved and compressed on the server.` : "No new documents selected."}`, failures.length ? "error" : "success"); }
+    try { const updated = await request(`/api/upload-portal/customers/${customer._id}`); currentCustomer = updated.customer; renderCustomer(currentCustomer); await searchCustomers($("search").value); status($("saveStatus"), failures.length ? `${saved} saved. ${failures.join(" ")}` : `${saved ? `${saved} document${saved === 1 ? "" : "s"} saved and prepared for VAHAN.` : "No new documents selected."}`, failures.length ? "error" : "success"); }
     catch (error) { const response = host.querySelector("#saveStatus") || result; status(response, error.message, "error"); }
     finally { button.disabled = false; setSaveBarrier(false); }
   }
