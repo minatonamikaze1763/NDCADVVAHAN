@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#090909">
   <meta name="robots" content="noindex, nofollow">
   <title>VAHAN Document Upload | NDC</title>
-  <link rel="stylesheet" href="upload.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="upload.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/">NDC <span>VAHAN TOOL</span></a><button id="logout" class="quiet" hidden>Log out</button></header>
+  <header class="topbar"><a class="brand" href="/" aria-label="Next Dimension Customs home"><img src="/logo.png" alt="NDC"><span>VAHAN TOOL</span></a><nav class="topbar-actions" aria-label="Account"><button id="settingsToggle" class="quiet" type="button" hidden>Settings</button><button id="logout" class="quiet" hidden>Log out</button></nav></header>
   <main>
     <section id="loginView" class="card login-card">
       <p class="eyebrow">MOBILE DOCUMENT WORKSPACE</p><h1>Upload VAHAN documents</h1>
@@ -25,6 +25,7 @@
       <div class="intro"><div><p class="eyebrow">CUSTOMER DOCUMENTS</p><h1>Upload from your phone</h1><p class="muted">Create a customer with the required chassis number and customer name, then add any available documents.</p></div><button id="newCustomer" class="primary">＋ New customer</button></div>
       <section class="card search-card"><label for="search">Find a customer</label><input id="search" placeholder="Chassis number, customer name, or application number" autocomplete="off"><div id="customerResults" class="customer-results"></div><p id="searchStatus" class="status" role="status"></p></section>
       <section id="customerView" class="card customer-card" hidden></section>
+      <section id="settingsView" class="card settings-card" hidden aria-labelledby="settingsTitle"><div class="settings-heading"><div><p class="eyebrow">WORKSPACE SETTINGS</p><h2 id="settingsTitle">Document retention</h2><p class="muted">Choose how long uploaded customer documents stay in the cloud. Customer records are kept for 30 days.</p></div><button id="backToWorkspace" class="secondary" type="button">Back to workspace</button></div><label for="retentionDays">Automatically delete uploaded documents after</label><div class="retention-control"><select id="retentionDays"><option value="7">7 days</option><option value="14">14 days</option><option value="20">20 days (default)</option></select><button id="saveRetention" class="primary" type="button">Save setting</button></div><p id="settingsStatus" class="status" role="status"></p></section>
     </section>
   </main>
   <dialog id="customerDialog" class="dialog">
@@ -39,6 +40,7 @@
       <button class="primary full" type="submit">Create customer</button>
     </form>
   </dialog>
+  <script src="document-matcher.js"></script>
   <script src="upload.js"></script>
 </body>
 </html>
