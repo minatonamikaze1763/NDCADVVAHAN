@@ -3,7 +3,10 @@
   const API = "https://server.nextdimensioncustoms.in";
   const $ = id => document.getElementById(id);
   const tokenKey = "ndcUploadPortalToken";
+  const expiryKey = "ndcUploadPortalExpiresAt";
   let token = sessionStorage.getItem(tokenKey) || "";
+  let sessionExpiry = Number(sessionStorage.getItem(expiryKey)) || 0;
+  let expiryTimer = null;
   let currentCustomer = null;
   let searchTimer;
 
@@ -28,14 +31,49 @@
     document.body.classList.toggle("save-active", active);
     if (active) barrier.focus({preventScroll:true});
   }
+  function clearClientSession() {
+    clearTimeout(expiryTimer);
+    expiryTimer = null;
+    sessionExpiry = 0;
+    token = "";
+    sessionStorage.removeItem(tokenKey);
+    sessionStorage.removeItem(expiryKey);
+  }
+  function expireSession(message = "Your 24-hour session has expired. Sign in again to continue.") {
+    clearClientSession();
+    currentCustomer = null;
+    showLogin();
+    status($("loginStatus"), message, "error");
+  }
+  function saveSessionExpiry(value) {
+    const expiresAt = typeof value === "number" ? value : Date.parse(value || "");
+    if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
+      clearClientSession();
+      return false;
+    }
+    sessionExpiry = expiresAt;
+    sessionStorage.setItem(expiryKey, String(expiresAt));
+    clearTimeout(expiryTimer);
+    const checkExpiry = () => {
+      const remaining = sessionExpiry - Date.now();
+      if (remaining <= 0) expireSession();
+      else expiryTimer = setTimeout(checkExpiry, Math.min(remaining, 2147483647));
+    };
+    expiryTimer = setTimeout(checkExpiry, Math.min(expiresAt - Date.now(), 2147483647));
+    return true;
+  }
   async function request(path, options = {}, binary = false) {
+    if (token && sessionExpiry && Date.now() >= sessionExpiry) {
+      expireSession();
+      throw new Error("Your 24-hour session has expired. Sign in again to continue.");
+    }
     const headers = new Headers(options.headers || {});
     if (token) headers.set("Authorization", `Bearer ${token}`);
     const response = await fetch(API + path, { ...options, headers });
     const type = response.headers.get("content-type") || "";
     if (!response.ok) {
       const data = type.includes("application/json") ? await response.json().catch(() => ({})) : null;
-      if (response.status === 401 || response.status === 403) { token = ""; sessionStorage.removeItem(tokenKey); showLogin(); }
+      if (response.status === 401 || response.status === 403) expireSession("Your session is no longer valid. Sign in again to continue.");
       throw new Error(data?.error || `Request failed (${response.status}).`);
     }
     return binary ? response.blob() : type.includes("application/json") ? response.json() : null;
@@ -74,8 +112,13 @@
   });
   async function validate() {
     if (!token) return showLogin();
-    try { await request("/api/auth/me"); showApp(); await searchCustomers(""); }
-    catch { showLogin(); }
+    if (sessionExpiry && Date.now() >= sessionExpiry) return expireSession();
+    try {
+      const data = await request("/api/auth/me");
+      if (!saveSessionExpiry(data.sessionExpiresAt)) return expireSession();
+      showApp();
+      await searchCustomers("");
+    } catch { showLogin(); }
   }
   $("loginForm").addEventListener("submit", async event => {
     event.preventDefault();
@@ -83,13 +126,16 @@
     status($("loginStatus"), "Signing in…");
     try {
       const data = await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: $("username").value.trim(), password: $("password").value, deviceId: sessionDevice }) });
-      token = data.token; sessionStorage.setItem(tokenKey, token); $("password").value = ""; showApp(); await searchCustomers("");
-      status($("loginStatus"), "Signed in.", "success");
+      token = data.token;
+      sessionStorage.setItem(tokenKey, token);
+      if (!saveSessionExpiry(data.expiresAt)) throw new Error("The server did not return a valid 24-hour session expiry.");
+      $("password").value = ""; showApp(); await searchCustomers("");
+      status($("loginStatus"), "Signed in. Your session is valid for up to 24 hours.", "success");
     } catch (error) { status($("loginStatus"), error.message, "error"); }
     finally { button.disabled = false; }
   });
   $("settingsView").hidden = true;
-  $("logout").addEventListener("click", async () => { try { await request("/api/auth/logout", { method: "POST" }); } catch {} token = ""; sessionStorage.removeItem(tokenKey); currentCustomer = null; $("customerView").hidden = true; showLogin(); });
+  $("logout").addEventListener("click", async () => { try { await request("/api/auth/logout", { method: "POST" }); } catch {} clearClientSession(); currentCustomer = null; $("customerView").hidden = true; showLogin(); });
   $("newCustomer").addEventListener("click", () => { editingCustomerId = null; $("customerForm").reset(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
   $("closeDialog").addEventListener("click", () => $("customerDialog").close());
   $("customerForm").addEventListener("submit", async event => {
@@ -902,3 +948,7 @@
   }
   void validate();
 })();
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && token && sessionExpiry && Date.now() >= sessionExpiry) expireSession();
+  });
