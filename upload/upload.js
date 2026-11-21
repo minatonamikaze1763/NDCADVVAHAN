@@ -715,7 +715,7 @@
   function formatModifiedDate(saved) {
     const value = saved?.originalLastModified ?? saved?.modifiedAt ?? saved?.uploadedAt;
     if (value === undefined || value === null || value === "") return "Date unavailable";
-    const date = value instanceof Date ? value : typeof value === "number" || /^\\d+$/.test(String(value)) ? new Date(Number(value)) : new Date(value);
+    const date = value instanceof Date ? value : typeof value === "number" || /^\d+$/.test(String(value)) ? new Date(Number(value)) : new Date(value);
     return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleString();
   }
   function addModifiedLabel(row, saved) {
