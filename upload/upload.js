@@ -7,6 +7,7 @@
   let currentCustomer = null;
   let searchTimer;
   let form20Slots = 3;
+  let editingCustomerId = null;
   const categories = [
     ["frontphoto", "Owners Photo with Vehicle"], ["chassis-photo", "Photo of chassis"],
     ["address-proof", "Address Proof"], ["insurance", "Certificate of Insurance"],
@@ -48,13 +49,15 @@
     finally { button.disabled = false; }
   });
   $("logout").addEventListener("click", async () => { try { await request("/api/auth/logout", { method: "POST" }); } catch {} token = ""; sessionStorage.removeItem(tokenKey); currentCustomer = null; $("customerView").hidden = true; showLogin(); });
-  $("newCustomer").addEventListener("click", () => { $("customerForm").reset(); status($("createStatus"), ""); $("customerDialog").showModal(); });
+  $("newCustomer").addEventListener("click", () => { editingCustomerId = null; $("customerForm").reset(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
   $("closeDialog").addEventListener("click", () => $("customerDialog").close());
   $("customerForm").addEventListener("submit", async event => {
-    event.preventDefault(); const button = event.currentTarget.querySelector("button[type=submit]"); button.disabled = true; status($("createStatus"), "Creating customer…");
+    event.preventDefault(); const button = event.currentTarget.querySelector("button[type=submit]"); button.disabled = true; status($("createStatus"), editingCustomerId ? "Saving customer…" : "Creating customer…");
     try {
-      const data = await request("/api/upload-portal/customers", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chassisNumber: $("chassisNumber").value, customerName: $("customerName").value, address: $("address").value, hp: $("hp").value, applicationNumber: $("applicationNumber").value }) });
-      $("customerDialog").close(); await openCustomer(data.customer._id); await searchCustomers($("search").value);
+      const body = JSON.stringify({ chassisNumber: $("chassisNumber").value, customerName: $("customerName").value, address: $("address").value, hp: $("hp").value, applicationNumber: $("applicationNumber").value });
+      const id = editingCustomerId;
+      const data = await request(id ? `/api/upload-portal/customers/${id}` : "/api/upload-portal/customers", { method: id ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body });
+      $("customerDialog").close(); if (id) await openCustomer(id); else await openCustomer(data.customer._id); await searchCustomers($("search").value);
     } catch (error) { status($("createStatus"), error.message, "error"); }
     finally { button.disabled = false; }
   });
@@ -85,12 +88,69 @@
     });
     input.click();
   }
+  function classifyFile(name) {
+    const value = name.normalize("NFKC").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const rules = [
+      ["form20", /\bform\s*20\b|\bf20\b/], ["inspection", /inspection|signed.*chassis|form20.*signed/],
+      ["form22", /\bform\s*22\b|\bf22\b/], ["form21", /\bform\s*21\b|\bf21\b/],
+      ["insurance", /insurance|policy|\bdoi\b/], ["dealer-invoice", /dealer.*invoice|invoice|sale.*invoice/],
+      ["pan-card", /\bpan\b/], ["owner-signature", /signature|sign/],
+      ["chassis-photo", /chassis|vin.*photo/], ["address-proof", /aadhaar|aadhar|address|passbook|electricity|voter|passport|ration/],
+      ["frontphoto", /frontphoto|owner.*vehicle|with.*vehicle|customer.*vehicle/], ["owner-photo", /owner.*photo|customer.*photo|\bphoto\b|\bpic\b/]
+    ];
+    return rules.find(([, pattern]) => pattern.test(value))?.[0] || "";
+  }
+  function queueFiles(files, host) {
+    const queue = host.querySelector(".bulk-queue");
+    const messages = [];
+    for (const file of files) {
+      const category = classifyFile(file.name);
+      let assigned = "Unmatched";
+      if (category === "form20" && file.type.startsWith("image/")) {
+        if (form20Slots < 3) form20Slots = 3;
+        let slot = [...host.querySelectorAll("[data-form20-page]")].find(item => !item._file);
+        while (!slot && form20Slots < 30) { form20Slots++; addForm20PageSlot(host); slot = host.querySelector(`[data-form20-page="${form20Slots}"]`); }
+        if (slot) { slot._file = file; slot.textContent = `Page ${slot.dataset.form20Page}: ${file.name}`; assigned = `Form 20 page ${slot.dataset.form20Page}`; }
+      } else if (category && category !== "form20") {
+        const row = host.querySelector(`[data-doc="${category}"]`);
+        if (row && !row._file) { row._file = file; row.querySelector(".doc-state").textContent = file.name; assigned = row.querySelector("h3").textContent; }
+        else if (row) assigned = "Already has a file; choose another document row";
+      }
+      const item = document.createElement("div"); item.className = "bulk-file";
+      const name = document.createElement("span"); name.textContent = file.name;
+      const result = document.createElement("small"); result.textContent = assigned;
+      item.append(name, result); queue.append(item); messages.push(`${file.name} → ${assigned}`);
+    }
+    status(host.querySelector(".bulk-status"), `${files.length} file${files.length === 1 ? "" : "s"} added. Check each assignment below; unmatched or duplicate files can be selected in a document row.`);
+  }
+  function addForm20PageSlot(host) {
+    const pages = host.querySelector(".form20-pages");
+    const pageNumber = form20Slots;
+    const group = document.createElement("div"); group.className = "form20-page-control";
+    const slot = document.createElement("button"); slot.type = "button"; slot.className = "secondary"; slot.dataset.form20Page = pageNumber; slot.textContent = `Page ${pageNumber}: Capture`; slot.addEventListener("click", () => safeFileInput("form20", true, pageNumber));
+    const choose = document.createElement("button"); choose.type = "button"; choose.className = "secondary"; choose.textContent = "Choose image"; choose.addEventListener("click", () => safeFileInput("form20", false, pageNumber));
+    group.append(slot, choose); pages.append(group);
+  }
   function renderCustomer(customer) {
     const host = $("customerView"); host.replaceChildren(); host.hidden = false;
     const head = document.createElement("div"); head.className = "customer-heading";
     const titleBlock = document.createElement("div"); const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "CUSTOMER WORKSPACE"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = `Chassis: ${customer.chassisNumber}`; titleBlock.append(eyebrow, title, chassis);
-    const close = document.createElement("button"); close.className = "quiet"; close.textContent = "Close"; close.addEventListener("click", () => { host.hidden = true; currentCustomer = null; }); head.append(titleBlock, close); host.append(head);
+    const controls = document.createElement("div"); controls.className = "customer-controls";
+    const edit = document.createElement("button"); edit.className = "quiet"; edit.textContent = "Edit details"; edit.addEventListener("click", () => { editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["chassisNumber", "customerName", "address", "hp", "applicationNumber"]) $(key).value = customer[key] || ""; $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
+    const removeCustomer = document.createElement("button"); removeCustomer.className = "danger"; removeCustomer.textContent = "Delete customer"; removeCustomer.addEventListener("click", async () => { if (!confirm(`Delete ${customer.customerName} and all of its stored documents? This cannot be undone.`)) return; try { await request(`/api/upload-portal/customers/${customer._id}`, { method: "DELETE" }); host.hidden = true; currentCustomer = null; await searchCustomers($("search").value); } catch (error) { alert(error.message); } });
+    const close = document.createElement("button"); close.className = "quiet"; close.textContent = "Close"; close.addEventListener("click", () => { host.hidden = true; currentCustomer = null; }); controls.append(edit, removeCustomer, close); head.append(titleBlock, controls); host.append(head);
     const fields = document.createElement("div"); fields.className = "customer-fields"; [["Address", customer.address], ["HP", customer.hp], ["Application no.", customer.applicationNumber]].forEach(([label, value]) => { if (value) { const span = document.createElement("span"); span.textContent = `${label}: ${value}`; fields.append(span); } }); host.append(fields);
+    const expires = document.createElement("p"); expires.className = "customer-expiry muted"; expires.textContent = `This customer record and its documents are automatically deleted after ${new Date(customer.expiresAt).toLocaleDateString()}.`; host.append(expires);
+    const bulk = document.createElement("section"); bulk.className = "bulk-upload"; bulk.tabIndex = 0; bulk.setAttribute("aria-label", "Add multiple documents");
+    const bulkTitle = document.createElement("strong"); bulkTitle.textContent = "Add multiple documents"; const bulkHint = document.createElement("span"); bulkHint.textContent = "Drop files here or tap to choose. Filenames are used to suggest document rows.";
+    const picker = document.createElement("input"); picker.type = "file"; picker.multiple = true; picker.accept = "image/*,.pdf"; picker.className = "bulk-picker"; picker.setAttribute("aria-label", "Choose multiple documents");
+    const chooseFiles = document.createElement("button"); chooseFiles.type = "button"; chooseFiles.className = "secondary"; chooseFiles.textContent = "Choose multiple files"; chooseFiles.addEventListener("click", event => { event.stopPropagation(); picker.click(); });
+    const queue = document.createElement("div"); queue.className = "bulk-queue"; const bulkStatus = document.createElement("p"); bulkStatus.className = "status bulk-status"; bulk.append(bulkTitle, bulkHint, chooseFiles, picker, queue, bulkStatus);
+    bulk.addEventListener("click", event => { if (event.target !== chooseFiles) picker.click(); });
+    bulk.addEventListener("dragover", event => { event.preventDefault(); bulk.classList.add("dragging"); });
+    bulk.addEventListener("dragleave", () => bulk.classList.remove("dragging"));
+    bulk.addEventListener("drop", event => { event.preventDefault(); bulk.classList.remove("dragging"); queueFiles([...event.dataTransfer.files], host); });
+    picker.addEventListener("change", () => { queueFiles([...picker.files], host); picker.value = ""; }); host.append(bulk);
     const toolbar = document.createElement("div"); toolbar.className = "doc-toolbar"; const label = document.createElement("strong"); label.textContent = "VAHAN documents"; const count = document.createElement("span"); count.className = "muted"; count.textContent = `${Object.keys(customer.documents || {}).length} of 12 saved`; toolbar.append(label, count); host.append(toolbar);
     const list = document.createElement("div"); list.className = "doc-list";
     categories.filter(([id]) => id !== "form20").forEach(([id, name]) => {
