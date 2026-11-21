@@ -119,17 +119,34 @@
   function classifyFile(name) {
     return globalThis.NDCDocumentMatcher?.match(name)?.id || "";
   }
+  function showFullscreenPreview(file) {
+    if (!file) return;
+    const overlay = document.createElement("div"); overlay.className = "fullscreen-preview"; overlay.setAttribute("role", "dialog"); overlay.setAttribute("aria-modal", "true"); overlay.setAttribute("aria-label", `Preview ${file.name || "document"}`);
+    const panel = document.createElement("div"); panel.className = "fullscreen-preview-panel";
+    const header = document.createElement("div"); header.className = "fullscreen-preview-header";
+    const title = document.createElement("strong"); title.textContent = file.name || "Document preview";
+    const close = document.createElement("button"); close.type = "button"; close.className = "fullscreen-preview-close"; close.textContent = "Close"; close.setAttribute("aria-label", "Close preview");
+    const body = document.createElement("div"); body.className = "fullscreen-preview-body";
+    const url = URL.createObjectURL(file);
+    const closePreview = () => { URL.revokeObjectURL(url); overlay.remove(); document.removeEventListener("keydown", onKeyDown); };
+    const onKeyDown = event => { if (event.key === "Escape") closePreview(); };
+    close.addEventListener("click", closePreview); overlay.addEventListener("click", event => { if (event.target === overlay) closePreview(); });
+    if (file.type?.startsWith("image/")) { const image = document.createElement("img"); image.src = url; image.alt = file.name || "Document preview"; body.append(image); }
+    else { const frame = document.createElement("iframe"); frame.src = url; frame.title = file.name || "PDF preview"; body.append(frame); }
+    header.append(title, close); panel.append(header, body); overlay.append(panel); document.body.append(overlay); document.addEventListener("keydown", onKeyDown); close.focus();
+  }
   function setPreview(box, file, label) {
     if (box._url) URL.revokeObjectURL(box._url);
     box.replaceChildren();
     const tag = document.createElement("span"); tag.className = "file-preview-title"; tag.textContent = label; box.append(tag);
     if (!file) { const empty = document.createElement("span"); empty.className = "file-preview-label"; empty.textContent = label === "Selected" ? "No file selected" : "No saved file"; box.append(empty); return; }
     const url = URL.createObjectURL(file); box._url = url;
-    if (file.type?.startsWith("image/")) { const image = document.createElement("img"); image.src = url; image.alt = file.name || "Document preview"; box.append(image); }
-    else { const object = document.createElement("object"); object.data = url; object.type = file.type || "application/pdf"; object.setAttribute("aria-label", file.name || "PDF preview"); box.append(object); }
+    if (file.type?.startsWith("image/")) { const image = document.createElement("img"); image.src = url; image.alt = file.name || "Document preview"; image.className = "file-preview-thumb"; image.addEventListener("click", () => showFullscreenPreview(file)); box.append(image); }
+    else { const object = document.createElement("object"); object.data = url; object.type = file.type || "application/pdf"; object.setAttribute("aria-label", file.name || "PDF preview"); object.addEventListener("click", () => showFullscreenPreview(file)); box.append(object); }
     const name = document.createElement("span"); name.className = "file-preview-label"; name.textContent = file.name || "Document"; box.append(name);
+    const full = document.createElement("button"); full.type = "button"; full.className = "preview-fullscreen"; full.textContent = "Open full-screen preview"; full.addEventListener("click", () => showFullscreenPreview(file)); box.append(full);
   }
-  function readableSize(value) { const n = Number(value); if (!Number.isFinite(n) || n < 0) return "—"; if (n < 1024) return `${n} B`; if (n < 1024*1024) return `${(n/1024).toFixed(1)} KB`; return `${(n/1024/1024).toFixed(2)} MB`; }
+    function readableSize(value) { const n = Number(value); if (!Number.isFinite(n) || n < 0) return "—"; if (n < 1024) return `${n} B`; if (n < 1024*1024) return `${(n/1024).toFixed(1)} KB`; return `${(n/1024/1024).toFixed(2)} MB`; }
   function addFileDetails(row, saved) {
     const details = document.createElement("dl"); details.className = "file-details";
     const entries = [["Original filename", saved?.originalFilename || "—"], ["Original size", readableSize(saved?.originalSize)], ["Saved filename", saved?.filename || "—"], ["Saved size", readableSize(saved?.size)], ["Modified", saved?.originalLastModified || saved?.modifiedAt ? new Date(saved.originalLastModified || saved.modifiedAt).toLocaleString() : "—"]];
@@ -145,7 +162,7 @@
       const open = document.createElement("button"); open.type = "button"; open.className = "preview-open"; open.textContent = "Tap to preview saved file";
       open.addEventListener("click", async () => {
         open.disabled = true;
-        try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, {}, true); setPreview(stored, new File([blob], saved.filename, {type:saved.contentType || blob.type}), "Saved"); }
+        try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, {}, true); const savedFile = new File([blob], saved.filename, {type:saved.contentType || blob.type}); setPreview(stored, savedFile, "Saved"); showFullscreenPreview(savedFile); }
         catch(error) { open.textContent = error.message; }
         finally { open.disabled = false; }
       });
