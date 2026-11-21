@@ -564,10 +564,11 @@
     for (let index = 0; index < photos.length; index++) {
       const photo = photos[index];
       status(progress, "Uploading Form 20 page " + (index + 1) + " of " + photos.length + "…");
+      const preparedPhoto = await prepareUploadFile(photo, "form20");
       await request("/api/upload-portal/customers/" + customer._id + "/form20/pages/" + (index + 1), {
         method:"PUT",
-        headers:{"Content-Type":"application/octet-stream","X-NDC-Original-Type":photo.type,"X-NDC-Original-Filename":photo.name,"X-NDC-Original-Size":String(photo.size),"X-NDC-Original-Last-Modified":String(photo.lastModified || Date.now())},
-        body:await prepareUploadFile(photo, "form20")
+        headers:{"Content-Type":"application/octet-stream","X-NDC-Original-Type":photo.type,"X-NDC-Upload-Type":preparedPhoto.type || photo.type,"X-NDC-Original-Filename":photo.name,"X-NDC-Original-Size":String(photo.size),"X-NDC-Original-Last-Modified":String(photo.lastModified || Date.now())},
+        body:preparedPhoto
       });
     }
     status(progress, "Combining the Form 20 photos into one PDF…");
@@ -580,10 +581,11 @@
   async function saveCapturedAadhaar(customer, host, row, photos, progress) {
     status(progress, "Combining Aadhaar front and back into one PDF…");
     const file = await createAadhaarPdf(photos, safeFilenamePart(customer.customerName) + "_aadhaar_front_back.pdf");
+    const preparedFile = await prepareUploadFile(file, "address-proof");
     const result = await request("/api/upload-portal/customers/" + customer._id + "/documents/address-proof", {
       method:"PUT",
-      headers:{"Content-Type":"application/octet-stream","X-NDC-Original-Type":"application/pdf","X-NDC-Original-Filename":file.name,"X-NDC-Original-Size":String(file.size),"X-NDC-Original-Last-Modified":String(file.lastModified || Date.now()),"X-NDC-Subcategory":"Aadhaar"},
-      body:await prepareUploadFile(file, "address-proof")
+      headers:{"Content-Type":"application/octet-stream","X-NDC-Original-Type":"application/pdf","X-NDC-Upload-Type":preparedFile.type || file.type,"X-NDC-Original-Filename":file.name,"X-NDC-Original-Size":String(file.size),"X-NDC-Original-Last-Modified":String(file.lastModified || Date.now()),"X-NDC-Subcategory":"Aadhaar"},
+      body:preparedFile
     });
     result.subcategory = "Aadhaar";
     result.uploadedAt = new Date().toISOString();
@@ -1017,7 +1019,7 @@
     for (const [category] of categories.filter(([id]) => id !== "form20")) {
       const row = host.querySelector(`[data-doc="${category}"]`); const file = row?._file; if (!file) continue;
       const subcategory = row.querySelector("[data-subcategory]")?.value || ""; if (category === "address-proof" && !subcategory) { failures.push("Address Proof: select a type."); continue; }
-      try { status(result, `Preparing ${row.querySelector("h3").textContent}…`); const prepared = await prepareUploadFile(file, category); await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": file.type || "application/octet-stream", "X-NDC-Original-Filename": file.name, "X-NDC-Original-Size": String(file.size), "X-NDC-Original-Last-Modified": String(file.lastModified || Date.now()), ...(subcategory ? { "X-NDC-Subcategory": subcategory } : {}) }, body: prepared }); saved++; }
+      try { status(result, `Preparing ${row.querySelector("h3").textContent}…`); const prepared = await prepareUploadFile(file, category); await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": file.type || "application/octet-stream", "X-NDC-Upload-Type": prepared.type || file.type, "X-NDC-Original-Filename": file.name, "X-NDC-Original-Size": String(file.size), "X-NDC-Original-Last-Modified": String(file.lastModified || Date.now()), ...(subcategory ? { "X-NDC-Subcategory": subcategory } : {}) }, body: prepared }); saved++; }
       catch (error) { failures.push(`${row.querySelector("h3").textContent}: ${error.message}`); }
     }
     const form20Row = host.querySelector('[data-doc="form20"]');
@@ -1027,7 +1029,7 @@
       try {
         status(result, "Preparing Form 20 PDF…");
         const preparedForm20 = await prepareUploadFile(form20File, "form20");
-        await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": form20File.type || "application/pdf", "X-NDC-Original-Filename": form20File.name, "X-NDC-Original-Size": String(form20File.size), "X-NDC-Original-Last-Modified": String(form20File.lastModified || Date.now()) }, body: preparedForm20 }); saved++;
+        await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": form20File.type || "application/pdf", "X-NDC-Upload-Type": preparedForm20.type || form20File.type, "X-NDC-Original-Filename": form20File.name, "X-NDC-Original-Size": String(form20File.size), "X-NDC-Original-Last-Modified": String(form20File.lastModified || Date.now()) }, body: preparedForm20 }); saved++;
       } catch (error) { failures.push(`Form 20: ${error.message}`); }
     }
     if (pages.length) {
@@ -1035,7 +1037,15 @@
       else {
         try {
           await request(`/api/upload-portal/customers/${customer._id}/form20/stage`, { method: "DELETE" });
-          for (let i = 0; i < pages.length; i++) { status(result, `Compressing Form 20 photo ${i + 1} of ${pages.length}…`); await request(`/api/upload-portal/customers/${customer._id}/form20/pages/${i + 1}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": pages[i].type, "X-NDC-Original-Filename": pages[i].name, "X-NDC-Original-Size": String(pages[i].size), "X-NDC-Original-Last-Modified": String(pages[i].lastModified || Date.now()) }, body: await prepareUploadFile(pages[i], "form20") }); }
+          for (let i = 0; i < pages.length; i++) {
+            status(result, `Compressing Form 20 photo ${i + 1} of ${pages.length}…`);
+            const preparedPage = await prepareUploadFile(pages[i], "form20");
+            await request(`/api/upload-portal/customers/${customer._id}/form20/pages/${i + 1}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": pages[i].type, "X-NDC-Upload-Type": preparedPage.type || pages[i].type, "X-NDC-Original-Filename": pages[i].name, "X-NDC-Original-Size": String(pages[i].size), "X-NDC-Original-Last-Modified": String(pages[i].lastModified || Date.now()) },
+              body: preparedPage
+            });
+          }
           status(result, "Combining Form 20 photos…"); await request(`/api/upload-portal/customers/${customer._id}/form20/complete`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }); saved++;
         } catch (error) { failures.push(`Form 20: ${error.message}`); }
       }
