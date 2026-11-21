@@ -425,3 +425,8 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d9a91d77;border-color
  .login-highlights small{font-size:.74rem}
  .login-form-panel{padding:24px 18px}
 }
+.native-capture-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;min-width:0;flex:1 0 100%}
+.native-capture-group[hidden]{display:none!important}
+.native-capture-group .native-capture-page{min-width:0;white-space:normal}
+.native-capture-group .native-capture-save,.native-capture-group .native-capture-status{grid-column:1/-1}
+.native-capture-status{margin:0;overflow-wrap:anywhere}
