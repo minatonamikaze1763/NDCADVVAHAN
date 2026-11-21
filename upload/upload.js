@@ -525,8 +525,7 @@
     pushText("trailer\n<< /Size " + size + " /Root 1 0 R >>\nstartxref\n" + xrefOffset + "\n%%EOF\n");
     return new Blob(chunks, {type:"application/pdf"});
   }
-  async function createAadhaarPdf(photos, filename) {
-    const targetBytes = 380000;
+  async function createCapturedPhotoPdf(photos, filename, targetBytes, documentName) {
     let imageBudget = Math.floor((targetBytes - 16 * 1024) / photos.length);
     for (let attempt = 0; attempt < 6 && imageBudget > 0; attempt++) {
       const pages = [];
@@ -535,7 +534,7 @@
       if (pdf.size <= targetBytes) return new File([pdf], filename, {type:"application/pdf", lastModified:Date.now()});
       imageBudget = Math.floor(imageBudget * .8);
     }
-    throw new Error("The Aadhaar front/back PDF could not be compressed below the VAHAN size limit. Retake the photos in good light and try again.");
+    throw new Error("The " + documentName + " photos could not be combined below the VAHAN size limit. Retake the photos in good light and try again.");
   }
   function updateSavedDocumentRow(customer, host, row, category, saved) {
     customer.documents = {...(customer.documents || {}), [category]:saved};
@@ -560,19 +559,14 @@
     host.querySelectorAll(".zip-download,.zip-share").forEach(button => { button.disabled = savedCount === 0; });
   }
   async function saveCapturedForm20(customer, host, row, photos, progress) {
-    await request("/api/upload-portal/customers/" + customer._id + "/form20/stage", {method:"DELETE"});
-    for (let index = 0; index < photos.length; index++) {
-      const photo = photos[index];
-      status(progress, "Uploading Form 20 page " + (index + 1) + " of " + photos.length + "…");
-      const preparedPhoto = await prepareUploadFile(photo, "form20");
-      await request("/api/upload-portal/customers/" + customer._id + "/form20/pages/" + (index + 1), {
-        method:"PUT",
-        headers:{"Content-Type":"application/octet-stream","X-NDC-Original-Type":photo.type,"X-NDC-Upload-Type":preparedPhoto.type || photo.type,"X-NDC-Original-Filename":photo.name,"X-NDC-Original-Size":String(photo.size),"X-NDC-Original-Last-Modified":String(photo.lastModified || Date.now())},
-        body:preparedPhoto
-      });
-    }
     status(progress, "Combining the Form 20 photos into one PDF…");
-    const result = await request("/api/upload-portal/customers/" + customer._id + "/form20/complete", {method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+    const file = await createCapturedPhotoPdf(photos, safeFilenamePart(customer.customerName) + "_form20.pdf", MAX_FORM20_UPLOAD_BYTES, "Form 20");
+    const preparedFile = await prepareUploadFile(file, "form20");
+    const result = await request("/api/upload-portal/customers/" + customer._id + "/documents/form20", {
+      method:"PUT",
+      headers:{"Content-Type":"application/octet-stream","X-NDC-Original-Type":"application/pdf","X-NDC-Upload-Type":preparedFile.type || file.type,"X-NDC-Original-Filename":file.name,"X-NDC-Original-Size":String(file.size),"X-NDC-Original-Last-Modified":String(file.lastModified || Date.now())},
+      body:preparedFile
+    });
     const saved = {...result,contentType:"application/pdf",subcategory:null,uploadedAt:new Date().toISOString(),modifiedAt:result.originalLastModified || new Date().toISOString()};
     updateSavedDocumentRow(customer, host, row, "form20", saved);
     await searchCustomers($("search").value);
@@ -580,7 +574,7 @@
   }
   async function saveCapturedAadhaar(customer, host, row, photos, progress) {
     status(progress, "Combining Aadhaar front and back into one PDF…");
-    const file = await createAadhaarPdf(photos, safeFilenamePart(customer.customerName) + "_aadhaar_front_back.pdf");
+    const file = await createCapturedPhotoPdf(photos, safeFilenamePart(customer.customerName) + "_aadhaar_front_back.pdf", 380000, "Aadhaar front and back");
     const preparedFile = await prepareUploadFile(file, "address-proof");
     const result = await request("/api/upload-portal/customers/" + customer._id + "/documents/address-proof", {
       method:"PUT",
