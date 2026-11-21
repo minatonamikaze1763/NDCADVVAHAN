@@ -17,6 +17,7 @@
     ["pan-card", "PAN Card"], ["owner-photo", "Owners Photo"]
   ];
   const addressTypes = ["Aadhaar", "Bank Passbook", "Electricity Bill", "Gas Bill", "Water Bill", "Passport", "Voter ID", "Ration Card", "Telephone Bill", "GST Certificate"];
+  const documentDisplayOrder = ["address-proof", "insurance", "dealer-invoice", "form20", "inspection", "form22", "form21", "frontphoto", "owner-photo", "owner-signature", "pan-card", "chassis-photo"];
   const sessionDevice = localStorage.getItem("ndcUploadPortalDeviceId") || crypto.randomUUID();
   localStorage.setItem("ndcUploadPortalDeviceId", sessionDevice);
   function status(el, message, type = "") { el.textContent = message; el.className = `status ${type}`; }
@@ -114,6 +115,143 @@
       row.querySelector(".doc-state").textContent = row._file ? row._file.name : "Not selected"; updateFileDetails(row, row._file); setPreview(row._selectedPreview, row._file, "Selected");
     });
     input.click();
+  }
+  async function openForm20Camera(form20) {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      alert("Camera capture is unavailable in this browser. Use Choose PDF or photos to select three images.");
+      return;
+    }
+    const dialog = document.createElement("dialog");
+    dialog.className = "dialog camera-dialog";
+    const panel = document.createElement("div");
+    panel.className = "camera-capture";
+    const heading = document.createElement("div");
+    heading.className = "camera-capture-heading";
+    const title = document.createElement("h2");
+    title.textContent = "Capture Form 20";
+    const help = document.createElement("p");
+    help.className = "muted";
+    help.textContent = "Take three clear photos. Review them before adding Form 20.";
+    heading.append(title, help);
+    const video = document.createElement("video");
+    video.className = "camera-capture-video";
+    video.autoplay = true;
+    video.playsInline = true;
+    video.muted = true;
+    video.setAttribute("aria-label", "Live camera preview");
+    const progress = document.createElement("p");
+    progress.className = "status camera-capture-status";
+    progress.setAttribute("role", "status");
+    progress.textContent = "Starting camera…";
+    const photoStrip = document.createElement("div");
+    photoStrip.className = "camera-capture-photos";
+    photoStrip.setAttribute("aria-label", "Captured Form 20 photos");
+    const actions = document.createElement("div");
+    actions.className = "camera-capture-actions";
+    const capture = document.createElement("button");
+    capture.type = "button";
+    capture.className = "primary";
+    capture.textContent = "Capture photo 1 of 3";
+    const retake = document.createElement("button");
+    retake.type = "button";
+    retake.className = "secondary";
+    retake.textContent = "Retake last";
+    retake.disabled = true;
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "quiet";
+    cancel.textContent = "Cancel";
+    const usePhotos = document.createElement("button");
+    usePhotos.type = "button";
+    usePhotos.className = "primary";
+    usePhotos.textContent = "Use 3 photos";
+    usePhotos.disabled = true;
+    actions.append(capture, retake, cancel, usePhotos);
+    panel.append(heading, video, progress, photoStrip, actions);
+    dialog.append(panel);
+    document.body.append(dialog);
+    const photos = [];
+    const previewUrls = [];
+    let stream = null;
+    let closed = false;
+    const cleanup = () => {
+      if (closed) return;
+      closed = true;
+      stream?.getTracks().forEach(track => track.stop());
+      previewUrls.forEach(url => URL.revokeObjectURL(url));
+      if (dialog.open) dialog.close();
+      dialog.remove();
+    };
+    const updateControls = () => {
+      const count = photos.length;
+      capture.textContent = count < 3 ? "Capture photo " + (count + 1) + " of 3" : "Three photos captured";
+      capture.disabled = count >= 3;
+      retake.disabled = count === 0;
+      usePhotos.disabled = count !== 3;
+      progress.textContent = count ? count + " of 3 photos captured" : "Capture photo 1 of 3";
+    };
+    capture.addEventListener("click", async () => {
+      if (photos.length >= 3 || !video.videoWidth) return;
+      capture.disabled = true;
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", .9));
+        if (!blob) throw new Error("The camera photo could not be created. Try again.");
+        const index = photos.length + 1;
+        const file = new File([blob], "form20_page_" + index + ".jpg", {type:"image/jpeg", lastModified:Date.now()});
+        photos.push(file);
+        const url = URL.createObjectURL(file);
+        previewUrls.push(url);
+        const item = document.createElement("div");
+        item.className = "camera-photo-thumb";
+        const image = document.createElement("img");
+        image.src = url;
+        image.alt = "Form 20 photo " + index;
+        const caption = document.createElement("span");
+        caption.textContent = "Page " + index;
+        item.append(image, caption);
+        photoStrip.append(item);
+        updateControls();
+      } catch (error) {
+        status(progress, error.message, "error");
+      } finally {
+        if (photos.length < 3) capture.disabled = false;
+      }
+    });
+    retake.addEventListener("click", () => {
+      const item = photoStrip.lastElementChild;
+      if (item) item.remove();
+      const url = previewUrls.pop();
+      if (url) URL.revokeObjectURL(url);
+      photos.pop();
+      updateControls();
+    });
+    usePhotos.addEventListener("click", () => {
+      if (photos.length !== 3) return;
+      form20._file = null;
+      form20._pages = photos.slice();
+      form20.querySelector(".doc-state").textContent = "3 photos captured · Form 20";
+      updateFileDetails(form20, photos[0]);
+      setPreview(form20._selectedPreview, photos[0], "Selected · 3 photos");
+      cleanup();
+    });
+    cancel.addEventListener("click", cleanup);
+    dialog.addEventListener("cancel", event => { event.preventDefault(); cleanup(); });
+    dialog.addEventListener("click", event => { if (event.target === dialog) cleanup(); });
+    dialog.showModal();
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({audio:false, video:{facingMode:{ideal:"environment"}}});
+      if (closed) { stream.getTracks().forEach(track => track.stop()); return; }
+      video.srcObject = stream;
+      await video.play();
+      status(progress, "Capture photo 1 of 3");
+    } catch (error) {
+      status(progress, error.name === "NotAllowedError" ? "Allow camera access in your browser settings, then try again." : "Could not start the camera. Use Choose PDF or photos instead.", "error");
+      capture.disabled = true;
+    }
   }
   function safeFilenamePart(value) { return String(value || "customer").normalize("NFKC").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 80) || "customer"; }
   function classifyFile(name) {
@@ -405,34 +543,59 @@
     bulk.addEventListener("dragleave", () => bulk.classList.remove("dragging"));
     bulk.addEventListener("drop", event => { event.preventDefault(); bulk.classList.remove("dragging"); queueFiles([...event.dataTransfer.files], host); });
     picker.addEventListener("change", () => { queueFiles([...picker.files], host); picker.value = ""; }); host.append(bulk);
-    const toolbar = document.createElement("div"); toolbar.className = "doc-toolbar"; const label = document.createElement("strong"); label.textContent = "VAHAN documents"; const count = document.createElement("span"); count.className = "muted"; count.textContent = `${Object.keys(customer.documents || {}).length} of 12 saved`; const zip = document.createElement("button"); zip.type = "button"; zip.className = "secondary zip-download"; zip.textContent = "Download ZIP"; zip.disabled = !Object.keys(customer.documents || {}).length; zip.addEventListener("click", async () => { zip.disabled = true; const prior = zip.textContent; zip.textContent = "Preparing ZIP…"; try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents.zip`, {}, true); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${safeFilenamePart(customer.customerName)}_${safeFilenamePart(customer.chassisNumber)}.zip`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); } catch (error) { alert(error.message); } finally { zip.textContent = prior; zip.disabled = !Object.keys(customer.documents || {}).length; } }); toolbar.append(label, count, zip); host.append(toolbar);
+    const toolbar = document.createElement("div"); toolbar.className = "doc-toolbar";
+    const label = document.createElement("strong"); label.textContent = "VAHAN documents";
+    const count = document.createElement("span"); count.className = "muted"; count.textContent = Object.keys(customer.documents || {}).length + " of 12 saved";
+    const zipEnabled = Object.keys(customer.documents || {}).length > 0;
+    const zipStatus = document.createElement("span"); zipStatus.className = "status zip-share-status"; zipStatus.setAttribute("role", "status"); zipStatus.hidden = true;
+    const zip = document.createElement("button"); zip.type = "button"; zip.className = "secondary zip-download"; zip.textContent = "Download ZIP"; zip.disabled = !zipEnabled;
+    const shareZip = document.createElement("button"); shareZip.type = "button"; shareZip.className = "secondary zip-share"; shareZip.textContent = "Share ZIP"; shareZip.disabled = !zipEnabled;
+    const setZipBusy = busy => { zip.disabled = busy || !zipEnabled; shareZip.disabled = busy || !zipEnabled; };
+    zip.addEventListener("click", async () => {
+      setZipBusy(true); zip.textContent = "Preparing ZIP…";
+      try {
+        const blob = await request("/api/upload-portal/customers/" + customer._id + "/documents.zip", {}, true);
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a"); anchor.href = url; anchor.download = safeFilenamePart(customer.customerName) + "_" + safeFilenamePart(customer.chassisNumber) + ".zip"; anchor.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } catch (error) { alert(error.message); }
+      finally { zip.textContent = "Download ZIP"; setZipBusy(false); }
+    });
+    shareZip.addEventListener("click", async () => {
+      setZipBusy(true); shareZip.textContent = "Preparing ZIP…"; zipStatus.hidden = false; status(zipStatus, "Preparing customer ZIP…");
+      try {
+        if (typeof navigator.share !== "function") throw new Error("Sharing isn't supported on this browser. Use Download ZIP instead.");
+        const blob = await request("/api/upload-portal/customers/" + customer._id + "/documents.zip", {}, true);
+        const filename = safeFilenamePart(customer.customerName) + "_" + safeFilenamePart(customer.chassisNumber) + ".zip";
+        const file = new File([blob], filename, {type:"application/zip"});
+        if (navigator.canShare && !navigator.canShare({files:[file]})) throw new Error("This device cannot share ZIP files. Use Download ZIP instead.");
+        await navigator.share({files:[file], title:customer.customerName + " documents", text:"VAHAN customer documents"});
+        status(zipStatus, "ZIP shared successfully.", "success");
+      } catch (error) {
+        if (error.name === "AbortError") status(zipStatus, "Sharing canceled.");
+        else status(zipStatus, error.message, "error");
+      } finally { shareZip.textContent = "Share ZIP"; setZipBusy(false); }
+    });
+    toolbar.append(label, count, shareZip, zip, zipStatus); host.append(toolbar);
     const list = document.createElement("div"); list.className = "doc-list";
-    categories.filter(([id]) => id !== "form20").forEach(([id, name]) => {
-      const row = document.createElement("section"); row.className = "doc-row"; row.dataset.doc = id; const h = document.createElement("h3"); h.textContent = name; const state = document.createElement("div"); state.className = "doc-state"; const saved = customer.documents?.[id]; state.textContent = saved ? `Saved · ${saved.filename}` : "Not selected"; if (saved) state.classList.add("saved"); row.append(h, state); addPreviewPair(row, customer, id, saved);
+    documentDisplayOrder.filter(id => id !== "form20").forEach(id => {
+      const name = categories.find(([category]) => category === id)?.[1] || id;
+      const row = document.createElement("section"); row.className = "doc-row"; row.dataset.doc = id; const h = document.createElement("h3"); h.textContent = (documentDisplayOrder.indexOf(id) + 1) + ". " + name; const state = document.createElement("div"); state.className = "doc-state"; const saved = customer.documents?.[id]; state.textContent = saved ? `Saved · ${saved.filename}` : "Not selected"; if (saved) state.classList.add("saved"); row.append(h, state); addPreviewPair(row, customer, id, saved);
       if (id === "address-proof") { const select = document.createElement("select"); select.className = "subcat"; select.dataset.subcategory = "true"; select.innerHTML = '<option value="">Choose address proof type</option>'; addressTypes.forEach(type => { const option = document.createElement("option"); option.value = type; option.textContent = type; select.append(option); }); const current = saved?.subcategory; if (current) select.value = current; row.append(select); }
       const actions = document.createElement("div"); actions.className = "doc-actions"; const camera = document.createElement("button"); camera.type = "button"; camera.className = "secondary"; camera.textContent = "Camera"; camera.addEventListener("click", () => safeFileInput(id, true)); const browse = document.createElement("button"); browse.type = "button"; browse.className = "secondary"; browse.textContent = "Choose file"; browse.addEventListener("click", () => safeFileInput(id, false)); actions.append(camera, browse);
       if (saved) { const remove = document.createElement("button"); remove.type = "button"; remove.className = "danger"; remove.textContent = "Remove"; remove.addEventListener("click", async () => { if (!confirm(`Remove ${name}?`)) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/${id}`, { method: "DELETE" }); await openCustomer(customer._id); } catch (error) { alert(error.message); } }); actions.append(remove); }
       row.append(actions); list.append(row);
     });
-    const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const ftitle = document.createElement("h3"); ftitle.textContent = "Form 20 (Finance)"; const saved20 = customer.documents?.form20; const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? `Saved · ${saved20.filename}` : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
+    const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const ftitle = document.createElement("h3"); ftitle.textContent = (documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)"; const saved20 = customer.documents?.form20; const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? `Saved · ${saved20.filename}` : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
     const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions";
-    const capture = document.createElement("button"); capture.type = "button"; capture.className = "secondary"; capture.textContent = "Capture 3 photos"; capture.addEventListener("click", () => {
-      const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.multiple = true; input.capture = "environment"; input.setAttribute("aria-label", "Capture three Form 20 photos");
-      input.addEventListener("change", () => {
-        const files = [...(input.files || [])].slice(0, 30);
-        form20._file = null; form20._pages = files;
-        form20.querySelector(".doc-state").textContent = files.length ? `${files.length} photo${files.length === 1 ? "" : "s"} selected · Form 20` : "No photos selected";
-        setPreview(form20._selectedPreview, files[0] || null, files.length ? `Selected · ${files.length} photos` : "Selected");
-      });
-      input.click();
-    });
+    const capture = document.createElement("button"); capture.type = "button"; capture.className = "secondary"; capture.textContent = "Capture 3 photos"; capture.addEventListener("click", () => { void openForm20Camera(form20); });
     const choose20 = document.createElement("button"); choose20.type = "button"; choose20.className = "secondary"; choose20.textContent = "Choose PDF or photos";
     choose20.addEventListener("click", () => { const input = document.createElement("input"); input.type = "file"; input.accept = "application/pdf,image/*"; input.multiple = true; input.addEventListener("change", () => {
       const files = [...(input.files || [])]; const pdfs = files.filter(file => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
       if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = `${pdfs[0].name} → Form 20`; updateFileDetails(form20, pdfs[0]); setPreview(form20._selectedPreview, pdfs[0], "Selected"); }
       else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} photos selected · Form 20` : "Upload a PDF (3+ pages) or capture three photos"; if (files[0]) updateFileDetails(form20, files[0]); setPreview(form20._selectedPreview, files[0] || null, "Selected"); }
     }); input.click(); });
-    form20Actions.append(capture, choose20); form20.append(form20Actions); list.append(form20); host.append(list);
+    form20Actions.append(capture, choose20); form20.append(form20Actions); list.insertBefore(form20, list.children[3] || null); host.append(list);
     const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status"; result.textContent = "Choose any available documents. You can save fewer than 12."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected documents"; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar);
   }
   async function openCustomer(id) { try { const data = await request(`/api/upload-portal/customers/${id}`); currentCustomer = data.customer; renderCustomer(currentCustomer); } catch (error) { status($("searchStatus"), error.message, "error"); } }
