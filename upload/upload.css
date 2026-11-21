@@ -361,3 +361,66 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d9a91d77;border-color
  .pdf-preview-thumb{min-height:102px}
  .pdf-preview-canvas{max-height:96px}
 }
+
+/* Sign-in: two-column branded workspace, collapsing into a compact mobile card. */
+.login-card{
+  width:min(100%,1040px);max-width:1040px;margin:clamp(24px,6vh,68px) auto;
+  display:grid;grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);
+  gap:0;padding:0;overflow:hidden;border-color:#4a4026;
+  background:linear-gradient(145deg,#151512,#0f0f0e 65%,#13120f)
+}
+.login-showcase{
+  position:relative;isolation:isolate;min-height:540px;padding:clamp(28px,4.5vw,52px);
+  display:flex;flex-direction:column;justify-content:space-between;gap:30px;
+  border-right:1px solid #383324;
+  background:radial-gradient(ellipse at 10% 12%,#c79d3020,transparent 48%),linear-gradient(160deg,#1b1912,#11110f 70%)
+}
+.login-showcase:after{
+  content:"";position:absolute;z-index:-1;right:-55px;top:90px;width:260px;height:260px;
+  border:1px solid #d7bd5518;border-radius:50%;box-shadow:0 0 0 34px #d7bd5508,0 0 0 70px #d7bd5505
+}
+.login-lockup{display:inline-flex;align-items:center;gap:11px;width:max-content;color:var(--text);text-decoration:none;font:700 .76rem/1 "Space Grotesk",sans-serif;letter-spacing:.12em}
+.login-lockup img{width:46px;height:46px;object-fit:cover;border-radius:10px}
+.login-showcase-copy{max-width:460px}
+.login-showcase-copy .eyebrow{margin-bottom:14px}
+.login-showcase-copy h1{max-width:420px;margin-bottom:15px;font:600 clamp(2rem,4vw,3.1rem)/1.08 "Space Grotesk",sans-serif;letter-spacing:-.045em}
+.login-showcase-copy .muted{max-width:400px;margin-bottom:0;font-size:1rem;line-height:1.7}
+.login-highlights{display:grid;gap:14px}
+.login-highlights>div{display:flex;align-items:center;gap:13px}
+.login-highlight-icon{display:grid;place-items:center;flex:none;width:38px;height:38px;border:1px solid #5f512b;border-radius:11px;background:#d7bd5510;color:var(--gold2);font:700 .7rem "Space Grotesk",sans-serif}
+.login-highlights strong,.login-session-note strong{display:block;font-size:.87rem}
+.login-highlights small,.login-session-note small{display:block;margin-top:3px;color:var(--muted);font-size:.76rem;line-height:1.45}
+.login-session-note{display:flex;align-items:center;gap:11px;padding:14px 15px;border:1px solid #413a28;border-radius:12px;background:#0e0e0d}
+.login-session-dot{width:9px;height:9px;flex:none;border-radius:50%;background:#e1c35a;box-shadow:0 0 12px #e1c35a75}
+.login-form-panel{display:flex;flex-direction:column;justify-content:center;padding:clamp(28px,4.5vw,52px)}
+.login-form-heading{margin-bottom:27px}
+.login-form-heading .eyebrow{margin-bottom:11px}
+.login-form-heading h2{margin-bottom:9px;font:600 clamp(1.5rem,2.4vw,2rem)/1.16 "Space Grotesk",sans-serif;letter-spacing:-.035em}
+.login-form-heading .muted{margin-bottom:0;line-height:1.55}
+.login-form{gap:17px}
+.login-form label{gap:8px}
+.login-form input{min-height:48px;border-radius:10px}
+.login-form button{display:flex;align-items:center;justify-content:space-between;min-height:49px;margin-top:5px;padding:11px 17px;border-radius:10px;font-weight:700}
+.login-status{min-height:24px;margin:15px 0 0}
+.login-footnote{margin:10px 0 0;color:var(--muted);font-size:.74rem;line-height:1.45}
+@media(max-width:760px){
+ .login-card{width:min(100%,560px);grid-template-columns:1fr;margin:24px auto}
+ .login-showcase{min-height:0;gap:24px;padding:26px 24px 22px;border-right:0;border-bottom:1px solid #383324}
+ .login-showcase:after{top:42px;right:-100px;width:210px;height:210px}
+ .login-lockup img{width:39px;height:39px}
+ .login-showcase-copy h1{max-width:440px;font-size:clamp(1.9rem,8vw,2.6rem)}
+ .login-highlights{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .login-highlights>div{align-items:flex-start;gap:9px}
+ .login-highlight-icon{width:32px;height:32px;border-radius:9px}
+ .login-highlights small{font-size:.7rem}
+ .login-session-note{padding:11px 12px}
+ .login-form-panel{padding:27px 24px 29px}
+}
+@media(max-width:420px){
+ .login-card{margin:14px auto}
+ .login-showcase{padding:22px 18px 18px;gap:19px}
+ .login-highlights{grid-template-columns:1fr}
+ .login-highlights>div{align-items:center}
+ .login-highlights small{font-size:.74rem}
+ .login-form-panel{padding:24px 18px}
+}
