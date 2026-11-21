@@ -430,3 +430,58 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d9a91d77;border-color
 .native-capture-group .native-capture-page{min-width:0;white-space:normal}
 .native-capture-group .native-capture-save,.native-capture-group .native-capture-status{grid-column:1/-1}
 .native-capture-status{margin:0;overflow-wrap:anywhere}
+
+
+/* Make controls read clearly as tappable buttons and surface saved-file dates. */
+button.primary, button.secondary, button.quiet, button.danger {
+  min-height: 44px;
+  border-style: solid;
+  border-width: 1px;
+  font-weight: 700;
+  box-shadow: 0 2px 0 rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.08);
+}
+button.primary {
+  border-color: #f2d66e;
+  background: linear-gradient(180deg, #f3d45e, #d5a51a);
+  box-shadow: 0 3px 0 #846416, inset 0 1px 0 rgba(255,255,255,.35);
+}
+button.secondary {
+  border-color: #75643a;
+  background: linear-gradient(180deg, #302a1c, #211f1a);
+}
+button.quiet {
+  border-color: #625633;
+  background: linear-gradient(180deg, #24231e, #171714);
+}
+button.danger {
+  border-color: #92554d;
+  background: linear-gradient(180deg, #482723, #351e1c);
+}
+button.primary:hover:not(:disabled), button.secondary:hover:not(:disabled),
+button.quiet:hover:not(:disabled), button.danger:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+button.primary:focus-visible, button.secondary:focus-visible,
+button.quiet:focus-visible, button.danger:focus-visible {
+  outline: 2px solid var(--gold2);
+  outline-offset: 3px;
+}
+.doc-row .doc-modified {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: -3px 0 0;
+  padding: 5px 9px;
+  border: 1px solid #665528;
+  border-radius: 999px;
+  background: rgba(217,169,29,.12);
+  color: #f0cb55;
+  font-size: .72rem;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+@media(max-width:680px) {
+  .doc-actions button, .customer-controls button { min-height: 46px; }
+}
