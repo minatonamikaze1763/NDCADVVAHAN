@@ -712,9 +712,22 @@
     window.setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
   function readableSize(value) { const n = Number(value); if (!Number.isFinite(n) || n < 0) return "—"; if (n < 1024) return `${n} B`; if (n < 1024*1024) return `${(n/1024).toFixed(1)} KB`; return `${(n/1024/1024).toFixed(2)} MB`; }
+  function formatModifiedDate(saved) {
+    const value = saved?.originalLastModified ?? saved?.modifiedAt ?? saved?.uploadedAt;
+    if (value === undefined || value === null || value === "") return "Date unavailable";
+    const date = value instanceof Date ? value : typeof value === "number" || /^\\d+$/.test(String(value)) ? new Date(Number(value)) : new Date(value);
+    return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleString();
+  }
+  function addModifiedLabel(row, saved) {
+    if (!saved) { row.querySelector(".doc-modified")?.remove(); return; }
+    let label = row.querySelector(".doc-modified");
+    if (!label) { label = document.createElement("p"); label.className = "doc-modified"; label.setAttribute("aria-label", "Document modified time"); }
+    label.textContent = `Modified · ${formatModifiedDate(saved)}`;
+    row.querySelector(".doc-state")?.insertAdjacentElement("afterend", label);
+  }
   function addFileDetails(row, saved) {
     const details = document.createElement("dl"); details.className = "file-details";
-    const entries = [["Original filename", saved?.originalFilename || "—"], ["Original size", readableSize(saved?.originalSize)], ["Saved filename", saved?.filename || "—"], ["Saved size", readableSize(saved?.size)], ["Modified", saved?.originalLastModified || saved?.modifiedAt ? new Date(saved.originalLastModified || saved.modifiedAt).toLocaleString() : "—"]];
+    const entries = [["Original filename", saved?.originalFilename || "—"], ["Original size", readableSize(saved?.originalSize)], ["Saved filename", saved?.filename || "—"], ["Saved size", readableSize(saved?.size)], ["Modified", formatModifiedDate(saved)]];
     for (const [label, value] of entries) { const wrap = document.createElement("div"); const dt = document.createElement("dt"); dt.textContent = label; const dd = document.createElement("dd"); dd.dataset.detail = label; dd.textContent = value; wrap.append(dt, dd); details.append(wrap); }
     row.append(details); row._fileDetails = details;
   }
@@ -736,7 +749,7 @@
       });
       stored.append(tag, open);
     } else setPreview(stored, null, "Saved");
-    pair.append(selected, stored); row.append(pair); row._selectedPreview = selected; addFileDetails(row, saved);
+    pair.append(selected, stored); row.append(pair); addModifiedLabel(row, saved); row._selectedPreview = selected; addFileDetails(row, saved);
   }
   function queueFiles(files, host) {
     const queue = host.querySelector(".bulk-queue");
