@@ -135,12 +135,22 @@
     panel.className = "camera-capture";
     const heading = document.createElement("div");
     heading.className = "camera-capture-heading";
+    const headingText = document.createElement("div");
+    headingText.className = "camera-capture-title";
     const title = document.createElement("h2");
     title.textContent = options.title;
     const help = document.createElement("p");
     help.className = "muted";
     help.textContent = options.helpText;
-    heading.append(title, help);
+    headingText.append(title, help);
+    const flashToggle = document.createElement("button");
+    flashToggle.type = "button";
+    flashToggle.className = "camera-flash-toggle";
+    flashToggle.hidden = true;
+    flashToggle.textContent = "⚡ Flash off";
+    flashToggle.setAttribute("aria-label", "Turn camera flash on");
+    flashToggle.setAttribute("aria-pressed", "false");
+    heading.append(headingText, flashToggle);
     const video = document.createElement("video");
     video.className = "camera-capture-video";
     video.autoplay = true;
@@ -182,6 +192,7 @@
     const previewUrls = [];
     let stream = null;
     let cameraReady = false;
+    let flashEnabled = false;
     let closed = false;
     const cleanup = () => {
       if (closed) return;
@@ -200,6 +211,27 @@
       progress.textContent = !cameraReady ? "Starting camera…" : captured ? captured + " of " + count + " photos captured" : "Capture photo 1 of " + count;
     };
     updateControls();
+    flashToggle.addEventListener("click", async () => {
+      const track = stream?.getVideoTracks?.()[0];
+      const capabilities = track?.getCapabilities?.();
+      if (!track || !capabilities || !("torch" in capabilities)) {
+        flashToggle.hidden = true;
+        return;
+      }
+      flashToggle.disabled = true;
+      try {
+        const nextState = !flashEnabled;
+        await track.applyConstraints({advanced:[{torch:nextState}]});
+        flashEnabled = nextState;
+        flashToggle.textContent = flashEnabled ? "⚡ Flash on" : "⚡ Flash off";
+        flashToggle.setAttribute("aria-pressed", String(flashEnabled));
+        flashToggle.setAttribute("aria-label", flashEnabled ? "Turn camera flash off" : "Turn camera flash on");
+      } catch (error) {
+        status(progress, "This camera could not change its flash setting. You can still capture with the current lighting.", "error");
+      } finally {
+        flashToggle.disabled = false;
+      }
+    });
     capture.addEventListener("click", async () => {
       if (photos.length >= count || !video.videoWidth || !video.videoHeight) return;
       capture.disabled = true;
@@ -271,6 +303,12 @@
     try {
       stream = await navigator.mediaDevices.getUserMedia({audio:false, video:{facingMode:{ideal:"environment"}}});
       if (closed) { stream.getTracks().forEach(track => track.stop()); return; }
+      const videoTrack = stream.getVideoTracks()[0];
+      const cameraCapabilities = videoTrack?.getCapabilities?.();
+      if (cameraCapabilities && ("torch" in cameraCapabilities)) {
+        flashToggle.hidden = false;
+        flashToggle.disabled = false;
+      }
       video.srcObject = stream;
       await video.play();
       cameraReady = video.videoWidth > 0 && video.videoHeight > 0;

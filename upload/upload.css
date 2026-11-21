@@ -294,3 +294,45 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d9a91d77;border-color
 @keyframes ndc-save-spin { to { transform:rotate(360deg); } }
 @media(prefers-reduced-motion:reduce) { .save-spinner { animation-duration:2.4s; } }
 @media(max-width:480px) { .save-barrier { padding:16px; }.save-barrier-card { padding:26px 21px; } }
+
+
+/* Mobile card spacing: recover usable width for document previews. */
+@media(max-width:680px){
+ main{padding-left:8px;padding-right:8px}
+ .card{padding:14px}
+ .customer-heading{padding:16px 12px}
+ .customer-fields{padding:12px}
+ .bulk-upload{margin-left:8px;margin-right:8px;padding:12px}
+ .doc-toolbar{padding:12px 9px}
+ .doc-list{padding:0 8px 14px;gap:12px}
+ .doc-row{padding:11px;gap:10px}
+ .preview-pair{gap:8px}
+ .file-preview{min-height:148px;padding:11px 8px}
+ .file-preview img{height:82px}
+ .file-details{gap:7px}
+ .file-details>div{padding:9px}
+ .doc-actions{gap:8px}
+ .doc-actions button{min-height:42px;padding:9px 7px}
+}
+@media(max-width:420px){
+ main{padding-left:6px;padding-right:6px}
+ .card{padding:12px}
+ .customer-heading{padding:14px 10px}
+ .customer-fields{padding:10px}
+ .bulk-upload{margin-left:6px;margin-right:6px;padding:10px}
+ .doc-toolbar{padding:11px 7px}
+ .doc-list{padding:0 6px 12px;gap:10px}
+ .doc-row{padding:9px;gap:9px}
+ .preview-pair{gap:6px}
+ .file-preview{min-height:138px;padding:10px 6px}
+ .file-preview img{height:74px}
+ .file-details{gap:6px}
+ .file-details>div{padding:8px}
+ .file-details dd{font-size:.72rem}
+}
+.camera-capture-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.camera-capture-title{min-width:0}
+.camera-flash-toggle{flex:none;display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:8px 12px;border:1px solid #51462b;border-radius:10px;background:#1b1a16;color:var(--text);font:600 .82rem/1.2 "DM Sans",sans-serif;cursor:pointer}
+.camera-flash-toggle[aria-pressed="true"]{border-color:var(--gold2);background:#33280d;color:var(--gold2)}
+.camera-flash-toggle[hidden]{display:none!important}
+@media(max-width:420px){.camera-capture-heading{gap:8px}.camera-flash-toggle{min-height:38px;padding:7px 9px;font-size:.76rem}}
