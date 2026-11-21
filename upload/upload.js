@@ -116,9 +116,10 @@
     });
     input.click();
   }
-  async function openForm20Camera(form20) {
+  async function openPhotoCapture(options) {
+    const count = options.count;
     if (!navigator.mediaDevices?.getUserMedia) {
-      alert("Camera capture is unavailable in this browser. Use Choose PDF or photos to select three images.");
+      alert("Camera capture is unavailable in this browser. Choose document photos from your files instead.");
       return;
     }
     const dialog = document.createElement("dialog");
@@ -128,10 +129,10 @@
     const heading = document.createElement("div");
     heading.className = "camera-capture-heading";
     const title = document.createElement("h2");
-    title.textContent = "Capture Form 20";
+    title.textContent = options.title;
     const help = document.createElement("p");
     help.className = "muted";
-    help.textContent = "Take three clear photos. Review them before adding Form 20.";
+    help.textContent = options.helpText;
     heading.append(title, help);
     const video = document.createElement("video");
     video.className = "camera-capture-video";
@@ -145,13 +146,13 @@
     progress.textContent = "Starting camera…";
     const photoStrip = document.createElement("div");
     photoStrip.className = "camera-capture-photos";
-    photoStrip.setAttribute("aria-label", "Captured Form 20 photos");
+    photoStrip.setAttribute("aria-label", "Captured document photos");
     const actions = document.createElement("div");
     actions.className = "camera-capture-actions";
     const capture = document.createElement("button");
     capture.type = "button";
     capture.className = "primary";
-    capture.textContent = "Capture photo 1 of 3";
+    capture.disabled = true;
     const retake = document.createElement("button");
     retake.type = "button";
     retake.className = "secondary";
@@ -164,7 +165,7 @@
     const usePhotos = document.createElement("button");
     usePhotos.type = "button";
     usePhotos.className = "primary";
-    usePhotos.textContent = "Use 3 photos";
+    usePhotos.textContent = options.useLabel;
     usePhotos.disabled = true;
     actions.append(capture, retake, cancel, usePhotos);
     panel.append(heading, video, progress, photoStrip, actions);
@@ -173,6 +174,7 @@
     const photos = [];
     const previewUrls = [];
     let stream = null;
+    let cameraReady = false;
     let closed = false;
     const cleanup = () => {
       if (closed) return;
@@ -183,25 +185,33 @@
       dialog.remove();
     };
     const updateControls = () => {
-      const count = photos.length;
-      capture.textContent = count < 3 ? "Capture photo " + (count + 1) + " of 3" : "Three photos captured";
-      capture.disabled = count >= 3;
-      retake.disabled = count === 0;
-      usePhotos.disabled = count !== 3;
-      progress.textContent = count ? count + " of 3 photos captured" : "Capture photo 1 of 3";
+      const captured = photos.length;
+      capture.textContent = captured < count ? "Capture photo " + (captured + 1) + " of " + count : "All " + count + " photos captured";
+      capture.disabled = captured >= count || !cameraReady;
+      retake.disabled = captured === 0;
+      usePhotos.disabled = captured !== count;
+      progress.textContent = !cameraReady ? "Starting camera…" : captured ? captured + " of " + count + " photos captured" : "Capture photo 1 of " + count;
     };
+    updateControls();
     capture.addEventListener("click", async () => {
-      if (photos.length >= 3 || !video.videoWidth) return;
+      if (photos.length >= count || !video.videoWidth || !video.videoHeight) return;
       capture.disabled = true;
       try {
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", .9));
-        if (!blob) throw new Error("The camera photo could not be created. Try again.");
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Could not prepare the camera photo. Try again.");
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const frame = context.getImageData(0, 0, canvas.width, canvas.height).data;
+        const sampleStep = Math.max(4, Math.floor(frame.length / 1200 / 4) * 4);
+        let brightness = 0, samples = 0;
+        for (let pixel = 0; pixel < frame.length; pixel += sampleStep) { brightness += frame[pixel] * .2126 + frame[pixel + 1] * .7152 + frame[pixel + 2] * .0722; samples++; }
+        if (!samples || brightness / samples < 8) throw new Error("The camera view is too dark to capture. Check the camera preview and lighting, then try again.");
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", .88));
+        if (!blob || blob.size < 1000) throw new Error("The camera photo looks empty. Check the camera view and try again.");
         const index = photos.length + 1;
-        const file = new File([blob], "form20_page_" + index + ".jpg", {type:"image/jpeg", lastModified:Date.now()});
+        const file = new File([blob], options.filenamePrefix + "_page_" + index + ".jpg", {type:"image/jpeg", lastModified:Date.now()});
         photos.push(file);
         const url = URL.createObjectURL(file);
         previewUrls.push(url);
@@ -209,7 +219,7 @@
         item.className = "camera-photo-thumb";
         const image = document.createElement("img");
         image.src = url;
-        image.alt = "Form 20 photo " + index;
+        image.alt = "Captured page " + index;
         const caption = document.createElement("span");
         caption.textContent = "Page " + index;
         item.append(image, caption);
@@ -218,7 +228,7 @@
       } catch (error) {
         status(progress, error.message, "error");
       } finally {
-        if (photos.length < 3) capture.disabled = false;
+        if (photos.length < count) capture.disabled = false;
       }
     });
     retake.addEventListener("click", () => {
@@ -229,14 +239,23 @@
       photos.pop();
       updateControls();
     });
-    usePhotos.addEventListener("click", () => {
-      if (photos.length !== 3) return;
-      form20._file = null;
-      form20._pages = photos.slice();
-      form20.querySelector(".doc-state").textContent = "3 photos captured · Form 20";
-      updateFileDetails(form20, photos[0]);
-      setPreview(form20._selectedPreview, photos[0], "Selected · 3 photos");
-      cleanup();
+    usePhotos.addEventListener("click", async () => {
+      if (photos.length !== count) return;
+      usePhotos.disabled = true;
+      capture.disabled = true;
+      retake.disabled = true;
+      usePhotos.textContent = options.savingLabel;
+      status(progress, options.savingStatus);
+      try {
+        await options.onUse(photos.slice(), progress);
+        cleanup();
+        if (options.advanceRow) advanceToNextDocument(options.advanceRow, options.host);
+      } catch (error) {
+        status(progress, error.message || "Could not save these photos. Try again.", "error");
+        usePhotos.disabled = false;
+        usePhotos.textContent = options.useLabel;
+        updateControls();
+      }
     });
     cancel.addEventListener("click", cleanup);
     dialog.addEventListener("cancel", event => { event.preventDefault(); cleanup(); });
@@ -247,11 +266,152 @@
       if (closed) { stream.getTracks().forEach(track => track.stop()); return; }
       video.srcObject = stream;
       await video.play();
-      status(progress, "Capture photo 1 of 3");
+      cameraReady = video.videoWidth > 0 && video.videoHeight > 0;
+      video.addEventListener("loadeddata", () => { cameraReady = video.videoWidth > 0 && video.videoHeight > 0; updateControls(); }, {once:true});
+      updateControls();
     } catch (error) {
-      status(progress, error.name === "NotAllowedError" ? "Allow camera access in your browser settings, then try again." : "Could not start the camera. Use Choose PDF or photos instead.", "error");
+      status(progress, error.name === "NotAllowedError" ? "Allow camera access in your browser settings, then try again." : "Could not start the camera. Choose photos from your files instead.", "error");
       capture.disabled = true;
     }
+  }
+  async function photoAsJpeg(file, maxEdge, quality) {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const context = canvas.getContext("2d", {alpha:false});
+    if (!context) { bitmap.close?.(); throw new Error("Could not prepare Aadhaar photos as a PDF."); }
+    context.fillStyle = "#fff";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close?.();
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", quality));
+    if (!blob) throw new Error("Could not compress an Aadhaar photo.");
+    return {bytes:new Uint8Array(await blob.arrayBuffer()), width:canvas.width, height:canvas.height};
+  }
+  function imagePagesPdf(pages) {
+    const encoder = new TextEncoder();
+    const chunks = [];
+    const offsets = new Array(3 + pages.length * 3).fill(0);
+    let length = 0;
+    const pushBytes = bytes => { chunks.push(bytes); length += bytes.length; };
+    const pushText = text => pushBytes(encoder.encode(text));
+    const addObject = (id, body) => {
+      offsets[id] = length;
+      pushText(id + " 0 obj\n" + body + "\nendobj\n");
+    };
+    pushText("%PDF-1.4\n");
+    const pageIds = pages.map((_, index) => 3 + index * 3);
+    addObject(1, "<< /Type /Catalog /Pages 2 0 R >>");
+    addObject(2, "<< /Type /Pages /Count " + pages.length + " /Kids [" + pageIds.map(id => id + " 0 R").join(" ") + "] >>");
+    pages.forEach((image, index) => {
+      const pageId = 3 + index * 3;
+      const imageId = pageId + 1;
+      const contentId = pageId + 2;
+      const pageWidth = 595.28, pageHeight = 841.89;
+      const scale = Math.min(pageWidth / image.width, pageHeight / image.height);
+      const width = image.width * scale, height = image.height * scale;
+      const x = (pageWidth - width) / 2, y = (pageHeight - height) / 2;
+      const content = "q\n" + width.toFixed(2) + " 0 0 " + height.toFixed(2) + " " + x.toFixed(2) + " " + y.toFixed(2) + " cm\n/Im0 Do\nQ";
+      const contentLength = encoder.encode(content).length;
+      addObject(pageId, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + pageWidth + " " + pageHeight + "] /Resources << /XObject << /Im0 " + imageId + " 0 R >> >> /Contents " + contentId + " 0 R >>");
+      offsets[imageId] = length;
+      pushText(imageId + " 0 obj\n<< /Type /XObject /Subtype /Image /Width " + image.width + " /Height " + image.height + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + image.bytes.length + " >>\nstream\n");
+      pushBytes(image.bytes);
+      pushText("\nendstream\nendobj\n");
+      addObject(contentId, "<< /Length " + contentLength + " >>\nstream\n" + content + "\nendstream");
+    });
+    const xrefOffset = length;
+    const size = offsets.length;
+    pushText("xref\n0 " + size + "\n0000000000 65535 f \n");
+    for (let id = 1; id < size; id++) pushText(String(offsets[id]).padStart(10, "0") + " 00000 n \n");
+    pushText("trailer\n<< /Size " + size + " /Root 1 0 R >>\nstartxref\n" + xrefOffset + "\n%%EOF\n");
+    return new Blob(chunks, {type:"application/pdf"});
+  }
+  async function createAadhaarPdf(photos, filename) {
+    const profiles = [{edge:1800,quality:.72},{edge:1500,quality:.62},{edge:1250,quality:.52},{edge:1000,quality:.42}];
+    for (const profile of profiles) {
+      const pages = [];
+      for (const photo of photos) pages.push(await photoAsJpeg(photo, profile.edge, profile.quality));
+      const pdf = imagePagesPdf(pages);
+      if (pdf.size <= 380000) return new File([pdf], filename, {type:"application/pdf", lastModified:Date.now()});
+    }
+    throw new Error("The two-page Aadhaar PDF is still too large. Retake the photos in good light and try again.");
+  }
+  function updateSavedDocumentRow(customer, host, row, category, saved) {
+    customer.documents = {...(customer.documents || {}), [category]:saved};
+    currentCustomer = customer;
+    row._file = null;
+    row._pages = [];
+    const state = row.querySelector(".doc-state");
+    state.textContent = "Saved · " + saved.filename;
+    state.classList.add("saved");
+    const selector = row.querySelector("[data-subcategory]");
+    const actions = row.querySelector(".doc-actions");
+    row.querySelector(".preview-pair")?.remove();
+    row.querySelector(".file-details")?.remove();
+    selector?.remove();
+    actions?.remove();
+    addPreviewPair(row, customer, category, saved);
+    if (selector) row.append(selector);
+    if (actions) row.append(actions);
+    const savedCount = Object.keys(customer.documents).length;
+    const count = host.querySelector(".doc-toolbar .muted");
+    if (count) count.textContent = savedCount + " of 12 saved";
+    host.querySelectorAll(".zip-download,.zip-share").forEach(button => { button.disabled = savedCount === 0; });
+  }
+  async function saveCapturedForm20(customer, host, row, photos, progress) {
+    await request("/api/upload-portal/customers/" + customer._id + "/form20/stage", {method:"DELETE"});
+    for (let index = 0; index < photos.length; index++) {
+      const photo = photos[index];
+      status(progress, "Uploading Form 20 page " + (index + 1) + " of " + photos.length + "…");
+      await request("/api/upload-portal/customers/" + customer._id + "/form20/pages/" + (index + 1), {
+        method:"PUT",
+        headers:{"Content-Type":"application/octet-stream","X-NDC-Original-Type":photo.type,"X-NDC-Original-Filename":photo.name,"X-NDC-Original-Size":String(photo.size),"X-NDC-Original-Last-Modified":String(photo.lastModified || Date.now())},
+        body:photo
+      });
+    }
+    status(progress, "Combining the Form 20 photos into one PDF…");
+    const result = await request("/api/upload-portal/customers/" + customer._id + "/form20/complete", {method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+    const saved = {...result,contentType:"application/pdf",subcategory:null,uploadedAt:new Date().toISOString(),modifiedAt:result.originalLastModified || new Date().toISOString()};
+    updateSavedDocumentRow(customer, host, row, "form20", saved);
+    await searchCustomers($("search").value);
+    status($("saveStatus"), "Form 20 saved as one PDF. Continue with the next document.", "success");
+  }
+  async function saveCapturedAadhaar(customer, host, row, photos, progress) {
+    status(progress, "Combining Aadhaar front and back into one PDF…");
+    const file = await createAadhaarPdf(photos, safeFilenamePart(customer.customerName) + "_aadhaar_front_back.pdf");
+    const result = await request("/api/upload-portal/customers/" + customer._id + "/documents/address-proof", {
+      method:"PUT",
+      headers:{"Content-Type":"application/octet-stream","X-NDC-Original-Type":"application/pdf","X-NDC-Original-Filename":file.name,"X-NDC-Original-Size":String(file.size),"X-NDC-Original-Last-Modified":String(file.lastModified || Date.now()),"X-NDC-Subcategory":"Aadhaar"},
+      body:file
+    });
+    result.subcategory = "Aadhaar";
+    result.uploadedAt = new Date().toISOString();
+    updateSavedDocumentRow(customer, host, row, "address-proof", result);
+    await searchCustomers($("search").value);
+    status($("saveStatus"), "Aadhaar front and back saved together as one PDF. Continue with the next document.", "success");
+  }
+  function advanceToNextDocument(row, host) {
+    const rows = [...host.querySelectorAll(".doc-row[data-doc]")];
+    const next = rows[rows.indexOf(row) + 1];
+    if (next) next.scrollIntoView({behavior:"smooth",block:"center"});
+    else host.querySelector(".save-bar")?.scrollIntoView({behavior:"smooth",block:"center"});
+  }
+  async function openForm20Camera(form20, customer, host) {
+    await openPhotoCapture({
+      count:3,
+      title:"Capture Form 20",
+      helpText:"Take three clear photos. They will be combined and saved as one Form 20 PDF.",
+      filenamePrefix:"form20",
+      useLabel:"Use 3 photos",
+      savingLabel:"Saving Form 20…",
+      savingStatus:"Combining and saving Form 20…",
+      advanceRow:form20,
+      host,
+      onUse:photos => saveCapturedForm20(customer, host, form20, photos, document.querySelector(".camera-capture-status"))
+    });
   }
   function safeFilenamePart(value) { return String(value || "customer").normalize("NFKC").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 80) || "customer"; }
   function classifyFile(name) {
@@ -581,14 +741,33 @@
     documentDisplayOrder.filter(id => id !== "form20").forEach(id => {
       const name = categories.find(([category]) => category === id)?.[1] || id;
       const row = document.createElement("section"); row.className = "doc-row"; row.dataset.doc = id; const h = document.createElement("h3"); h.textContent = (documentDisplayOrder.indexOf(id) + 1) + ". " + name; const state = document.createElement("div"); state.className = "doc-state"; const saved = customer.documents?.[id]; state.textContent = saved ? `Saved · ${saved.filename}` : "Not selected"; if (saved) state.classList.add("saved"); row.append(h, state); addPreviewPair(row, customer, id, saved);
-      if (id === "address-proof") { const select = document.createElement("select"); select.className = "subcat"; select.dataset.subcategory = "true"; select.innerHTML = '<option value="">Choose address proof type</option>'; addressTypes.forEach(type => { const option = document.createElement("option"); option.value = type; option.textContent = type; select.append(option); }); const current = saved?.subcategory; if (current) select.value = current; row.append(select); }
+      let addressTypeSelect = null, aadhaarCaptureHint = null;
+      if (id === "address-proof") {
+        const select = document.createElement("select"); select.className = "subcat"; select.dataset.subcategory = "true"; select.innerHTML = '<option value="">Choose address proof type</option>'; addressTypes.forEach(type => { const option = document.createElement("option"); option.value = type; option.textContent = type; select.append(option); }); if (saved?.subcategory) select.value = saved.subcategory; addressTypeSelect = select;
+        aadhaarCaptureHint = document.createElement("p"); aadhaarCaptureHint.className = "aadhar-capture-hint muted"; aadhaarCaptureHint.textContent = "Optional: capture Aadhaar front and back to save them together as one PDF."; aadhaarCaptureHint.hidden = true;
+        row.append(select, aadhaarCaptureHint);
+      }
       const actions = document.createElement("div"); actions.className = "doc-actions"; const camera = document.createElement("button"); camera.type = "button"; camera.className = "secondary"; camera.textContent = "Camera"; camera.addEventListener("click", () => safeFileInput(id, true)); const browse = document.createElement("button"); browse.type = "button"; browse.className = "secondary"; browse.textContent = "Choose file"; browse.addEventListener("click", () => safeFileInput(id, false)); actions.append(camera, browse);
+      if (id === "address-proof") {
+        const aadhaarCapture = document.createElement("button"); aadhaarCapture.type = "button"; aadhaarCapture.className = "secondary aadhaar-capture"; aadhaarCapture.textContent = "Capture Aadhaar front + back"; aadhaarCapture.hidden = true;
+        aadhaarCapture.addEventListener("click", () => {
+          if (addressTypeSelect.value !== "Aadhaar") { status($("saveStatus"), "Choose Aadhaar as the address-proof type first.", "error"); return; }
+          void openPhotoCapture({
+            count:2,title:"Capture Aadhaar front and back",helpText:"Capture both sides. They will be combined and saved as one Aadhaar PDF.",filenamePrefix:"aadhaar",useLabel:"Use front + back",savingLabel:"Saving Aadhaar PDF…",savingStatus:"Combining and saving both Aadhaar sides…",advanceRow:row,host,
+            onUse:photos => saveCapturedAadhaar(customer, host, row, photos, document.querySelector(".camera-capture-status"))
+          });
+        });
+        actions.append(aadhaarCapture);
+        const updateAadhaarOption = () => { const visible = addressTypeSelect.value === "Aadhaar"; aadhaarCapture.hidden = !visible; aadhaarCaptureHint.hidden = !visible; };
+        addressTypeSelect.addEventListener("change", updateAadhaarOption);
+        updateAadhaarOption();
+      }
       if (saved) { const remove = document.createElement("button"); remove.type = "button"; remove.className = "danger"; remove.textContent = "Remove"; remove.addEventListener("click", async () => { if (!confirm(`Remove ${name}?`)) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/${id}`, { method: "DELETE" }); await openCustomer(customer._id); } catch (error) { alert(error.message); } }); actions.append(remove); }
       row.append(actions); list.append(row);
     });
     const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const ftitle = document.createElement("h3"); ftitle.textContent = (documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)"; const saved20 = customer.documents?.form20; const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? `Saved · ${saved20.filename}` : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
     const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions";
-    const capture = document.createElement("button"); capture.type = "button"; capture.className = "secondary"; capture.textContent = "Capture 3 photos"; capture.addEventListener("click", () => { void openForm20Camera(form20); });
+    const capture = document.createElement("button"); capture.type = "button"; capture.className = "secondary"; capture.textContent = "Capture 3 photos"; capture.addEventListener("click", () => { void openForm20Camera(form20, customer, host); });
     const choose20 = document.createElement("button"); choose20.type = "button"; choose20.className = "secondary"; choose20.textContent = "Choose PDF or photos";
     choose20.addEventListener("click", () => { const input = document.createElement("input"); input.type = "file"; input.accept = "application/pdf,image/*"; input.multiple = true; input.addEventListener("change", () => {
       const files = [...(input.files || [])]; const pdfs = files.filter(file => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
