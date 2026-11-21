@@ -266,201 +266,98 @@
     });
     input.click();
   }
-  async function openPhotoCapture(options) {
-    const count = options.count;
-    if (!navigator.mediaDevices?.getUserMedia) {
-      alert("Camera capture is unavailable in this browser. Choose document photos from your files instead.");
-      return;
-    }
-    const dialog = document.createElement("dialog");
-    dialog.className = "dialog camera-dialog";
-    const panel = document.createElement("div");
-    panel.className = "camera-capture";
-    const heading = document.createElement("div");
-    heading.className = "camera-capture-heading";
-    const headingText = document.createElement("div");
-    headingText.className = "camera-capture-title";
-    const title = document.createElement("h2");
-    title.textContent = options.title;
-    const help = document.createElement("p");
-    help.className = "muted";
-    help.textContent = options.helpText;
-    headingText.append(title, help);
-    const flashToggle = document.createElement("button");
-    flashToggle.type = "button";
-    flashToggle.className = "camera-flash-toggle";
-    flashToggle.hidden = true;
-    flashToggle.textContent = "⚡ Flash off";
-    flashToggle.setAttribute("aria-label", "Turn camera flash on");
-    flashToggle.setAttribute("aria-pressed", "false");
-    heading.append(headingText, flashToggle);
-    const video = document.createElement("video");
-    video.className = "camera-capture-video";
-    video.autoplay = true;
-    video.playsInline = true;
-    video.muted = true;
-    video.setAttribute("aria-label", "Live camera preview");
+  function capturePhotoFromDefaultCamera() {
+    return new Promise(resolve => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.capture = "environment";
+      let settled = false;
+      const finish = file => {
+        if (settled) return;
+        settled = true;
+        input.remove();
+        resolve(file || null);
+      };
+      input.addEventListener("change", () => finish(input.files?.[0]), {once:true});
+      input.addEventListener("cancel", () => finish(null), {once:true});
+      input.click();
+    });
+  }
+  function addNativeMultiPhotoCapture(actions, row, {labels, documentName, saveLabel, onSave}) {
+    const photos = Array(labels.length).fill(null);
+    const captureButtons = [];
     const progress = document.createElement("p");
-    progress.className = "status camera-capture-status";
+    progress.className = "status native-capture-status";
     progress.setAttribute("role", "status");
-    progress.textContent = "Starting camera…";
-    const photoStrip = document.createElement("div");
-    photoStrip.className = "camera-capture-photos";
-    photoStrip.setAttribute("aria-label", "Captured document photos");
-    const actions = document.createElement("div");
-    actions.className = "camera-capture-actions";
-    const capture = document.createElement("button");
-    capture.type = "button";
-    capture.className = "primary";
-    capture.disabled = true;
-    const retake = document.createElement("button");
-    retake.type = "button";
-    retake.className = "secondary";
-    retake.textContent = "Retake last";
-    retake.disabled = true;
-    const cancel = document.createElement("button");
-    cancel.type = "button";
-    cancel.className = "quiet";
-    cancel.textContent = "Cancel";
-    const usePhotos = document.createElement("button");
-    usePhotos.type = "button";
-    usePhotos.className = "primary";
-    usePhotos.textContent = options.useLabel;
-    usePhotos.disabled = true;
-    actions.append(capture, retake, cancel, usePhotos);
-    panel.append(heading, video, progress, photoStrip, actions);
-    dialog.append(panel);
-    document.body.append(dialog);
-    const photos = [];
-    const previewUrls = [];
-    let stream = null;
-    let cameraReady = false;
-    let flashEnabled = false;
-    let closed = false;
-    const cleanup = () => {
-      if (closed) return;
-      closed = true;
-      stream?.getTracks().forEach(track => track.stop());
-      previewUrls.forEach(url => URL.revokeObjectURL(url));
-      if (dialog.open) dialog.close();
-      dialog.remove();
+    progress.textContent = `Capture ${labels.length} photos to create the ${documentName} PDF.`;
+    const save = document.createElement("button");
+    save.type = "button";
+    save.className = "primary full native-capture-save";
+    save.textContent = saveLabel;
+    save.disabled = true;
+    const update = () => {
+      const captured = photos.filter(Boolean).length;
+      captureButtons.forEach((button, index) => {
+        button.disabled = saving;
+        button.textContent = photos[index] ? `Retake ${labels[index]}` : `Capture ${labels[index]}`;
+      });
+      save.disabled = saving || saved || captured !== photos.length;
+      if (saved) {
+        save.textContent = "PDF saved";
+        progress.textContent = `${documentName} PDF saved successfully.`;
+      } else {
+        save.textContent = saveLabel;
+        progress.textContent = captured === photos.length
+          ? `All ${captured} photos captured. Combine and save the PDF.`
+          : `${captured} of ${photos.length} photos captured.`;
+      }
     };
-    const updateControls = () => {
-      const captured = photos.length;
-      capture.textContent = captured < count ? "Capture photo " + (captured + 1) + " of " + count : "All " + count + " photos captured";
-      capture.disabled = captured >= count || !cameraReady;
-      retake.disabled = captured === 0;
-      usePhotos.disabled = captured !== count;
-      progress.textContent = !cameraReady ? "Starting camera…" : captured ? captured + " of " + count + " photos captured" : "Capture photo 1 of " + count;
-    };
-    updateControls();
-    flashToggle.addEventListener("click", async () => {
-      const track = stream?.getVideoTracks?.()[0];
-      const capabilities = track?.getCapabilities?.();
-      if (!track || !capabilities || !("torch" in capabilities)) {
-        flashToggle.hidden = true;
-        return;
-      }
-      flashToggle.disabled = true;
+    let saving = false;
+    let saved = false;
+    labels.forEach((label, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "secondary native-capture-page";
+      button.textContent = `Capture ${label}`;
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        button.textContent = `Opening camera for ${label}…`;
+        try {
+          const photo = await capturePhotoFromDefaultCamera();
+          if (!photo) {
+            progress.textContent = `No photo selected for ${label}. You can try again.`;
+            return;
+          }
+          photos[index] = photo;
+          saved = false;
+          update();
+        } catch (error) {
+          progress.textContent = error.message || `Could not capture ${label}. Try again.`;
+        } finally {
+          if (!saving) button.disabled = false;
+        }
+      });
+      captureButtons.push(button);
+      actions.append(button);
+    });
+    save.addEventListener("click", async () => {
+      if (saving || saved || photos.some(photo => !photo)) return;
+      saving = true;
+      update();
       try {
-        const nextState = !flashEnabled;
-        await track.applyConstraints({advanced:[{torch:nextState}]});
-        flashEnabled = nextState;
-        flashToggle.textContent = flashEnabled ? "⚡ Flash on" : "⚡ Flash off";
-        flashToggle.setAttribute("aria-pressed", String(flashEnabled));
-        flashToggle.setAttribute("aria-label", flashEnabled ? "Turn camera flash off" : "Turn camera flash on");
+        await onSave(photos.slice(), progress);
+        saved = true;
       } catch (error) {
-        status(progress, "This camera could not change its flash setting. You can still capture with the current lighting.", "error");
+        progress.textContent = error.message || `Could not save the ${documentName} PDF. Try again.`;
       } finally {
-        flashToggle.disabled = false;
+        saving = false;
+        update();
       }
     });
-    capture.addEventListener("click", async () => {
-      if (photos.length >= count || !video.videoWidth || !video.videoHeight) return;
-      capture.disabled = true;
-      try {
-        const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const context = canvas.getContext("2d");
-        if (!context) throw new Error("Could not prepare the camera photo. Try again.");
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const frame = context.getImageData(0, 0, canvas.width, canvas.height).data;
-        const sampleStep = Math.max(4, Math.floor(frame.length / 1200 / 4) * 4);
-        let brightness = 0, samples = 0;
-        for (let pixel = 0; pixel < frame.length; pixel += sampleStep) { brightness += frame[pixel] * .2126 + frame[pixel + 1] * .7152 + frame[pixel + 2] * .0722; samples++; }
-        if (!samples || brightness / samples < 8) throw new Error("The camera view is too dark to capture. Check the camera preview and lighting, then try again.");
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", .88));
-        if (!blob || blob.size < 1000) throw new Error("The camera photo looks empty. Check the camera view and try again.");
-        const index = photos.length + 1;
-        const file = new File([blob], options.filenamePrefix + "_page_" + index + ".jpg", {type:"image/jpeg", lastModified:Date.now()});
-        photos.push(file);
-        const url = URL.createObjectURL(file);
-        previewUrls.push(url);
-        const item = document.createElement("div");
-        item.className = "camera-photo-thumb";
-        const image = document.createElement("img");
-        image.src = url;
-        image.alt = "Captured page " + index;
-        const caption = document.createElement("span");
-        caption.textContent = "Page " + index;
-        item.append(image, caption);
-        photoStrip.append(item);
-        updateControls();
-      } catch (error) {
-        status(progress, error.message, "error");
-      } finally {
-        if (photos.length < count) capture.disabled = false;
-      }
-    });
-    retake.addEventListener("click", () => {
-      const item = photoStrip.lastElementChild;
-      if (item) item.remove();
-      const url = previewUrls.pop();
-      if (url) URL.revokeObjectURL(url);
-      photos.pop();
-      updateControls();
-    });
-    usePhotos.addEventListener("click", async () => {
-      if (photos.length !== count) return;
-      usePhotos.disabled = true;
-      capture.disabled = true;
-      retake.disabled = true;
-      usePhotos.textContent = options.savingLabel;
-      status(progress, options.savingStatus);
-      try {
-        await options.onUse(photos.slice(), progress);
-        cleanup();
-        if (options.advanceRow) advanceToNextDocument(options.advanceRow, options.host);
-      } catch (error) {
-        status(progress, error.message || "Could not save these photos. Try again.", "error");
-        usePhotos.disabled = false;
-        usePhotos.textContent = options.useLabel;
-        updateControls();
-      }
-    });
-    cancel.addEventListener("click", cleanup);
-    dialog.addEventListener("cancel", event => { event.preventDefault(); cleanup(); });
-    dialog.addEventListener("click", event => { if (event.target === dialog) cleanup(); });
-    dialog.showModal();
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({audio:false, video:{facingMode:{ideal:"environment"}}});
-      if (closed) { stream.getTracks().forEach(track => track.stop()); return; }
-      const videoTrack = stream.getVideoTracks()[0];
-      const cameraCapabilities = videoTrack?.getCapabilities?.();
-      if (cameraCapabilities && ("torch" in cameraCapabilities)) {
-        flashToggle.hidden = false;
-        flashToggle.disabled = false;
-      }
-      video.srcObject = stream;
-      await video.play();
-      cameraReady = video.videoWidth > 0 && video.videoHeight > 0;
-      video.addEventListener("loadeddata", () => { cameraReady = video.videoWidth > 0 && video.videoHeight > 0; updateControls(); }, {once:true});
-      updateControls();
-    } catch (error) {
-      status(progress, error.name === "NotAllowedError" ? "Allow camera access in your browser settings, then try again." : "Could not start the camera. Choose photos from your files instead.", "error");
-      capture.disabled = true;
-    }
+    actions.append(save, progress);
+    row._nativeCameraPhotos = photos;
+    update();
   }
   async function photoAsJpeg(file, targetBytes) {
     const bitmap = await createImageBitmap(file);
@@ -563,26 +460,6 @@
     updateSavedDocumentRow(customer, host, row, "address-proof", result);
     await searchCustomers($("search").value);
     status($("saveStatus"), "Aadhaar front and back saved together as one PDF. Continue with the next document.", "success");
-  }
-  function advanceToNextDocument(row, host) {
-    const rows = [...host.querySelectorAll(".doc-row[data-doc]")];
-    const next = rows[rows.indexOf(row) + 1];
-    if (next) next.scrollIntoView({behavior:"smooth",block:"center"});
-    else host.querySelector(".save-bar")?.scrollIntoView({behavior:"smooth",block:"center"});
-  }
-  async function openForm20Camera(form20, customer, host) {
-    await openPhotoCapture({
-      count:3,
-      title:"Capture Form 20",
-      helpText:"Take three clear photos. They will be combined and saved as one Form 20 PDF.",
-      filenamePrefix:"form20",
-      useLabel:"Use 3 photos",
-      savingLabel:"Saving Form 20…",
-      savingStatus:"Combining and saving Form 20…",
-      advanceRow:form20,
-      host,
-      onUse:photos => saveCapturedForm20(customer, host, form20, photos, document.querySelector(".camera-capture-status"))
-    });
   }
   function safeFilenamePart(value) { return String(value || "customer").normalize("NFKC").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 80) || "customer"; }
   function classifyFile(name) {
@@ -948,24 +825,20 @@
     documentDisplayOrder.filter(id => id !== "form20").forEach(id => {
       const name = categories.find(([category]) => category === id)?.[1] || id;
       const row = document.createElement("section"); row.className = "doc-row"; row.dataset.doc = id; const h = document.createElement("h3"); h.textContent = (documentDisplayOrder.indexOf(id) + 1) + ". " + name; const state = document.createElement("div"); state.className = "doc-state"; const saved = customer.documents?.[id]; state.textContent = saved ? `Saved · ${saved.filename}` : "Not selected"; if (saved) state.classList.add("saved"); row.append(h, state); addPreviewPair(row, customer, id, saved);
-      let addressTypeSelect = null, aadhaarCaptureHint = null;
+      let addressTypeSelect = null, aadhaarCaptureHint = null, aadhaarCaptureControls = null;
       if (id === "address-proof") {
         const select = document.createElement("select"); select.className = "subcat"; select.dataset.subcategory = "true"; select.innerHTML = '<option value="">Choose address proof type</option>'; addressTypes.forEach(type => { const option = document.createElement("option"); option.value = type; option.textContent = type; select.append(option); }); if (saved?.subcategory) select.value = saved.subcategory; addressTypeSelect = select;
         aadhaarCaptureHint = document.createElement("p"); aadhaarCaptureHint.className = "aadhar-capture-hint muted"; aadhaarCaptureHint.textContent = "Optional: capture Aadhaar front and back to save them together as one PDF."; aadhaarCaptureHint.hidden = true;
-        row.append(select, aadhaarCaptureHint);
+        aadhaarCaptureControls = document.createElement("div"); aadhaarCaptureControls.className = "doc-actions native-capture-group aadhaar-native-capture"; aadhaarCaptureControls.hidden = true;
+        addNativeMultiPhotoCapture(aadhaarCaptureControls, row, {
+          labels:["Front side", "Back side"], documentName:"Aadhaar", saveLabel:"Combine and save Aadhaar PDF",
+          onSave:(photos, progress) => saveCapturedAadhaar(customer, host, row, photos, progress)
+        });
+        row.append(select, aadhaarCaptureHint, aadhaarCaptureControls);
       }
       const actions = document.createElement("div"); actions.className = "doc-actions"; const camera = document.createElement("button"); camera.type = "button"; camera.className = "secondary"; camera.textContent = "Camera"; camera.addEventListener("click", () => safeFileInput(id, true)); const browse = document.createElement("button"); browse.type = "button"; browse.className = "secondary"; browse.textContent = "Choose file"; browse.addEventListener("click", () => safeFileInput(id, false)); actions.append(camera, browse);
       if (id === "address-proof") {
-        const aadhaarCapture = document.createElement("button"); aadhaarCapture.type = "button"; aadhaarCapture.className = "secondary aadhaar-capture"; aadhaarCapture.textContent = "Capture Aadhaar front + back"; aadhaarCapture.hidden = true;
-        aadhaarCapture.addEventListener("click", () => {
-          if (addressTypeSelect.value !== "Aadhaar") { status($("saveStatus"), "Choose Aadhaar as the address-proof type first.", "error"); return; }
-          void openPhotoCapture({
-            count:2,title:"Capture Aadhaar front and back",helpText:"Capture both sides. They will be combined and saved as one Aadhaar PDF.",filenamePrefix:"aadhaar",useLabel:"Use front + back",savingLabel:"Saving Aadhaar PDF…",savingStatus:"Combining and saving both Aadhaar sides…",advanceRow:row,host,
-            onUse:photos => saveCapturedAadhaar(customer, host, row, photos, document.querySelector(".camera-capture-status"))
-          });
-        });
-        actions.append(aadhaarCapture);
-        const updateAadhaarOption = () => { const visible = addressTypeSelect.value === "Aadhaar"; aadhaarCapture.hidden = !visible; aadhaarCaptureHint.hidden = !visible; };
+        const updateAadhaarOption = () => { const visible = addressTypeSelect.value === "Aadhaar"; aadhaarCaptureControls.hidden = !visible; aadhaarCaptureHint.hidden = !visible; };
         addressTypeSelect.addEventListener("change", updateAadhaarOption);
         updateAadhaarOption();
       }
@@ -974,14 +847,19 @@
     });
     const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const ftitle = document.createElement("h3"); ftitle.textContent = (documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)"; const saved20 = customer.documents?.form20; const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? `Saved · ${saved20.filename}` : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
     const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions";
-    const capture = document.createElement("button"); capture.type = "button"; capture.className = "secondary"; capture.textContent = "Capture 3 photos"; capture.addEventListener("click", () => { void openForm20Camera(form20, customer, host); });
+    const form20CaptureControls = document.createElement("div"); form20CaptureControls.className = "doc-actions native-capture-group";
+    addNativeMultiPhotoCapture(form20CaptureControls, form20, {
+      labels:["Page 1", "Page 2", "Page 3"], documentName:"Form 20", saveLabel:"Combine and save Form 20 PDF",
+      onSave:(photos, progress) => saveCapturedForm20(customer, host, form20, photos, progress)
+    });
+    form20Actions.append(form20CaptureControls);
     const choose20 = document.createElement("button"); choose20.type = "button"; choose20.className = "secondary"; choose20.textContent = "Choose PDF or photos";
     choose20.addEventListener("click", () => { const input = document.createElement("input"); input.type = "file"; input.accept = "application/pdf,image/*"; input.multiple = true; input.addEventListener("change", () => {
       const files = [...(input.files || [])]; const pdfs = files.filter(file => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
       if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = `${pdfs[0].name} → Form 20`; updateFileDetails(form20, pdfs[0]); setPreview(form20._selectedPreview, pdfs[0], "Selected"); }
       else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} photos selected · Form 20` : "Upload a PDF (3+ pages) or capture three photos"; if (files[0]) updateFileDetails(form20, files[0]); setPreview(form20._selectedPreview, files[0] || null, "Selected"); }
     }); input.click(); });
-    form20Actions.append(capture, choose20); form20.append(form20Actions); list.insertBefore(form20, list.children[3] || null); host.append(list);
+    form20Actions.append(choose20); form20.append(form20Actions); list.insertBefore(form20, list.children[3] || null); host.append(list);
     const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status"; result.textContent = "Choose any available documents. You can save fewer than 12."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected documents"; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar);
   }
   async function openCustomer(id) { try { const data = await request(`/api/upload-portal/customers/${id}`); currentCustomer = data.customer; renderCustomer(currentCustomer); } catch (error) { status($("searchStatus"), error.message, "error"); } }
