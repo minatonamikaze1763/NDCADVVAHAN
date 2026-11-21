@@ -48,14 +48,14 @@
   <link rel="stylesheet" href="reviews-showcase.css?v=cefcfcfe96ea" />
   <link rel="stylesheet" href="screenshots-showcase.css?v=b90e211c8c83" />
   <script src="screenshots-showcase.js?v=21583385c493" defer></script>
-  <link rel="stylesheet" href="landing-redesign.css?v=9350082736ff" />
+  <link rel="stylesheet" href="landing-redesign.css?v=cloud-workflow-20261121" />
   <script src="landing-redesign.js?v=ab4c33330a84" defer></script>
   <link rel="stylesheet" href="preview-showcase.css?v=07a7674d019a" />
   <script src="preview-showcase.js?v=658ab43eee76" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="portfolio-theme.css?v=0e79480a79db" />
+  <link rel="stylesheet" href="portfolio-theme.css?v=fixed-nav-20261121" />
   <link rel="stylesheet" href="checkout-ui.css?v=c2901c143c44" />
   <link rel="stylesheet" href="document-workflow.css?v=bf48d04cc4d3" />
   <link rel="stylesheet" href="workflow-chart.css?v=1f88ec23eb64" />
@@ -411,6 +411,59 @@
           </div>
         </div>
         <p class="ndc-wf-footnote">Account checks may repeat before protected actions. Local saving requires permission; with Auto Submit off, submit manually on VAHAN. ZIP downloads and local caches stay on your device. Submission confirmation is not registration approval. <a href="privacy-policy.html#local-data">Privacy &amp; local storage details ↗</a></p>
+      </div>
+    </section>
+
+    <section id="cloud-workflow" class="workflow ndc-cloud-flow-section" aria-labelledby="ndcCloudWorkflowTitle">
+      <div class="container">
+        <div class="section-head">
+          <div class="kicker">VAHAN Cloud · Document handoff</div>
+          <h2 class="section-title" id="ndcCloudWorkflowTitle">From phone upload to <span class="gold">VAHAN fetch.</span></h2>
+          <p class="section-desc">See how a customer's documents move through the Cloud workspace and back to an authorized dealership user.</p>
+        </div>
+        <div class="ndc-document-flow">
+          <ol class="ndc-flow-steps" aria-label="VAHAN Cloud document workflow">
+            <li><span class="ndc-flow-number">01</span><h4>Upload documents</h4><p>Choose or capture available files on your phone or desktop and save them under the right customer and chassis record.</p></li>
+            <li><span class="ndc-flow-number">02</span><h4>Protect in the Cloud</h4><p>Files travel over HTTPS, are encrypted at rest, and are available to signed-in users of the registered dealership account.</p></li>
+            <li><span class="ndc-flow-number">03</span><h4>Package for handoff</h4><p>Download or share a compressed ZIP. For VAHAN work, the extension can ask for only the documents that case needs.</p></li>
+            <li><span class="ndc-flow-number">04</span><h4>Fetch what is available</h4><p>The Cloud checks the requested categories and returns the available files together, ready for the customer workflow.</p></li>
+          </ol>
+          <div class="ndc-flow-branches">
+            <article><span class="ndc-flow-number">ACCESS</span><h4>Account-scoped retrieval</h4><p>Customer records are retrievable by authenticated members of the registered dealership account.</p></article>
+            <article><span class="ndc-flow-number">ZIP</span><h4>Compact document transfer</h4><p>Keep related files together in one compressed package for a simpler handoff between the workspace and extension.</p></article>
+          </div>
+          <p class="ndc-flow-note">Ready to add customer files? <a href="upload/">Open the VAHAN Cloud upload workspace ↗</a></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="cloud-workspace" class="ndc-cloud-section" aria-labelledby="ndcCloudHeading">
+      <div class="container">
+        <div class="section-head ndc-cloud-intro">
+          <div class="kicker">VAHAN Cloud · The new document handoff</div>
+          <h2 class="section-title" id="ndcCloudHeading">One customer folder.<br><span class="gold">A faster handoff.</span></h2>
+          <p class="section-desc">Keep a customer's available documents together in the cloud workspace. Share them as one compressed ZIP, or let your VAHAN workflow fetch the required files in one transfer.</p>
+        </div>
+        <div class="ndc-cloud-layout">
+          <div class="ndc-cloud-showcase" aria-label="Illustration of customer files packaged as a ZIP for sharing">
+            <div class="ndc-cloud-showcase-top"><span>DOCUMENT HANDOFF</span><span>ZIP · READY</span></div>
+            <div class="ndc-cloud-showcase-customer"><span class="ndc-cloud-avatar">CX</span><div><strong>Customer folder</strong><small>Documents grouped by customer</small></div><span class="ndc-cloud-file-total">08 files</span></div>
+            <div class="ndc-cloud-showcase-files"><span>Address proof</span><b>PDF</b><span>Insurance</span><b>PDF</b><span>Dealer invoice</span><b>PDF</b></div>
+            <div class="ndc-cloud-zip"><span class="ndc-cloud-zip-mark">ZIP</span><div><strong>Customer documents.zip</strong><small>Compressed for an easy handoff</small></div><span aria-hidden="true">↓</span></div>
+            <div class="ndc-cloud-encryption"><span aria-hidden="true">◆</span> Encrypted at rest · Signed-in access</div>
+          </div>
+          <div class="ndc-cloud-details">
+            <article class="ndc-cloud-detail"><span class="ndc-cloud-step">01</span><div><h3>Useful from phone to desk</h3><p>Capture or select documents in the upload workspace, then keep them under the right customer record for your dealership team.</p></div></article>
+            <article class="ndc-cloud-detail"><span class="ndc-cloud-step">02</span><div><h3>Fewer file handoffs</h3><p>Download or share one compressed ZIP instead of sending each document separately. In the extension workflow, request only the documents needed for that case.</p></div></article>
+            <article class="ndc-cloud-detail"><span class="ndc-cloud-step">03</span><div><h3>Simple to use</h3><p>Sign in, create or choose a customer, upload available files, then download the ZIP or fetch the required documents when working in VAHAN.</p></div></article>
+          </div>
+        </div>
+        <div class="ndc-cloud-security">
+          <span class="ndc-cloud-security-icon" aria-hidden="true">◆</span>
+          <div><strong>Encrypted transport and storage. Access controlled by your dealership account.</strong>
+            <p>Files travel over HTTPS and are encrypted at rest in the configured MongoDB Atlas storage. Signed-in members of the registered dealership account can retrieve its customer records. VAHAN Cloud processes file contents to prepare ZIP downloads, so this is protected cloud storage, not end-to-end encryption.</p></div>
+          <a class="btn btn-primary" href="upload/">Open VAHAN Cloud <span aria-hidden="true">↗</span></a>
+        </div>
       </div>
     </section>
     
@@ -1066,35 +1119,7 @@
       </div>
     </section>
     
-    <section id="cloud-workspace" class="ndc-cloud-section" aria-labelledby="ndcCloudHeading">
-      <div class="container">
-        <div class="ndc-cloud-intro">
-          <div class="kicker">VAHAN Cloud · The new document handoff</div>
-          <h2 class="section-title" id="ndcCloudHeading">One customer folder.<br><span class="gold">A faster handoff.</span></h2>
-          <p class="section-desc">Keep a customer's available documents together in the cloud workspace. Share them as one compressed ZIP, or let your VAHAN workflow fetch the required files in one transfer.</p>
-        </div>
-        <div class="ndc-cloud-layout">
-          <div class="ndc-cloud-showcase" aria-label="Illustration of customer files packaged as a ZIP for sharing">
-            <div class="ndc-cloud-showcase-top"><span>DOCUMENT HANDOFF</span><span>ZIP · READY</span></div>
-            <div class="ndc-cloud-showcase-customer"><span class="ndc-cloud-avatar">CX</span><div><strong>Customer folder</strong><small>Documents grouped by customer</small></div><span class="ndc-cloud-file-total">08 files</span></div>
-            <div class="ndc-cloud-showcase-files"><span>Address proof</span><b>PDF</b><span>Insurance</span><b>PDF</b><span>Dealer invoice</span><b>PDF</b></div>
-            <div class="ndc-cloud-zip"><span class="ndc-cloud-zip-mark">ZIP</span><div><strong>Customer documents.zip</strong><small>Compressed for an easy handoff</small></div><span aria-hidden="true">↓</span></div>
-            <div class="ndc-cloud-encryption"><span aria-hidden="true">◆</span> Encrypted at rest · Signed-in access</div>
-          </div>
-          <div class="ndc-cloud-details">
-            <article class="ndc-cloud-detail"><span class="ndc-cloud-step">01</span><div><h3>Useful from phone to desk</h3><p>Capture or select documents in the upload workspace, then keep them under the right customer record for your dealership team.</p></div></article>
-            <article class="ndc-cloud-detail"><span class="ndc-cloud-step">02</span><div><h3>Fewer file handoffs</h3><p>Download or share one compressed ZIP instead of sending each document separately. In the extension workflow, request only the documents needed for that case.</p></div></article>
-            <article class="ndc-cloud-detail"><span class="ndc-cloud-step">03</span><div><h3>Simple to use</h3><p>Sign in, create or choose a customer, upload available files, then download the ZIP or fetch the required documents when working in VAHAN.</p></div></article>
-          </div>
-        </div>
-        <div class="ndc-cloud-security">
-          <span class="ndc-cloud-security-icon" aria-hidden="true">◆</span>
-          <div><strong>Encrypted transport and storage. Access controlled by your dealership account.</strong>
-            <p>Files travel over HTTPS and are encrypted at rest in the configured MongoDB Atlas storage. Signed-in members of the registered dealership account can retrieve its customer records. VAHAN Cloud processes file contents to prepare ZIP downloads, so this is protected cloud storage, not end-to-end encryption.</p></div>
-          <a class="btn btn-primary" href="upload/">Open VAHAN Cloud <span aria-hidden="true">↗</span></a>
-        </div>
-      </div>
-    </section>
+    
     
     <section class="workflow" id="background-use-cases" aria-labelledby="backgroundUseCasesHeading">
       <div class="container">

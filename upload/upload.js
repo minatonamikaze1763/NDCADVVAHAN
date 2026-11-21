@@ -21,6 +21,13 @@
   const sessionDevice = localStorage.getItem("ndcUploadPortalDeviceId") || crypto.randomUUID();
   localStorage.setItem("ndcUploadPortalDeviceId", sessionDevice);
   function status(el, message, type = "") { el.textContent = message; el.className = `status ${type}`; }
+  function setSaveBarrier(active) {
+    const barrier = $("saveBarrier");
+    if (!barrier) return;
+    barrier.hidden = !active;
+    document.body.classList.toggle("save-active", active);
+    if (active) barrier.focus({preventScroll:true});
+  }
   async function request(path, options = {}, binary = false) {
     const headers = new Headers(options.headers || {});
     if (token) headers.set("Authorization", `Bearer ${token}`);
@@ -779,7 +786,7 @@
   }
   async function openCustomer(id) { try { const data = await request(`/api/upload-portal/customers/${id}`); currentCustomer = data.customer; renderCustomer(currentCustomer); } catch (error) { status($("searchStatus"), error.message, "error"); } }
   async function saveDocuments(customer, host, button) {
-    button.disabled = true; const result = $("saveStatus"); let saved = 0; const failures = [];
+    button.disabled = true; setSaveBarrier(true); const result = $("saveStatus"); let saved = 0; const failures = [];
     for (const [category] of categories.filter(([id]) => id !== "form20")) {
       const row = host.querySelector(`[data-doc="${category}"]`); const file = row?._file; if (!file) continue;
       const subcategory = row.querySelector("[data-subcategory]")?.value || ""; if (category === "address-proof" && !subcategory) { failures.push("Address Proof: select a type."); continue; }
@@ -806,8 +813,8 @@
       }
     }
     try { const updated = await request(`/api/upload-portal/customers/${customer._id}`); currentCustomer = updated.customer; renderCustomer(currentCustomer); await searchCustomers($("search").value); status($("saveStatus"), failures.length ? `${saved} saved. ${failures.join(" ")}` : `${saved ? `${saved} document${saved === 1 ? "" : "s"} saved and compressed on the server.` : "No new documents selected."}`, failures.length ? "error" : "success"); }
-    catch (error) { status(result, error.message, "error"); }
-    finally { button.disabled = false; }
+    catch (error) { const response = host.querySelector("#saveStatus") || result; status(response, error.message, "error"); }
+    finally { button.disabled = false; setSaveBarrier(false); }
   }
   void validate();
 })();
