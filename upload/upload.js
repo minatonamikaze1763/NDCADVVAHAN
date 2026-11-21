@@ -42,6 +42,8 @@
   function expireSession(message = "Your 24-hour session has expired. Sign in again to continue.") {
     clearClientSession();
     currentCustomer = null;
+    if ($("customerDialog").open) $("customerDialog").close();
+    $("password").value = "";
     showLogin();
     status($("loginStatus"), message, "error");
   }
