@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /upload/
 
 Sitemap: https://vahan.nextdimensioncustoms.in/sitemap.xml

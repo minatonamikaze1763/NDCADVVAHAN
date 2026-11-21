@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090909">
+  <meta name="robots" content="noindex, nofollow">
+  <title>VAHAN Document Upload | NDC</title>
+  <link rel="stylesheet" href="upload.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/">NDC <span>VAHAN TOOL</span></a><button id="logout" class="quiet" hidden>Log out</button></header>
+  <main>
+    <section id="loginView" class="card login-card">
+      <p class="eyebrow">MOBILE DOCUMENT WORKSPACE</p><h1>Upload VAHAN documents</h1>
+      <p class="muted">Sign in with your VAHAN NDC TOOL account. This login shares your existing device limit.</p>
+      <form id="loginForm" class="form-grid">
+        <label>Extension ID / username<input id="username" autocomplete="username" required></label>
+        <label>Password<input id="password" type="password" autocomplete="current-password" required></label>
+        <button class="primary full" type="submit">Sign in</button>
+      </form><p id="loginStatus" class="status" role="status"></p>
+    </section>
+
+    <section id="appView" hidden>
+      <div class="intro"><div><p class="eyebrow">CUSTOMER DOCUMENTS</p><h1>Upload from your phone</h1><p class="muted">Create a customer with the required chassis number and customer name, then add any available documents.</p></div><button id="newCustomer" class="primary">＋ New customer</button></div>
+      <section class="card search-card"><label for="search">Find a customer</label><input id="search" placeholder="Chassis number, customer name, or application number" autocomplete="off"><div id="customerResults" class="customer-results"></div><p id="searchStatus" class="status" role="status"></p></section>
+      <section id="customerView" class="card customer-card" hidden></section>
+    </section>
+  </main>
+  <dialog id="customerDialog" class="dialog">
+    <form id="customerForm" class="form-grid">
+      <div class="dialog-heading"><div><p class="eyebrow">NEW CUSTOMER</p><h2>Create customer</h2></div><button id="closeDialog" class="quiet" type="button" aria-label="Close">✕</button></div>
+      <label>Chassis number <span class="required">Required</span><input id="chassisNumber" maxlength="60" required autocomplete="off"></label>
+      <label>Customer name <span class="required">Required</span><input id="customerName" maxlength="120" required autocomplete="name"></label>
+      <label>Address <span class="optional">Optional</span><textarea id="address" rows="2" maxlength="500"></textarea></label>
+      <label>HP / hypothecation <span class="optional">Optional</span><input id="hp" maxlength="160"></label>
+      <label>Application number <span class="optional">Optional</span><input id="applicationNumber" maxlength="100"></label>
+      <p id="createStatus" class="status full" role="status"></p>
+      <button class="primary full" type="submit">Create customer</button>
+    </form>
+  </dialog>
+  <script src="upload.js"></script>
+</body>
+</html>
