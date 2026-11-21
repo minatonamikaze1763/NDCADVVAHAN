@@ -23,13 +23,31 @@
   </div>
   <main>
     <section id="loginView" class="card login-card">
-      <p class="eyebrow">MOBILE DOCUMENT WORKSPACE</p><h1>Upload VAHAN documents</h1>
-      <p class="muted">Sign in with your VAHAN NDC TOOL account. This login shares your existing device limit.</p>
-      <form id="loginForm" class="form-grid">
-        <label>Extension ID / username<input id="username" autocomplete="username" required></label>
-        <label>Password<input id="password" type="password" autocomplete="current-password" required></label>
-        <button class="primary full" type="submit">Sign in</button>
-      </form><p id="loginStatus" class="status" role="status"></p>
+      <div class="login-showcase">
+        <a class="login-lockup" href="/" aria-label="Next Dimension Customs home">
+          <img src="/logo.png" alt="Next Dimension Customs"><span>VAHAN NDC TOOL</span>
+        </a>
+        <div class="login-showcase-copy">
+          <p class="eyebrow">SECURE DOCUMENT WORKSPACE</p>
+          <h1>Customer documents, in one place.</h1>
+          <p class="muted">Sign in to collect, prepare, and manage VAHAN documents for your customers.</p>
+        </div>
+        <div class="login-highlights" aria-label="Workspace features">
+          <div><span class="login-highlight-icon" aria-hidden="true">01</span><span><strong>Organized by customer</strong><small>Find documents using customer name or chassis number.</small></span></div>
+          <div><span class="login-highlight-icon" aria-hidden="true">02</span><span><strong>Prepared for VAHAN</strong><small>Files are renamed and compressed as they are saved.</small></span></div>
+        </div>
+        <div class="login-session-note"><span class="login-session-dot" aria-hidden="true"></span><span><strong>24-hour secure session</strong><small>Same session limit as the VAHAN NDC TOOL extension.</small></span></div>
+      </div>
+      <div class="login-form-panel">
+        <div class="login-form-heading"><p class="eyebrow">WELCOME BACK</p><h2>Sign in to your account</h2><p class="muted">Use the same credentials as your VAHAN NDC TOOL account.</p></div>
+        <form id="loginForm" class="form-grid login-form">
+          <label for="username">Username<input id="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+          <label for="password">Password<input id="password" type="password" autocomplete="current-password" required></label>
+          <button class="primary full" type="submit"><span>Continue</span><span aria-hidden="true">→</span></button>
+        </form>
+        <p id="loginStatus" class="status login-status" role="status" aria-live="polite"></p>
+        <p class="login-footnote">Your account’s existing device limit still applies.</p>
+      </div>
     </section>
 
     <section id="appView" hidden>
