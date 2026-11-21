@@ -119,34 +119,227 @@
   function classifyFile(name) {
     return globalThis.NDCDocumentMatcher?.match(name)?.id || "";
   }
-  function showFullscreenPreview(file) {
+  async function showFullscreenPreview(file) {
     if (!file) return;
-    const overlay = document.createElement("div"); overlay.className = "fullscreen-preview"; overlay.setAttribute("role", "dialog"); overlay.setAttribute("aria-modal", "true"); overlay.setAttribute("aria-label", `Preview ${file.name || "document"}`);
-    const panel = document.createElement("div"); panel.className = "fullscreen-preview-panel";
-    const header = document.createElement("div"); header.className = "fullscreen-preview-header";
-    const title = document.createElement("strong"); title.textContent = file.name || "Document preview";
-    const close = document.createElement("button"); close.type = "button"; close.className = "fullscreen-preview-close"; close.textContent = "Close"; close.setAttribute("aria-label", "Close preview");
-    const body = document.createElement("div"); body.className = "fullscreen-preview-body";
-    const url = URL.createObjectURL(file);
-    const closePreview = () => { URL.revokeObjectURL(url); overlay.remove(); document.removeEventListener("keydown", onKeyDown); };
-    const onKeyDown = event => { if (event.key === "Escape") closePreview(); };
-    close.addEventListener("click", closePreview); overlay.addEventListener("click", event => { if (event.target === overlay) closePreview(); });
-    if (file.type?.startsWith("image/")) { const image = document.createElement("img"); image.src = url; image.alt = file.name || "Document preview"; body.append(image); }
-    else { const frame = document.createElement("iframe"); frame.src = url; frame.title = file.name || "PDF preview"; body.append(frame); }
-    header.append(title, close); panel.append(header, body); overlay.append(panel); document.body.append(overlay); document.addEventListener("keydown", onKeyDown); close.focus();
+    const isImage = file.type?.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(file.name || "");
+    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
+    if (!isImage && !isPdf) return;
+    const overlay = document.createElement("div");
+    overlay.className = "fullscreen-preview";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", `Preview ${file.name || "document"}`);
+    const panel = document.createElement("section");
+    panel.className = "fullscreen-preview-panel";
+    const header = document.createElement("header");
+    header.className = "fullscreen-preview-header";
+    const fileInfo = document.createElement("div");
+    fileInfo.className = "fullscreen-preview-file";
+    const title = document.createElement("strong");
+    title.className = "fullscreen-preview-title";
+    title.textContent = file.name || "Document preview";
+    const metadata = document.createElement("span");
+    metadata.className = "fullscreen-preview-meta";
+    metadata.textContent = `${readableSize(file.size)} · ${isPdf ? "PDF document" : "Image"}`;
+    fileInfo.append(title, metadata);
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "fullscreen-preview-close";
+    close.textContent = "Close";
+    close.setAttribute("aria-label", "Close preview");
+    const toolbar = document.createElement("div");
+    toolbar.className = "fullscreen-preview-toolbar";
+    const zoomControls = document.createElement("div");
+    zoomControls.className = "preview-control-group";
+    const makeButton = (label, labelTitle, handler, extraClass = "") => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `preview-tool-button ${extraClass}`.trim();
+      button.textContent = label;
+      button.title = labelTitle;
+      button.addEventListener("click", handler);
+      return button;
+    };
+    let zoom = 1, fitScale = 1, pdfDocument = null, loadingTask = null, renderTask = null, renderSequence = 0, pageNumber = 1, closed = false, image = null, imageUrl = "";
+    const zoomValue = document.createElement("span");
+    zoomValue.className = "preview-zoom-value";
+    zoomValue.setAttribute("aria-live", "polite");
+    const updateZoomLabel = () => { zoomValue.textContent = `${Math.round(zoom * 100)}%`; };
+    const stage = document.createElement("div");
+    stage.className = "fullscreen-preview-stage";
+    const body = document.createElement("div");
+    body.className = "fullscreen-preview-body";
+    body.setAttribute("role", "region");
+    body.setAttribute("aria-label", "Document preview");
+    const pageControls = document.createElement("div");
+    pageControls.className = "preview-control-group preview-page-controls";
+    const pageValue = document.createElement("span");
+    pageValue.className = "preview-page-value";
+    pageValue.setAttribute("aria-live", "polite");
+    const previousPage = makeButton("‹", "Previous page", () => { if (pageNumber > 1) { pageNumber--; updatePageControls(); void renderPdfPage(); } });
+    const nextPage = makeButton("›", "Next page", () => { if (pdfDocument && pageNumber < pdfDocument.numPages) { pageNumber++; updatePageControls(); void renderPdfPage(); } });
+    const updatePageControls = () => {
+      pageValue.textContent = pdfDocument ? `${pageNumber} / ${pdfDocument.numPages}` : "Loading PDF…";
+      previousPage.disabled = !pdfDocument || pageNumber <= 1;
+      nextPage.disabled = !pdfDocument || pageNumber >= pdfDocument.numPages;
+    };
+    if (!isPdf) pageControls.hidden = true;
+    const updateImageSize = () => {
+      if (!image?.naturalWidth || closed) return;
+      const w = Math.max(120, body.clientWidth - 44), h = Math.max(120, body.clientHeight - 44);
+      fitScale = Math.min(1, w / image.naturalWidth, h / image.naturalHeight);
+      image.style.width = `${Math.max(1, image.naturalWidth * fitScale * zoom)}px`;
+      image.style.height = `${Math.max(1, image.naturalHeight * fitScale * zoom)}px`;
+    };
+    const renderPdfPage = async () => {
+      if (!pdfDocument || closed) return;
+      const sequence = ++renderSequence;
+      if (renderTask) { try { renderTask.cancel(); } catch {} renderTask = null; }
+      try {
+        const page = await pdfDocument.getPage(pageNumber);
+        if (closed || sequence !== renderSequence) return;
+        const initial = page.getViewport({scale:1});
+        const w = Math.max(120, body.clientWidth - 44), h = Math.max(120, body.clientHeight - 44);
+        fitScale = Math.min(1, w / initial.width, h / initial.height);
+        const viewport = page.getViewport({scale:fitScale * zoom});
+        const outputScale = Math.min(window.devicePixelRatio || 1, 2);
+        const canvas = document.createElement("canvas");
+        canvas.className = "custom-pdf-page";
+        canvas.width = Math.ceil(viewport.width * outputScale);
+        canvas.height = Math.ceil(viewport.height * outputScale);
+        canvas.style.width = `${viewport.width}px`;
+        canvas.style.height = `${viewport.height}px`;
+        const context = canvas.getContext("2d", {alpha:false});
+        context.fillStyle = "#fff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        stage.replaceChildren(canvas);
+        const task = page.render({canvasContext:context, viewport, transform:outputScale === 1 ? null : [outputScale,0,0,outputScale,0,0]});
+        renderTask = task;
+        await task.promise;
+        if (sequence === renderSequence) renderTask = null;
+      } catch (error) {
+        if (error?.name === "RenderingCancelledException" || closed || sequence !== renderSequence) return;
+        const message = document.createElement("p");
+        message.className = "preview-error";
+        message.textContent = "This PDF could not be displayed. It may be damaged or password protected.";
+        stage.replaceChildren(message);
+      }
+    };
+    const setZoom = next => {
+      zoom = Math.min(4, Math.max(.25, Math.round(next * 20) / 20));
+      updateZoomLabel();
+      if (isImage) updateImageSize();
+      else if (pdfDocument) void renderPdfPage();
+    };
+    zoomControls.append(
+      makeButton("−", "Zoom out", () => setZoom(zoom - .15)),
+      zoomValue,
+      makeButton("+", "Zoom in", () => setZoom(zoom + .15)),
+      makeButton("Fit", "Fit document to preview", () => setZoom(1), "preview-fit-button")
+    );
+    pageControls.prepend(previousPage);
+    pageControls.append(pageValue, nextPage);
+    const hint = document.createElement("span");
+    hint.className = "preview-zoom-hint";
+    hint.textContent = "Scroll or Ctrl + scroll to zoom";
+    toolbar.append(zoomControls, pageControls, hint);
+    body.append(stage);
+    header.append(fileInfo, close);
+    panel.append(header, toolbar, body);
+    overlay.append(panel);
+    const previousFocus = document.activeElement;
+    const cleanup = () => {
+      if (closed) return;
+      closed = true;
+      if (renderTask) { try { renderTask.cancel(); } catch {} }
+      if (loadingTask) void loadingTask.destroy().catch(() => {});
+      if (pdfDocument) void pdfDocument.destroy().catch(() => {});
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+      overlay.remove();
+      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("resize", onResize);
+      if (previousFocus instanceof HTMLElement) previousFocus.focus({preventScroll:true});
+    };
+    const onKeyDown = event => {
+      if (event.key === "Escape") cleanup();
+      else if (event.key === "+" || event.key === "=") { event.preventDefault(); setZoom(zoom + .15); }
+      else if (event.key === "-") { event.preventDefault(); setZoom(zoom - .15); }
+      else if (event.key === "0") { event.preventDefault(); setZoom(1); }
+      else if (event.key === "ArrowLeft" && isPdf && pageNumber > 1) { pageNumber--; updatePageControls(); void renderPdfPage(); }
+      else if (event.key === "ArrowRight" && isPdf && pdfDocument && pageNumber < pdfDocument.numPages) { pageNumber++; updatePageControls(); void renderPdfPage(); }
+    };
+    const onResize = () => { if (isImage) updateImageSize(); else if (pdfDocument) void renderPdfPage(); };
+    const onWheel = event => { event.preventDefault(); if (event.deltaY) setZoom(zoom + (event.deltaY < 0 ? .1 : -.1)); };
+    close.addEventListener("click", cleanup);
+    overlay.addEventListener("click", event => { if (event.target === overlay) cleanup(); });
+    body.addEventListener("wheel", onWheel, {passive:false});
+    document.addEventListener("keydown", onKeyDown);
+    window.addEventListener("resize", onResize);
+    document.body.append(overlay);
+    updateZoomLabel();
+    updatePageControls();
+    if (isImage) {
+      imageUrl = URL.createObjectURL(file);
+      image = document.createElement("img");
+      image.className = "custom-image-page";
+      image.alt = file.name || "Image preview";
+      image.addEventListener("load", updateImageSize, {once:true});
+      image.addEventListener("error", () => {
+        const message = document.createElement("p");
+        message.className = "preview-error";
+        message.textContent = "This image could not be displayed.";
+        stage.replaceChildren(message);
+      }, {once:true});
+      stage.replaceChildren(image);
+      image.src = imageUrl;
+    } else {
+      const pdfjs = globalThis.pdfjsLib;
+      if (!pdfjs?.getDocument) stage.textContent = "The custom PDF viewer could not be loaded. Refresh the page and try again.";
+      else {
+        pdfjs.GlobalWorkerOptions.workerSrc = "/upload/vendor/pdf.worker.min.js?v=3.11.174";
+        try {
+          const data = await file.arrayBuffer();
+          if (closed) return;
+          loadingTask = pdfjs.getDocument({data});
+          pdfDocument = await loadingTask.promise;
+          if (closed) return;
+          updatePageControls();
+          await renderPdfPage();
+        } catch (error) {
+          if (closed) return;
+          const message = document.createElement("p");
+          message.className = "preview-error";
+          message.textContent = "This PDF could not be opened. It may be damaged or password protected.";
+          stage.replaceChildren(message);
+        }
+      }
+    }
+    if (!closed) close.focus();
   }
+
   function setPreview(box, file, label) {
     if (box._url) URL.revokeObjectURL(box._url);
     box.replaceChildren();
     const tag = document.createElement("span"); tag.className = "file-preview-title"; tag.textContent = label; box.append(tag);
     if (!file) { const empty = document.createElement("span"); empty.className = "file-preview-label"; empty.textContent = label === "Selected" ? "No file selected" : "No saved file"; box.append(empty); return; }
-    const url = URL.createObjectURL(file); box._url = url;
-    if (file.type?.startsWith("image/")) { const image = document.createElement("img"); image.src = url; image.alt = file.name || "Document preview"; image.className = "file-preview-thumb"; image.addEventListener("click", () => showFullscreenPreview(file)); box.append(image); }
-    else { const object = document.createElement("object"); object.data = url; object.type = file.type || "application/pdf"; object.setAttribute("aria-label", file.name || "PDF preview"); object.addEventListener("click", () => showFullscreenPreview(file)); box.append(object); }
+    const isImage = file.type?.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(file.name || "");
+    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
+    if (isImage) {
+      const url = URL.createObjectURL(file); box._url = url;
+      const image = document.createElement("img"); image.src = url; image.alt = file.name || "Document preview"; image.className = "file-preview-thumb"; image.addEventListener("click", () => showFullscreenPreview(file)); box.append(image);
+    } else if (isPdf) {
+      const pdfButton = document.createElement("button"); pdfButton.type = "button"; pdfButton.className = "pdf-preview-thumb"; pdfButton.setAttribute("aria-label", `Preview PDF ${file.name || ""} · ${readableSize(file.size)}`);
+      const mark = document.createElement("span"); mark.className = "pdf-preview-mark"; mark.textContent = "PDF";
+      const hint = document.createElement("span"); hint.className = "pdf-preview-hint"; hint.textContent = "Custom preview";
+      pdfButton.append(mark, hint); pdfButton.addEventListener("click", () => showFullscreenPreview(file)); box.append(pdfButton);
+    } else {
+      const unsupported = document.createElement("span"); unsupported.className = "file-preview-label"; unsupported.textContent = "Preview unavailable"; box.append(unsupported);
+    }
     const name = document.createElement("span"); name.className = "file-preview-label"; name.textContent = file.name || "Document"; box.append(name);
-    const full = document.createElement("button"); full.type = "button"; full.className = "preview-fullscreen"; full.textContent = "Open full-screen preview"; full.addEventListener("click", () => showFullscreenPreview(file)); box.append(full);
+    const size = document.createElement("span"); size.className = "file-preview-size"; size.textContent = readableSize(file.size); box.append(size);
+    const full = document.createElement("button"); full.type = "button"; full.className = "preview-fullscreen"; full.textContent = "Open preview"; full.addEventListener("click", () => showFullscreenPreview(file)); box.append(full);
   }
-    function readableSize(value) { const n = Number(value); if (!Number.isFinite(n) || n < 0) return "—"; if (n < 1024) return `${n} B`; if (n < 1024*1024) return `${(n/1024).toFixed(1)} KB`; return `${(n/1024/1024).toFixed(2)} MB`; }
+  function readableSize(value) { const n = Number(value); if (!Number.isFinite(n) || n < 0) return "—"; if (n < 1024) return `${n} B`; if (n < 1024*1024) return `${(n/1024).toFixed(1)} KB`; return `${(n/1024/1024).toFixed(2)} MB`; }
   function addFileDetails(row, saved) {
     const details = document.createElement("dl"); details.className = "file-details";
     const entries = [["Original filename", saved?.originalFilename || "—"], ["Original size", readableSize(saved?.originalSize)], ["Saved filename", saved?.filename || "—"], ["Saved size", readableSize(saved?.size)], ["Modified", saved?.originalLastModified || saved?.modifiedAt ? new Date(saved.originalLastModified || saved.modifiedAt).toLocaleString() : "—"]];
