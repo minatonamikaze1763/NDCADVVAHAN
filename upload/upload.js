@@ -6,7 +6,7 @@
   let token = sessionStorage.getItem(tokenKey) || "";
   let currentCustomer = null;
   let searchTimer;
-  let form20Slots = 3;
+
   let editingCustomerId = null;
   const categories = [
     ["frontphoto", "Owners Photo with Vehicle"], ["chassis-photo", "Photo of chassis"],
@@ -107,20 +107,15 @@
       status($("searchStatus"), data.customers.length ? `${data.customers.length} customer${data.customers.length === 1 ? "" : "s"} found.` : query ? "No matching customer found." : "Create a customer to start uploading.");
     } catch (error) { status($("searchStatus"), error.message, "error"); }
   }
-  function safeFileInput(category, isCamera, page) {
+  function safeFileInput(category, isCamera) {
     const input = document.createElement("input"); input.type = "file"; input.accept = isCamera ? "image/*" : "image/*,.pdf"; if (isCamera) input.capture = "environment";
-    input.accept = category === "form20" ? "image/*" : input.accept;
     input.addEventListener("change", () => {
-      if (category === "form20") {
-        const slot = document.querySelector(`[data-form20-page="${page}"]`); slot.dataset.file = "";
-        slot._file = input.files?.[0] || null; slot.textContent = slot._file ? `Page ${page}: ${slot._file.name}` : `Page ${page}: Capture or choose`; const form20 = document.querySelector(`[data-doc="form20"]`); if (form20) setPreview(form20._selectedPreview, slot._file, "Selected");
-      } else {
-        const row = document.querySelector(`[data-doc="${category}"]`); row._file = input.files?.[0] || null;
-        row.querySelector(".doc-state").textContent = row._file ? row._file.name : "Not selected"; setPreview(row._selectedPreview, row._file, "Selected");
-      }
+      const row = document.querySelector(`[data-doc="${category}"]`); row._file = input.files?.[0] || null;
+      row.querySelector(".doc-state").textContent = row._file ? row._file.name : "Not selected"; updateFileDetails(row, row._file); setPreview(row._selectedPreview, row._file, "Selected");
     });
     input.click();
   }
+  function safeFilenamePart(value) { return String(value || "customer").normalize("NFKC").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 80) || "customer"; }
   function classifyFile(name) {
     return globalThis.NDCDocumentMatcher?.match(name)?.id || "";
   }
@@ -133,6 +128,13 @@
     if (file.type?.startsWith("image/")) { const image = document.createElement("img"); image.src = url; image.alt = file.name || "Document preview"; box.append(image); }
     else { const object = document.createElement("object"); object.data = url; object.type = file.type || "application/pdf"; object.setAttribute("aria-label", file.name || "PDF preview"); box.append(object); }
     const name = document.createElement("span"); name.className = "file-preview-label"; name.textContent = file.name || "Document"; box.append(name);
+  }
+  function readableSize(value) { const n = Number(value); if (!Number.isFinite(n) || n < 0) return "—"; if (n < 1024) return `${n} B`; if (n < 1024*1024) return `${(n/1024).toFixed(1)} KB`; return `${(n/1024/1024).toFixed(2)} MB`; }
+  function addFileDetails(row, saved) {
+    const details = document.createElement("dl"); details.className = "file-details";
+    const entries = [["Original filename", saved?.originalFilename || "—"], ["Original size", readableSize(saved?.originalSize)], ["Saved filename", saved?.filename || "—"], ["Saved size", readableSize(saved?.size)], ["Modified", saved?.originalLastModified || saved?.modifiedAt ? new Date(saved.originalLastModified || saved.modifiedAt).toLocaleString() : "—"]];
+    for (const [label, value] of entries) { const wrap = document.createElement("div"); const dt = document.createElement("dt"); dt.textContent = label; const dd = document.createElement("dd"); dd.dataset.detail = label; dd.textContent = value; wrap.append(dt, dd); details.append(wrap); }
+    row.append(details); row._fileDetails = details;
   }
   function addPreviewPair(row, customer, category, saved) {
     const pair = document.createElement("div"); pair.className = "preview-pair";
@@ -149,7 +151,7 @@
       });
       stored.append(tag, open);
     } else setPreview(stored, null, "Saved");
-    pair.append(selected, stored); row.append(pair); row._selectedPreview = selected;
+    pair.append(selected, stored); row.append(pair); row._selectedPreview = selected; addFileDetails(row, saved);
   }
   function queueFiles(files, host) {
     const queue = host.querySelector(".bulk-queue");
@@ -157,14 +159,13 @@
     for (const file of files) {
       const category = classifyFile(file.name);
       let assigned = "Unmatched";
-      if (category === "form20" && file.type.startsWith("image/")) {
-        if (form20Slots < 3) form20Slots = 3;
-        let slot = [...host.querySelectorAll("[data-form20-page]")].find(item => !item._file);
-        while (!slot && form20Slots < 30) { form20Slots++; addForm20PageSlot(host); slot = host.querySelector(`[data-form20-page="${form20Slots}"]`); }
-        if (slot) { slot._file = file; slot.textContent = `Page ${slot.dataset.form20Page}: ${file.name}`; const form20 = host.querySelector(`[data-doc="form20"]`); if (form20) setPreview(form20._selectedPreview, file, "Selected"); assigned = `Form 20 page ${slot.dataset.form20Page}`; }
-      } else if (category && category !== "form20") {
+      if (category === "form20") {
+        const row = host.querySelector('[data-doc="form20"]');
+        if (row && (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))) { row._file = file; row._pages = []; row.querySelector(".doc-state").textContent = `${file.name} → Form 20`; updateFileDetails(row, file); setPreview(row._selectedPreview, file, "Selected"); assigned = "Form 20"; }
+        else if (row && file.type.startsWith("image/")) { row._pages = [...(row._pages || []), file]; row._file = null; row.querySelector(".doc-state").textContent = `${row._pages.length} photos selected · Form 20`; if (row._pages.length === 1) { updateFileDetails(row, file); setPreview(row._selectedPreview, file, "Selected"); } assigned = "Form 20 photos"; }
+      } else if (category) {
         const row = host.querySelector(`[data-doc="${category}"]`);
-        if (row && !row._file) { row._file = file; row.querySelector(".doc-state").textContent = file.name; if (row._selectedPreview) setPreview(row._selectedPreview, file, "Selected"); assigned = row.querySelector("h3").textContent; }
+        if (row && !row._file) { row._file = file; row.querySelector(".doc-state").textContent = file.name; updateFileDetails(row, file); if (row._selectedPreview) setPreview(row._selectedPreview, file, "Selected"); assigned = row.querySelector("h3").textContent; }
         else if (row) assigned = "Already has a file; choose another document row";
       }
       const item = document.createElement("div"); item.className = "bulk-file";
@@ -173,14 +174,6 @@
       item.append(name, result); queue.append(item); messages.push(`${file.name} → ${assigned}`);
     }
     status(host.querySelector(".bulk-status"), `${files.length} file${files.length === 1 ? "" : "s"} added. Check each assignment below; unmatched or duplicate files can be selected in a document row.`);
-  }
-  function addForm20PageSlot(host) {
-    const pages = host.querySelector(".form20-pages");
-    const pageNumber = form20Slots;
-    const group = document.createElement("div"); group.className = "form20-page-control";
-    const slot = document.createElement("button"); slot.type = "button"; slot.className = "secondary"; slot.dataset.form20Page = pageNumber; slot.textContent = `Page ${pageNumber}: Capture`; slot.addEventListener("click", () => safeFileInput("form20", true, pageNumber));
-    const choose = document.createElement("button"); choose.type = "button"; choose.className = "secondary"; choose.textContent = "Choose image"; choose.addEventListener("click", () => safeFileInput("form20", false, pageNumber));
-    group.append(slot, choose); pages.append(group);
   }
   function renderCustomer(customer) {
     const host = $("customerView"); host.replaceChildren(); host.hidden = false;
@@ -202,7 +195,7 @@
     bulk.addEventListener("dragleave", () => bulk.classList.remove("dragging"));
     bulk.addEventListener("drop", event => { event.preventDefault(); bulk.classList.remove("dragging"); queueFiles([...event.dataTransfer.files], host); });
     picker.addEventListener("change", () => { queueFiles([...picker.files], host); picker.value = ""; }); host.append(bulk);
-    const toolbar = document.createElement("div"); toolbar.className = "doc-toolbar"; const label = document.createElement("strong"); label.textContent = "VAHAN documents"; const count = document.createElement("span"); count.className = "muted"; count.textContent = `${Object.keys(customer.documents || {}).length} of 12 saved`; toolbar.append(label, count); host.append(toolbar);
+    const toolbar = document.createElement("div"); toolbar.className = "doc-toolbar"; const label = document.createElement("strong"); label.textContent = "VAHAN documents"; const count = document.createElement("span"); count.className = "muted"; count.textContent = `${Object.keys(customer.documents || {}).length} of 12 saved`; const zip = document.createElement("button"); zip.type = "button"; zip.className = "secondary zip-download"; zip.textContent = "Download ZIP"; zip.disabled = !Object.keys(customer.documents || {}).length; zip.addEventListener("click", async () => { zip.disabled = true; const prior = zip.textContent; zip.textContent = "Preparing ZIP…"; try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents.zip`, {}, true); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${safeFilenamePart(customer.customerName)}_${safeFilenamePart(customer.chassisNumber)}.zip`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); } catch (error) { alert(error.message); } finally { zip.textContent = prior; zip.disabled = !Object.keys(customer.documents || {}).length; } }); toolbar.append(label, count, zip); host.append(toolbar);
     const list = document.createElement("div"); list.className = "doc-list";
     categories.filter(([id]) => id !== "form20").forEach(([id, name]) => {
       const row = document.createElement("section"); row.className = "doc-row"; row.dataset.doc = id; const h = document.createElement("h3"); h.textContent = name; const state = document.createElement("div"); state.className = "doc-state"; const saved = customer.documents?.[id]; state.textContent = saved ? `Saved · ${saved.filename}` : "Not selected"; if (saved) state.classList.add("saved"); row.append(h, state); addPreviewPair(row, customer, id, saved);
@@ -211,16 +204,25 @@
       if (saved) { const remove = document.createElement("button"); remove.type = "button"; remove.className = "danger"; remove.textContent = "Remove"; remove.addEventListener("click", async () => { if (!confirm(`Remove ${name}?`)) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/${id}`, { method: "DELETE" }); await openCustomer(customer._id); } catch (error) { alert(error.message); } }); actions.append(remove); }
       row.append(actions); list.append(row);
     });
-    const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const ftitle = document.createElement("h3"); ftitle.textContent = "Form 20 (Finance) · multi-page PDF"; const saved20 = customer.documents?.form20; const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? `Saved · ${saved20.filename}` : "Add at least three image pages"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
-    const pages = document.createElement("div"); pages.className = "form20-pages";
-    const addPageSlot = page => {
-      const group = document.createElement("div"); group.className = "form20-page-control";
-      const slot = document.createElement("button"); slot.type = "button"; slot.className = "secondary"; slot.dataset.form20Page = page; slot.textContent = `Page ${page}: Capture`; slot.addEventListener("click", () => safeFileInput("form20", true, page));
-      const choose = document.createElement("button"); choose.type = "button"; choose.className = "secondary"; choose.textContent = "Choose image"; choose.addEventListener("click", () => safeFileInput("form20", false, page));
-      group.append(slot, choose); pages.append(group);
-    };
-    for (let page = 1; page <= form20Slots; page++) addPageSlot(page);
-    const addPage = document.createElement("button"); addPage.type = "button"; addPage.className = "secondary add-page"; addPage.textContent = "+ Add page"; addPage.addEventListener("click", () => { if (form20Slots < 30) { form20Slots++; addPageSlot(form20Slots); } if (form20Slots >= 30) addPage.disabled = true; }); form20.append(pages, addPage); list.append(form20); host.append(list);
+    const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const ftitle = document.createElement("h3"); ftitle.textContent = "Form 20 (Finance)"; const saved20 = customer.documents?.form20; const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? `Saved · ${saved20.filename}` : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
+    const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions";
+    const capture = document.createElement("button"); capture.type = "button"; capture.className = "secondary"; capture.textContent = "Capture 3 photos"; capture.addEventListener("click", () => {
+      const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.multiple = true; input.capture = "environment"; input.setAttribute("aria-label", "Capture three Form 20 photos");
+      input.addEventListener("change", () => {
+        const files = [...(input.files || [])].slice(0, 30);
+        form20._file = null; form20._pages = files;
+        form20.querySelector(".doc-state").textContent = files.length ? `${files.length} photo${files.length === 1 ? "" : "s"} selected · Form 20` : "No photos selected";
+        setPreview(form20._selectedPreview, files[0] || null, files.length ? `Selected · ${files.length} photos` : "Selected");
+      });
+      input.click();
+    });
+    const choose20 = document.createElement("button"); choose20.type = "button"; choose20.className = "secondary"; choose20.textContent = "Choose PDF or photos";
+    choose20.addEventListener("click", () => { const input = document.createElement("input"); input.type = "file"; input.accept = "application/pdf,image/*"; input.multiple = true; input.addEventListener("change", () => {
+      const files = [...(input.files || [])]; const pdfs = files.filter(file => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
+      if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = `${pdfs[0].name} → Form 20`; updateFileDetails(form20, pdfs[0]); setPreview(form20._selectedPreview, pdfs[0], "Selected"); }
+      else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} photos selected · Form 20` : "Upload a PDF (3+ pages) or capture three photos"; if (files[0]) updateFileDetails(form20, files[0]); setPreview(form20._selectedPreview, files[0] || null, "Selected"); }
+    }); input.click(); });
+    form20Actions.append(capture, choose20); form20.append(form20Actions); list.append(form20); host.append(list);
     const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status"; result.textContent = "Choose any available documents. You can save fewer than 12."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected documents"; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar);
   }
   async function openCustomer(id) { try { const data = await request(`/api/upload-portal/customers/${id}`); currentCustomer = data.customer; renderCustomer(currentCustomer); } catch (error) { status($("searchStatus"), error.message, "error"); } }
@@ -229,17 +231,25 @@
     for (const [category] of categories.filter(([id]) => id !== "form20")) {
       const row = host.querySelector(`[data-doc="${category}"]`); const file = row?._file; if (!file) continue;
       const subcategory = row.querySelector("[data-subcategory]")?.value || ""; if (category === "address-proof" && !subcategory) { failures.push("Address Proof: select a type."); continue; }
-      try { status(result, `Preparing ${row.querySelector("h3").textContent}…`); await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": file.type || "application/octet-stream", ...(subcategory ? { "X-NDC-Subcategory": subcategory } : {}) }, body: file }); saved++; }
+      try { status(result, `Preparing ${row.querySelector("h3").textContent}…`); await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": file.type || "application/octet-stream", "X-NDC-Original-Filename": file.name, "X-NDC-Original-Size": String(file.size), "X-NDC-Original-Last-Modified": String(file.lastModified || Date.now()), ...(subcategory ? { "X-NDC-Subcategory": subcategory } : {}) }, body: file }); saved++; }
       catch (error) { failures.push(`${row.querySelector("h3").textContent}: ${error.message}`); }
     }
-    const pages = [...host.querySelectorAll("[data-form20-page]")].map(slot => slot._file).filter(Boolean);
+    const form20Row = host.querySelector('[data-doc="form20"]');
+    const form20File = form20Row?._file;
+    const pages = form20Row?._pages || [];
+    if (form20File) {
+      try {
+        status(result, "Preparing Form 20 PDF…");
+        await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": form20File.type || "application/pdf", "X-NDC-Original-Filename": form20File.name, "X-NDC-Original-Size": String(form20File.size), "X-NDC-Original-Last-Modified": String(form20File.lastModified || Date.now()) }, body: form20File }); saved++;
+      } catch (error) { failures.push(`Form 20: ${error.message}`); }
+    }
     if (pages.length) {
-      if (pages.length < 3) failures.push("Form 20: capture at least three pages to create the PDF.");
+      if (pages.length < 3) failures.push("Form 20: choose or capture at least three photos.");
       else {
         try {
           await request(`/api/upload-portal/customers/${customer._id}/form20/stage`, { method: "DELETE" });
-          for (let i = 0; i < pages.length; i++) { status(result, `Compressing Form 20 page ${i + 1} of ${pages.length}…`); await request(`/api/upload-portal/customers/${customer._id}/form20/pages/${i + 1}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": pages[i].type }, body: pages[i] }); }
-          status(result, "Combining Form 20 pages…"); await request(`/api/upload-portal/customers/${customer._id}/form20/complete`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }); saved++;
+          for (let i = 0; i < pages.length; i++) { status(result, `Compressing Form 20 photo ${i + 1} of ${pages.length}…`); await request(`/api/upload-portal/customers/${customer._id}/form20/pages/${i + 1}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": pages[i].type, "X-NDC-Original-Filename": pages[i].name, "X-NDC-Original-Size": String(pages[i].size), "X-NDC-Original-Last-Modified": String(pages[i].lastModified || Date.now()) }, body: pages[i] }); }
+          status(result, "Combining Form 20 photos…"); await request(`/api/upload-portal/customers/${customer._id}/form20/complete`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }); saved++;
         } catch (error) { failures.push(`Form 20: ${error.message}`); }
       }
     }
