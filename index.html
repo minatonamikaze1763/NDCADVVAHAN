@@ -1707,8 +1707,9 @@
             <section class="ndc-cloud-checkout" aria-labelledby="signupCloudHeading">
               <h4 id="signupCloudHeading">Optional Cloud Storage</h4>
               <p>Uploaded documents auto-delete after 30 days; customer records stay as usage history. Cloud logins use your NDC plan device limit.</p>
-              <label for="signupCloudAddon">Cloud add-on plan</label>
-              <select id="signupCloudAddon"><option value="">No Cloud Storage add-on</option></select>
+              <span class="ndc-cloud-choice-label">Choose a cloud storage option</span>
+              <div id="signupCloudChoices" class="ndc-cloud-choices" role="group" aria-label="Cloud add-on plan"></div>
+              <select id="signupCloudAddon" class="ndc-cloud-native-select" aria-hidden="true" tabindex="-1"><option value="">No Cloud Storage add-on</option></select>
               <label id="signupCloudQuantityLabel" for="signupCloudAddonQuantity" hidden>Monthly customer record limit</label><input id="signupCloudAddonQuantity" type="number" min="1" step="1" value="100" hidden>
               <small id="signupCloudPrice"></small>
             </section>
