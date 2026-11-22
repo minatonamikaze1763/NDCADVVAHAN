@@ -49,6 +49,15 @@
       event.stopPropagation();
     }
   }, true);
+  function hasPendingDocumentChanges(host) {
+    return [...host.querySelectorAll(".doc-row[data-doc]")].some(row =>
+      Boolean(row._file) || (Array.isArray(row._pages) && row._pages.length > 0)
+    );
+  }
+  function updateDocumentSaveButton(host) {
+    const button = host?.querySelector(".save-bar .primary");
+    if (button) button.disabled = !hasPendingDocumentChanges(host);
+  }
   function setSaveBarrier(active) {
     const barrier = $("saveBarrier");
     if (!barrier) return;
@@ -363,6 +372,7 @@
       if (!row || !input.files?.[0]) return;
       row._file = input.files[0]; row._pages = [];
       row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "File selected";
+      updateDocumentSaveButton($("customerView"));
       await loadSelectedFilePreview(row, row._file);
     });
     input.click();
@@ -913,11 +923,11 @@
       let assigned = "Unmatched";
       if (category === "form20") {
         const row = host.querySelector('[data-doc="form20"]');
-        if (row && (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))) { row._file = file; row._pages = []; row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "Form 20 file selected"; await loadSelectedFilePreview(row, file); assigned = "Form 20"; }
-        else if (row && file.type.startsWith("image/")) { row._pages = [...(row._pages || []), file]; row._file = null; row.querySelector(".doc-state").textContent = `${row._pages.length} Form 20 photos selected`; if (row._pages.length === 1) await loadSelectedFilePreview(row, file); assigned = "Form 20 photos"; }
+        if (row && (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))) { row._file = file; row._pages = []; row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "Form 20 file selected"; updateDocumentSaveButton(host); await loadSelectedFilePreview(row, file); assigned = "Form 20"; }
+        else if (row && file.type.startsWith("image/")) { row._pages = [...(row._pages || []), file]; row._file = null; row.querySelector(".doc-state").textContent = `${row._pages.length} Form 20 photos selected`; updateDocumentSaveButton(host); if (row._pages.length === 1) await loadSelectedFilePreview(row, file); assigned = "Form 20 photos"; }
       } else if (category) {
         const row = host.querySelector(`[data-doc="${category}"]`);
-        if (row && !row._file) { row._file = file; row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "File selected"; await loadSelectedFilePreview(row, file); assigned = row.querySelector("h3").textContent; }
+        if (row && !row._file) { row._file = file; row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "File selected"; updateDocumentSaveButton(host); await loadSelectedFilePreview(row, file); assigned = row.querySelector("h3").textContent; }
         else if (row) assigned = "Already has a file; choose another document row";
       }
       const item = document.createElement("div"); item.className = "bulk-file";
@@ -925,6 +935,7 @@
       const result = document.createElement("small"); result.textContent = assigned;
       item.append(name, result); queue.append(item); messages.push(`${file.name} → ${assigned}`);
     }
+    updateDocumentSaveButton(host);
     status(host.querySelector(".bulk-status"), `${files.length} file${files.length === 1 ? "" : "s"} added. Check each assignment below; unmatched or duplicate files can be selected in a document row.`);
   }
   const actionIconSvg = {
@@ -943,7 +954,7 @@
   function renderCustomer(customer) {
     const host = $("customerView"); host.replaceChildren(); host.hidden = false;
     const head = document.createElement("div"); head.className = "customer-heading";
-    const titleBlock = document.createElement("div"); const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "CUSTOMER WORKSPACE"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = `Chassis: ${customer.chassisNumber}`; titleBlock.append(eyebrow, title, chassis);
+    const titleBlock = document.createElement("div"); const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "CUSTOMER WORKSPACE"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = customer.chassisNumber; titleBlock.append(eyebrow, title, chassis);
     const controls = document.createElement("div"); controls.className = "customer-controls";
     const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["chassisNumber", "customerName", "address", "hp", "applicationNumber"]) $(key).value = customer[key] || ""; $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
     const removeCustomer = document.createElement("button"); removeCustomer.type = "button"; removeCustomer.className = "danger"; setIconButton(removeCustomer, "trash", "Delete customer"); removeCustomer.addEventListener("click", async () => { if (!confirm(`Delete ${customer.customerName} and all of its stored documents? This cannot be undone.`)) return; try { await request(`/api/upload-portal/customers/${customer._id}`, { method: "DELETE" }); host.hidden = true; currentCustomer = null; await searchCustomers($("search").value); } catch (error) { alert(error.message); } });
@@ -1045,16 +1056,18 @@
     choose20.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; const input = document.createElement("input"); input.type = "file"; input.accept = "application/pdf,image/*"; input.multiple = true; input.addEventListener("change", async () => {
       if (!(await ensureActiveSession())) return;
       const files = [...(input.files || [])]; const pdfs = files.filter(file => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
-      if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = form20._savedDocument ? "Replacement selected" : "Form 20 file selected"; await loadSelectedFilePreview(form20, pdfs[0]); }
-      else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} Form 20 photos selected` : "Upload a PDF (3+ pages) or capture three photos"; if (files[0]) await loadSelectedFilePreview(form20, files[0]); else setPreview(form20._selectedPreview, null, "Selected"); }
+      if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = form20._savedDocument ? "Replacement selected" : "Form 20 file selected"; updateDocumentSaveButton(host); await loadSelectedFilePreview(form20, pdfs[0]); }
+      else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} Form 20 photos selected` : "Upload a PDF (3+ pages) or capture three photos"; updateDocumentSaveButton(host); if (files[0]) await loadSelectedFilePreview(form20, files[0]); else setPreview(form20._selectedPreview, null, "Selected"); }
     }); input.click(); });
     form20Actions.append(choose20); form20.append(form20Actions); list.insertBefore(form20, list.children[3] || null); host.append(list);
-    const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status"; result.textContent = "Choose any available documents. You can save fewer than 12."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected documents"; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar);
+    const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status save-description"; result.textContent = "Select files to save (up to 12)."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected"; save.disabled = true; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar); updateDocumentSaveButton(host);
   }
   async function openCustomer(id) { try { const data = await request(`/api/upload-portal/customers/${id}`); currentCustomer = data.customer; renderCustomer(currentCustomer); } catch (error) { status($("searchStatus"), error.message, "error"); } }
   async function saveDocuments(customer, host, button) {
-    if (!(await ensureActiveSession())) return;
-    button.disabled = true; setSaveBarrier(true); const result = $("saveStatus"); let saved = 0; const failures = [];
+    if (!hasPendingDocumentChanges(host)) return;
+    button.disabled = true;
+    if (!(await ensureActiveSession())) { updateDocumentSaveButton(host); return; }
+    setSaveBarrier(true); const result = $("saveStatus"); let saved = 0; const failures = [];
     for (const [category] of categories.filter(([id]) => id !== "form20")) {
       const row = host.querySelector(`[data-doc="${category}"]`); const file = row?._file; if (!file) continue;
       const subcategory = row.querySelector("[data-subcategory]")?.value || ""; if (category === "address-proof" && !subcategory) { failures.push("Address Proof: select a type."); continue; }
@@ -1097,7 +1110,7 @@
     }
     try { const updated = await request(`/api/upload-portal/customers/${customer._id}`); currentCustomer = updated.customer; renderCustomer(currentCustomer); await searchCustomers($("search").value); status($("saveStatus"), failures.length ? `${saved} saved. ${failures.join(" ")}` : `${saved ? `${saved} document${saved === 1 ? "" : "s"} saved and prepared for VAHAN.` : "No new documents selected."}`, failures.length ? "error" : "success"); }
     catch (error) { const response = host.querySelector("#saveStatus") || result; status(response, error.message, "error"); }
-    finally { button.disabled = false; setSaveBarrier(false); }
+    finally { setSaveBarrier(false); updateDocumentSaveButton(host); }
   }
   void validate();
 })();
