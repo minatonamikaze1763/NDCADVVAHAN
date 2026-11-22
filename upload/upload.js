@@ -142,6 +142,7 @@
             expireSession();
             return false;
           }
+          setWelcomeBack(data.user?.username || "");
           showApp();
           return true;
         } catch (error) {
@@ -272,8 +273,15 @@
       reader.readAsDataURL(blob);
     });
   }
-  function showLogin() { $("loginView").hidden = false; $("appView").hidden = true; $("logout").hidden = true; $("settingsToggle").hidden = true; }
-  function showApp() { $("loginView").hidden = true; $("appView").hidden = false; $("logout").hidden = false; $("settingsToggle").hidden = false; }
+  function setWelcomeBack(username) {
+    const welcome = $("welcomeBack");
+    if (!welcome) return;
+    const accountName = typeof username === "string" ? username.trim() : "";
+    welcome.textContent = accountName ? "Welcome back, " + accountName : "Welcome back";
+    welcome.hidden = false;
+  }
+  function showLogin() { $("loginView").hidden = false; $("appView").hidden = true; $("logout").hidden = true; $("settingsToggle").hidden = true; $("welcomeBack").hidden = true; }
+  function showApp() { $("loginView").hidden = true; $("appView").hidden = false; $("logout").hidden = false; $("settingsToggle").hidden = false; if ($("welcomeBack").hidden) setWelcomeBack(""); }
   async function loadSettings() {
     const data = await request("/api/upload-portal/settings");
     persistedRetentionDays = String(data.retentionDays || 20);
@@ -413,7 +421,7 @@
       sessionStorage.removeItem(tokenKey);
       if (!saveSessionExpiry(data.expiresAt)) throw new Error("The server did not return a valid 24-hour session expiry.");
       saveRememberedAccount(username);
-      $("password").value = ""; showApp();
+      setWelcomeBack(data.user?.username || username); $("password").value = ""; showApp();
       await Promise.all([
         searchCustomers(""),
         loadSettings().catch(error => status($("settingsStatus"), error.message, "error"))
