@@ -607,7 +607,7 @@
   function classifyFile(name) {
     return globalThis.NDCDocumentMatcher?.match(name)?.id || "";
   }
-  async function showFullscreenPreview(file) {
+  async function showFullscreenPreview(file, savedDetails = null) {
     if (!file || !(await ensureActiveSession())) return;
     const isImage = file.type?.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(file.name || "");
     const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
@@ -628,7 +628,9 @@
     title.textContent = file.name || "Document preview";
     const metadata = document.createElement("span");
     metadata.className = "fullscreen-preview-meta";
-    metadata.textContent = `${readableSize(file.size)} · ${isPdf ? "PDF document" : "Image"}`;
+    metadata.textContent = savedDetails
+      ? [savedDetails.originalSize != null ? `Original size: ${readableSize(savedDetails.originalSize)}` : "", savedDetails.size != null ? `Saved size: ${readableSize(savedDetails.size)}` : "", isPdf ? "PDF document" : "Image"].filter(Boolean).join(" · ")
+      : `${readableSize(file.size)} · ${isPdf ? "PDF document" : "Image"}`;
     fileInfo.append(title, metadata);
     const close = document.createElement("button");
     close.type = "button";
@@ -824,7 +826,7 @@
     } catch (_) { hint.textContent = "Open PDF preview"; }
     finally { if (pdf) await pdf.destroy().catch(()=>{}); else if (loadingTask) await loadingTask.destroy().catch(()=>{}); }
   }
-  function setPreview(box, file, label) {
+  function setPreview(box, file, label, savedDetails = null) {
     if (box._url) URL.revokeObjectURL(box._url);
     box._previewReady = Promise.resolve();
     box.replaceChildren();
@@ -834,20 +836,19 @@
     const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
     if (isImage) {
       const url = URL.createObjectURL(file); box._url = url;
-      const image = document.createElement("img"); image.alt = file.name || "Document preview"; image.className = "file-preview-thumb"; image.addEventListener("click", () => showFullscreenPreview(file));
+      const image = document.createElement("img"); image.alt = file.name || "Document preview"; image.className = "file-preview-thumb"; image.addEventListener("click", () => showFullscreenPreview(file, savedDetails));
       box._previewReady = new Promise(resolve => { image.addEventListener("load", resolve, {once:true}); image.addEventListener("error", resolve, {once:true}); });
       box.append(image); image.src = url;
     } else if (isPdf) {
       const pdfButton = document.createElement("button"); pdfButton.type = "button"; pdfButton.className = "pdf-preview-thumb"; pdfButton.setAttribute("aria-label", `Preview PDF ${file.name || ""} · ${readableSize(file.size)}`);
       const mark = document.createElement("span"); mark.className = "pdf-preview-mark"; mark.textContent = "PDF";
       const hint = document.createElement("span"); hint.className = "pdf-preview-hint"; hint.textContent = "Loading first page…";
-      pdfButton.append(mark, hint); pdfButton.addEventListener("click", () => showFullscreenPreview(file)); box.append(pdfButton);
+      pdfButton.append(mark, hint); pdfButton.addEventListener("click", () => showFullscreenPreview(file, savedDetails)); box.append(pdfButton);
       box._previewReady = renderPdfThumbnail(file, pdfButton, mark, hint);
     } else {
       const unsupported = document.createElement("span"); unsupported.className = "file-preview-label"; unsupported.textContent = "Preview unavailable"; box.append(unsupported);
     }
-    const size = document.createElement("span"); size.className = "file-preview-size"; size.textContent = readableSize(file.size); box.append(size);
-    const full = document.createElement("button"); full.type = "button"; full.className = "preview-fullscreen"; full.textContent = "Open preview"; full.addEventListener("click", () => showFullscreenPreview(file)); box.append(full);
+    const full = document.createElement("button"); full.type = "button"; full.className = "preview-fullscreen"; full.textContent = "Open preview"; full.addEventListener("click", () => showFullscreenPreview(file, savedDetails)); box.append(full);
     return box._previewReady;
   }
   function setDocumentRowLoading(row, loading) {
@@ -866,7 +867,6 @@
     setDocumentRowLoading(row, true);
     try {
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      updateFileDetails(row, file);
       await setPreview(row._selectedPreview, file, "Selected");
     } finally { setDocumentRowLoading(row, false); }
   }
@@ -890,26 +890,9 @@
     label.textContent = `Modified · ${formatModifiedDate(saved)}`;
     row.querySelector(".doc-state")?.insertAdjacentElement("afterend", label);
   }
-  function updateFileDetails(row, file) {
-    if (!file || row._savedDocument) return;
-    const details = row.querySelector(".file-details");
-    if (!details) return;
-    const values = {
-      "Original size": readableSize(file.size),
-      "Saved filename": "Pending cloud save",
-      "Saved size": "Pending"
-    };
-    for (const [label, value] of Object.entries(values)) {
-      const detail = details.querySelector(`[data-detail="${label}"]`);
-      if (detail) detail.textContent = value;
-    }
-  }
   function addFileDetails(row, saved) {
     row._savedDocument = saved || null;
-    const details = document.createElement("dl"); details.className = "file-details";
-    const entries = [["Original size", readableSize(saved?.originalSize)], ["Saved filename", saved?.filename || "—"], ["Saved size", readableSize(saved?.size)]];
-    for (const [label, value] of entries) { const wrap = document.createElement("div"); const dt = document.createElement("dt"); dt.textContent = label; const dd = document.createElement("dd"); dd.dataset.detail = label; dd.textContent = value; wrap.append(dt, dd); details.append(wrap); }
-    row.append(details); row._fileDetails = details;
+    row._fileDetails = null;
   }
   function addPreviewPair(row, customer, category, saved) {
     const pair = document.createElement("div"); pair.className = "preview-pair";
@@ -923,7 +906,7 @@
       open.append(openIcon, openLabel);
       open.addEventListener("click", async () => {
         open.disabled = true;
-        try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, {}, true); const savedFile = new File([blob], saved.filename, {type:saved.contentType || blob.type}); setPreview(stored, savedFile, "Saved"); showFullscreenPreview(savedFile); }
+        try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, {}, true); const savedFile = new File([blob], saved.filename, {type:saved.contentType || blob.type}); setPreview(stored, savedFile, "Saved", saved); showFullscreenPreview(savedFile, saved); }
         catch(error) { openLabel.textContent = "Preview unavailable"; open.title = error.message; }
         finally { open.disabled = false; }
       });

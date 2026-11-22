@@ -780,3 +780,58 @@ button.icon-only:focus-visible {
     align-items: flex-start;
   }
 }
+
+
+/* Keep row tiles free of repeated file metadata and fill preview actions. */
+.file-details { display: none !important; }
+.file-preview .preview-open,
+.file-preview .preview-fullscreen {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-self: stretch;
+  justify-content: center;
+}
+
+/* Form 20 mobile actions occupy separate, full-width rows. */
+@media(max-width:680px) {
+  .form20-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 10px;
+  }
+  .form20-actions > .native-capture-group {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    gap: 8px;
+  }
+  .form20-actions .native-capture-pages {
+    display: flex;
+    width: 100%;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .form20-actions .native-capture-page {
+    flex: 0 0 46px !important;
+  }
+  .form20-actions .native-capture-group .native-capture-save {
+    grid-column: auto;
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 0;
+  }
+  .form20-actions .native-capture-group .native-capture-status {
+    grid-column: auto;
+    flex: 0 0 100%;
+  }
+  .form20-actions > .icon-only {
+    justify-self: stretch;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 46px;
+  }
+}
