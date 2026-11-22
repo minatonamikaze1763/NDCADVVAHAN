@@ -300,13 +300,18 @@
     } catch (error) { status($("settingsStatus"), error.message, "error"); }
     finally { button.disabled = false; }
   });
+  function setSessionBarrier(active) {
+    $("sessionBarrier").hidden = !active;
+  }
   async function validate() {
     if (!token) return showLogin();
     if (sessionExpiry && Date.now() >= sessionExpiry) return expireSession();
+    setSessionBarrier(true);
     try {
       const data = await request("/api/auth/me");
       if (!saveSessionExpiry(data.sessionExpiresAt)) return expireSession();
       showApp();
+      setSessionBarrier(false);
       await Promise.all([
         searchCustomers(""),
         loadSettings().catch(error => status($("settingsStatus"), error.message, "error"))
@@ -314,7 +319,10 @@
     } catch (error) {
       if (!token || (sessionExpiry && Date.now() >= sessionExpiry)) return showLogin();
       showApp();
+      setSessionBarrier(false);
       status($("searchStatus"), "Could not verify your saved session because the server is unreachable. Check your connection and reload.", "error");
+    } finally {
+      setSessionBarrier(false);
     }
   }
   const rememberedAccountsKey = "ndcUploadPortalRememberedAccounts";
@@ -402,17 +410,49 @@
     finally { button.disabled = false; }
   });
   $("search").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => searchCustomers($("search").value), 250); });
+  let customerSearchSequence = 0;
+  function renderCustomerSkeletons(host) {
+    host.replaceChildren();
+    host.setAttribute("aria-busy", "true");
+    for (let index = 0; index < 3; index++) {
+      const row = document.createElement("div");
+      row.className = "customer-skeleton";
+      row.setAttribute("aria-hidden", "true");
+      const copy = document.createElement("span");
+      copy.className = "customer-skeleton-copy";
+      const titleLine = document.createElement("span");
+      titleLine.className = "customer-skeleton-line customer-skeleton-title";
+      const metaLine = document.createElement("span");
+      metaLine.className = "customer-skeleton-line customer-skeleton-meta";
+      copy.append(titleLine, metaLine);
+      const arrow = document.createElement("span");
+      arrow.className = "customer-skeleton-line customer-skeleton-arrow";
+      row.append(copy, arrow);
+      host.append(row);
+    }
+  }
   async function searchCustomers(query) {
+    const host = $("customerResults");
+    const requestSequence = ++customerSearchSequence;
+    renderCustomerSkeletons(host);
+    status($("searchStatus"), "Loading customer records…");
     try {
       const data = await request(`/api/upload-portal/customers?q=${encodeURIComponent(query)}`);
-      const host = $("customerResults"); host.replaceChildren();
+      if (requestSequence !== customerSearchSequence) return;
+      host.replaceChildren();
+      host.removeAttribute("aria-busy");
       data.customers.forEach(customer => {
         const button = document.createElement("button"); button.type = "button"; button.className = "result-row";
         const title = document.createElement("span"); title.textContent = customer.customerName; const meta = document.createElement("small"); meta.textContent = `${customer.chassisNumber} · ${Object.keys(customer.documents || {}).length} documents saved`;
         const right = document.createElement("span"); right.append(title, meta); const arrow = document.createElement("b"); arrow.textContent = "›"; button.append(right, arrow); button.addEventListener("click", () => openCustomer(customer._id)); host.append(button);
       });
       status($("searchStatus"), data.customers.length ? `${data.customers.length} customer${data.customers.length === 1 ? "" : "s"} found.` : query ? "No matching customer found." : "Create a customer to start uploading.");
-    } catch (error) { status($("searchStatus"), error.message, "error"); }
+    } catch (error) {
+      if (requestSequence !== customerSearchSequence) return;
+      host.replaceChildren();
+      host.removeAttribute("aria-busy");
+      status($("searchStatus"), error.message, "error");
+    }
   }
   async function safeFileInput(category, isCamera) {
     if (!(await ensureActiveSession())) return;
