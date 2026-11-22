@@ -1081,6 +1081,27 @@
     const displayIndex = documentDisplayOrder.indexOf(category);
     return `${displayIndex >= 0 ? displayIndex + 1 : categoryIndex + 1}. ${categories[categoryIndex][1]}`;
   }
+  function resetBulkAssignedRow(row, category, assignedFile) {
+    if (!row) return;
+    if (row._bulkAssignedFile === assignedFile) {
+      row._file = null;
+      row._bulkAssignedFile = null;
+    }
+    if (category === "form20" && Array.isArray(row._bulkAssignedPhotos) && row._bulkAssignedPhotos.includes(assignedFile)) {
+      row._pages = (row._pages || []).filter(file => file !== assignedFile);
+      row._bulkAssignedPhotos = row._bulkAssignedPhotos.filter(file => file !== assignedFile);
+    }
+    const state = row.querySelector(".doc-state");
+    if (state) {
+      state.textContent = category === "form20"
+        ? (row._savedDocument ? "" : "Upload a PDF (3+ pages) or capture three photos")
+        : (row._savedDocument ? "" : "Not selected");
+    }
+    if (category === "form20" && row._pages?.length) {
+      state.textContent = row._pages.length + " Form 20 photos selected";
+      void loadSelectedFilePreview(row, row._pages[0]);
+    } else if (row._selectedPreview) setPreview(row._selectedPreview, null, "Selected");
+  }
   function releaseBulkFilePreview(item) {
     const preview = item?.querySelector(".bulk-file-preview");
     if (preview?._url) {
