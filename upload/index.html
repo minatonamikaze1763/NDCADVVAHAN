@@ -9,7 +9,7 @@
   <link rel="apple-touch-icon" href="/logo.png?v=e43be25972f4">
   <meta name="robots" content="noindex, nofollow">
   <title>VAHAN Document Upload | NDC</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="upload.css?v=8dfba039">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="upload.css?v=logout-20261122">
 </head>
 <body>
   <header class="topbar"><a class="brand" href="/" aria-label="Next Dimension Customs, VAHAN Cloud"><img src="/logo.png" alt="Next Dimension Customs"><span class="brand-copy"><strong>VAHAN CLOUD</strong><small>NEXT DIMENSION CUSTOMS</small></span></a><nav class="topbar-actions" aria-label="Account"><button id="settingsToggle" class="quiet" type="button" hidden>Settings</button><button id="logout" class="quiet" hidden>Log out</button></nav></header>
@@ -75,6 +75,18 @@
       <button class="primary full" type="submit">Create customer</button>
     </form>
   </dialog>
+  <dialog id="logoutDialog" class="dialog logout-dialog" aria-labelledby="logoutTitle" aria-describedby="logoutMessage">
+    <div class="logout-content">
+      <p class="eyebrow">ACCOUNT</p>
+      <h2 id="logoutTitle">Confirm Logout</h2>
+      <p id="logoutMessage">Are you sure you want to log out of your NDC account?</p>
+      <p id="logoutLoading" class="logout-loading" role="status" aria-live="polite" hidden><span class="logout-spinner" aria-hidden="true"></span><span>Logging you out securely...</span></p>
+      <div class="logout-actions">
+        <button id="cancelLogout" class="secondary" type="button">Cancel</button>
+        <button id="confirmLogout" class="danger" type="button">Yes, Logout</button>
+      </div>
+    </div>
+  </dialog>
   <dialog id="discardChangesDialog" class="dialog discard-changes-dialog" aria-labelledby="discardChangesTitle" aria-describedby="discardChangesMessage">
     <div class="discard-changes-content">
       <p class="eyebrow">UNSAVED DOCUMENTS</p>
@@ -89,6 +101,6 @@
   <script src="document-matcher.js"></script>
   <script src="/upload/vendor/pdf.min.js?v=3.11.174"></script>
   <script src="/upload/vendor/jspdf.umd.min.js?v=2.5.1"></script>
-  <script src="upload.js?v=cb199832"></script>
+  <script src="upload.js?v=logout-20261122"></script>
 </body>
 </html>

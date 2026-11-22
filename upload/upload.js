@@ -21,6 +21,7 @@
   let autoForm20AsInspection = false;
   let persistedRetentionDays = "20";
   let sessionValidationPromise = null;
+  let logoutInProgress = false;
 
   let editingCustomerId = null;
   const categories = [
@@ -431,7 +432,70 @@
     finally { button.disabled = false; }
   });
   $("settingsView").hidden = true;
-  $("logout").addEventListener("click", async () => { try { await request("/api/auth/logout", { method: "POST" }); } catch {} clearClientSession(); currentCustomer = null; $("customerView").hidden = true; showLogin(); });
+  async function closeLogoutDialog() {
+    const dialog = $("logoutDialog");
+    if (!dialog.open) return;
+    dialog.classList.add("is-closing");
+    await new Promise(resolve => setTimeout(resolve, 180));
+    dialog.close();
+    dialog.classList.remove("is-closing");
+  }
+  $("logout").addEventListener("click", () => {
+    if (logoutInProgress || $("logoutDialog").open) return;
+    $("logoutLoading").hidden = true;
+    $("logoutMessage").hidden = false;
+    $("cancelLogout").disabled = false;
+    $("confirmLogout").disabled = false;
+    $("logoutDialog").classList.remove("is-closing");
+    $("logoutDialog").showModal();
+  });
+  $("cancelLogout").addEventListener("click", () => { void closeLogoutDialog(); });
+  $("logoutDialog").addEventListener("cancel", event => {
+    event.preventDefault();
+    if (!logoutInProgress) void closeLogoutDialog();
+  });
+  $("logoutDialog").addEventListener("click", event => {
+    if (event.target === $("logoutDialog") && !logoutInProgress) void closeLogoutDialog();
+  });
+  $("confirmLogout").addEventListener("click", async () => {
+    if (logoutInProgress) return;
+    logoutInProgress = true;
+    $("cancelLogout").disabled = true;
+    $("confirmLogout").disabled = true;
+    $("logoutLoading").hidden = false;
+    $("logoutMessage").hidden = true;
+
+    const headers = new Headers();
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    let logoutWarning = "";
+    let logoutRequest;
+    try {
+      // Start server-side revocation immediately; do not wait for a UI animation or auth preflight.
+      logoutRequest = fetch(API + "/api/auth/logout", { method: "POST", headers });
+    } catch (error) {
+      logoutWarning = "This device was signed out, but the server could not confirm session revocation. Reconnect and sign out again.";
+    }
+    clearClientSession();
+    try {
+      const response = await logoutRequest;
+      if (response && !response.ok && response.status !== 401 && response.status !== 403) {
+        logoutWarning = "This device was signed out, but the server could not confirm session revocation. Reconnect and sign out again.";
+      }
+    } catch (error) {
+      logoutWarning = "This device was signed out, but the server could not confirm session revocation. Reconnect and sign out again.";
+    }
+
+    currentCustomer = null;
+    $("customerView").hidden = true;
+    await closeLogoutDialog();
+    const appView = $("appView");
+    appView.classList.add("logout-fade-out");
+    await new Promise(resolve => setTimeout(resolve, 200));
+    showLogin();
+    appView.classList.remove("logout-fade-out");
+    if (logoutWarning) status($("loginStatus"), logoutWarning, "error");
+    logoutInProgress = false;
+  });
   $("newCustomer").addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = null; $("customerForm").reset(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
   $("closeDialog").addEventListener("click", () => $("customerDialog").close());
   $("keepEditing").addEventListener("click", () => {

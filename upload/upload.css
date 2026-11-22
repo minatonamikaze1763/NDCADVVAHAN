@@ -1123,3 +1123,27 @@ button.password-toggle {
   .search-card { padding:16px 13px; }
   .result-row { min-height:70px; padding:13px 12px; }
 }
+
+/* Logout confirmation and exit transition. */
+.logout-dialog { width:min(440px,calc(100vw - 24px)); }
+.logout-dialog[open] { animation:ndc-logout-in .2s ease-out both; }
+.logout-dialog.is-closing { animation:ndc-logout-out .18s ease-in both; }
+.logout-content h2 { margin:0 0 10px; font:600 1.3rem/1.3 "Space Grotesk",sans-serif; }
+.logout-content>p:not(.eyebrow) { margin:0; color:var(--muted); line-height:1.6; }
+.logout-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
+.logout-actions button { min-height:44px; }
+.logout-loading[hidden] { display:none; }
+.logout-loading { display:flex; align-items:center; gap:10px; margin-top:18px!important; color:var(--text)!important; }
+.logout-spinner { width:19px; height:19px; flex:none; border:2px solid rgba(240,203,85,.25); border-top-color:var(--gold2); border-radius:50%; animation:ndc-save-spin .75s linear infinite; }
+#appView.logout-fade-out { opacity:0; pointer-events:none; transition:opacity .2s ease; }
+@keyframes ndc-logout-in { from { opacity:0; transform:translateY(8px) scale(.98); } to { opacity:1; transform:translateY(0) scale(1); } }
+@keyframes ndc-logout-out { from { opacity:1; transform:translateY(0) scale(1); } to { opacity:0; transform:translateY(5px) scale(.99); } }
+@media(prefers-reduced-motion:reduce) {
+  .logout-dialog[open],.logout-dialog.is-closing { animation-duration:.01ms; }
+  #appView.logout-fade-out { transition-duration:.01ms; }
+  .logout-spinner { animation-duration:2.4s; }
+}
+@media(max-width:480px) {
+  .logout-actions { flex-direction:column-reverse; }
+  .logout-actions button { width:100%; }
+}
