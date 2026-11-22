@@ -1032,3 +1032,14 @@ button.icon-only:focus-visible {
 }
 
 .doc-state.saved:empty { display: none; }
+
+/* Confirm before discarding files selected in the customer editor. */
+.discard-changes-dialog { width:min(470px,calc(100vw - 24px)); }
+.discard-changes-content h2 { margin:0 0 10px; font:600 1.3rem/1.3 "Space Grotesk",sans-serif; }
+.discard-changes-content>p:not(.eyebrow) { margin:0; color:var(--muted); line-height:1.6; }
+.discard-changes-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
+.discard-changes-actions button { min-height:44px; }
+@media(max-width:480px) {
+  .discard-changes-actions { flex-direction:column-reverse; }
+  .discard-changes-actions button { width:100%; }
+}
