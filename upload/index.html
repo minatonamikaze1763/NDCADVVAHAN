@@ -9,7 +9,7 @@
   <link rel="apple-touch-icon" href="/logo.png?v=e43be25972f4">
   <meta name="robots" content="noindex, nofollow">
   <title>VAHAN Document Upload | NDC</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="upload.css?v=cloud-addon-20261122">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="upload.css?v=cloud-retention-20261122">
 </head>
 <body>
   <header class="topbar"><a class="brand" href="/" aria-label="Next Dimension Customs, VAHAN Cloud"><img src="/logo.png" alt="Next Dimension Customs"><span class="brand-copy"><strong>VAHAN CLOUD</strong><small>NEXT DIMENSION CUSTOMS</small></span></a><nav class="topbar-actions" aria-label="Account"><button id="settingsToggle" class="quiet" type="button" hidden>Settings</button><button id="logout" class="quiet" hidden>Log out</button></nav></header>
@@ -57,10 +57,10 @@
       </div>
     </section>
     <section id="appView" hidden>
-      <div class="intro"><div><p id="welcomeBack" class="welcome-back" hidden></p><p class="eyebrow">CUSTOMER DOCUMENTS</p><h1>Upload from your phone</h1><p class="muted">Create a customer with the required chassis number and customer name, then add any available documents.</p></div><button id="newCustomer" class="primary">＋ New customer</button></div>
+      <div class="intro"><div><p id="welcomeBack" class="welcome-back" hidden></p><p class="eyebrow">CUSTOMER DOCUMENTS</p><h1>Upload from your phone</h1><p class="muted">Create a customer with the required chassis number and customer name, then add any available documents. Uploaded documents auto-delete after 30 days; customer records stay for usage history and cannot be deleted.</p></div><button id="newCustomer" class="primary">＋ New customer</button></div>
       <section class="card search-card"><label for="search">Find a customer</label><input id="search" placeholder="Chassis number, customer name, or application number" autocomplete="off"><div id="customerResults" class="customer-results"></div><p id="searchStatus" class="status" role="status"></p></section>
       <section id="customerView" class="card customer-card" hidden></section>
-      <section id="settingsView" class="card settings-card" hidden aria-labelledby="settingsTitle"><div class="settings-heading"><div><p class="eyebrow">WORKSPACE SETTINGS</p><h2 id="settingsTitle">Document settings</h2><p class="muted">Manage cloud retention and VAHAN upload preferences for this company.</p></div><button id="backToWorkspace" class="secondary" type="button">Back to workspace</button></div><label for="retentionDays">Cloud customer records and documents expire after</label><div class="retention-control"><select id="retentionDays" disabled><option value="30">30 days</option></select></div><div class="extension-setting"><p class="eyebrow">VAHAN EXTENSION PREFERENCE</p><label class="setting-toggle" for="autoForm20AsInspection"><input id="autoForm20AsInspection" type="checkbox"><span><strong>Auto copy Form 20 as Inspection</strong><small>Save the Form 20 PDF to the Inspection document slot as well.</small></span></label></div><button id="saveRetention" class="primary" type="button">Save settings</button><p id="settingsStatus" class="status" role="status"></p></section>
+      <section id="settingsView" class="card settings-card" hidden aria-labelledby="settingsTitle"><div class="settings-heading"><div><p class="eyebrow">WORKSPACE SETTINGS</p><h2 id="settingsTitle">Document settings</h2><p class="muted">Manage cloud retention and VAHAN upload preferences for this company.</p></div><button id="backToWorkspace" class="secondary" type="button">Back to workspace</button></div><label for="retentionDays">Uploaded customer documents are automatically deleted after</label><div class="retention-control"><select id="retentionDays" disabled><option value="30">30 days</option></select></div><small class="retention-note">Customer records are retained as cloud usage and billing history. You may delete individual documents; customer records cannot be deleted.</small><div class="extension-setting"><p class="eyebrow">VAHAN EXTENSION PREFERENCE</p><label class="setting-toggle" for="autoForm20AsInspection"><input id="autoForm20AsInspection" type="checkbox"><span><strong>Auto copy Form 20 as Inspection</strong><small>Save the Form 20 PDF to the Inspection document slot as well.</small></span></label></div><button id="saveRetention" class="primary" type="button">Save settings</button><p id="settingsStatus" class="status" role="status"></p></section>
     </section>
   </main>
   <dialog id="customerDialog" class="dialog">
@@ -101,6 +101,6 @@
   <script src="document-matcher.js"></script>
   <script src="/upload/vendor/pdf.min.js?v=3.11.174"></script>
   <script src="/upload/vendor/jspdf.umd.min.js?v=2.5.1"></script>
-  <script src="upload.js?v=cloud-addon-20261122"></script>
+  <script src="upload.js?v=cloud-retention-20261122"></script>
 </body>
 </html>
