@@ -1374,7 +1374,7 @@
     
     <script src="plan-catalog.js?v=306e61018fff" defer></script>
     
-    <script src="signup.js?v=9f0ce2dc314e" defer></script>
+    <script src="signup.js?v=cloud-flex-20261122" defer></script>
     
     <script src="offers-showcase.js?v=2ca242495092" defer></script>
     
@@ -1706,9 +1706,10 @@
             </div>
             <section class="ndc-cloud-checkout" aria-labelledby="signupCloudHeading">
               <h4 id="signupCloudHeading">Optional Cloud Storage</h4>
-              <p>Keep customer records in the cloud for 30 days. Cloud logins use the device login limit included in your NDC plan.</p>
+              <p>Uploaded documents auto-delete after 30 days; customer records stay as usage history. Cloud logins use your NDC plan device limit.</p>
               <label for="signupCloudAddon">Cloud add-on plan</label>
               <select id="signupCloudAddon"><option value="">No Cloud Storage add-on</option></select>
+              <label id="signupCloudQuantityLabel" for="signupCloudAddonQuantity" hidden>Monthly customer record limit</label><input id="signupCloudAddonQuantity" type="number" min="1" step="1" value="100" hidden>
               <small id="signupCloudPrice"></small>
             </section>
             <div id="signupGstFields" class="ndc-gst-checkout-fields">
