@@ -6,6 +6,14 @@
     latestFeatures: document.querySelector("#latest-features .features"),
     faq: document.querySelector("#faq .faq-grid")
   };
+  const cloudFaqFallback = targets.faq
+    ? [...targets.faq.querySelectorAll(":scope > details[data-cloud-faq]")]
+      .map(details => ({
+        question: details.querySelector("summary")?.textContent.trim() || "",
+        answer: details.querySelector("p")?.textContent.trim() || ""
+      }))
+      .filter(item => item.question && item.answer)
+    : [];
   const iconNames = new Set(["folder", "settings", "merge", "image", "check", "compress", "bolt", "upload", "search", "download", "user", "clock", "database", "file", "refresh"]);
   const node = (tag, className, value) => {
     const element = document.createElement(tag);
@@ -66,6 +74,15 @@
         const fragment = document.createDocumentFragment();
         for (const item of sections[key]) {
           fragment.append(key === "faq" ? faq(item) : feature(item, key === "latestFeatures"));
+        }
+        if (key === "faq") {
+          const questions = new Set(sections.faq.map(item => item.question.trim().toLowerCase()));
+          for (const item of cloudFaqFallback) {
+            const question = item.question.toLowerCase();
+            if (questions.has(question)) continue;
+            questions.add(question);
+            fragment.append(faq(item));
+          }
         }
         targets[key].replaceChildren(fragment);
       }

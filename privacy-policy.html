@@ -418,7 +418,7 @@
               <a href="index.html#document-choices">Four document buttons</a>
               <a href="index.html#automation">Automation</a>
               <a href="index.html#filename-guide">Document filenames</a>
-              <a href="index.html#security">Privacy &amp; security</a>
+              <a href="privacy-policy.html#storage">Privacy &amp; security</a>
               <a href="index.html#access">Get the extension</a>
               <a href="index.html#about">About NDC</a>
               <a href="index.html#updates">Version &amp; updates</a>
@@ -472,7 +472,7 @@
           Transparency matters. Learn how VAHAN NDC TOOL handles information
           when you use our Chrome extension and customer panel.
         </p>
-        <div class="updated">LAST UPDATED: NOVEMBER 17, 2026</div>
+        <div class="updated">LAST UPDATED: NOVEMBER 22, 2026</div>
       </section>
 
       <div class="layout">
@@ -572,11 +572,17 @@
                 categories used to organize documents.
               </li>
               <li>
+                <strong>Cloud customer record information:</strong> Customer
+                name, chassis number, and optional address, hypothecation and
+                application number entered in VAHAN Cloud to identify and
+                organize uploaded documents.
+              </li>
+              <li>
                 <strong>Document contents:</strong> Information contained in
-                vehicle-registration documents selected by the user, processed
-                as part of the document-preparation and VAHAN upload workflow.
-                Processing these documents does not mean their contents are
-                stored on the NDC server.
+                files selected for preparation or upload. The desktop extension
+                prepares directly selected files in the browser. Files
+                deliberately uploaded to VAHAN Cloud are transmitted over HTTPS
+                and stored in the registered dealership workspace.
               </li>
             </ul>
           </section>
@@ -595,7 +601,8 @@
                 required upload steps.
               </li>
               <li>Save extension preferences and settings.</li>
-              <li>Prepare, categorize, and optimize selected documents.</li>
+              <li>Prepare, categorize, and optimize files selected in the desktop extension workflow.</li>
+              <li>Store VAHAN Cloud documents under the registered dealership account, create ZIP downloads, and return requested document categories to the extension workflow.</li>
               <li>
                 Support document uploading and related portal interactions.
               </li>
@@ -612,19 +619,21 @@
           <section class="section" id="storage">
             <h2><span class="number">04</span> Storage & Security</h2>
             <p>
-              <strong>Document privacy:</strong> NDC does not store your
-              uploaded documents or the customer and bank details contained in
-              those documents on our server. Your documents are submitted to the
-              intended VAHAN portal only as part of your workflow. Extension
-              settings may be stored in Chrome's extension storage, and
-              documents may be processed locally for preparation and upload.
+              <strong>Document privacy:</strong> The desktop extension can
+              prepare files selected from local customer folders in your
+              browser and submit them to the official VAHAN portal. If you
+              upload documents and customer details to VAHAN Cloud, they are
+              transmitted over HTTPS and stored encrypted at rest in the
+              configured MongoDB Atlas storage for your registered dealership
+              account. Signed-in members of that account can retrieve those
+              records. VAHAN Cloud processes file contents to create ZIP
+              downloads and return requested document categories.
             </p>
             <p>
-              <strong>Workflow validation:</strong> Our server checks account
-              access and subscription permissions. Document preparation and
-              portal interactions take place in your browser; access validation
-              does not upload document contents to NDC.
-            </p>
+              <strong>Workflow validation:</strong> Account and subscription
+              checks do not upload the contents of files selected directly
+              through the desktop extension. VAHAN Cloud uploads are a separate,
+              intentional document-storage workflow.</p>
             <p>
               <strong>Account and access security:</strong> Authentication
               requests are sent to the NDC authentication service over HTTPS.
@@ -646,9 +655,13 @@
             <p>
               Authentication information is sent to the NDC authentication
               service when required to verify access and manage sessions.
-              Documents are submitted to the intended VAHAN portal when the user
-              carries out the document-upload workflow. NDC does not keep a
-              server-side copy of those uploaded documents.
+              Documents selected directly in the desktop extension workflow
+              are prepared in the browser and submitted to the intended VAHAN
+              portal. Documents and customer record details deliberately
+              uploaded to VAHAN Cloud are transmitted to NDC over HTTPS and
+              stored in the configured MongoDB Atlas storage for the registered
+              dealership account. VAHAN Cloud processes those files to create
+              ZIP downloads or return requested categories to authorized users.
             </p>
             <p>
               Subscription payments are processed through Razorpay. Payment
@@ -662,9 +675,11 @@
           <section class="section" id="retention">
             <h2><span class="number">06</span> Data Retention</h2>
             <p>
-              Locally stored settings may remain in the browser until cleared or
-              the extension is removed. Uploaded documents and the customer or
-              bank details contained in them are not retained on the NDC server.
+              Locally stored extension settings and prepared copies may remain
+              on the device until cleared or deleted. VAHAN Cloud customer
+              records and uploaded files are automatically deleted according
+              to the company retention setting: 7, 14 or 20 days, with 20 days
+              as the default. The workspace shows the record expiration date.
               Server-side account information, subscription and payment
               transaction records, referral records, sessions and security logs
               may be retained as necessary for authentication, service
@@ -679,9 +694,11 @@
           <section class="section" id="control">
             <h2><span class="number">07</span> Your Control</h2>
             <p>
-              Users choose which files to select and submit. You can review your
-              extension settings and remove locally stored extension data
-              through Chrome's available extension-data controls.
+              Users choose which files to select for the desktop extension or
+              upload to VAHAN Cloud. Company administrators can manage the Cloud
+              retention period in workspace settings. You can review extension
+              settings and remove locally stored extension data through
+              Chrome's available extension-data controls.
             </p>
             <p>
               For account-related or privacy requests, use the contact details
@@ -699,12 +716,18 @@
           </section>
 
           <section class="section" id="local-data">
-            <h2>Local Documents, Cache &amp; Downloads</h2>
+            <h2>Local Processing, VAHAN Cloud, Cache &amp; Downloads</h2>
             <p>
-              <strong>No NDC document archive:</strong> selected document files
-              are prepared on your device and attached to the official VAHAN
-              upload form. They are not routed through an NDC document-storage
-              service. VAHAN handles submitted files under its own policies.
+              <strong>Two document routes:</strong> Files selected directly from
+              local folders for the desktop extension workflow are prepared in
+              your browser and submitted to the official VAHAN portal. Files
+              deliberately uploaded to VAHAN Cloud are stored under the
+              registered dealership account, encrypted at rest in the
+              configured MongoDB Atlas storage, and used for ZIP downloads or
+              requested-document retrieval. Cloud records and files follow the
+              company retention setting and are automatically deleted when it
+              expires. VAHAN applies its own practices after documents are
+              submitted to its portal.
             </p>
             <ul>
               <li>
