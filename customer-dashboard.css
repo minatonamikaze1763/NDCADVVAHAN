@@ -735,3 +735,11 @@ body.ndc-dashboard-v2 {
   .ndc-logout-actions { flex-direction:column-reverse; }
   .ndc-logout-actions button { width:100%; }
 }
+
+
+/* Cloud add-on checkout and dashboard */
+.ndc-portfolio-page .ndc-cloud-addon-options > p { color: var(--ndc-muted, #b8b8b8); line-height: 1.6; }
+.ndc-portfolio-page .ndc-cloud-addon-options > .ndc-choice { display: inline-flex; margin: 0 0 12px; }
+.ndc-portfolio-page .ndc-cloud-addon-choice { min-width: 220px; }
+.ndc-portfolio-page #ndcCloudStorageNav[hidden] { display: none; }
+.ndc-portfolio-page [data-section="cloud-storage"] { border-color: rgba(214, 183, 84, .38); }
