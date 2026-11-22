@@ -218,7 +218,10 @@
       const data = await request("/api/auth/me");
       if (!saveSessionExpiry(data.sessionExpiresAt)) return expireSession();
       showApp();
-      await searchCustomers("");
+      await Promise.all([
+        searchCustomers(""),
+        loadSettings().catch(error => status($("settingsStatus"), error.message, "error"))
+      ]);
     } catch { showLogin(); }
   }
   $("loginForm").addEventListener("submit", async event => {
@@ -230,7 +233,11 @@
       token = data.token;
       sessionStorage.setItem(tokenKey, token);
       if (!saveSessionExpiry(data.expiresAt)) throw new Error("The server did not return a valid 24-hour session expiry.");
-      $("password").value = ""; showApp(); await searchCustomers("");
+      $("password").value = ""; showApp();
+      await Promise.all([
+        searchCustomers(""),
+        loadSettings().catch(error => status($("settingsStatus"), error.message, "error"))
+      ]);
       status($("loginStatus"), "Signed in. Your session is valid for up to 24 hours.", "success");
     } catch (error) { status($("loginStatus"), error.message, "error"); }
     finally { button.disabled = false; }
