@@ -35,6 +35,20 @@
   const sessionDevice = localStorage.getItem("ndcUploadPortalDeviceId") || crypto.randomUUID();
   localStorage.setItem("ndcUploadPortalDeviceId", sessionDevice);
   function status(el, message, type = "") { el.textContent = message; el.className = `status ${type}`; }
+  // Best-effort browser-page shortcut deterrence only; browser chrome can still open DevTools.
+  document.addEventListener("contextmenu", event => event.preventDefault(), true);
+  document.addEventListener("keydown", event => {
+    const key = String(event.key || "").toLowerCase();
+    const devtoolsCombo = key === "f12"
+      || ((event.ctrlKey || event.metaKey) && event.shiftKey && ["i", "j", "c"].includes(key))
+      || ((event.ctrlKey || event.metaKey) && event.altKey && ["i", "j", "c"].includes(key))
+      || (event.shiftKey && key === "f10")
+      || key === "contextmenu";
+    if (devtoolsCombo) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }, true);
   function setSaveBarrier(active) {
     const barrier = $("saveBarrier");
     if (!barrier) return;
@@ -386,8 +400,12 @@
     const update = () => {
       const captured = photos.filter(Boolean).length;
       captureButtons.forEach((button, index) => {
+        const action = photos[index] ? "Retake" : "Capture";
         button.disabled = saving;
-        button.textContent = photos[index] ? `Retake ${labels[index]}` : `Capture ${labels[index]}`;
+        button.dataset.captured = String(Boolean(photos[index]));
+        button.setAttribute("aria-label", `${action} ${labels[index]}`);
+        button.title = `${action} ${labels[index]}`;
+        button.innerHTML = `<span class="numbered-camera-icon">${actionIconSvg.camera}<span class="camera-number-badge">${index + 1}</span></span>`;
       });
       save.disabled = saving || saved || captured !== photos.length;
       if (saved) {
@@ -405,8 +423,9 @@
     labels.forEach((label, index) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "secondary native-capture-page";
-      button.textContent = `Capture ${label}`;
+      button.className = "secondary native-capture-page icon-only";
+      button.setAttribute("aria-label", `Capture ${label}`);
+      button.title = `Capture ${label}`;
       button.addEventListener("click", async () => {
         if (!(await ensureActiveSession())) return;
         button.disabled = true;
@@ -1038,7 +1057,7 @@
       onSave:(photos, progress) => saveCapturedForm20(customer, host, form20, photos, progress)
     });
     form20Actions.append(form20CaptureControls);
-    const choose20 = document.createElement("button"); choose20.type = "button"; choose20.className = "secondary"; choose20.textContent = "Choose PDF or photos";
+    const choose20 = document.createElement("button"); choose20.type = "button"; choose20.className = "secondary"; setIconButton(choose20, "upload", "Choose Form 20 PDF or photos");
     choose20.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; const input = document.createElement("input"); input.type = "file"; input.accept = "application/pdf,image/*"; input.multiple = true; input.addEventListener("change", async () => {
       if (!(await ensureActiveSession())) return;
       const files = [...(input.files || [])]; const pdfs = files.filter(file => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
