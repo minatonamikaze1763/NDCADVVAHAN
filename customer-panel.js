@@ -917,7 +917,7 @@
               <div class="ndc-renewal-purchase-details">
               <fieldset class="ndc-choice-group"><legend>02 · Add more time</legend><p>Each month adds 30 days. Choose 1–12 months.</p>
               <div class="ndc-month-options">${Array.from({ length: 12 }, (_, i) => `<label class="ndc-choice ndc-month-choice"><input type="radio" name="renewalMonths" value="${i + 1}" ${i === 0 ? 'checked' : ''}><span><strong>${i + 1}</strong><small>${i === 0 ? 'month' : 'months'}</small></span></label>`).join('')}</div></fieldset>
-              <fieldset class="ndc-choice-group ndc-cloud-addon-options"><legend>03 · Optional Cloud Storage</legend><p>Uploaded documents auto-delete after 30 days; customer records remain as usage history. Cloud logins use the device limit on the selected NDC plan. A new add-on period starts after any active add-on period.</p><label class="ndc-choice"><input type="radio" name="renewalCloudAddon" value="" checked><span><strong>No Cloud Storage</strong><em>Keep existing cloud access, if active</em></span></label><div class="ndc-plan-options">${(dashboardData.cloudAddonPlans || []).map(plan => '<label class="ndc-choice ndc-cloud-addon-choice"><input type="radio" name="renewalCloudAddon" value="' + esc(plan.id) + '"><span><small>CLOUD STORAGE ADD-ON</small><strong>' + esc(plan.name) + '</strong><b>' + esc(money(plan.monthlyPrice)) + '<small> / month</small></b><em>' + Number(plan.maxCustomersPerMonth).toLocaleString("en-IN") + ' customer records/month · 12 document slots each; documents auto-delete after 30 days</em></span></label>').join("")}</div></fieldset>
+              <fieldset class="ndc-choice-group ndc-cloud-addon-options"><legend>03 · Optional Cloud Storage</legend><p>Uploaded documents auto-delete after 30 days; customer records remain as usage history. Cloud logins use the device limit on the selected NDC plan. A new add-on period starts after any active add-on period.</p><label class="ndc-choice"><input type="radio" name="renewalCloudAddon" value="" checked><span><strong>No Cloud Storage</strong><em>Keep existing cloud access, if active</em></span></label><div class="ndc-plan-options">${(dashboardData.cloudAddonPlans || []).map(plan => '<div class="ndc-cloud-plan-card"><label class="ndc-choice ndc-cloud-addon-choice"><input type="radio" name="renewalCloudAddon" value="' + esc(plan.id) + '"><span><small>CLOUD STORAGE ADD-ON · ' + (plan.structure === "flex" ? "FLEX" : "FIXED") + '</small><strong>' + esc(plan.name) + '</strong><b>' + esc(money(plan.structure === "flex" ? plan.perCustomerPrice : plan.monthlyPrice)) + (plan.structure === "flex" ? '<small> / record / month</small>' : '<small> / month</small>') + '</b><em>' + (plan.structure === "flex" ? "Choose monthly record quantity, up to " + Number(plan.maxCustomersPerMonth).toLocaleString("en-IN") : Number(plan.maxCustomersPerMonth).toLocaleString("en-IN") + " customer records/month") + ' · 12 document slots each; documents auto-delete after 30 days</em></span></label>' + (plan.structure === "flex" ? '<label class="ndc-cloud-flex-quantity" data-cloud-quantity-wrap="' + esc(plan.id) + '" hidden><span>Customer records per month</span><input type="number" min="1" max="' + Number(plan.maxCustomersPerMonth) + '" value="100" inputmode="numeric" data-cloud-quantity="' + esc(plan.id) + '" aria-label="Monthly customer record quantity"></label>' : "") + '</div>').join("")}</div></div></fieldset>
               <div id="ndcRenewalOffer"></div>
               <div id="ndcRenewalPreview" class="ndc-renewal-preview" aria-live="polite"></div>
               ${dashboardData.gstProfile?.gstin && dashboardData.gstProfile?.businessName && dashboardData.gstProfile?.businessAddress && dashboardData.gstProfile?.stateCode ? "" : `
@@ -1394,11 +1394,33 @@
     offerWidget.setBusy(paymentBusy);
   }
   const RENEWAL_PRICES = {};
+  function cloudQuantityFor(plan) {
+    const input = [...document.querySelectorAll("[data-cloud-quantity]")].find(node => node.dataset.cloudQuantity === plan?.id);
+    const quantity = Number(input?.value), maximum = Number(plan?.maxCustomersPerMonth);
+    return Number.isInteger(quantity) && quantity > 0 && quantity <= maximum ? quantity : 0;
+  }
+  function syncCloudQuantityFields() {
+    const selectedId = document.querySelector('input[name="renewalCloudAddon"]:checked')?.value;
+    document.querySelectorAll("[data-cloud-quantity-wrap]").forEach(wrap => {
+      const selected = wrap.dataset.cloudQuantityWrap === selectedId;
+      wrap.hidden = !selected;
+      const input = wrap.querySelector("[data-cloud-quantity]");
+      if (!input) return;
+      const plan = (dashboardData?.cloudAddonPlans || []).find(item => item.id === selectedId);
+      const max = Math.max(1, Number(plan?.maxCustomersPerMonth) || 1);
+      input.max = String(max);
+      const value = Number(input.value);
+      if (!Number.isInteger(value) || value < 1) input.value = String(Math.min(100, max));
+      else if (value > max) input.value = String(max);
+      input.disabled = paymentBusy || !selected;
+    });
+  }
   function renewalTotal() {
     const plan = document.querySelector('input[name="renewalPlan"]:checked')?.value, months = Number(document.querySelector('input[name="renewalMonths"]:checked')?.value || 1);
     const addonId = document.querySelector('input[name="renewalCloudAddon"]:checked')?.value;
     const addonPlan = (dashboardData?.cloudAddonPlans || []).find(item => item.id === addonId);
-    const addonAmount = addonPlan ? Number(addonPlan.monthlyPrice) * months : 0;
+    syncCloudQuantityFields();
+    const addonAmount = addonPlan ? (addonPlan.structure === "flex" ? Number(addonPlan.perCustomerPrice) * cloudQuantityFor(addonPlan) : Number(addonPlan.monthlyPrice)) * months : 0;
     if ($("ndcRenewalTotal") && RENEWAL_PRICES[plan]) {
       const list = RENEWAL_PRICES[plan] * months + addonAmount, taxable = (appliedOffer ? appliedOffer.amountPaise / 100 : RENEWAL_PRICES[plan] * months) + addonAmount;
       const gstRate = Number(dashboardData?.gstCheckout?.gstRate) || 18, gst = dashboardData?.gstCheckout?.enabled ? Math.round(taxable * gstRate) / 100 : 0;
@@ -1430,7 +1452,7 @@
   function setPaymentBusy(busy) {
     paymentBusy = busy;
     offerWidget?.setBusy(busy);
-    document.querySelectorAll('input[name="renewalPlan"], input[name="renewalMonths"]').forEach(input => input.disabled = busy);
+    document.querySelectorAll('input[name="renewalPlan"], input[name="renewalMonths"], [data-cloud-quantity]').forEach(input => input.disabled = busy || (input.matches('[data-cloud-quantity]') && input.closest('[data-cloud-quantity-wrap]')?.hidden));
     const quick = $("ndcQuickRenew");
     const account = dashboardData?.account || {};
     const paidExpiry = Date.parse(account.expiresAt);
