@@ -437,10 +437,19 @@
     if (host) closeCustomerEditor(host, true);
   });
   $("customerForm").addEventListener("submit", async event => {
-    event.preventDefault(); const button = event.currentTarget.querySelector("button[type=submit]"); button.disabled = true; status($("createStatus"), editingCustomerId ? "Saving customer…" : "Creating customer…");
+    event.preventDefault();
+    const id = editingCustomerId;
+    const chassisNumber = $("chassisNumber").value.trim();
+    if (!id && !/^[A-Za-z0-9]{17}$/.test(chassisNumber)) {
+      status($("createStatus"), "Enter a 17-character chassis number using letters and numbers only.", "error");
+      $("chassisNumber").focus();
+      return;
+    }
+    const button = event.currentTarget.querySelector("button[type=submit]");
+    button.disabled = true;
+    status($("createStatus"), id ? "Saving customer…" : "Creating customer…");
     try {
-      const body = JSON.stringify({ chassisNumber: $("chassisNumber").value, customerName: $("customerName").value, address: $("address").value, hp: $("hp").value, applicationNumber: $("applicationNumber").value });
-      const id = editingCustomerId;
+      const body = JSON.stringify({ chassisNumber: id ? $("chassisNumber").value : chassisNumber, customerName: $("customerName").value, address: $("address").value, hp: $("hp").value, applicationNumber: $("applicationNumber").value });
       const data = await request(id ? `/api/upload-portal/customers/${id}` : "/api/upload-portal/customers", { method: id ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body });
       $("customerDialog").close(); if (id) await openCustomer(id); else await openCustomer(data.customer._id); await searchCustomers($("search").value);
     } catch (error) { status($("createStatus"), error.message, "error"); }
