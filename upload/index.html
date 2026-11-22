@@ -41,8 +41,10 @@
       <div class="login-form-panel">
         <div class="login-form-heading"><p class="eyebrow">WELCOME BACK</p><h2>Sign in to your account</h2><p class="muted">Use the same credentials as your VAHAN NDC TOOL account.</p></div>
         <form id="loginForm" class="form-grid login-form">
+          <label id="savedAccountsField" for="savedAccounts" hidden>Saved account<select id="savedAccounts"><option value="">Choose a saved account</option></select></label>
           <label for="username">Username<input id="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
-          <label for="password">Password<input id="password" type="password" autocomplete="current-password" required></label>
+          <label for="password">Password<div class="password-field"><input id="password" type="password" autocomplete="current-password" required><button id="togglePassword" class="password-toggle secondary" type="button" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></label>
+          <label class="remember-account"><input id="rememberAccount" type="checkbox"><span>Remember my account</span></label>
           <button class="primary full" type="submit"><span>Continue</span><span aria-hidden="true">→</span></button>
         </form>
         <p id="loginStatus" class="status login-status" role="status" aria-live="polite"></p>
