@@ -417,7 +417,7 @@
         button.dataset.captured = String(Boolean(photos[index]));
         button.setAttribute("aria-label", `${action} ${labels[index]}`);
         button.title = `${action} ${labels[index]}`;
-        button.innerHTML = `<span class="numbered-camera-icon">${actionIconSvg.camera}<span class="camera-number-badge">${index + 1}</span></span>`;
+        button.innerHTML = `<span class="numbered-camera-icon">${actionIconSvg.camera}<span class="camera-number-badge">${index + 1}</span></span><span class="button-label">${action} ${labels[index]}</span>`;
       });
       save.disabled = saving || saved || captured !== photos.length;
       if (saved) {
@@ -454,7 +454,7 @@
         } catch (error) {
           progress.textContent = error.message || `Could not capture ${label}. Try again.`;
         } finally {
-          if (!saving) button.disabled = false;
+          if (!saving) update();
         }
       });
       captureButtons.push(button);
@@ -950,6 +950,10 @@
     button.setAttribute("aria-label", label);
     button.title = label;
     button.innerHTML = actionIconSvg[icon];
+    const visibleLabel = document.createElement("span");
+    visibleLabel.className = "button-label";
+    visibleLabel.textContent = label;
+    button.append(visibleLabel);
   }
   function renderCustomer(customer) {
     const host = $("customerView"); host.replaceChildren(); host.hidden = false;
