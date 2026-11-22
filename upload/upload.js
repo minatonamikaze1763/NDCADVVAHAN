@@ -449,12 +449,12 @@
   async function copyForm20ToInspection(customer, file, sourceFile) {
     if (!autoForm20AsInspection) return false;
     const prepared = await prepareUploadFile(file, "inspection");
-    await request("/api/upload-portal/customers/" + customer._id + "/documents/inspection", {
+    const saved = await request("/api/upload-portal/customers/" + customer._id + "/documents/inspection", {
       method:"PUT",
       headers:{"Content-Type":"application/octet-stream","X-NDC-Original-Type":sourceFile.type || "application/pdf","X-NDC-Upload-Type":prepared.type || file.type,"X-NDC-Original-Filename":sourceFile.name,"X-NDC-Original-Size":String(sourceFile.size),"X-NDC-Original-Last-Modified":String(sourceFile.lastModified || Date.now())},
       body:prepared
     });
-    return true;
+    return {...saved, uploadedAt:new Date().toISOString()};
   }
   async function saveCapturedForm20(customer, host, row, photos, progress) {
     status(progress, "Combining the Form 20 photos into one PDF…");
@@ -467,11 +467,17 @@
     });
     const saved = {...result,contentType:"application/pdf",subcategory:null,uploadedAt:new Date().toISOString(),modifiedAt:result.originalLastModified || new Date().toISOString()};
     let inspectionCopyError = "";
+    let inspectionSaved = null;
     if (autoForm20AsInspection) {
-      try { await copyForm20ToInspection(customer, preparedFile, file); }
+      try { inspectionSaved = await copyForm20ToInspection(customer, preparedFile, file); }
       catch (error) { inspectionCopyError = error.message; }
     }
     updateSavedDocumentRow(customer, host, row, "form20", saved);
+    if (inspectionSaved) {
+      const inspectionRow = host.querySelector('[data-doc="inspection"]');
+      if (inspectionRow) updateSavedDocumentRow(customer, host, inspectionRow, "inspection", inspectionSaved);
+      else customer.documents = {...(customer.documents || {}), inspection:inspectionSaved};
+    }
     await searchCustomers($("search").value);
     status($("saveStatus"), inspectionCopyError ? `Form 20 PDF saved, but Inspection copy failed: ${inspectionCopyError}` : autoForm20AsInspection ? "Form 20 PDF saved and copied to Inspection." : "Form 20 saved as one PDF. Continue with the next document.", inspectionCopyError ? "error" : "success");
   }
