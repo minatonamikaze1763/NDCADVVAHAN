@@ -666,3 +666,72 @@ body.ndc-dashboard-v2 {
 .ndc-checkout-summary-columns{display:flex;justify-content:space-between;padding:6px 0 8px;border-bottom:1px solid rgba(215,189,85,.18);color:#a99c62;font-size:.7rem;font-weight:800;letter-spacing:.1em}
 @media(max-width:760px){.ndc-invoice-filters{grid-template-columns:1fr 1fr}.ndc-invoice-filters label:first-child{grid-column:1/-1}.ndc-invoice-filters button{width:100%}}
 @media(max-width:460px){.ndc-invoice-filters{grid-template-columns:1fr}.ndc-invoice-filters label:first-child{grid-column:auto}}
+
+/* Customer panel logout confirmation and exit animation. */
+.ndc-portfolio-page .ndc-logout-dialog {
+  width:min(440px,calc(100vw - 28px));
+  max-width:440px;
+  padding:26px;
+  border:1px solid rgba(215,189,85,.38);
+  border-radius:18px;
+  background:linear-gradient(145deg,#171714,#0c0c0b);
+  color:#f7f3e9;
+  box-shadow:0 24px 90px #000c;
+  font:400 14px/1.6 "DM Sans","Segoe UI",sans-serif;
+}
+.ndc-portfolio-page .ndc-logout-dialog::backdrop {
+  background:rgba(0,0,0,.82);
+  backdrop-filter:blur(7px);
+}
+.ndc-portfolio-page .ndc-logout-dialog[open] { animation:ndc-panel-logout-in .2s ease-out both; }
+.ndc-portfolio-page .ndc-logout-dialog.is-closing { animation:ndc-panel-logout-out .18s ease-in both; }
+.ndc-logout-content h2 {
+  margin:0 0 10px;
+  color:#f7f3e9;
+  font:600 1.3rem/1.3 "Space Grotesk","Segoe UI",sans-serif;
+}
+.ndc-logout-content>p:not(.ndc-logout-eyebrow) { margin:0; color:#aaa69d; }
+.ndc-logout-eyebrow {
+  margin:0 0 8px;
+  color:#f2d889;
+  font-size:.69rem;
+  font-weight:700;
+  letter-spacing:.16em;
+}
+.ndc-logout-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
+.ndc-logout-actions button {
+  min-height:44px;
+  padding:10px 15px;
+  border-radius:9px;
+  font:600 .88rem/1.2 "DM Sans","Segoe UI",sans-serif;
+  cursor:pointer;
+  transition:transform .16s ease,background .16s ease,border-color .16s ease;
+}
+.ndc-logout-actions button:hover { transform:translateY(-1px); }
+.ndc-logout-actions button:disabled { opacity:.5; cursor:wait; transform:none; }
+.ndc-logout-cancel { border:1px solid #484334; background:#211f1a; color:#f7f3e9; }
+.ndc-logout-confirm { border:1px solid #70403b; background:#351e1c; color:#ffd7d1; }
+.ndc-logout-loading { display:flex; align-items:center; gap:10px; margin-top:18px!important; color:#f7f3e9!important; }
+.ndc-logout-loading[hidden] { display:none!important; }
+.ndc-logout-spinner {
+  width:19px;
+  height:19px;
+  flex:none;
+  border:2px solid rgba(240,203,85,.25);
+  border-top-color:#f2d889;
+  border-radius:50%;
+  animation:ndc-panel-logout-spin .75s linear infinite;
+}
+.ndc-portal-shell.ndc-logout-fade { opacity:0; pointer-events:none; transition:opacity .22s ease; }
+@keyframes ndc-panel-logout-in { from { opacity:0; transform:translateY(8px) scale(.98); } to { opacity:1; transform:translateY(0) scale(1); } }
+@keyframes ndc-panel-logout-out { from { opacity:1; transform:translateY(0) scale(1); } to { opacity:0; transform:translateY(5px) scale(.99); } }
+@keyframes ndc-panel-logout-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) {
+  .ndc-portfolio-page .ndc-logout-dialog[open],.ndc-portfolio-page .ndc-logout-dialog.is-closing { animation-duration:.01ms; }
+  .ndc-portal-shell.ndc-logout-fade { transition-duration:.01ms; }
+  .ndc-logout-spinner { animation-duration:2.4s; }
+}
+@media(max-width:480px) {
+  .ndc-logout-actions { flex-direction:column-reverse; }
+  .ndc-logout-actions button { width:100%; }
+}

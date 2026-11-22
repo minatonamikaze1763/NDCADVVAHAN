@@ -10,6 +10,7 @@
   let dashboardData = null;
   let activeSection = "overview";
   let redirecting = false;
+  let logoutInProgress = false;
   let paymentBusy = false;
   let appliedOffer = null, offerWidget = null;
   const planDevices = (account, plan) => Math.min(20, plan.maxDevices + Math.max(0, ...(account?.offerBenefits || []).filter(b => b.planId === plan.id && (b.retainDevicesOnRenewal || Date.parse(b.expiresAt) > Date.now() + serverClockOffset)).map(b => Number(b.extraDevices) || 0)));
@@ -1549,7 +1550,10 @@
       }
     });
     window.matchMedia?.('(max-width: 760px)').addEventListener('change', () => { if (toggle.getAttribute('aria-expanded') === 'true') menu(false); });
-    document.querySelector('[data-menu-logout]').addEventListener('click', () => $("ndcLogoutButton").click());
+    document.querySelector('[data-menu-logout]').addEventListener('click', () => {
+      menu(false);
+      $("ndcLogoutButton").click();
+    });
 
 
     document.addEventListener("change", e => { if (e.target?.name === "renewalPlan" || e.target?.name === "renewalMonths") { if (appliedOffer) offerWidget?.clear("Offer removed because your selection changed."); renewalTotal(); } });
@@ -1578,17 +1582,50 @@
     });
 
     // Logout.
-    $("ndcLogoutButton")?.addEventListener("click", async () => {
-      const button = $("ndcLogoutButton");
-
-      button.disabled = true;
-      button.textContent = "Signing out…";
+    const logoutDialog = $("ndcLogoutDialog");
+    async function closeLogoutDialog() {
+      if (!logoutDialog.open) return;
+      logoutDialog.classList.add("is-closing");
+      await new Promise(resolve => setTimeout(resolve, 180));
+      logoutDialog.close();
+      logoutDialog.classList.remove("is-closing");
+    }
+    $("ndcLogoutButton")?.addEventListener("click", () => {
+      if (logoutInProgress || logoutDialog.open) return;
+      $("ndcLogoutMessage").hidden = false;
+      $("ndcLogoutLoading").hidden = true;
+      $("ndcCancelLogout").disabled = false;
+      $("ndcConfirmLogout").disabled = false;
+      logoutDialog.classList.remove("is-closing");
+      logoutDialog.showModal();
+    });
+    $("ndcCancelLogout").addEventListener("click", () => { void closeLogoutDialog(); });
+    logoutDialog.addEventListener("cancel", event => {
+      event.preventDefault();
+      if (!logoutInProgress) void closeLogoutDialog();
+    });
+    logoutDialog.addEventListener("click", event => {
+      if (event.target === logoutDialog && !logoutInProgress) void closeLogoutDialog();
+    });
+    $("ndcConfirmLogout").addEventListener("click", async () => {
+      if (logoutInProgress) return;
+      logoutInProgress = true;
+      $("ndcCancelLogout").disabled = true;
+      $("ndcConfirmLogout").disabled = true;
+      $("ndcLogoutMessage").hidden = true;
+      $("ndcLogoutLoading").hidden = false;
 
       try {
+        // Start session revocation immediately; the visual transition runs afterward.
         await window.NDCAuth.logout();
-      } finally {
-        window.location.replace("index.html");
+      } catch (error) {
+        console.warn("[NDC] Could not confirm server session revocation:", error);
       }
+
+      await closeLogoutDialog();
+      document.querySelector(".ndc-portal-shell").classList.add("ndc-logout-fade");
+      await new Promise(resolve => setTimeout(resolve, 220));
+      window.location.replace("index.html");
     });
 
     // Check authentication client.
