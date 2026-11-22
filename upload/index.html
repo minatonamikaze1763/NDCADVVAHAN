@@ -74,6 +74,17 @@
       <button class="primary full" type="submit">Create customer</button>
     </form>
   </dialog>
+  <dialog id="discardChangesDialog" class="dialog discard-changes-dialog" aria-labelledby="discardChangesTitle" aria-describedby="discardChangesMessage">
+    <div class="discard-changes-content">
+      <p class="eyebrow">UNSAVED DOCUMENTS</p>
+      <h2 id="discardChangesTitle">Close this customer?</h2>
+      <p id="discardChangesMessage">Some files or camera photos have not been saved to the cloud. If you close now, those unsaved files will be removed.</p>
+      <div class="discard-changes-actions">
+        <button id="keepEditing" class="secondary" type="button">No, keep editing</button>
+        <button id="discardAndClose" class="danger" type="button">Yes, discard files</button>
+      </div>
+    </div>
+  </dialog>
   <script src="document-matcher.js"></script>
   <script src="/upload/vendor/pdf.min.js?v=3.11.174"></script>
   <script src="/upload/vendor/jspdf.umd.min.js?v=2.5.1"></script>
