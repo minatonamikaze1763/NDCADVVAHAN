@@ -51,12 +51,13 @@
     }
   }, true);
   function hasPendingDocumentChanges(host) {
+    if (host?.querySelector(".bulk-queue .bulk-file")) return false;
     return [...host.querySelectorAll(".doc-row[data-doc]")].some(row =>
       Boolean(row._file) || (Array.isArray(row._pages) && row._pages.length > 0)
     );
   }
   function hasUnsavedEditorChanges(host) {
-    return [...host.querySelectorAll(".doc-row[data-doc]")].some(row =>
+    return Boolean(host?.querySelector(".bulk-queue .bulk-file")) || [...host.querySelectorAll(".doc-row[data-doc]")].some(row =>
       Boolean(row._file)
       || (Array.isArray(row._pages) && row._pages.length > 0)
       || (Array.isArray(row._nativeCameraPhotos) && row._nativeCameraPhotos.some(Boolean))
@@ -1080,60 +1081,52 @@
     const displayIndex = documentDisplayOrder.indexOf(category);
     return `${displayIndex >= 0 ? displayIndex + 1 : categoryIndex + 1}. ${categories[categoryIndex][1]}`;
   }
-  function resetBulkAssignedRow(row, category, assignedFile) {
-    if (!row) return;
-    if (row._bulkAssignedFile === assignedFile) {
-      row._file = null;
-      row._bulkAssignedFile = null;
+  function releaseBulkFilePreview(item) {
+    const preview = item?.querySelector(".bulk-file-preview");
+    if (preview?._url) {
+      URL.revokeObjectURL(preview._url);
+      preview._url = null;
     }
-    if (category === "form20" && Array.isArray(row._bulkAssignedPhotos) && row._bulkAssignedPhotos.includes(assignedFile)) {
-      row._pages = (row._pages || []).filter(file => file !== assignedFile);
-      row._bulkAssignedPhotos = row._bulkAssignedPhotos.filter(file => file !== assignedFile);
-    }
-    const state = row.querySelector(".doc-state");
-    if (state) {
-      state.textContent = category === "form20"
-        ? (row._savedDocument ? "" : "Upload a PDF (3+ pages) or capture three photos")
-        : (row._savedDocument ? "" : "Not selected");
-    }
-    if (category === "form20" && row._pages?.length) {
-      state.textContent = `${row._pages.length} Form 20 photos selected`;
-      void loadSelectedFilePreview(row, row._pages[0]);
-    } else if (row._selectedPreview) setPreview(row._selectedPreview, null, "Selected");
   }
-  async function setBulkFileAssignment(file, item, category, host) {
+  function updateBulkQueueStatus(host) {
+    const count = host?.querySelectorAll(".bulk-queue .bulk-file").length || 0;
+    const message = count
+      ? count + " loaded file" + (count === 1 ? " still needs" : "s still need") + " a document assignment or removal before saving."
+      : "All loaded files are assigned or removed.";
+    status(host?.querySelector(".bulk-status"), message);
+  }
+  async function setBulkFileAssignment(file, item, category, host, automatic = false) {
     const previousCategory = item.dataset.category || "";
-    const result = item.querySelector("small");
+    const select = item.querySelector(".bulk-file-category");
+    const result = item.querySelector(".bulk-file-message");
+    const restoreUnmatched = message => {
+      select.value = previousCategory;
+      result.textContent = message;
+      return false;
+    };
     if (category === previousCategory) {
       result.textContent = bulkFileAssignmentLabel(category, file);
-      return true;
+      return Boolean(category);
     }
-    const targetRow = category ? host.querySelector(`[data-doc="${category}"]`) : null;
-    if (category && !targetRow) {
-      item.querySelector(".bulk-file-category").value = previousCategory;
-      result.textContent = "Document row is unavailable.";
-      return false;
-    }
+    const targetRow = category ? host.querySelector('[data-doc="' + category + '"]') : null;
+    if (category && !targetRow) return restoreUnmatched("Document row is unavailable.");
     const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
     const isImage = file.type?.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(file.name || "");
+    if (category && automatic && targetRow._savedDocument) {
+      return restoreUnmatched("Already has an uploaded document. Select this type to overwrite it, or choose another document row.");
+    }
     if (category === "form20") {
-      const alreadyHasDifferentPdf = targetRow._file && targetRow._file !== file;
+      const alreadyHasDifferentFile = targetRow._file && targetRow._file !== file;
       const alreadyHasDifferentPages = isPdf && (targetRow._pages || []).length > 0;
-      const unsupportedForm20Type = !isPdf && !isImage;
-      if (alreadyHasDifferentPdf || alreadyHasDifferentPages || unsupportedForm20Type) {
-        item.querySelector(".bulk-file-category").value = previousCategory;
-        result.textContent = unsupportedForm20Type
-          ? "Form 20 supports PDF or image files."
-          : "Already has a file; choose another document row";
-        return false;
+      if (alreadyHasDifferentFile || alreadyHasDifferentPages) {
+        return restoreUnmatched("Already has another file selected. Choose another document row.");
       }
-    } else if (targetRow?._file && targetRow._file !== file) {
-      item.querySelector(".bulk-file-category").value = previousCategory;
-      result.textContent = "Already has a file; choose another document row";
-      return false;
+      if (!isPdf && !isImage) return restoreUnmatched("Form 20 supports PDF or image files.");
+    } else if (category && targetRow._file && targetRow._file !== file) {
+      return restoreUnmatched("Already has another file selected. Choose another document row.");
     }
     if (previousCategory) {
-      const previousRow = host.querySelector(`[data-doc="${previousCategory}"]`);
+      const previousRow = host.querySelector('[data-doc="' + previousCategory + '"]');
       if (previousRow?._bulkAssignedFile === file) resetBulkAssignedRow(previousRow, previousCategory, file);
       if (previousCategory === "form20" && previousRow?._bulkAssignedPhotos?.includes(file)) resetBulkAssignedRow(previousRow, previousCategory, file);
     }
@@ -1149,7 +1142,7 @@
         targetRow._pages = [...(targetRow._pages || []), file];
         targetRow._bulkAssignedPhotos = [...(targetRow._bulkAssignedPhotos || []), file];
         targetRow._file = null;
-        targetRow.querySelector(".doc-state").textContent = `${targetRow._pages.length} Form 20 photos selected`;
+        targetRow.querySelector(".doc-state").textContent = targetRow._savedDocument ? "Replacement selected" : targetRow._pages.length + " Form 20 photos selected";
         if (targetRow._pages.length === 1) await loadSelectedFilePreview(targetRow, file);
       }
     } else if (category) {
@@ -1159,9 +1152,15 @@
       await loadSelectedFilePreview(targetRow, file);
     }
     item.dataset.category = category;
-    result.textContent = bulkFileAssignmentLabel(category, file);
+    if (category) {
+      releaseBulkFilePreview(item);
+      item.remove();
+    } else {
+      result.textContent = "Unmatched";
+    }
     updateDocumentSaveButton(host);
-    return true;
+    updateBulkQueueStatus(host);
+    return Boolean(category);
   }
   async function queueFiles(files, host) {
     if (!(await ensureActiveSession())) return;
@@ -1172,33 +1171,49 @@
       const name = document.createElement("span");
       name.className = "bulk-file-name";
       name.textContent = file.name;
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "quiet bulk-file-remove";
+      setIconButton(remove, "close", "Remove file");
+      const preview = document.createElement("div");
+      preview.className = "file-preview bulk-file-preview";
+      setPreview(preview, file, "Loaded");
       const select = document.createElement("select");
       select.className = "bulk-file-category";
-      select.setAttribute("aria-label", `Document type for ${file.name}`);
+      select.setAttribute("aria-label", "Document type for " + file.name);
       select.add(new Option("Unmatched", ""));
       categories.forEach(([id, label]) => {
         const displayIndex = documentDisplayOrder.indexOf(id);
-        select.add(new Option(`${displayIndex >= 0 ? displayIndex + 1 : categories.findIndex(([category]) => category === id) + 1}. ${label}`, id));
+        select.add(new Option((displayIndex >= 0 ? displayIndex + 1 : categories.findIndex(([category]) => category === id) + 1) + ". " + label, id));
       });
       const result = document.createElement("small");
+      result.className = "bulk-file-message";
       const suggestedCategory = classifyFile(file.name);
       const initialCategory = categories.some(([id]) => id === suggestedCategory) ? suggestedCategory : "";
       item.dataset.category = "";
-      item.append(name, select, result);
+      item.append(name, preview, select, result, remove);
       queue.append(item);
-      select.value = initialCategory;
+      remove.addEventListener("click", () => {
+        releaseBulkFilePreview(item);
+        item.remove();
+        updateDocumentSaveButton(host);
+        updateBulkQueueStatus(host);
+      });
       select.addEventListener("change", () => {
         void setBulkFileAssignment(file, item, select.value, host).catch(error => {
           select.value = item.dataset.category || "";
           result.textContent = error.message;
         });
       });
+      select.value = initialCategory;
       if (initialCategory) {
-        await setBulkFileAssignment(file, item, initialCategory, host);
-      } else result.textContent = "Unmatched";
+        await setBulkFileAssignment(file, item, initialCategory, host, true);
+      } else {
+        result.textContent = "Unmatched. Choose a document type or remove this file.";
+      }
     }
     updateDocumentSaveButton(host);
-    status(host.querySelector(".bulk-status"), `${files.length} file${files.length === 1 ? "" : "s"} added. Choose a document type for unmatched files; duplicate assignments must use another document row.`);
+    updateBulkQueueStatus(host);
   }
   const actionIconSvg = {
     edit: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>',
