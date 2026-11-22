@@ -1203,6 +1203,44 @@ button.icon-only:focus-visible {
   #customerView>.save-bar .primary { flex:0 0 220px; width:220px; min-width:220px; min-height:42px; }
   .cloud-saved-indicator.is-pending { color:#f07878; border-color:rgba(240,120,120,.52); background:rgba(112,34,34,.22); }
 }
+/* Tablet screens use the floating editor with the list above its preview. */
+@media (min-width:681px) and (max-width:1100px) {
+  #customerView.customer-card {
+    inset:12px auto 12px 50%;
+    width:calc(100vw - 24px);
+    border-radius:15px;
+  }
+  #customerView>.customer-heading { padding:11px 14px; }
+  #customerView>.customer-fields { padding:6px 14px; }
+  #customerView>.bulk-upload { margin:6px 12px; }
+  #customerView>.doc-toolbar { padding:5px 14px; }
+  #customerView>.doc-list {
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:minmax(210px,.58fr) minmax(200px,.42fr);
+    gap:9px;
+    padding:8px 12px;
+  }
+  #customerView .doc-rows {
+    grid-column:1;
+    grid-row:1;
+  }
+  #customerView .desktop-preview-panel {
+    grid-column:1;
+    grid-row:2;
+  }
+  #customerView>.save-bar {
+    position:relative;
+    bottom:auto;
+    grid-row:6;
+    min-height:60px;
+    padding:8px 12px;
+  }
+  #customerView>.save-bar .primary {
+    flex-basis:200px;
+    width:200px;
+    min-width:200px;
+  }
+}
 @media (max-width:680px) {
   #customerView .doc-rows { display:contents; }
   #customerView .desktop-preview-panel,
