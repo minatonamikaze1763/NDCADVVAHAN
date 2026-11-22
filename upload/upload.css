@@ -56,7 +56,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d9a91d77;border-color
 .form20-pages input{font-size:.77rem;padding:8px}
 .add-page{font-size:.8rem;padding:7px 10px}
 .save-bar{padding:15px 22px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;bottom:0;background:#111e;backdrop-filter:blur(12px);z-index:2}
-.save-bar .status{margin:0}.save-bar .save-description{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.save-bar .primary{min-width:180px}
+.save-bar .status{margin:0}.save-bar .primary{min-width:180px}
 .dialog{width:min(560px,calc(100vw - 24px));max-height:90vh;overflow:auto;border:1px solid #5a4b22;border-radius:15px;padding:20px;background:#141412;color:var(--text)}
 .dialog::backdrop{background:#000b}
 .dialog-heading{display:flex;align-items:center;justify-content:space-between;grid-column:1/-1}
@@ -778,5 +778,60 @@ button.icon-only:focus-visible {
   }
   .form20-actions {
     align-items: flex-start;
+  }
+}
+
+
+/* Keep row tiles free of repeated file metadata and fill preview actions. */
+.file-details { display: none !important; }
+.file-preview .preview-open,
+.file-preview .preview-fullscreen {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-self: stretch;
+  justify-content: center;
+}
+
+/* Form 20 mobile actions occupy separate, full-width rows. */
+@media(max-width:680px) {
+  .form20-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 10px;
+  }
+  .form20-actions > .native-capture-group {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    gap: 8px;
+  }
+  .form20-actions .native-capture-pages {
+    display: flex;
+    width: 100%;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .form20-actions .native-capture-page {
+    flex: 0 0 46px !important;
+  }
+  .form20-actions .native-capture-group .native-capture-save {
+    grid-column: auto;
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 0;
+  }
+  .form20-actions .native-capture-group .native-capture-status {
+    grid-column: auto;
+    flex: 0 0 100%;
+  }
+  .form20-actions > .icon-only {
+    justify-self: stretch;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 46px;
   }
 }
