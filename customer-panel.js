@@ -1490,11 +1490,16 @@
       message("Razorpay Checkout did not load. Refresh and retry.");
       return;
     }
+    const cloudAddonPlan = (dashboardData?.cloudAddonPlans || []).find(item => item.id === cloudAddonPlanId);
+    const cloudAddonQuantity = cloudAddonPlan?.structure === "flex" ? cloudQuantityFor(cloudAddonPlan) : null;
+    if (cloudAddonPlan?.structure === "flex" && !cloudAddonQuantity) {
+      message("Enter a valid monthly customer record quantity for this cloud plan."); return;
+    }
     setPaymentBusy(true);
     message("Creating secure payment order…");
     try {
       const result = await api("/api/panel/payments/orders", {
-        method: "POST", body: JSON.stringify({ planId, months, ...(cloudAddonPlanId ? { cloudAddonPlanId } : {}), ...renewalBillingPayload(), ...(statusId === "ndcRenewalStatus" && appliedOffer?.planId === planId && appliedOffer?.months === months ? { offerCode: appliedOffer.code } : {}) })
+        method: "POST", body: JSON.stringify({ planId, months, ...(cloudAddonPlanId ? { cloudAddonPlanId, ...(cloudAddonQuantity ? { cloudAddonQuantity } : {}) } : {}), ...renewalBillingPayload(), ...(statusId === "ndcRenewalStatus" && appliedOffer?.planId === planId && appliedOffer?.months === months ? { offerCode: appliedOffer.code } : {}) })
       });
       const order = result.data || result;
       if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error("Invalid payment order response.");
@@ -1604,7 +1609,13 @@
     });
 
 
-    document.addEventListener("change", e => { if (e.target?.name === "renewalPlan" || e.target?.name === "renewalMonths" || e.target?.name === "renewalCloudAddon") { if (appliedOffer) offerWidget?.clear("Offer removed because your selection changed."); renewalTotal(); } });
+    document.addEventListener("input", e => { if (e.target?.matches("[data-cloud-quantity]")) renewalTotal(); });
+    document.addEventListener("change", e => {
+      if (e.target?.name === "renewalPlan" || e.target?.name === "renewalMonths" || e.target?.name === "renewalCloudAddon") {
+        if (appliedOffer) offerWidget?.clear("Offer removed because your selection changed.");
+        renewalTotal();
+      } else if (e.target?.matches("[data-cloud-quantity]")) renewalTotal();
+    });
     document.addEventListener("submit", e => {
       if (e.target?.id === "ndcRenewalForm") renewSubscription(e);
       if (e.target?.id === "ndcPasswordForm") changePassword(e);
