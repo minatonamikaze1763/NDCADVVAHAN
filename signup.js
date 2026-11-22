@@ -12,12 +12,15 @@
         const p = plans[selected], m = Number($('signupMonths').value) || 1;
         const cloudAddonPlanId = $('signupCloudAddon')?.value || null;
         const cloudAddon = cloudAddonPlans[cloudAddonPlanId] || null;
-        const cloudAmount = cloudAddon ? Number(cloudAddon.monthlyPrice) * m : 0;
+        const quantityInput = $('signupCloudAddonQuantity');
+        const cloudQuantity = cloudAddon?.structure === 'flex' ? Math.max(1, Number(quantityInput?.value) || 1) : null;
+        const cloudMonthlyAmount = !cloudAddon ? 0 : cloudAddon.structure === 'flex' ? Number(cloudAddon.perCustomerPrice) * cloudQuantity : Number(cloudAddon.monthlyPrice);
+        const cloudAmount = cloudMonthlyAmount * m;
         const amount = (appliedOffer ? appliedOffer.amountPaise / 100 : p?.monthlyPrice * m) + cloudAmount;
         const tax = checkoutGst.enabled && p ? Math.round(amount * checkoutGst.gstRate) / 100 : 0;
         const payable = orderQuote?.amount ?? amount + tax;
         const displayBase = orderQuote?.baseAmount ?? amount;
-        const displayList = orderQuote?.listPrice ?? (p ? p.monthlyPrice * m : amount);
+        const displayList = orderQuote?.listPrice ?? ((p ? p.monthlyPrice * m : amount) + cloudAmount);
         const displayDiscount = orderQuote?.discountAmount ?? Math.max(0, displayList - displayBase);
         const displayTax = orderQuote?.taxAmount ?? tax;
         const devices = appliedOffer ? appliedOffer.maxDevices : p?.maxDevices;
@@ -37,7 +40,14 @@
         }
         const gstFields = $('signupGstFields');
         if (gstFields) { gstFields.hidden = false; for (const input of gstFields.querySelectorAll('input,textarea')) { input.disabled = state !== 'idle'; input.required = checkoutGst.enabled && input.id !== 'signupTradeName' && input.id !== 'signupBusinessPhone'; } } $('selectedPlanLogins').textContent = p ? `1 User · ${devices} devices · ${m} month(s)` : 'Choose a subscription plan to continue.';
-        const cloudPrice = $('signupCloudPrice'); if (cloudPrice) cloudPrice.textContent = cloudAddon ? money(cloudAddon.monthlyPrice) + ' per 30 days × ' + m + ' month(s) · ' + Number(cloudAddon.maxCustomersPerMonth).toLocaleString('en-IN') + ' customer records/month' : 'No cloud records included without an add-on.';
+        if (quantityInput) {
+            quantityInput.hidden = cloudAddon?.structure !== 'flex';
+            quantityInput.required = cloudAddon?.structure === 'flex';
+            if ($('signupCloudQuantityLabel')) $('signupCloudQuantityLabel').hidden = cloudAddon?.structure !== 'flex';
+            quantityInput.disabled = state !== 'idle' || cloudAddon?.structure !== 'flex';
+            if (cloudAddon?.structure === 'flex') { quantityInput.max = String(cloudAddon.maxCustomersPerMonth); quantityInput.value = String(Math.min(Number(quantityInput.value) || 100, Number(cloudAddon.maxCustomersPerMonth))); quantityInput.min = "1"; }
+        }
+        const cloudPrice = $('signupCloudPrice'); if (cloudPrice) cloudPrice.textContent = !cloudAddon ? 'No cloud records included without an add-on.' : cloudAddon.structure === 'flex' ? money(cloudAddon.perCustomerPrice) + ' per customer record/month × ' + (cloudQuantity || 1) + ' records · 12 document slots per record' : money(cloudAddon.monthlyPrice) + ' per month · ' + Number(cloudAddon.maxCustomersPerMonth).toLocaleString('en-IN') + ' records · 12 document slots per record';
         $('paymentProceed').disabled = !p || state !== 'idle'; $('paymentProceed').textContent = ['complete', 'review'].includes(state) ? 'Payment received' : state !== 'idle' ? 'Processing…' : p ? 'Pay securely · ' + money(payable) : 'Select a Plan to Continue';
         $('ndcSignupForm').querySelectorAll('input,select').forEach(n => n.disabled = state !== 'idle');
         offerWidget?.setBusy(state !== 'idle');
@@ -68,7 +78,7 @@
     window.selectCustomPlan = () => window.open('https://wa.me/919052691719?text=' + encodeURIComponent('Hi, I am interested in a Custom Plan for NDC VAHAN TOOL.'), '_blank', 'noopener');
     async function begin(e) {
         e.preventDefault(); if (state !== 'idle') return; if(offerWidget?.isLoading() || offerWidget?.hasUnapplied()) { status('Apply or remove your offer code before continuing.'); return; } if (!selected) { status('Choose a plan first.'); return; } if (!e.target.reportValidity()) return; if (typeof Razorpay !== 'function') { status('Unable to load Razorpay Checkout.'); return; }
-        const details = { referralCode: $('signupReferral').value.trim().toUpperCase(), cloudAddonPlanId: $('signupCloudAddon')?.value || null, name: $('signupName').value.trim(), username: $('accountUsername').value.trim().toLowerCase(), email: $('signupEmail').value.trim(), planId: selected, months: Number($('signupMonths').value), ...(appliedOffer ? {offerCode:appliedOffer.code} : {}), gstin: $('signupGstin').value.trim().toUpperCase(), tradeName: $('signupTradeName').value.trim(), businessName: $('signupBusinessName').value.trim(), businessAddress: $('signupBusinessAddress').value.trim(), stateCode: $('signupStateCode').value.trim(), phone: $('signupBusinessPhone').value.trim() }; orderQuote = null; state = 'creating'; update(); status('Creating your payment order…');
+        const details = { referralCode: $('signupReferral').value.trim().toUpperCase(), cloudAddonPlanId: $('signupCloudAddon')?.value || null, cloudAddonQuantity: cloudAddonPlans[$('signupCloudAddon')?.value]?.structure === 'flex' ? Number($('signupCloudAddonQuantity')?.value) : null, name: $('signupName').value.trim(), username: $('accountUsername').value.trim().toLowerCase(), email: $('signupEmail').value.trim(), planId: selected, months: Number($('signupMonths').value), ...(appliedOffer ? {offerCode:appliedOffer.code} : {}), gstin: $('signupGstin').value.trim().toUpperCase(), tradeName: $('signupTradeName').value.trim(), businessName: $('signupBusinessName').value.trim(), businessAddress: $('signupBusinessAddress').value.trim(), stateCode: $('signupStateCode').value.trim(), phone: $('signupBusinessPhone').value.trim() }; orderQuote = null; state = 'creating'; update(); status('Creating your payment order…');
         try {
             const r = await post('/api/public/payments/orders', details), order = r.data || r; if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error('Invalid payment order response.'); const p = plans[order.plan?.id || selected]; if (order.gst?.enabled) { checkoutGst = { enabled: true, gstRate: Number(order.gst.rate) || checkoutGst.gstRate }; orderQuote = { amount: Number(order.amount) / 100, listPrice: Number(order.gst.listPrice) / 100, discountAmount: Number(order.gst.discountAmount) / 100, baseAmount: Number(order.gst.taxableAmount) / 100, taxAmount: Number(order.gst.amount) / 100, gstRate: Number(order.gst.rate) || checkoutGst.gstRate }; } state = 'checkout'; update(); status('Complete payment in the secure checkout.');
             const checkout = new Razorpay({ key: order.keyId, order_id: order.orderId, amount: order.amount, currency: order.currency || 'INR', name: 'Next Dimension Customs', description: order.description || p.name + ' subscription', prefill: { name: details.name, email: details.email }, theme: { color: '#d7bd55' }, handler: proof => { if (state !== 'checkout') return; saved = { proof, details, purchase: { planName: order.plan?.name || p.name, months: order.months || details.months, offer: order.offer || null, maxDevices: order.plan?.maxDevices || p.maxDevices, amount: Number(order.amount) / 100, currency: order.currency || 'INR' }, state: 'pending', acknowledged: false }; persist(); state = 'pending'; void verify(); }, modal: { ondismiss: () => { if (state !== 'checkout') return; state = 'idle'; orderQuote = null; update(); status('Checkout closed. If money was deducted, check your email before retrying.'); } } });
@@ -205,10 +215,11 @@
             for (const plan of Object.values(cloudAddonPlans)) {
                 const option = document.createElement('option');
                 option.value = plan.id;
-                option.textContent = plan.name + ' · ' + money(plan.monthlyPrice) + '/month · ' + Number(plan.maxCustomersPerMonth).toLocaleString('en-IN') + ' customers';
+                option.textContent = plan.name + ' · ' + (plan.structure === 'flex' ? money(plan.perCustomerPrice) + '/customer · up to ' : money(plan.monthlyPrice) + '/month · ') + Number(plan.maxCustomersPerMonth).toLocaleString('en-IN') + ' records';
                 cloudSelect.append(option);
             }
             cloudSelect?.addEventListener('change', () => { orderQuote = null; update(); });
+            $('signupCloudAddonQuantity')?.addEventListener('input', () => { orderQuote = null; update(); });
             await NDCPlans.ready;
             const container = document.querySelector('.pricing');
             const custom = container.querySelector('.plan');
