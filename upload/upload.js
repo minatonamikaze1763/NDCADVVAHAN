@@ -93,6 +93,17 @@
     document.body.classList.toggle("save-active", active);
     if (active) barrier.focus({preventScroll:true});
   }
+  function hasCloudSubscription(user) { return user?.cloudAddon?.active === true; }
+  async function rejectCloudSubscription() {
+    const message = "Cloud subscription not taken. Choose a Cloud Storage add-on in your customer panel to use /upload.";
+    const oldToken = token;
+    if (oldToken) {
+      try { await fetch(API + "/api/auth/logout", { method: "POST", headers: { Authorization: "Bearer " + oldToken } }); } catch {}
+    }
+    clearClientSession();
+    showLogin();
+    status($("loginStatus"), message, "error");
+  }
   function clearClientSession() {
     clearTimeout(expiryTimer);
     expiryTimer = null;
@@ -139,6 +150,10 @@
       sessionValidationPromise = (async () => {
         try {
           const data = await request("/api/auth/me");
+          if (!hasCloudSubscription(data.user)) {
+            await rejectCloudSubscription();
+            return false;
+          }
           if (!saveSessionExpiry(data.sessionExpiresAt)) {
             expireSession();
             return false;
@@ -174,8 +189,12 @@
     const type = response.headers.get("content-type") || "";
     if (!response.ok) {
       const data = type.includes("application/json") ? await response.json().catch(() => ({})) : null;
-      if (response.status === 401 || response.status === 403) expireSession("Your session is no longer valid. Sign in again to continue.");
-      throw new Error(data?.error || `Request failed (${response.status}).`);
+      if (data?.code === "CLOUD_SUBSCRIPTION_REQUIRED") {
+        expireSession("Cloud subscription not taken. Choose a Cloud Storage add-on in your customer panel to use /upload.");
+      } else if (response.status === 401 || response.status === 403) expireSession("Your session is no longer valid. Sign in again to continue.");
+      const error = new Error(data?.error || `Request failed (${response.status}).`);
+      error.code = data?.code || null;
+      throw error;
     }
     return binary ? response.blob() : type.includes("application/json") ? response.json() : null;
   }
@@ -345,6 +364,7 @@
     setSessionBarrier(true);
     try {
       const data = await request("/api/auth/me");
+      if (!hasCloudSubscription(data.user)) return rejectCloudSubscription();
       if (!saveSessionExpiry(data.sessionExpiresAt)) return expireSession();
       showApp();
       setSessionBarrier(false);
@@ -353,6 +373,7 @@
         loadSettings().catch(error => status($("settingsStatus"), error.message, "error"))
       ]);
     } catch (error) {
+      if (error.code === "CLOUD_SUBSCRIPTION_REQUIRED") return rejectCloudSubscription();
       if (!token || (sessionExpiry && Date.now() >= sessionExpiry)) return showLogin();
       showApp();
       setSessionBarrier(false);
@@ -418,6 +439,11 @@
     try {
       const data = await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password: $("password").value, deviceId: sessionDevice }) });
       token = data.token;
+      if (!hasCloudSubscription(data.user)) {
+        await rejectCloudSubscription();
+        button.disabled = false;
+        return;
+      }
       localStorage.setItem(tokenKey, token);
       sessionStorage.removeItem(tokenKey);
       if (!saveSessionExpiry(data.expiresAt)) throw new Error("The server did not return a valid 24-hour session expiry.");
