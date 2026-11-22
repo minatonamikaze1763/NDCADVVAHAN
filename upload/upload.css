@@ -67,9 +67,11 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d9a91d77;border-color
 .bulk-upload.dragging,.bulk-upload:focus-within{border-color:var(--gold2);background:#211d10}
 .bulk-upload>span{color:var(--muted);font-size:.83rem}
 .bulk-picker{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-.bulk-queue{display:grid;width:100%;gap:5px}
-.bulk-file{display:flex;justify-content:space-between;gap:10px;padding:7px 9px;border-radius:7px;background:#0d0d0d;font-size:.78rem;overflow-wrap:anywhere}
-.bulk-file small{color:var(--gold2);text-align:right}
+.bulk-queue{display:grid;width:100%;gap:7px}
+.bulk-file{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:10px;border-radius:9px;background:#0d0d0d;font-size:.82rem;overflow-wrap:anywhere}
+.bulk-file-name{line-height:1.4;overflow-wrap:anywhere}
+.bulk-file .bulk-file-category{width:100%;min-height:40px;margin:0;padding:8px 10px;border-color:#75612b;border-radius:8px;font:600 .82rem/1.35 "DM Sans",sans-serif}
+.bulk-file small{color:var(--gold2);text-align:left;line-height:1.4;overflow-wrap:anywhere}
 .bulk-status{margin:2px 0 0}
 .form20-page-control{display:grid;gap:5px}.customer-heading h2{overflow-wrap:anywhere}
 .preview-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
