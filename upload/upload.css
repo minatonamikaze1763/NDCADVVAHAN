@@ -881,12 +881,13 @@ button.icon-only:focus-visible {
     min-width: 0 !important;
     flex: 1 1 auto !important;
   }
-  .form20-actions {
+  .doc-actions.form20-actions {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 10px;
   }
-  .form20-actions > .icon-only {
+  .doc-actions.form20-actions > .icon-only {
+    flex: 1 1 auto !important;
     width: 100% !important;
     min-width: 0 !important;
   }
