@@ -1080,16 +1080,15 @@
     const displayIndex = documentDisplayOrder.indexOf(category);
     return `${displayIndex >= 0 ? displayIndex + 1 : categoryIndex + 1}. ${categories[categoryIndex][1]}`;
   }
-  function resetBulkAssignedRow(row, category) {
+  function resetBulkAssignedRow(row, category, assignedFile) {
     if (!row) return;
-    if (row._bulkAssignedFile) {
+    if (row._bulkAssignedFile === assignedFile) {
       row._file = null;
       row._bulkAssignedFile = null;
     }
-    if (category === "form20" && Array.isArray(row._bulkAssignedPhotos) && row._bulkAssignedPhotos.length) {
-      const assignedPhotos = row._bulkAssignedPhotos;
-      row._pages = (row._pages || []).filter(file => !assignedPhotos.includes(file));
-      row._bulkAssignedPhotos = [];
+    if (category === "form20" && Array.isArray(row._bulkAssignedPhotos) && row._bulkAssignedPhotos.includes(assignedFile)) {
+      row._pages = (row._pages || []).filter(file => file !== assignedFile);
+      row._bulkAssignedPhotos = row._bulkAssignedPhotos.filter(file => file !== assignedFile);
     }
     const state = row.querySelector(".doc-state");
     if (state) {
@@ -1135,8 +1134,8 @@
     }
     if (previousCategory) {
       const previousRow = host.querySelector(`[data-doc="${previousCategory}"]`);
-      if (previousRow?._bulkAssignedFile === file) resetBulkAssignedRow(previousRow, previousCategory);
-      if (previousCategory === "form20" && previousRow?._bulkAssignedPhotos?.includes(file)) resetBulkAssignedRow(previousRow, previousCategory);
+      if (previousRow?._bulkAssignedFile === file) resetBulkAssignedRow(previousRow, previousCategory, file);
+      if (previousCategory === "form20" && previousRow?._bulkAssignedPhotos?.includes(file)) resetBulkAssignedRow(previousRow, previousCategory, file);
     }
     if (category === "form20") {
       if (isPdf) {
@@ -1251,7 +1250,7 @@
     dropzone.append(dropPrompt, chooseFiles);
     const queue = document.createElement("div"); queue.className = "bulk-queue"; const bulkStatus = document.createElement("p"); bulkStatus.className = "status bulk-status";
     bulk.append(bulkHeading, dropzone, picker, queue, bulkStatus);
-    bulk.addEventListener("click", async event => { if (event.target !== chooseFiles && await ensureActiveSession()) picker.click(); });
+    dropzone.addEventListener("click", async event => { if (event.target !== chooseFiles && !event.target.closest("button") && await ensureActiveSession()) picker.click(); });
     bulk.addEventListener("dragover", event => { event.preventDefault(); bulk.classList.add("dragging"); });
     bulk.addEventListener("dragleave", () => bulk.classList.remove("dragging"));
     bulk.addEventListener("drop", event => { event.preventDefault(); bulk.classList.remove("dragging"); void queueFiles([...event.dataTransfer.files], host).catch(error => status(bulkStatus, error.message, "error")); });
