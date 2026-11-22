@@ -49,15 +49,6 @@
       event.stopPropagation();
     }
   }, true);
-  function hasPendingDocumentChanges(host) {
-    return [...host.querySelectorAll(".doc-row[data-doc]")].some(row =>
-      Boolean(row._file) || (Array.isArray(row._pages) && row._pages.length > 0)
-    );
-  }
-  function updateDocumentSaveButton(host) {
-    const button = host?.querySelector(".save-bar .primary");
-    if (button) button.disabled = !hasPendingDocumentChanges(host);
-  }
   function setSaveBarrier(active) {
     const barrier = $("saveBarrier");
     if (!barrier) return;
@@ -372,7 +363,6 @@
       if (!row || !input.files?.[0]) return;
       row._file = input.files[0]; row._pages = [];
       row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "File selected";
-      updateDocumentSaveButton($("customerView"));
       await loadSelectedFilePreview(row, row._file);
     });
     input.click();
@@ -607,7 +597,7 @@
   function classifyFile(name) {
     return globalThis.NDCDocumentMatcher?.match(name)?.id || "";
   }
-  async function showFullscreenPreview(file) {
+  async function showFullscreenPreview(file, savedDetails = null) {
     if (!file || !(await ensureActiveSession())) return;
     const isImage = file.type?.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(file.name || "");
     const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
@@ -628,7 +618,9 @@
     title.textContent = file.name || "Document preview";
     const metadata = document.createElement("span");
     metadata.className = "fullscreen-preview-meta";
-    metadata.textContent = `${readableSize(file.size)} · ${isPdf ? "PDF document" : "Image"}`;
+    metadata.textContent = savedDetails
+      ? [savedDetails.originalSize != null ? `Original size: ${readableSize(savedDetails.originalSize)}` : "", savedDetails.size != null ? `Saved size: ${readableSize(savedDetails.size)}` : "", isPdf ? "PDF document" : "Image"].filter(Boolean).join(" · ")
+      : `${readableSize(file.size)} · ${isPdf ? "PDF document" : "Image"}`;
     fileInfo.append(title, metadata);
     const close = document.createElement("button");
     close.type = "button";
@@ -824,7 +816,7 @@
     } catch (_) { hint.textContent = "Open PDF preview"; }
     finally { if (pdf) await pdf.destroy().catch(()=>{}); else if (loadingTask) await loadingTask.destroy().catch(()=>{}); }
   }
-  function setPreview(box, file, label) {
+  function setPreview(box, file, label, savedDetails = null) {
     if (box._url) URL.revokeObjectURL(box._url);
     box._previewReady = Promise.resolve();
     box.replaceChildren();
@@ -834,20 +826,19 @@
     const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
     if (isImage) {
       const url = URL.createObjectURL(file); box._url = url;
-      const image = document.createElement("img"); image.alt = file.name || "Document preview"; image.className = "file-preview-thumb"; image.addEventListener("click", () => showFullscreenPreview(file));
+      const image = document.createElement("img"); image.alt = file.name || "Document preview"; image.className = "file-preview-thumb"; image.addEventListener("click", () => showFullscreenPreview(file, savedDetails));
       box._previewReady = new Promise(resolve => { image.addEventListener("load", resolve, {once:true}); image.addEventListener("error", resolve, {once:true}); });
       box.append(image); image.src = url;
     } else if (isPdf) {
       const pdfButton = document.createElement("button"); pdfButton.type = "button"; pdfButton.className = "pdf-preview-thumb"; pdfButton.setAttribute("aria-label", `Preview PDF ${file.name || ""} · ${readableSize(file.size)}`);
       const mark = document.createElement("span"); mark.className = "pdf-preview-mark"; mark.textContent = "PDF";
       const hint = document.createElement("span"); hint.className = "pdf-preview-hint"; hint.textContent = "Loading first page…";
-      pdfButton.append(mark, hint); pdfButton.addEventListener("click", () => showFullscreenPreview(file)); box.append(pdfButton);
+      pdfButton.append(mark, hint); pdfButton.addEventListener("click", () => showFullscreenPreview(file, savedDetails)); box.append(pdfButton);
       box._previewReady = renderPdfThumbnail(file, pdfButton, mark, hint);
     } else {
       const unsupported = document.createElement("span"); unsupported.className = "file-preview-label"; unsupported.textContent = "Preview unavailable"; box.append(unsupported);
     }
-    const size = document.createElement("span"); size.className = "file-preview-size"; size.textContent = readableSize(file.size); box.append(size);
-    const full = document.createElement("button"); full.type = "button"; full.className = "preview-fullscreen"; full.textContent = "Open preview"; full.addEventListener("click", () => showFullscreenPreview(file)); box.append(full);
+    const full = document.createElement("button"); full.type = "button"; full.className = "preview-fullscreen"; full.textContent = "Open preview"; full.addEventListener("click", () => showFullscreenPreview(file, savedDetails)); box.append(full);
     return box._previewReady;
   }
   function setDocumentRowLoading(row, loading) {
@@ -866,7 +857,6 @@
     setDocumentRowLoading(row, true);
     try {
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      updateFileDetails(row, file);
       await setPreview(row._selectedPreview, file, "Selected");
     } finally { setDocumentRowLoading(row, false); }
   }
@@ -890,26 +880,9 @@
     label.textContent = `Modified · ${formatModifiedDate(saved)}`;
     row.querySelector(".doc-state")?.insertAdjacentElement("afterend", label);
   }
-  function updateFileDetails(row, file) {
-    if (!file || row._savedDocument) return;
-    const details = row.querySelector(".file-details");
-    if (!details) return;
-    const values = {
-      "Original size": readableSize(file.size),
-      "Saved filename": "Pending cloud save",
-      "Saved size": "Pending"
-    };
-    for (const [label, value] of Object.entries(values)) {
-      const detail = details.querySelector(`[data-detail="${label}"]`);
-      if (detail) detail.textContent = value;
-    }
-  }
   function addFileDetails(row, saved) {
     row._savedDocument = saved || null;
-    const details = document.createElement("dl"); details.className = "file-details";
-    const entries = [["Original size", readableSize(saved?.originalSize)], ["Saved filename", saved?.filename || "—"], ["Saved size", readableSize(saved?.size)]];
-    for (const [label, value] of entries) { const wrap = document.createElement("div"); const dt = document.createElement("dt"); dt.textContent = label; const dd = document.createElement("dd"); dd.dataset.detail = label; dd.textContent = value; wrap.append(dt, dd); details.append(wrap); }
-    row.append(details); row._fileDetails = details;
+    row._fileDetails = null;
   }
   function addPreviewPair(row, customer, category, saved) {
     const pair = document.createElement("div"); pair.className = "preview-pair";
@@ -923,7 +896,7 @@
       open.append(openIcon, openLabel);
       open.addEventListener("click", async () => {
         open.disabled = true;
-        try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, {}, true); const savedFile = new File([blob], saved.filename, {type:saved.contentType || blob.type}); setPreview(stored, savedFile, "Saved"); showFullscreenPreview(savedFile); }
+        try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, {}, true); const savedFile = new File([blob], saved.filename, {type:saved.contentType || blob.type}); setPreview(stored, savedFile, "Saved", saved); showFullscreenPreview(savedFile, saved); }
         catch(error) { openLabel.textContent = "Preview unavailable"; open.title = error.message; }
         finally { open.disabled = false; }
       });
@@ -940,11 +913,11 @@
       let assigned = "Unmatched";
       if (category === "form20") {
         const row = host.querySelector('[data-doc="form20"]');
-        if (row && (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))) { row._file = file; row._pages = []; row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "Form 20 file selected"; updateDocumentSaveButton(host); await loadSelectedFilePreview(row, file); assigned = "Form 20"; }
-        else if (row && file.type.startsWith("image/")) { row._pages = [...(row._pages || []), file]; row._file = null; row.querySelector(".doc-state").textContent = `${row._pages.length} Form 20 photos selected`; updateDocumentSaveButton(host); if (row._pages.length === 1) await loadSelectedFilePreview(row, file); assigned = "Form 20 photos"; }
+        if (row && (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))) { row._file = file; row._pages = []; row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "Form 20 file selected"; await loadSelectedFilePreview(row, file); assigned = "Form 20"; }
+        else if (row && file.type.startsWith("image/")) { row._pages = [...(row._pages || []), file]; row._file = null; row.querySelector(".doc-state").textContent = `${row._pages.length} Form 20 photos selected`; if (row._pages.length === 1) await loadSelectedFilePreview(row, file); assigned = "Form 20 photos"; }
       } else if (category) {
         const row = host.querySelector(`[data-doc="${category}"]`);
-        if (row && !row._file) { row._file = file; row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "File selected"; updateDocumentSaveButton(host); await loadSelectedFilePreview(row, file); assigned = row.querySelector("h3").textContent; }
+        if (row && !row._file) { row._file = file; row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "File selected"; await loadSelectedFilePreview(row, file); assigned = row.querySelector("h3").textContent; }
         else if (row) assigned = "Already has a file; choose another document row";
       }
       const item = document.createElement("div"); item.className = "bulk-file";
@@ -952,7 +925,6 @@
       const result = document.createElement("small"); result.textContent = assigned;
       item.append(name, result); queue.append(item); messages.push(`${file.name} → ${assigned}`);
     }
-    updateDocumentSaveButton(host);
     status(host.querySelector(".bulk-status"), `${files.length} file${files.length === 1 ? "" : "s"} added. Check each assignment below; unmatched or duplicate files can be selected in a document row.`);
   }
   const actionIconSvg = {
@@ -971,7 +943,7 @@
   function renderCustomer(customer) {
     const host = $("customerView"); host.replaceChildren(); host.hidden = false;
     const head = document.createElement("div"); head.className = "customer-heading";
-    const titleBlock = document.createElement("div"); const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "CUSTOMER WORKSPACE"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = customer.chassisNumber; titleBlock.append(eyebrow, title, chassis);
+    const titleBlock = document.createElement("div"); const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "CUSTOMER WORKSPACE"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = `Chassis: ${customer.chassisNumber}`; titleBlock.append(eyebrow, title, chassis);
     const controls = document.createElement("div"); controls.className = "customer-controls";
     const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["chassisNumber", "customerName", "address", "hp", "applicationNumber"]) $(key).value = customer[key] || ""; $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
     const removeCustomer = document.createElement("button"); removeCustomer.type = "button"; removeCustomer.className = "danger"; setIconButton(removeCustomer, "trash", "Delete customer"); removeCustomer.addEventListener("click", async () => { if (!confirm(`Delete ${customer.customerName} and all of its stored documents? This cannot be undone.`)) return; try { await request(`/api/upload-portal/customers/${customer._id}`, { method: "DELETE" }); host.hidden = true; currentCustomer = null; await searchCustomers($("search").value); } catch (error) { alert(error.message); } });
@@ -1073,18 +1045,16 @@
     choose20.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; const input = document.createElement("input"); input.type = "file"; input.accept = "application/pdf,image/*"; input.multiple = true; input.addEventListener("change", async () => {
       if (!(await ensureActiveSession())) return;
       const files = [...(input.files || [])]; const pdfs = files.filter(file => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
-      if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = form20._savedDocument ? "Replacement selected" : "Form 20 file selected"; updateDocumentSaveButton(host); await loadSelectedFilePreview(form20, pdfs[0]); }
-      else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} Form 20 photos selected` : "Upload a PDF (3+ pages) or capture three photos"; updateDocumentSaveButton(host); if (files[0]) await loadSelectedFilePreview(form20, files[0]); else setPreview(form20._selectedPreview, null, "Selected"); }
+      if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = form20._savedDocument ? "Replacement selected" : "Form 20 file selected"; await loadSelectedFilePreview(form20, pdfs[0]); }
+      else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} Form 20 photos selected` : "Upload a PDF (3+ pages) or capture three photos"; if (files[0]) await loadSelectedFilePreview(form20, files[0]); else setPreview(form20._selectedPreview, null, "Selected"); }
     }); input.click(); });
     form20Actions.append(choose20); form20.append(form20Actions); list.insertBefore(form20, list.children[3] || null); host.append(list);
-    const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status save-description"; result.textContent = "Select files to save (up to 12)."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected"; save.disabled = true; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar); updateDocumentSaveButton(host);
+    const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status"; result.textContent = "Choose any available documents. You can save fewer than 12."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected documents"; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar);
   }
   async function openCustomer(id) { try { const data = await request(`/api/upload-portal/customers/${id}`); currentCustomer = data.customer; renderCustomer(currentCustomer); } catch (error) { status($("searchStatus"), error.message, "error"); } }
   async function saveDocuments(customer, host, button) {
-    if (!hasPendingDocumentChanges(host)) return;
-    button.disabled = true;
-    if (!(await ensureActiveSession())) { updateDocumentSaveButton(host); return; }
-    setSaveBarrier(true); const result = $("saveStatus"); let saved = 0; const failures = [];
+    if (!(await ensureActiveSession())) return;
+    button.disabled = true; setSaveBarrier(true); const result = $("saveStatus"); let saved = 0; const failures = [];
     for (const [category] of categories.filter(([id]) => id !== "form20")) {
       const row = host.querySelector(`[data-doc="${category}"]`); const file = row?._file; if (!file) continue;
       const subcategory = row.querySelector("[data-subcategory]")?.value || ""; if (category === "address-proof" && !subcategory) { failures.push("Address Proof: select a type."); continue; }
@@ -1127,7 +1097,7 @@
     }
     try { const updated = await request(`/api/upload-portal/customers/${customer._id}`); currentCustomer = updated.customer; renderCustomer(currentCustomer); await searchCustomers($("search").value); status($("saveStatus"), failures.length ? `${saved} saved. ${failures.join(" ")}` : `${saved ? `${saved} document${saved === 1 ? "" : "s"} saved and prepared for VAHAN.` : "No new documents selected."}`, failures.length ? "error" : "success"); }
     catch (error) { const response = host.querySelector("#saveStatus") || result; status(response, error.message, "error"); }
-    finally { setSaveBarrier(false); updateDocumentSaveButton(host); }
+    finally { button.disabled = false; setSaveBarrier(false); }
   }
   void validate();
 })();
