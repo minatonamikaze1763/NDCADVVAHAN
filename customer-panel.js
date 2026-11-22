@@ -276,7 +276,8 @@
       const response = await api("/api/panel/dashboard");
 
       dashboardData = response.dashboard || response;
-      const extras = await Promise.allSettled([api("/api/panel/gst-profile"), api("/api/panel/gst-invoices")]);
+      const extras = await Promise.allSettled([api("/api/panel/gst-profile"), api("/api/panel/gst-invoices"), fetch(API_BASE + "/api/public/cloud-addon-plans", { cache: "no-store" }).then(response => { if (!response.ok) throw Error("Cloud plans unavailable"); return response.json(); })]);
+      dashboardData.cloudAddonPlans = extras[2].status === "fulfilled" ? (extras[2].value.plans || []) : [];
       dashboardData.gstProfile = extras[0].status === "fulfilled" ? extras[0].value.profile : {};
       dashboardData.gstInvoicelocked = extras[0].status === "fulfilled" && extras[0].value.gstinLocked;
       dashboardData.gstProfileLocked = extras[0].status === "fulfilled" && extras[0].value.profileLocked;
@@ -915,6 +916,7 @@
               <div class="ndc-renewal-purchase-details">
               <fieldset class="ndc-choice-group"><legend>02 · Add more time</legend><p>Each month adds 30 days. Choose 1–12 months.</p>
               <div class="ndc-month-options">${Array.from({ length: 12 }, (_, i) => `<label class="ndc-choice ndc-month-choice"><input type="radio" name="renewalMonths" value="${i + 1}" ${i === 0 ? 'checked' : ''}><span><strong>${i + 1}</strong><small>${i === 0 ? 'month' : 'months'}</small></span></label>`).join('')}</div></fieldset>
+              <fieldset class="ndc-choice-group ndc-cloud-addon-options"><legend>03 · Optional Cloud Storage</legend><p>30-day record retention. Cloud logins use the device limit on the selected NDC plan. A new add-on period starts after any active add-on period.</p><label class="ndc-choice"><input type="radio" name="renewalCloudAddon" value="" checked><span><strong>No Cloud Storage</strong><em>Keep existing cloud access, if active</em></span></label><div class="ndc-plan-options">${(dashboardData.cloudAddonPlans || []).map(plan => '<label class="ndc-choice ndc-cloud-addon-choice"><input type="radio" name="renewalCloudAddon" value="' + esc(plan.id) + '"><span><small>CLOUD STORAGE ADD-ON</small><strong>' + esc(plan.name) + '</strong><b>' + esc(money(plan.monthlyPrice)) + '<small> / month</small></b><em>' + Number(plan.maxCustomersPerMonth).toLocaleString("en-IN") + ' customer records/month · retained for 30 days</em></span></label>').join("")}</div></fieldset>
               <div id="ndcRenewalOffer"></div>
               <div id="ndcRenewalPreview" class="ndc-renewal-preview" aria-live="polite"></div>
               ${dashboardData.gstProfile?.gstin ? "" : `
@@ -938,6 +940,22 @@
           </div>
         </section>
       `;
+    }
+
+    // =======================================================
+    // CLOUD STORAGE
+    // =======================================================
+    else if (activeSection === "cloud-storage") {
+      const cloud = account.cloudAddon || {}, usage = cloud.usage || {};
+      const starts = cloud.startsAt ? new Date(cloud.startsAt).toLocaleDateString("en-IN") : "—";
+      const expires = cloud.expiresAt ? new Date(cloud.expiresAt).toLocaleDateString("en-IN") : "—";
+      sectionHTML = '<div class="ndc-page-heading"><span class="ndc-eyebrow">CUSTOMER CLOUD</span><h1>Cloud Storage</h1><p>Customer records are retained for 30 days. Cloud logins use your NDC plan device allowance (' + (Number(account.maxDevices) || 1) + ' devices).</p></div>' +
+        '<div class="ndc-stat-grid"><article class="ndc-stat"><span>Cloud plan</span><strong>' + esc(cloud.planName || "Cloud Storage") + '</strong><small>' + esc(money(cloud.monthlyPrice || 0)) + ' / month</small></article>' +
+        '<article class="ndc-stat"><span>Records created this month</span><strong>' + Number(usage.recordsCreated || 0).toLocaleString("en-IN") + ' / ' + Number(usage.limit || cloud.maxCustomersPerMonth || 0).toLocaleString("en-IN") + '</strong><small>Month ' + Number(usage.monthIndex || 1) + ' of ' + Number(usage.monthCount || 1) + '</small></article>' +
+        '<article class="ndc-stat"><span>Customer records stored</span><strong>' + Number(usage.recordsStored || 0).toLocaleString("en-IN") + '</strong><small>Records auto-delete after 30 days</small></article>' +
+        '<article class="ndc-stat"><span>Add-on started</span><strong>' + esc(starts) + '</strong></article><article class="ndc-stat"><span>Add-on expires</span><strong>' + esc(expires) + '</strong></article>' +
+        '<article class="ndc-stat"><span>Allowed device logins</span><strong>' + (Number(account.maxDevices) || 1) + '</strong><small>Shared with your NDC subscription</small></article></div>' +
+        '<section class="ndc-panel-card"><h2>Cloud usage</h2><p>Force-deleting a customer record removes it and its uploaded files. Deleted records still count toward this month’s creation limit.</p><button type="button" class="ndc-home-button" data-go-section="subscription">Manage subscription</button></section>';
     }
 
     // =======================================================
@@ -1161,8 +1179,11 @@
     if (!content) return;
 
     if (["profile", "security", "payments"].includes(activeSection)) sectionHTML += emailSettings(account);
-    if (activeSection === 'security') sectionHTML += '<aside class="ndc-security-note" aria-label="Security information"><span class="ndc-security-icon" aria-hidden="true">🔒</span><div><h2>Security information</h2><p><strong>VAHAN Cloud:</strong> Documents you upload are sent over HTTPS and stored encrypted at rest in the configured MongoDB Atlas storage. Signed-in users in your registered dealership account can retrieve them. Your company can choose a 7-, 14- or 20-day retention period (20 days by default); Cloud records and files are automatically deleted according to that setting.</p><p><strong>Desktop extension workflow:</strong> When you select local customer folders directly in the extension, matching and preparation happen on your device. Account and subscription checks do not send those local document files to NDC. The extension submits selected files to the official VAHAN portal as part of your workflow.</p><p class="ndc-security-foot">Manage Cloud retention in workspace settings. Account, subscription and login security records are maintained separately. <a href="privacy-policy.html">Read our privacy policy ↗</a></p></div></aside>';
+    if (activeSection === 'security') sectionHTML += '<aside class="ndc-security-note" aria-label="Security information"><span class="ndc-security-icon" aria-hidden="true">🔒</span><div><h2>Security information</h2><p><strong>VAHAN Cloud:</strong> Documents you upload are sent over HTTPS and stored encrypted at rest in the configured MongoDB Atlas storage. Signed-in users in your registered dealership account can retrieve them. Cloud records and files are retained for 30 days and then automatically deleted.</p><p><strong>Desktop extension workflow:</strong> When you select local customer folders directly in the extension, matching and preparation happen on your device. Account and subscription checks do not send those local document files to NDC. The extension submits selected files to the official VAHAN portal as part of your workflow.</p><p class="ndc-security-foot">Manage Cloud retention in workspace settings. Account, subscription and login security records are maintained separately. <a href="privacy-policy.html">Read our privacy policy ↗</a></p></div></aside>';
     content.innerHTML = sectionHTML;
+    const cloudNav = $("ndcCloudStorageNav");
+    if (cloudNav) cloudNav.hidden = account.cloudAddon?.active !== true;
+    if (activeSection === "cloud-storage" && account.cloudAddon?.active !== true) activeSection = "overview";
     content.querySelectorAll('.ndc-device-alias-form').forEach(form => form.addEventListener('submit', async event => {
       event.preventDefault(); const button = form.querySelector('button'), status = form.querySelector('[role="status"]');
       button.disabled = true;
@@ -1336,6 +1357,7 @@
       "profile",
       "setup",
       "subscription",
+      "cloud-storage",
       "payments",
       "gst-invoices",
       "sessions",
@@ -1344,7 +1366,7 @@
       "contact"
     ];
 
-    if (!allowedSections.includes(section)) {
+    if (!allowedSections.includes(section) || (section === "cloud-storage" && dashboardData?.account?.cloudAddon?.active !== true)) {
       return;
     }
 
@@ -1373,8 +1395,11 @@
   const RENEWAL_PRICES = {};
   function renewalTotal() {
     const plan = document.querySelector('input[name="renewalPlan"]:checked')?.value, months = Number(document.querySelector('input[name="renewalMonths"]:checked')?.value || 1);
+    const addonId = document.querySelector('input[name="renewalCloudAddon"]:checked')?.value;
+    const addonPlan = (dashboardData?.cloudAddonPlans || []).find(item => item.id === addonId);
+    const addonAmount = addonPlan ? Number(addonPlan.monthlyPrice) * months : 0;
     if ($("ndcRenewalTotal") && RENEWAL_PRICES[plan]) {
-      const list = RENEWAL_PRICES[plan] * months, taxable = appliedOffer ? appliedOffer.amountPaise / 100 : list;
+      const list = RENEWAL_PRICES[plan] * months + addonAmount, taxable = (appliedOffer ? appliedOffer.amountPaise / 100 : RENEWAL_PRICES[plan] * months) + addonAmount;
       const gstRate = Number(dashboardData?.gstCheckout?.gstRate) || 18, gst = dashboardData?.gstCheckout?.enabled ? Math.round(taxable * gstRate) / 100 : 0;
       renderRenewalSummary({ list, taxable, discount: Math.max(0, list - taxable), gst, gstRate, gstEnabled: dashboardData?.gstCheckout?.enabled === true, total: taxable + gst });
     }
@@ -1421,10 +1446,10 @@
   async function renewSubscription(event) {
     event.preventDefault();
     if (offerWidget?.isLoading() || offerWidget?.hasUnapplied()) { $("ndcRenewalStatus").textContent = 'Apply or remove your offer code before continuing.'; return; }
-    await startRenewalPayment(document.querySelector('input[name="renewalPlan"]:checked').value, Number(document.querySelector('input[name="renewalMonths"]:checked').value), "ndcRenewalStatus");
+    await startRenewalPayment(document.querySelector('input[name="renewalPlan"]:checked').value, Number(document.querySelector('input[name="renewalMonths"]:checked').value), "ndcRenewalStatus", document.querySelector('input[name="renewalCloudAddon"]:checked')?.value || null);
   }
 
-  async function startRenewalPayment(planId, months, statusId) {
+  async function startRenewalPayment(planId, months, statusId, cloudAddonPlanId = null) {
     if (paymentBusy) return;
     const message = (text) => {
       // Resolve the current node: navigation may re-render during checkout.
@@ -1446,7 +1471,7 @@
     message("Creating secure payment order…");
     try {
       const result = await api("/api/panel/payments/orders", {
-        method: "POST", body: JSON.stringify({ planId, months, ...renewalBillingPayload(), ...(statusId === "ndcRenewalStatus" && appliedOffer?.planId === planId && appliedOffer?.months === months ? { offerCode: appliedOffer.code } : {}) })
+        method: "POST", body: JSON.stringify({ planId, months, ...(cloudAddonPlanId ? { cloudAddonPlanId } : {}), ...renewalBillingPayload(), ...(statusId === "ndcRenewalStatus" && appliedOffer?.planId === planId && appliedOffer?.months === months ? { offerCode: appliedOffer.code } : {}) })
       });
       const order = result.data || result;
       if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error("Invalid payment order response.");
@@ -1556,7 +1581,7 @@
     });
 
 
-    document.addEventListener("change", e => { if (e.target?.name === "renewalPlan" || e.target?.name === "renewalMonths") { if (appliedOffer) offerWidget?.clear("Offer removed because your selection changed."); renewalTotal(); } });
+    document.addEventListener("change", e => { if (e.target?.name === "renewalPlan" || e.target?.name === "renewalMonths" || e.target?.name === "renewalCloudAddon") { if (appliedOffer) offerWidget?.clear("Offer removed because your selection changed."); renewalTotal(); } });
     document.addEventListener("submit", e => {
       if (e.target?.id === "ndcRenewalForm") renewSubscription(e);
       if (e.target?.id === "ndcPasswordForm") changePassword(e);
