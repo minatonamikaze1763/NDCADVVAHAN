@@ -956,6 +956,10 @@
         status(result, "Preparing Form 20 PDF…");
         const preparedForm20 = await prepareUploadFile(form20File, "form20");
         await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": form20File.type || "application/pdf", "X-NDC-Upload-Type": preparedForm20.type || form20File.type, "X-NDC-Original-Filename": form20File.name, "X-NDC-Original-Size": String(form20File.size), "X-NDC-Original-Last-Modified": String(form20File.lastModified || Date.now()) }, body: preparedForm20 }); saved++;
+        if (autoForm20AsInspection) {
+          try { await copyForm20ToInspection(customer, preparedForm20, form20File); saved++; }
+          catch (error) { failures.push(`Form 20 Inspection copy: ${error.message}`); }
+        }
       } catch (error) { failures.push(`Form 20: ${error.message}`); }
     }
     if (pages.length) {
@@ -971,6 +975,10 @@
             body: preparedForm20
           });
           saved++;
+          if (autoForm20AsInspection) {
+            try { await copyForm20ToInspection(customer, preparedForm20, form20Pdf); saved++; }
+            catch (error) { failures.push(`Form 20 Inspection copy: ${error.message}`); }
+          }
         } catch (error) { failures.push(`Form 20: ${error.message}`); }
       }
     }
