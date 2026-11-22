@@ -35,7 +35,7 @@
   const documentDisplayOrder = ["address-proof", "insurance", "dealer-invoice", "form20", "inspection", "form22", "form21", "frontphoto", "owner-photo", "owner-signature", "pan-card", "chassis-photo"];
   const sessionDevice = localStorage.getItem("ndcUploadPortalDeviceId") || crypto.randomUUID();
   localStorage.setItem("ndcUploadPortalDeviceId", sessionDevice);
-  function status(el, message, type = "") { el.textContent = message; el.className = `status ${type}`; }
+  function status(el, message, type = "") { if (!el) return; el.textContent = message; el.className = `status ${type}`; }
   // Best-effort browser-page shortcut deterrence only; browser chrome can still open DevTools.
   document.addEventListener("contextmenu", event => event.preventDefault(), true);
   document.addEventListener("keydown", event => {
@@ -1117,6 +1117,18 @@
       preview._url = null;
     }
   }
+  function setDocumentRowStatus(row, message) {
+    if (!row) return;
+    let state = row.querySelector(".doc-state");
+    if (!state) {
+      state = document.createElement("div");
+      state.className = "doc-state";
+      const title = row.querySelector(".doc-row-header");
+      if (title) title.insertAdjacentElement("afterend", state);
+      else row.prepend(state);
+    }
+    state.textContent = message;
+  }
   function updateBulkQueueStatus(host) {
     const count = host?.querySelectorAll(".bulk-queue .bulk-file").length || 0;
     const message = count
@@ -1129,12 +1141,12 @@
     const select = item.querySelector(".bulk-file-category");
     const result = item.querySelector(".bulk-file-message");
     const restoreUnmatched = message => {
-      select.value = previousCategory;
-      result.textContent = message;
+      if (select) select.value = previousCategory;
+      if (result) result.textContent = message;
       return false;
     };
     if (category === previousCategory) {
-      result.textContent = bulkFileAssignmentLabel(category, file);
+      if (result) result.textContent = bulkFileAssignmentLabel(category, file);
       return Boolean(category);
     }
     const targetRow = category ? host.querySelector('[data-doc="' + category + '"]') : null;
@@ -1165,19 +1177,19 @@
         targetRow._bulkAssignedFile = file;
         targetRow._pages = [];
         targetRow._bulkAssignedPhotos = [];
-        targetRow.querySelector(".doc-state").textContent = targetRow._savedDocument ? "Replacement selected" : "Form 20 file selected";
+        setDocumentRowStatus(targetRow, targetRow._savedDocument ? "Replacement selected" : "Form 20 file selected");
         await loadSelectedFilePreview(targetRow, file);
       } else {
         targetRow._pages = [...(targetRow._pages || []), file];
         targetRow._bulkAssignedPhotos = [...(targetRow._bulkAssignedPhotos || []), file];
         targetRow._file = null;
-        targetRow.querySelector(".doc-state").textContent = targetRow._savedDocument ? "Replacement selected" : targetRow._pages.length + " Form 20 photos selected";
+        setDocumentRowStatus(targetRow, targetRow._savedDocument ? "Replacement selected" : targetRow._pages.length + " Form 20 photos selected");
         if (targetRow._pages.length === 1) await loadSelectedFilePreview(targetRow, file);
       }
     } else if (category) {
       targetRow._file = file;
       targetRow._bulkAssignedFile = file;
-      targetRow.querySelector(".doc-state").textContent = targetRow._savedDocument ? "Replacement selected" : "File selected";
+      setDocumentRowStatus(targetRow, targetRow._savedDocument ? "Replacement selected" : "File selected");
       await loadSelectedFilePreview(targetRow, file);
     }
     item.dataset.category = category;
@@ -1185,7 +1197,7 @@
       releaseBulkFilePreview(item);
       item.remove();
     } else {
-      result.textContent = "Unmatched";
+      if (result) result.textContent = "Unmatched";
     }
     updateDocumentSaveButton(host);
     updateBulkQueueStatus(host);
