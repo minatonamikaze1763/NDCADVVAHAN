@@ -390,12 +390,11 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d9a91d77;border-color
 .login-showcase-copy .eyebrow{margin-bottom:14px}
 .login-showcase-copy h1{max-width:440px;margin-bottom:15px;font:600 clamp(2.4rem,4.5vw,3.6rem)/1.04 "Space Grotesk",sans-serif;letter-spacing:-.05em}
 .login-showcase-copy .muted{max-width:400px;margin-bottom:0;font-size:1.02rem;line-height:1.7}
-.login-vin-art{position:relative;max-width:640px;margin:8px 0 4px}
-.login-vin-art svg{display:block;width:100%;height:auto;overflow:visible}
-.login-vin-art svg path,.login-vin-art svg circle{fill:none;stroke:#d7b64f;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;opacity:.78}
-.login-vin-art svg path:nth-child(2){stroke:#d7b64f;opacity:.42}
-.login-vin-art svg circle{stroke-width:2.5}
-.login-vin-tag{display:flex;justify-content:space-between;gap:12px;margin:0 0 0 19%;padding:8px 14px;width:min(440px,76%);border:1px solid #806b2c;border-radius:8px;background:#11100d;color:var(--gold2);font:700 .65rem/1.2 "Space Grotesk",sans-serif;letter-spacing:.18em}
+.login-vin-art{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:14px;max-width:640px;margin:8px 0 4px}
+.login-vehicle-icons{display:flex;align-items:center;gap:14px}
+.login-vehicle-icon{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;width:132px;height:116px;border:1px solid #66552a;border-radius:16px;background:linear-gradient(145deg,#262216b8,#11100dcc);color:var(--gold2);font:700 .62rem/1 "Space Grotesk",sans-serif;letter-spacing:.18em;box-shadow:inset 0 1px #ffffff0a,0 12px 28px #0003}
+.login-vehicle-icon svg{display:block;width:72px;height:72px;fill:none;stroke:currentColor;stroke-width:1.45;stroke-linecap:round;stroke-linejoin:round}
+.login-vin-tag{display:flex;justify-content:space-between;gap:12px;margin:0 0 0 11px;padding:8px 14px;width:min(390px,90%);border:1px solid #806b2c;border-radius:8px;background:#11100d;color:var(--gold2);font:700 .65rem/1.2 "Space Grotesk",sans-serif;letter-spacing:.15em}
 .login-form-panel{display:flex;flex-direction:column;justify-content:center;padding:clamp(32px,4.5vw,56px)}
 .login-form-heading{margin-bottom:28px}
 .login-form-heading .eyebrow{margin-bottom:11px}
@@ -413,7 +412,11 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d9a91d77;border-color
  .login-showcase:after{top:24px;right:-100px;width:210px;height:210px}
  .login-showcase-copy{max-width:100%}
  .login-showcase-copy h1{max-width:440px;font-size:clamp(2.2rem,8vw,2.8rem)}
- .login-vin-art{display:none}
+ .login-vin-art{display:flex;align-items:flex-start;gap:9px;margin:0 0 2px}
+ .login-vehicle-icons{gap:9px}
+ .login-vehicle-icon{width:78px;height:68px;gap:5px;border-radius:11px;font-size:.52rem}
+ .login-vehicle-icon svg{width:43px;height:43px;stroke-width:1.6}
+ .login-vin-tag{width:min(100%,300px);margin:0;padding:7px 9px;font-size:.51rem;letter-spacing:.1em}
  .login-form-panel{padding:28px 25px 31px}
 }
 @media(max-width:420px){
