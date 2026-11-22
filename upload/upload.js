@@ -974,6 +974,23 @@
     const date = value instanceof Date ? value : typeof value === "number" || /^\d+$/.test(String(value)) ? new Date(Number(value)) : new Date(value);
     return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleString();
   }
+  function createDocTitleRow(titleText, saved) {
+    const header = document.createElement("div");
+    header.className = "doc-row-header";
+    const title = document.createElement("h3");
+    title.textContent = titleText;
+    header.append(title);
+    if (saved) {
+      const indicator = document.createElement("span");
+      indicator.className = "cloud-saved-indicator";
+      indicator.setAttribute("role", "img");
+      indicator.setAttribute("aria-label", "Saved to cloud");
+      indicator.title = "Saved to cloud";
+      indicator.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.2 18h9.6a4.2 4.2 0 0 0 .4-8.4A5.5 5.5 0 0 0 7 8.4 4.8 4.8 0 0 0 7.2 18Z"/><path d="m9.4 13.2 1.8 1.8 3.8-3.8"/></svg>';
+      header.append(indicator);
+    }
+    return header;
+  }
   function addModifiedLabel(row, saved) {
     if (!saved) { row.querySelector(".doc-modified")?.remove(); return; }
     let label = row.querySelector(".doc-modified");
@@ -1121,7 +1138,7 @@
     const list = document.createElement("div"); list.className = "doc-list";
     documentDisplayOrder.filter(id => id !== "form20").forEach(id => {
       const name = categories.find(([category]) => category === id)?.[1] || id;
-      const row = document.createElement("section"); row.className = "doc-row"; row.dataset.doc = id; const h = document.createElement("h3"); h.textContent = (documentDisplayOrder.indexOf(id) + 1) + ". " + name; const state = document.createElement("div"); state.className = "doc-state"; const saved = customer.documents?.[id]; state.textContent = saved ? "Saved" : "Not selected"; if (saved) state.classList.add("saved"); row.append(h, state); addPreviewPair(row, customer, id, saved);
+      const row = document.createElement("section"); row.className = "doc-row"; row.dataset.doc = id; const titleText = (documentDisplayOrder.indexOf(id) + 1) + ". " + name; const state = document.createElement("div"); state.className = "doc-state"; const saved = customer.documents?.[id]; state.textContent = saved ? "" : "Not selected"; if (saved) state.classList.add("saved"); row.append(createDocTitleRow(titleText, saved), state); addPreviewPair(row, customer, id, saved);
       let addressTypeSelect = null, aadhaarCaptureHint = null, aadhaarCaptureControls = null;
       if (id === "address-proof") {
         const select = document.createElement("select"); select.className = "subcat"; select.dataset.subcategory = "true"; select.innerHTML = '<option value="">Choose address proof type</option>'; addressTypes.forEach(type => { const option = document.createElement("option"); option.value = type; option.textContent = type; select.append(option); }); if (saved?.subcategory) select.value = saved.subcategory; addressTypeSelect = select;
@@ -1150,7 +1167,7 @@
       if (saved) { const remove = document.createElement("button"); remove.type = "button"; remove.className = "danger"; setIconButton(remove, "trash", "Remove document"); remove.addEventListener("click", async () => { if (!confirm(`Remove ${name}?`)) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/${id}`, { method: "DELETE" }); await openCustomer(customer._id); } catch (error) { alert(error.message); } }); actions.append(remove); }
       row.append(actions); list.append(row);
     });
-    const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const ftitle = document.createElement("h3"); ftitle.textContent = (documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)"; const saved20 = customer.documents?.form20; const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? "Saved" : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
+    const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const saved20 = customer.documents?.form20; const ftitle = createDocTitleRow((documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)", saved20); const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? "" : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
     const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions";
     const form20CaptureControls = document.createElement("div"); form20CaptureControls.className = "doc-actions native-capture-group";
     addNativeMultiPhotoCapture(form20CaptureControls, form20, {
