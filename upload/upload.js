@@ -362,7 +362,7 @@
       const row = document.querySelector(`[data-doc="${category}"]`);
       if (!row || !input.files?.[0]) return;
       row._file = input.files[0]; row._pages = [];
-      row.querySelector(".doc-state").textContent = row._savedDocument ? `Replacement selected · ${row._file.name}` : row._file.name;
+      row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "File selected";
       await loadSelectedFilePreview(row, row._file);
     });
     input.click();
@@ -388,6 +388,8 @@
   function addNativeMultiPhotoCapture(actions, row, {labels, documentName, saveLabel, onSave}) {
     const photos = Array(labels.length).fill(null);
     const captureButtons = [];
+    const capturePages = document.createElement("div");
+    capturePages.className = "native-capture-pages";
     const progress = document.createElement("p");
     progress.className = "status native-capture-status";
     progress.setAttribute("role", "status");
@@ -446,8 +448,9 @@
         }
       });
       captureButtons.push(button);
-      actions.append(button);
+      capturePages.append(button);
     });
+    actions.append(capturePages);
     save.addEventListener("click", async () => {
       if (saving || saved || photos.some(photo => !photo)) return;
       if (!(await ensureActiveSession())) return;
@@ -524,7 +527,7 @@
     row._file = null;
     row._pages = [];
     const state = row.querySelector(".doc-state");
-    state.textContent = "Saved · " + saved.filename;
+    state.textContent = "Saved";
     state.classList.add("saved");
     const selector = row.querySelector("[data-subcategory]");
     const actions = row.querySelector(".doc-actions");
@@ -833,7 +836,6 @@
     } else {
       const unsupported = document.createElement("span"); unsupported.className = "file-preview-label"; unsupported.textContent = "Preview unavailable"; box.append(unsupported);
     }
-    const name = document.createElement("span"); name.className = "file-preview-label"; name.textContent = file.name || "Document"; box.append(name);
     const size = document.createElement("span"); size.className = "file-preview-size"; size.textContent = readableSize(file.size); box.append(size);
     const full = document.createElement("button"); full.type = "button"; full.className = "preview-fullscreen"; full.textContent = "Open preview"; full.addEventListener("click", () => showFullscreenPreview(file)); box.append(full);
     return box._previewReady;
@@ -883,7 +885,6 @@
     const details = row.querySelector(".file-details");
     if (!details) return;
     const values = {
-      "Original filename": file.name || "—",
       "Original size": readableSize(file.size),
       "Saved filename": "Pending cloud save",
       "Saved size": "Pending"
@@ -896,7 +897,7 @@
   function addFileDetails(row, saved) {
     row._savedDocument = saved || null;
     const details = document.createElement("dl"); details.className = "file-details";
-    const entries = [["Original filename", saved?.originalFilename || "—"], ["Original size", readableSize(saved?.originalSize)], ["Saved filename", saved?.filename || "—"], ["Saved size", readableSize(saved?.size)]];
+    const entries = [["Original size", readableSize(saved?.originalSize)], ["Saved filename", saved?.filename || "—"], ["Saved size", readableSize(saved?.size)]];
     for (const [label, value] of entries) { const wrap = document.createElement("div"); const dt = document.createElement("dt"); dt.textContent = label; const dd = document.createElement("dd"); dd.dataset.detail = label; dd.textContent = value; wrap.append(dt, dd); details.append(wrap); }
     row.append(details); row._fileDetails = details;
   }
@@ -929,11 +930,11 @@
       let assigned = "Unmatched";
       if (category === "form20") {
         const row = host.querySelector('[data-doc="form20"]');
-        if (row && (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))) { row._file = file; row._pages = []; row.querySelector(".doc-state").textContent = row._savedDocument ? `Replacement selected · ${file.name}` : `${file.name} → Form 20`; await loadSelectedFilePreview(row, file); assigned = "Form 20"; }
-        else if (row && file.type.startsWith("image/")) { row._pages = [...(row._pages || []), file]; row._file = null; row.querySelector(".doc-state").textContent = `${row._pages.length} photos selected · Form 20`; if (row._pages.length === 1) await loadSelectedFilePreview(row, file); assigned = "Form 20 photos"; }
+        if (row && (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))) { row._file = file; row._pages = []; row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "Form 20 file selected"; await loadSelectedFilePreview(row, file); assigned = "Form 20"; }
+        else if (row && file.type.startsWith("image/")) { row._pages = [...(row._pages || []), file]; row._file = null; row.querySelector(".doc-state").textContent = `${row._pages.length} Form 20 photos selected`; if (row._pages.length === 1) await loadSelectedFilePreview(row, file); assigned = "Form 20 photos"; }
       } else if (category) {
         const row = host.querySelector(`[data-doc="${category}"]`);
-        if (row && !row._file) { row._file = file; row.querySelector(".doc-state").textContent = row._savedDocument ? `Replacement selected · ${file.name}` : file.name; await loadSelectedFilePreview(row, file); assigned = row.querySelector("h3").textContent; }
+        if (row && !row._file) { row._file = file; row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "File selected"; await loadSelectedFilePreview(row, file); assigned = row.querySelector("h3").textContent; }
         else if (row) assigned = "Already has a file; choose another document row";
       }
       const item = document.createElement("div"); item.className = "bulk-file";
@@ -1020,7 +1021,7 @@
     const list = document.createElement("div"); list.className = "doc-list";
     documentDisplayOrder.filter(id => id !== "form20").forEach(id => {
       const name = categories.find(([category]) => category === id)?.[1] || id;
-      const row = document.createElement("section"); row.className = "doc-row"; row.dataset.doc = id; const h = document.createElement("h3"); h.textContent = (documentDisplayOrder.indexOf(id) + 1) + ". " + name; const state = document.createElement("div"); state.className = "doc-state"; const saved = customer.documents?.[id]; state.textContent = saved ? `Saved · ${saved.filename}` : "Not selected"; if (saved) state.classList.add("saved"); row.append(h, state); addPreviewPair(row, customer, id, saved);
+      const row = document.createElement("section"); row.className = "doc-row"; row.dataset.doc = id; const h = document.createElement("h3"); h.textContent = (documentDisplayOrder.indexOf(id) + 1) + ". " + name; const state = document.createElement("div"); state.className = "doc-state"; const saved = customer.documents?.[id]; state.textContent = saved ? "Saved" : "Not selected"; if (saved) state.classList.add("saved"); row.append(h, state); addPreviewPair(row, customer, id, saved);
       let addressTypeSelect = null, aadhaarCaptureHint = null, aadhaarCaptureControls = null;
       if (id === "address-proof") {
         const select = document.createElement("select"); select.className = "subcat"; select.dataset.subcategory = "true"; select.innerHTML = '<option value="">Choose address proof type</option>'; addressTypes.forEach(type => { const option = document.createElement("option"); option.value = type; option.textContent = type; select.append(option); }); if (saved?.subcategory) select.value = saved.subcategory; addressTypeSelect = select;
@@ -1049,7 +1050,7 @@
       if (saved) { const remove = document.createElement("button"); remove.type = "button"; remove.className = "danger"; setIconButton(remove, "trash", "Remove document"); remove.addEventListener("click", async () => { if (!confirm(`Remove ${name}?`)) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/${id}`, { method: "DELETE" }); await openCustomer(customer._id); } catch (error) { alert(error.message); } }); actions.append(remove); }
       row.append(actions); list.append(row);
     });
-    const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const ftitle = document.createElement("h3"); ftitle.textContent = (documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)"; const saved20 = customer.documents?.form20; const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? `Saved · ${saved20.filename}` : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
+    const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const ftitle = document.createElement("h3"); ftitle.textContent = (documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)"; const saved20 = customer.documents?.form20; const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? "Saved" : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
     const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions";
     const form20CaptureControls = document.createElement("div"); form20CaptureControls.className = "doc-actions native-capture-group";
     addNativeMultiPhotoCapture(form20CaptureControls, form20, {
@@ -1061,8 +1062,8 @@
     choose20.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; const input = document.createElement("input"); input.type = "file"; input.accept = "application/pdf,image/*"; input.multiple = true; input.addEventListener("change", async () => {
       if (!(await ensureActiveSession())) return;
       const files = [...(input.files || [])]; const pdfs = files.filter(file => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
-      if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = form20._savedDocument ? `Replacement selected · ${pdfs[0].name}` : `${pdfs[0].name} → Form 20`; await loadSelectedFilePreview(form20, pdfs[0]); }
-      else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} photos selected · Form 20` : "Upload a PDF (3+ pages) or capture three photos"; if (files[0]) await loadSelectedFilePreview(form20, files[0]); else setPreview(form20._selectedPreview, null, "Selected"); }
+      if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = form20._savedDocument ? "Replacement selected" : "Form 20 file selected"; await loadSelectedFilePreview(form20, pdfs[0]); }
+      else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} Form 20 photos selected` : "Upload a PDF (3+ pages) or capture three photos"; if (files[0]) await loadSelectedFilePreview(form20, files[0]); else setPreview(form20._selectedPreview, null, "Selected"); }
     }); input.click(); });
     form20Actions.append(choose20); form20.append(form20Actions); list.insertBefore(form20, list.children[3] || null); host.append(list);
     const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status"; result.textContent = "Choose any available documents. You can save fewer than 12."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected documents"; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar);
