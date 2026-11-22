@@ -56,7 +56,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d9a91d77;border-color
 .form20-pages input{font-size:.77rem;padding:8px}
 .add-page{font-size:.8rem;padding:7px 10px}
 .save-bar{padding:15px 22px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;bottom:0;background:#111e;backdrop-filter:blur(12px);z-index:2}
-.save-bar .status{margin:0}.save-bar .primary{min-width:180px}
+.save-bar .status{margin:0}.save-bar .save-description{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.save-bar .primary{min-width:180px}
 .dialog{width:min(560px,calc(100vw - 24px));max-height:90vh;overflow:auto;border:1px solid #5a4b22;border-radius:15px;padding:20px;background:#141412;color:var(--text)}
 .dialog::backdrop{background:#000b}
 .dialog-heading{display:flex;align-items:center;justify-content:space-between;grid-column:1/-1}
