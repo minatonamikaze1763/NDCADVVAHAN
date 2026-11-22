@@ -1246,3 +1246,34 @@ button.icon-only:focus-visible {
   #customerView .desktop-preview-panel,
   #customerView .desktop-preview-trigger { display:none !important; }
 }
+
+/* File queue rows include an explicit document assignment selector. */
+.bulk-file {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(190px,260px);
+  align-items:center;
+}
+.bulk-file>span { min-width:0; overflow-wrap:anywhere; }
+.bulk-file-assignment {
+  width:100%;
+  min-width:0;
+  min-height:38px;
+  padding:7px 10px;
+  border:1px solid #5a4a24;
+  border-radius:8px;
+  background:#11110f;
+  color:var(--text);
+  font:inherit;
+  font-size:.76rem;
+}
+.bulk-file-assignment:focus-visible { outline:2px solid var(--gold2); outline-offset:2px; }
+.bulk-file small.bulk-file-status {
+  grid-column:1/-1;
+  text-align:left;
+  font-size:.7rem;
+  overflow-wrap:anywhere;
+}
+@media (max-width:540px) {
+  .bulk-file { grid-template-columns:minmax(0,1fr); }
+  .bulk-file-assignment { grid-row:auto; }
+}
