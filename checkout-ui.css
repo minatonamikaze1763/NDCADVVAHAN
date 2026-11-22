@@ -725,3 +725,113 @@ body #payment > .container {
   color: #c9c5b8;
   cursor: not-allowed;
 }
+
+/* Cloud add-on choices: compact, tappable cards in the checkout palette. */
+#payment .ndc-cloud-choice-label {
+  display: block;
+  margin: 14px 0 10px;
+  color: #f0ead8;
+  font-size: 14px;
+  font-weight: 600;
+}
+#payment .ndc-cloud-native-select {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+  border: 0;
+}
+#payment .ndc-cloud-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 10px;
+  margin: 0 0 12px;
+}
+#payment .ndc-cloud-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  min-height: 132px;
+  padding: 15px;
+  border: 1px solid rgba(215, 189, 85, .24);
+  border-radius: 12px;
+  background: linear-gradient(145deg, #151513, #0b0b0a);
+  color: #e9e5da;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+#payment .ndc-cloud-choice:hover {
+  border-color: rgba(215, 189, 85, .65);
+  transform: translateY(-1px);
+}
+#payment .ndc-cloud-choice:focus-visible {
+  outline: 2px solid #e0c37a;
+  outline-offset: 3px;
+}
+#payment .ndc-cloud-choice.is-selected {
+  border-color: #d7bd55;
+  background: linear-gradient(145deg, rgba(215, 189, 85, .15), #11100d);
+  box-shadow: inset 0 0 0 1px rgba(215, 189, 85, .24), 0 8px 22px rgba(0, 0, 0, .2);
+}
+#payment .ndc-cloud-choice:disabled {
+  cursor: not-allowed;
+  opacity: .66;
+}
+#payment .ndc-cloud-choice-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+#payment .ndc-cloud-choice-name {
+  color: #f4f0e4;
+  font-size: 14px;
+  line-height: 1.4;
+}
+#payment .ndc-cloud-choice-state {
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border: 1px solid rgba(215, 189, 85, .24);
+  border-radius: 999px;
+  color: #bcb6a5;
+  font-size: 10px;
+}
+#payment .ndc-cloud-choice.is-selected .ndc-cloud-choice-state {
+  border-color: rgba(215, 189, 85, .5);
+  color: #e3ca5e;
+}
+#payment .ndc-cloud-choice-price {
+  display: block;
+  margin: 15px 0 7px;
+  color: #e3ca5e;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+#payment .ndc-cloud-choice-detail {
+  display: block;
+  margin-top: auto;
+  color: #aaa69d;
+  font-size: 11px;
+  line-height: 1.55;
+}
+@media (max-width: 480px) {
+  #payment .ndc-cloud-choices {
+    grid-template-columns: 1fr;
+  }
+  #payment .ndc-cloud-choice {
+    min-height: 116px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #payment .ndc-cloud-choice {
+    transition: none;
+  }
+}
