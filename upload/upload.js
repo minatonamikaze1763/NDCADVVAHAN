@@ -551,6 +551,7 @@
         button.innerHTML = `<span class="numbered-camera-icon">${actionIconSvg.camera}<span class="camera-number-badge">${index + 1}</span></span><span class="button-label">${action} ${labels[index]}</span>`;
       });
       save.disabled = saving || saved || captured !== photos.length;
+      updateCustomerCloudStatus(row.closest(".customer-card"));
       if (saved) {
         save.textContent = "PDF saved";
         progress.textContent = `${documentName} PDF saved successfully.`;
@@ -663,12 +664,18 @@
     throw new Error("The " + documentName + " photos could not be combined below the VAHAN size limit. Retake the photos in good light and try again.");
   }
   function updateSavedDocumentRow(customer, host, row, category, saved) {
+    const wasActive = host._activeDesktopRow === row;
+    if (wasActive) {
+      restoreDesktopDocumentRow(row);
+      host._activeDesktopRow = null;
+      host.querySelector(".desktop-preview-content")?.replaceChildren();
+    }
     customer.documents = {...(customer.documents || {}), [category]:saved};
     currentCustomer = customer;
     row._file = null;
     row._pages = [];
     row._nativeCameraPhotos = [];
-    const state = row.querySelector(".doc-state");
+    const state = row._docState || row.querySelector(".doc-state");
     state.textContent = "";
     state.classList.add("saved");
     const titleRow = row.querySelector(".doc-row-header");
@@ -683,7 +690,7 @@
     if (selector) row.append(selector);
     if (actions) row.append(actions);
     registerDesktopDocumentRow(row);
-    if (host._activeDesktopRow === row) activateDesktopDocumentRow(row, host);
+    if (wasActive) activateDesktopDocumentRow(row, host);
     updateCustomerCloudStatus(host);
     const savedCount = Object.keys(customer.documents).length;
     const count = host.querySelector(".doc-toolbar .muted");
@@ -1188,7 +1195,7 @@
     const titleBlock = document.createElement("div"); const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "CUSTOMER WORKSPACE"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = customer.chassisNumber; const cloudStatus = createCloudSavedIndicator(false); cloudStatus.classList.add("customer-cloud-status"); titleBlock.append(eyebrow, title, chassis, cloudStatus);
     const controls = document.createElement("div"); controls.className = "customer-controls";
     const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["chassisNumber", "customerName", "address", "hp", "applicationNumber"]) $(key).value = customer[key] || ""; $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
-    const removeCustomer = document.createElement("button"); removeCustomer.type = "button"; removeCustomer.className = "danger"; setIconButton(removeCustomer, "trash", "Delete customer"); removeCustomer.addEventListener("click", async () => { if (!confirm(`Delete ${customer.customerName} and all of its stored documents? This cannot be undone.`)) return; try { await request(`/api/upload-portal/customers/${customer._id}`, { method: "DELETE" }); host.hidden = true; currentCustomer = null; await searchCustomers($("search").value); } catch (error) { alert(error.message); } });
+    const removeCustomer = document.createElement("button"); removeCustomer.type = "button"; removeCustomer.className = "danger"; setIconButton(removeCustomer, "trash", "Delete customer"); removeCustomer.addEventListener("click", async () => { if (!confirm(`Delete ${customer.customerName} and all of its stored documents? This cannot be undone.`)) return; try { await request(`/api/upload-portal/customers/${customer._id}`, { method: "DELETE" }); host.hidden = true; document.body.classList.remove("customer-editor-open"); currentCustomer = null; await searchCustomers($("search").value); } catch (error) { alert(error.message); } });
     const close = document.createElement("button"); close.type = "button"; close.className = "quiet"; setIconButton(close, "close", "Close customer"); close.addEventListener("click", () => {
       if (!hasUnsavedEditorChanges(host)) {
         closeCustomerEditor(host);
@@ -1262,21 +1269,28 @@
     });
     toolbar.append(label, count, shareZip, zip, zipStatus); host.append(toolbar);
     const list = document.createElement("div"); list.className = "doc-list";
+    const rowList = document.createElement("div"); rowList.className = "doc-rows";
+    const previewPanel = document.createElement("aside"); previewPanel.className = "desktop-preview-panel";
+    const previewHeading = document.createElement("div"); previewHeading.className = "desktop-preview-heading";
+    const previewTitle = document.createElement("strong"); previewTitle.className = "desktop-preview-title"; previewTitle.textContent = "Document preview";
+    const previewStatus = document.createElement("span"); previewStatus.className = "desktop-preview-status"; previewStatus.textContent = "Choose a document row to view its preview and actions.";
+    const previewContent = document.createElement("div"); previewContent.className = "desktop-preview-content";
+    previewHeading.append(previewTitle, previewStatus); previewPanel.append(previewHeading, previewContent); list.append(rowList, previewPanel);
     documentDisplayOrder.filter(id => id !== "form20").forEach(id => {
       const name = categories.find(([category]) => category === id)?.[1] || id;
-      const row = document.createElement("section"); row.className = "doc-row"; row.dataset.doc = id; const titleText = (documentDisplayOrder.indexOf(id) + 1) + ". " + name; const state = document.createElement("div"); state.className = "doc-state"; const saved = customer.documents?.[id]; state.textContent = saved ? "" : "Not selected"; if (saved) state.classList.add("saved"); row.append(createDocTitleRow(titleText, saved), state); addPreviewPair(row, customer, id, saved);
+      const row = document.createElement("section"); row.className = "doc-row"; row.dataset.doc = id; const titleText = (documentDisplayOrder.indexOf(id) + 1) + ". " + name; const state = document.createElement("div"); state.className = "doc-state"; const saved = customer.documents?.[id]; state.textContent = saved ? "" : "Not selected"; if (saved) state.classList.add("saved"); row._docTitleText = titleText; row._docState = state; row.append(createDocTitleRow(titleText, saved), state); addPreviewPair(row, customer, id, saved);
       let addressTypeSelect = null, aadhaarCaptureHint = null, aadhaarCaptureControls = null;
       if (id === "address-proof") {
-        const select = document.createElement("select"); select.className = "subcat"; select.dataset.subcategory = "true"; select.innerHTML = '<option value="">Choose address proof type</option>'; addressTypes.forEach(type => { const option = document.createElement("option"); option.value = type; option.textContent = type; select.append(option); }); if (saved?.subcategory) select.value = saved.subcategory; addressTypeSelect = select;
-        aadhaarCaptureHint = document.createElement("p"); aadhaarCaptureHint.className = "aadhar-capture-hint muted"; aadhaarCaptureHint.textContent = "Optional: capture Aadhaar front and back to save them together as one PDF."; aadhaarCaptureHint.hidden = true;
-        aadhaarCaptureControls = document.createElement("div"); aadhaarCaptureControls.className = "doc-actions native-capture-group aadhaar-native-capture"; aadhaarCaptureControls.hidden = true;
+        const select = document.createElement("select"); select.className = "subcat"; select.dataset.subcategory = "true"; select.innerHTML = '<option value="">Choose address proof type</option>'; addressTypes.forEach(type => { const option = document.createElement("option"); option.value = type; option.textContent = type; select.append(option); }); if (saved?.subcategory) select.value = saved.subcategory; addressTypeSelect = select; row._subcategorySelect = select;
+        aadhaarCaptureHint = document.createElement("p"); aadhaarCaptureHint.className = "aadhar-capture-hint muted"; aadhaarCaptureHint.textContent = "Optional: capture Aadhaar front and back to save them together as one PDF."; aadhaarCaptureHint.hidden = true; row._captureHint = aadhaarCaptureHint;
+        aadhaarCaptureControls = document.createElement("div"); aadhaarCaptureControls.className = "doc-actions native-capture-group aadhaar-native-capture desktop-camera-action"; aadhaarCaptureControls.hidden = true; row._nativeCaptureControls = aadhaarCaptureControls;
         addNativeMultiPhotoCapture(aadhaarCaptureControls, row, {
           labels:["Front side", "Back side"], documentName:"Aadhaar", saveLabel:"Combine and save Aadhaar PDF",
           onSave:(photos, progress) => saveCapturedAadhaar(customer, host, row, photos, progress)
         });
         row.append(select, aadhaarCaptureHint, aadhaarCaptureControls);
       }
-      const actions = document.createElement("div"); actions.className = "doc-actions"; const camera = document.createElement("button"); camera.type = "button"; camera.className = "secondary"; setIconButton(camera, "camera", "Camera"); camera.addEventListener("click", () => safeFileInput(id, true)); const browse = document.createElement("button"); browse.type = "button"; browse.className = "secondary"; setIconButton(browse, "upload", "Choose file"); browse.addEventListener("click", () => safeFileInput(id, false)); actions.append(camera, browse);
+      const actions = document.createElement("div"); actions.className = "doc-actions"; const camera = document.createElement("button"); camera.type = "button"; camera.className = "secondary desktop-camera-action"; setIconButton(camera, "camera", "Camera"); camera.addEventListener("click", () => safeFileInput(id, true)); const browse = document.createElement("button"); browse.type = "button"; browse.className = "secondary"; setIconButton(browse, "upload", "Choose file"); browse.addEventListener("click", () => safeFileInput(id, false)); actions.append(camera, browse);
       if (id === "address-proof") {
         const updateAadhaarOption = () => { const visible = addressTypeSelect.value === "Aadhaar"; aadhaarCaptureControls.hidden = !visible; aadhaarCaptureHint.hidden = !visible; };
         addressTypeSelect.addEventListener("change", async () => {
@@ -1290,12 +1304,16 @@
         addressTypeSelect.dataset.savedValue = addressTypeSelect.value;
         updateAadhaarOption();
       }
+      const previewButton = document.createElement("button"); previewButton.type = "button"; previewButton.className = "secondary desktop-preview-trigger"; setIconButton(previewButton, "preview", "Preview");
+      previewButton.addEventListener("click", event => { event.stopPropagation(); activateDesktopDocumentRow(row, host); });
       if (saved) { const remove = document.createElement("button"); remove.type = "button"; remove.className = "danger"; setIconButton(remove, "trash", "Remove document"); remove.addEventListener("click", async () => { if (!confirm(`Remove ${name}?`)) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/${id}`, { method: "DELETE" }); await openCustomer(customer._id); } catch (error) { alert(error.message); } }); actions.append(remove); }
-      row.append(actions); list.append(row);
+      actions.append(previewButton); row._documentActions = actions; row.append(actions);
+      row.addEventListener("click", event => { if (!event.target.closest("button,select,input,a")) activateDesktopDocumentRow(row, host); });
+      registerDesktopDocumentRow(row); rowList.append(row);
     });
-    const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const saved20 = customer.documents?.form20; const ftitle = createDocTitleRow((documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)", saved20); const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? "" : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
+    const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const saved20 = customer.documents?.form20; const form20TitleText = (documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)"; const ftitle = createDocTitleRow(form20TitleText, saved20); const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? "" : "Upload a PDF (3+ pages) or capture three photos"; form20._docTitleText = form20TitleText; form20._docState = fstate; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
     const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions";
-    const form20CaptureControls = document.createElement("div"); form20CaptureControls.className = "doc-actions native-capture-group";
+    const form20CaptureControls = document.createElement("div"); form20CaptureControls.className = "doc-actions native-capture-group desktop-camera-action"; form20._nativeCaptureControls = form20CaptureControls;
     addNativeMultiPhotoCapture(form20CaptureControls, form20, {
       labels:["Page 1", "Page 2", "Page 3"], documentName:"Form 20", saveLabel:"Combine and save Form 20 PDF",
       onSave:(photos, progress) => saveCapturedForm20(customer, host, form20, photos, progress)
@@ -1308,8 +1326,11 @@
       if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = form20._savedDocument ? "Replacement selected" : "Form 20 file selected"; updateDocumentSaveButton(host); await loadSelectedFilePreview(form20, pdfs[0]); }
       else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} Form 20 photos selected` : "Upload a PDF (3+ pages) or capture three photos"; updateDocumentSaveButton(host); if (files[0]) await loadSelectedFilePreview(form20, files[0]); else setPreview(form20._selectedPreview, null, "Selected"); }
     }); input.click(); });
-    form20Actions.append(choose20); form20.append(form20Actions); list.insertBefore(form20, list.children[3] || null); host.append(list);
-    const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status save-description"; result.textContent = "Select files to save (up to 12)."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected"; save.disabled = true; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar); updateDocumentSaveButton(host);
+    const preview20 = document.createElement("button"); preview20.type = "button"; preview20.className = "secondary desktop-preview-trigger"; setIconButton(preview20, "preview", "Preview"); preview20.addEventListener("click", event => { event.stopPropagation(); activateDesktopDocumentRow(form20, host); });
+    form20Actions.append(choose20, preview20); form20._documentActions = form20Actions; form20.append(form20Actions);
+    form20.addEventListener("click", event => { if (!event.target.closest("button,select,input,a")) activateDesktopDocumentRow(form20, host); });
+    registerDesktopDocumentRow(form20); rowList.insertBefore(form20, rowList.children[3] || null); host.append(list);
+    const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status save-description"; result.textContent = "Select files to save (up to 12)."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected"; save.disabled = true; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar); updateDocumentSaveButton(host); syncDesktopDocumentLayout(host); void updateDesktopCameraAvailability();
   }
   async function openCustomer(id) { try { const data = await request(`/api/upload-portal/customers/${id}`); currentCustomer = data.customer; renderCustomer(currentCustomer); } catch (error) { status($("searchStatus"), error.message, "error"); } }
   async function saveDocuments(customer, host, button) {
@@ -1319,7 +1340,7 @@
     setSaveBarrier(true); const result = $("saveStatus"); let saved = 0; const failures = [];
     for (const [category] of categories.filter(([id]) => id !== "form20")) {
       const row = host.querySelector(`[data-doc="${category}"]`); const file = row?._file; if (!file) continue;
-      const subcategory = row.querySelector("[data-subcategory]")?.value || ""; if (category === "address-proof" && !subcategory) { failures.push("Address Proof: select a type."); continue; }
+      const subcategory = (row._subcategorySelect || row.querySelector("[data-subcategory]"))?.value || ""; if (category === "address-proof" && !subcategory) { failures.push("Address Proof: select a type."); continue; }
       try { status(result, `Preparing ${row.querySelector("h3").textContent}…`); const prepared = await prepareUploadFile(file, category); await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": file.type || "application/octet-stream", "X-NDC-Upload-Type": prepared.type || file.type, "X-NDC-Original-Filename": file.name, "X-NDC-Original-Size": String(file.size), "X-NDC-Original-Last-Modified": String(file.lastModified || Date.now()), ...(subcategory ? { "X-NDC-Subcategory": subcategory } : {}) }, body: prepared }); saved++; }
       catch (error) { failures.push(`${row.querySelector("h3").textContent}: ${error.message}`); }
     }
@@ -1361,6 +1382,14 @@
     catch (error) { const response = host.querySelector("#saveStatus") || result; status(response, error.message, "error"); }
     finally { setSaveBarrier(false); updateDocumentSaveButton(host); }
   }
+  window.addEventListener("resize", () => {
+    clearTimeout(desktopCameraCheckTimer);
+    desktopCameraCheckTimer = setTimeout(() => {
+      syncDesktopDocumentLayout($("customerView"));
+      void updateDesktopCameraAvailability();
+    }, 120);
+  }, {passive:true});
+  void updateDesktopCameraAvailability();
   void validate();
 })();
 
