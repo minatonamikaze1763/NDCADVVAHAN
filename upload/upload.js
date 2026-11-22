@@ -1072,29 +1072,134 @@
     } else setPreview(stored, null, "Saved");
     pair.append(selected, stored); row.append(pair); addModifiedLabel(row, saved); row._selectedPreview = selected; row._savedDocument = saved || null; addFileDetails(row, saved);
   }
+  function bulkFileAssignmentLabel(category, file) {
+    if (!category) return "Unmatched";
+    if (category === "form20" && (file.type?.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(file.name || ""))) return "Form 20 photos";
+    const categoryIndex = categories.findIndex(([id]) => id === category);
+    if (categoryIndex < 0) return "Unmatched";
+    const displayIndex = documentDisplayOrder.indexOf(category);
+    return `${displayIndex >= 0 ? displayIndex + 1 : categoryIndex + 1}. ${categories[categoryIndex][1]}`;
+  }
+  function resetBulkAssignedRow(row, category) {
+    if (!row) return;
+    if (row._bulkAssignedFile) {
+      row._file = null;
+      row._bulkAssignedFile = null;
+    }
+    if (category === "form20" && Array.isArray(row._bulkAssignedPhotos) && row._bulkAssignedPhotos.length) {
+      const assignedPhotos = row._bulkAssignedPhotos;
+      row._pages = (row._pages || []).filter(file => !assignedPhotos.includes(file));
+      row._bulkAssignedPhotos = [];
+    }
+    const state = row.querySelector(".doc-state");
+    if (state) {
+      state.textContent = category === "form20"
+        ? (row._savedDocument ? "" : "Upload a PDF (3+ pages) or capture three photos")
+        : (row._savedDocument ? "" : "Not selected");
+    }
+    if (category === "form20" && row._pages?.length) {
+      state.textContent = `${row._pages.length} Form 20 photos selected`;
+      void loadSelectedFilePreview(row, row._pages[0]);
+    } else if (row._selectedPreview) setPreview(row._selectedPreview, null, "Selected");
+  }
+  async function setBulkFileAssignment(file, item, category, host) {
+    const previousCategory = item.dataset.category || "";
+    const result = item.querySelector("small");
+    if (category === previousCategory) {
+      result.textContent = bulkFileAssignmentLabel(category, file);
+      return true;
+    }
+    const targetRow = category ? host.querySelector(`[data-doc="${category}"]`) : null;
+    if (category && !targetRow) {
+      item.querySelector(".bulk-file-category").value = previousCategory;
+      result.textContent = "Document row is unavailable.";
+      return false;
+    }
+    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
+    const isImage = file.type?.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(file.name || "");
+    if (category === "form20") {
+      const alreadyHasDifferentPdf = targetRow._file && targetRow._file !== file;
+      const alreadyHasDifferentPages = isPdf && (targetRow._pages || []).length > 0;
+      const unsupportedForm20Type = !isPdf && !isImage;
+      if (alreadyHasDifferentPdf || alreadyHasDifferentPages || unsupportedForm20Type) {
+        item.querySelector(".bulk-file-category").value = previousCategory;
+        result.textContent = unsupportedForm20Type
+          ? "Form 20 supports PDF or image files."
+          : "Already has a file; choose another document row";
+        return false;
+      }
+    } else if (targetRow?._file && targetRow._file !== file) {
+      item.querySelector(".bulk-file-category").value = previousCategory;
+      result.textContent = "Already has a file; choose another document row";
+      return false;
+    }
+    if (previousCategory) {
+      const previousRow = host.querySelector(`[data-doc="${previousCategory}"]`);
+      if (previousRow?._bulkAssignedFile === file) resetBulkAssignedRow(previousRow, previousCategory);
+      if (previousCategory === "form20" && previousRow?._bulkAssignedPhotos?.includes(file)) resetBulkAssignedRow(previousRow, previousCategory);
+    }
+    if (category === "form20") {
+      if (isPdf) {
+        targetRow._file = file;
+        targetRow._bulkAssignedFile = file;
+        targetRow._pages = [];
+        targetRow._bulkAssignedPhotos = [];
+        targetRow.querySelector(".doc-state").textContent = targetRow._savedDocument ? "Replacement selected" : "Form 20 file selected";
+        await loadSelectedFilePreview(targetRow, file);
+      } else {
+        targetRow._pages = [...(targetRow._pages || []), file];
+        targetRow._bulkAssignedPhotos = [...(targetRow._bulkAssignedPhotos || []), file];
+        targetRow._file = null;
+        targetRow.querySelector(".doc-state").textContent = `${targetRow._pages.length} Form 20 photos selected`;
+        if (targetRow._pages.length === 1) await loadSelectedFilePreview(targetRow, file);
+      }
+    } else if (category) {
+      targetRow._file = file;
+      targetRow._bulkAssignedFile = file;
+      targetRow.querySelector(".doc-state").textContent = targetRow._savedDocument ? "Replacement selected" : "File selected";
+      await loadSelectedFilePreview(targetRow, file);
+    }
+    item.dataset.category = category;
+    result.textContent = bulkFileAssignmentLabel(category, file);
+    updateDocumentSaveButton(host);
+    return true;
+  }
   async function queueFiles(files, host) {
     if (!(await ensureActiveSession())) return;
     const queue = host.querySelector(".bulk-queue");
-    const messages = [];
     for (const file of files) {
-      const category = classifyFile(file.name);
-      let assigned = "Unmatched";
-      if (category === "form20") {
-        const row = host.querySelector('[data-doc="form20"]');
-        if (row && (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))) { row._file = file; row._pages = []; row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "Form 20 file selected"; updateDocumentSaveButton(host); await loadSelectedFilePreview(row, file); assigned = "Form 20"; }
-        else if (row && file.type.startsWith("image/")) { row._pages = [...(row._pages || []), file]; row._file = null; row.querySelector(".doc-state").textContent = `${row._pages.length} Form 20 photos selected`; updateDocumentSaveButton(host); if (row._pages.length === 1) await loadSelectedFilePreview(row, file); assigned = "Form 20 photos"; }
-      } else if (category) {
-        const row = host.querySelector(`[data-doc="${category}"]`);
-        if (row && !row._file) { row._file = file; row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "File selected"; updateDocumentSaveButton(host); await loadSelectedFilePreview(row, file); assigned = row.querySelector("h3").textContent; }
-        else if (row) assigned = "Already has a file; choose another document row";
-      }
-      const item = document.createElement("div"); item.className = "bulk-file";
-      const name = document.createElement("span"); name.textContent = file.name;
-      const result = document.createElement("small"); result.textContent = assigned;
-      item.append(name, result); queue.append(item); messages.push(`${file.name} → ${assigned}`);
+      const item = document.createElement("div");
+      item.className = "bulk-file";
+      const name = document.createElement("span");
+      name.className = "bulk-file-name";
+      name.textContent = file.name;
+      const select = document.createElement("select");
+      select.className = "bulk-file-category";
+      select.setAttribute("aria-label", `Document type for ${file.name}`);
+      select.add(new Option("Unmatched", ""));
+      categories.forEach(([id, label]) => {
+        const displayIndex = documentDisplayOrder.indexOf(id);
+        select.add(new Option(`${displayIndex >= 0 ? displayIndex + 1 : categories.findIndex(([category]) => category === id) + 1}. ${label}`, id));
+      });
+      const result = document.createElement("small");
+      const suggestedCategory = classifyFile(file.name);
+      const initialCategory = categories.some(([id]) => id === suggestedCategory) ? suggestedCategory : "";
+      item.dataset.category = "";
+      item.append(name, select, result);
+      queue.append(item);
+      select.value = initialCategory;
+      select.addEventListener("change", () => {
+        void setBulkFileAssignment(file, item, select.value, host).catch(error => {
+          select.value = item.dataset.category || "";
+          result.textContent = error.message;
+        });
+      });
+      if (initialCategory) {
+        await setBulkFileAssignment(file, item, initialCategory, host);
+      } else result.textContent = "Unmatched";
     }
     updateDocumentSaveButton(host);
-    status(host.querySelector(".bulk-status"), `${files.length} file${files.length === 1 ? "" : "s"} added. Check each assignment below; unmatched or duplicate files can be selected in a document row.`);
+    status(host.querySelector(".bulk-status"), `${files.length} file${files.length === 1 ? "" : "s"} added. Choose a document type for unmatched files; duplicate assignments must use another document row.`);
   }
   const actionIconSvg = {
     edit: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>',
