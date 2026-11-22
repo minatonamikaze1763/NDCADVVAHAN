@@ -1206,6 +1206,5 @@ button.icon-only:focus-visible {
 @media (max-width:680px) {
   #customerView .doc-rows { display:contents; }
   #customerView .desktop-preview-panel,
-  #customerView .desktop-preview-trigger,
-  #customerView .customer-cloud-status { display:none !important; }
+  #customerView .desktop-preview-trigger { display:none !important; }
 }
