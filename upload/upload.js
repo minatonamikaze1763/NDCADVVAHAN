@@ -1157,6 +1157,11 @@
   function queuedDocumentName(category) {
     return categories.find(([id]) => id === category)?.[1] || category;
   }
+  function queuedAssignmentMessage(category, file) {
+    return category === "form20" && queuedFileKind(file) === "image"
+      ? "Added to Form 20 photo pages."
+      : `Assigned to ${queuedDocumentName(category)}; replaces any current selection there.`;
+  }
   async function assignQueuedFile(file, category, host) {
     const row = host.querySelector(`[data-doc="${category}"]`);
     if (!row) return false;
@@ -1229,7 +1234,7 @@
       if (assignedCategory && !await assignQueuedFile(file, assignedCategory, host)) assignedCategory = "";
       select.value = assignedCategory;
       message.textContent = assignedCategory
-        ? `Assigned to ${queuedDocumentName(assignedCategory)}; replaces any current selection there.`
+        ? queuedAssignmentMessage(assignedCategory, file)
         : fileKind ? "Choose a document row." : "Unsupported file type.";
       select.addEventListener("change", async () => {
         const nextCategory = select.value;
@@ -1251,7 +1256,7 @@
           message.textContent = "Choose a document row.";
         } else if (await assignQueuedFile(file, nextCategory, host)) {
           assignedCategory = nextCategory;
-          message.textContent = `Assigned to ${queuedDocumentName(nextCategory)}; replaces any current selection there.`;
+          message.textContent = queuedAssignmentMessage(nextCategory, file);
         } else {
           select.value = assignedCategory;
           message.textContent = "Could not assign this file.";
