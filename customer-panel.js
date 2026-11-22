@@ -15,6 +15,17 @@
   let appliedOffer = null, offerWidget = null;
   const planDevices = (account, plan) => Math.min(20, plan.maxDevices + Math.max(0, ...(account?.offerBenefits || []).filter(b => b.planId === plan.id && (b.retainDevicesOnRenewal || Date.parse(b.expiresAt) > Date.now() + serverClockOffset)).map(b => Number(b.extraDevices) || 0)));
   let serverClockOffset = 0;
+  const CLOUD_ADDON_DAY_MS = 30 * 86400000;
+  function canPurchaseCloudAddon(account) {
+    const expiry = Date.parse(account?.expiresAt || "");
+    return Boolean(account && account.isDemo !== true && account.approved === true && !account.disabled && !account.banned && Number.isFinite(expiry) && expiry > Date.now() + serverClockOffset);
+  }
+  function cloudAddonPriceUntilExpiry(plan, quantity = null, account = dashboardData?.account) {
+    const expiry = Date.parse(account?.expiresAt || "");
+    const remainingMs = Number.isFinite(expiry) ? Math.max(0, expiry - (Date.now() + serverClockOffset)) : 0;
+    const monthly = plan?.structure === "flex" ? Number(plan.perCustomerPrice) * Number(quantity) : Number(plan?.monthlyPrice);
+    return Math.round(Math.max(0, monthly) * remainingMs / CLOUD_ADDON_DAY_MS * 100) / 100;
+  }
 
   function availablePlans(account) {
     return NDCPlans.visible.filter(p => p.id !== "basic" || !(Number(account.minimumRenewalTier) >= 1));
@@ -950,13 +961,25 @@
       const cloud = account.cloudAddon || {}, usage = cloud.usage || {};
       const starts = cloud.startsAt ? new Date(cloud.startsAt).toLocaleDateString("en-IN") : "—";
       const expires = cloud.expiresAt ? new Date(cloud.expiresAt).toLocaleDateString("en-IN") : "—";
-      sectionHTML = '<div class="ndc-page-heading"><span class="ndc-eyebrow">CUSTOMER CLOUD</span><h1>Cloud Storage</h1><p>Uploaded documents auto-delete after 30 days; customer records remain as usage history. Cloud logins use your NDC plan device allowance (' + (Number(account.maxDevices) || 1) + ' devices).</p></div>' +
-        '<div class="ndc-stat-grid"><article class="ndc-stat"><span>Cloud plan</span><strong>' + esc(cloud.planName || "Cloud Storage") + '</strong><small>' + esc(money(cloud.monthlyPrice || 0)) + ' / month</small></article>' +
-        '<article class="ndc-stat"><span>Records created this month</span><strong>' + Number(usage.recordsCreated || 0).toLocaleString("en-IN") + ' / ' + Number(usage.limit || cloud.maxCustomersPerMonth || 0).toLocaleString("en-IN") + '</strong><small>Month ' + Number(usage.monthIndex || 1) + ' of ' + Number(usage.monthCount || 1) + '</small></article>' +
-        '<article class="ndc-stat"><span>Customer records stored</span><strong>' + Number(usage.recordsStored || 0).toLocaleString("en-IN") + '</strong><small>Customer records remain as billing evidence</small></article>' +
-        '<article class="ndc-stat"><span>Add-on started</span><strong>' + esc(starts) + '</strong></article><article class="ndc-stat"><span>Add-on expires</span><strong>' + esc(expires) + '</strong></article>' +
-        '<article class="ndc-stat"><span>Allowed device logins</span><strong>' + (Number(account.maxDevices) || 1) + '</strong><small>Shared with your NDC subscription</small></article></div>' +
-        '<section class="ndc-panel-card"><h2>Cloud usage</h2><p>Uploaded documents can be deleted individually. Customer records cannot be deleted and remain as usage and billing evidence.</p><button type="button" class="ndc-home-button" data-go-section="subscription">Manage subscription</button></section>';
+      if (cloud.active) {
+        sectionHTML = '<div class="ndc-page-heading"><span class="ndc-eyebrow">CUSTOMER CLOUD</span><h1>Cloud Storage</h1><p>Uploaded documents auto-delete after 30 days; customer records remain as usage history. Cloud logins use your NDC plan device allowance (' + (Number(account.maxDevices) || 1) + ' devices).</p></div>' +
+          '<div class="ndc-stat-grid"><article class="ndc-stat"><span>Cloud plan</span><strong>' + esc(cloud.planName || "Cloud Storage") + '</strong><small>' + esc(money(cloud.monthlyPrice || 0)) + ' / month</small></article>' +
+          '<article class="ndc-stat"><span>Records created this month</span><strong>' + Number(usage.recordsCreated || 0).toLocaleString("en-IN") + ' / ' + Number(usage.limit || cloud.maxCustomersPerMonth || 0).toLocaleString("en-IN") + '</strong><small>Month ' + Number(usage.monthIndex || 1) + ' of ' + Number(usage.monthCount || 1) + '</small></article>' +
+          '<article class="ndc-stat"><span>Customer records stored</span><strong>' + Number(usage.recordsStored || 0).toLocaleString("en-IN") + '</strong><small>Customer records remain as billing evidence</small></article>' +
+          '<article class="ndc-stat"><span>Add-on started</span><strong>' + esc(starts) + '</strong></article><article class="ndc-stat"><span>Add-on expires</span><strong>' + esc(expires) + '</strong></article>' +
+          '<article class="ndc-stat"><span>Allowed device logins</span><strong>' + (Number(account.maxDevices) || 1) + '</strong><small>Shared with your NDC subscription</small></article></div>' +
+          '<section class="ndc-panel-card"><h2>Cloud usage</h2><p>Uploaded documents can be deleted individually. Customer records cannot be deleted and remain as usage and billing evidence.</p><button type="button" class="ndc-home-button" data-go-section="subscription">Manage subscription</button></section>';
+      } else {
+        const plans = (dashboardData.cloudAddonPlans || []).filter(plan => plan.status === "active" && plan.visibility === "public" && plan.acceptPurchases === true);
+        const expiry = new Date(account.expiresAt);
+        sectionHTML = '<div class="ndc-page-heading"><span class="ndc-eyebrow">CUSTOMER CLOUD</span><h1>Add Cloud Storage</h1><p>Choose a Cloud Storage plan. It will be active from payment confirmation until your current paid subscription expires on ' + esc(expiry.toLocaleDateString("en-IN")) + '. The amount is calculated from today to that date. This checkout does not change your NDC subscription or device limit.</p></div>' +
+          (plans.length ? '<form id="ndcCloudAddonForm"><fieldset class="ndc-choice-group"><legend>Choose a Cloud Storage plan</legend><div class="ndc-plan-options">' + plans.map((plan, index) => {
+            const flex = plan.structure === "flex";
+            const quantity = flex ? Math.min(100, Number(plan.maxCustomersPerMonth) || 1) : null;
+            const amount = cloudAddonPriceUntilExpiry(plan, quantity);
+            return '<div class="ndc-cloud-plan-card"><label class="ndc-choice ndc-cloud-addon-choice"><input type="radio" name="cloudOnlyPlan" value="' + esc(plan.id) + '"' + (index === 0 ? " checked" : "") + '><span><small>CLOUD STORAGE · ' + (flex ? "FLEX" : "FIXED") + '</small><strong>' + esc(plan.name) + '</strong><b>' + esc(money(flex ? plan.perCustomerPrice : plan.monthlyPrice)) + (flex ? '<small> / record / month</small>' : '<small> / month</small>') + '</b><em>' + (flex ? "Choose monthly record quantity, up to " + Number(plan.maxCustomersPerMonth).toLocaleString("en-IN") : Number(plan.maxCustomersPerMonth).toLocaleString("en-IN") + " customer records/month") + ' · 12 document slots each</em><strong data-cloud-only-price="' + esc(plan.id) + '">' + esc(money(amount)) + ' total through subscription expiry</strong></span></label>' + (flex ? '<label class="ndc-cloud-flex-quantity" data-cloud-only-quantity-wrap="' + esc(plan.id) + '" hidden><span>Customer records per month</span><input type="number" min="1" max="' + Number(plan.maxCustomersPerMonth) + '" value="' + quantity + '" inputmode="numeric" data-cloud-only-quantity="' + esc(plan.id) + '" aria-label="Monthly customer record quantity"></label>' : "") + '</div>';
+          }).join("") + '</div></fieldset><div id="ndcCloudAddonTotal" class="ndc-checkout-payment-summary" aria-live="polite"></div><button class="ndc-home-button" id="ndcCloudAddonSubmit" type="submit">Pay for Cloud Storage only</button><p id="ndcCloudAddonStatus" role="status" aria-live="polite"></p></form>' : '<section class="ndc-panel-card"><h2>No Cloud Storage plans are available</h2><p>Check back later or contact NDC support.</p></section>');
+      }
     }
 
     // =======================================================
@@ -1182,9 +1205,42 @@
     if (["profile", "security", "payments"].includes(activeSection)) sectionHTML += emailSettings(account);
     if (activeSection === 'security') sectionHTML += '<aside class="ndc-security-note" aria-label="Security information"><span class="ndc-security-icon" aria-hidden="true">🔒</span><div><h2>Security information</h2><p><strong>VAHAN Cloud:</strong> Documents you upload are sent over HTTPS and stored encrypted at rest in the configured MongoDB Atlas storage. Signed-in users in your registered dealership account can retrieve them. Cloud records and files are retained for 30 days and then automatically deleted.</p><p><strong>Desktop extension workflow:</strong> When you select local customer folders directly in the extension, matching and preparation happen on your device. Account and subscription checks do not send those local document files to NDC. The extension submits selected files to the official VAHAN portal as part of your workflow.</p><p class="ndc-security-foot">Manage Cloud retention in workspace settings. Account, subscription and login security records are maintained separately. <a href="privacy-policy.html">Read our privacy policy ↗</a></p></div></aside>';
     content.innerHTML = sectionHTML;
+    const cloudOnlyForm = content.querySelector("#ndcCloudAddonForm");
+    if (cloudOnlyForm) {
+      const refreshCloudOnlyQuote = () => {
+        const selectedId = cloudOnlyForm.querySelector('input[name="cloudOnlyPlan"]:checked')?.value;
+        cloudOnlyForm.querySelectorAll("[data-cloud-only-quantity-wrap]").forEach(wrap => {
+          const selected = wrap.dataset.cloudOnlyQuantityWrap === selectedId;
+          wrap.hidden = !selected;
+          const input = wrap.querySelector("[data-cloud-only-quantity]");
+          const plan = dashboardData.cloudAddonPlans.find(item => item.id === wrap.dataset.cloudOnlyQuantityWrap);
+          if (input && plan) { input.max = String(plan.maxCustomersPerMonth); input.disabled = paymentBusy || !selected; }
+        });
+        cloudOnlyForm.querySelectorAll("[data-cloud-only-price]").forEach(node => {
+          const plan = dashboardData.cloudAddonPlans.find(item => item.id === node.dataset.cloudOnlyPrice);
+          const input = cloudOnlyForm.querySelector('[data-cloud-only-quantity="' + CSS.escape(node.dataset.cloudOnlyPrice) + '"]');
+          node.textContent = money(cloudAddonPriceUntilExpiry(plan, plan?.structure === "flex" ? Number(input?.value) : null)) + " total through subscription expiry";
+        });
+        const plan = dashboardData.cloudAddonPlans.find(item => item.id === selectedId);
+        const quantityInput = plan ? cloudOnlyForm.querySelector('[data-cloud-only-quantity="' + CSS.escape(plan.id) + '"]') : null;
+        const amount = cloudAddonPriceUntilExpiry(plan, plan?.structure === "flex" ? Number(quantityInput?.value) : null);
+        const summary = cloudOnlyForm.querySelector("#ndcCloudAddonTotal");
+        if (summary) {
+          const gstRate = Number(dashboardData?.gstCheckout?.gstRate) || 18;
+          const gst = dashboardData?.gstCheckout?.enabled ? Math.round(amount * gstRate) / 100 : 0;
+          renderCloudAddonSummary({ amount, gst, gstRate, gstEnabled: dashboardData?.gstCheckout?.enabled === true, total: amount + gst });
+        }
+        const button = cloudOnlyForm.querySelector("#ndcCloudAddonSubmit");
+        if (button) button.disabled = paymentBusy || !plan || amount <= 0 || !canPurchaseCloudAddon(dashboardData.account);
+      };
+      cloudOnlyForm.addEventListener("change", refreshCloudOnlyQuote);
+      cloudOnlyForm.addEventListener("input", refreshCloudOnlyQuote);
+      cloudOnlyForm.addEventListener("submit", startCloudAddonPayment);
+      refreshCloudOnlyQuote();
+    }
     const cloudNav = $("ndcCloudStorageNav");
-    if (cloudNav) cloudNav.hidden = account.cloudAddon?.active !== true;
-    if (activeSection === "cloud-storage" && account.cloudAddon?.active !== true) activeSection = "overview";
+    if (cloudNav) cloudNav.hidden = account.cloudAddon?.active !== true && !canPurchaseCloudAddon(account);
+    if (activeSection === "cloud-storage" && account.cloudAddon?.active !== true && !canPurchaseCloudAddon(account)) activeSection = "overview";
     content.querySelectorAll('.ndc-device-alias-form').forEach(form => form.addEventListener('submit', async event => {
       event.preventDefault(); const button = form.querySelector('button'), status = form.querySelector('[role="status"]');
       button.disabled = true;
@@ -1367,7 +1423,7 @@
       "contact"
     ];
 
-    if (!allowedSections.includes(section) || (section === "cloud-storage" && dashboardData?.account?.cloudAddon?.active !== true)) {
+    if (!allowedSections.includes(section) || (section === "cloud-storage" && dashboardData?.account?.cloudAddon?.active !== true && !canPurchaseCloudAddon(dashboardData?.account))) {
       return;
     }
 
@@ -1429,6 +1485,12 @@
     renewalPreview();
   }
 
+  function renderCloudAddonSummary(summary) {
+    const root = $("ndcCloudAddonTotal"); if (!root) return;
+    const rows = [["Cloud Storage add-on", summary.amount], [summary.gstEnabled ? "GST (" + summary.gstRate + "%)" : "GST · not charged", summary.gst], ["Total payable", summary.total]];
+    root.innerHTML = '<div class="ndc-checkout-summary-heading">PAYMENT SUMMARY</div><div class="ndc-checkout-summary-columns"><span>DESCRIPTION</span><span>AMOUNT</span></div>' + rows.map(([label, value]) => '<div class="ndc-checkout-tax-row' + (label === "Total payable" ? ' is-total' : '') + '"><span>' + esc(label) + '</span><strong>' + esc(money(value)) + '</strong></div>').join('') + '<small class="ndc-checkout-summary-note">' + (summary.gstEnabled ? 'GST is calculated on the Cloud Storage add-on.' : 'GST is currently not charged. The amount shown is the amount you will pay.') + '</small>';
+  }
+
   function renderRenewalSummary(summary) {
     const root = $("ndcRenewalTotal"); if (!root) return;
     const rows = [ ["Plan / offer amount", summary.list], ...(summary.discount > 0 ? [["Discount / offer applied", summary.discount]] : []), ["Taxable amount", summary.taxable], [summary.gstEnabled ? "GST (" + summary.gstRate + "%)" : "GST · not charged", summary.gst], ["Total payable", summary.total] ];
@@ -1453,6 +1515,15 @@
     paymentBusy = busy;
     offerWidget?.setBusy(busy);
     document.querySelectorAll('input[name="renewalPlan"], input[name="renewalMonths"], [data-cloud-quantity]').forEach(input => input.disabled = busy || (input.matches('[data-cloud-quantity]') && input.closest('[data-cloud-quantity-wrap]')?.hidden));
+    document.querySelectorAll('input[name="cloudOnlyPlan"], [data-cloud-only-quantity]').forEach(input => input.disabled = busy || (input.matches('[data-cloud-only-quantity]') && input.closest('[data-cloud-only-quantity-wrap]')?.hidden));
+    const cloudOnlyForm = $("ndcCloudAddonForm"), cloudOnlyButton = $("ndcCloudAddonSubmit");
+    if (cloudOnlyForm && cloudOnlyButton) {
+      const selectedId = cloudOnlyForm.querySelector('input[name="cloudOnlyPlan"]:checked')?.value;
+      const selectedPlan = (dashboardData?.cloudAddonPlans || []).find(plan => plan.id === selectedId);
+      const quantityInput = selectedPlan ? cloudOnlyForm.querySelector('[data-cloud-only-quantity="' + CSS.escape(selectedPlan.id) + '"]') : null;
+      const quantity = selectedPlan?.structure === "flex" ? Number(quantityInput?.value) : null;
+      cloudOnlyButton.disabled = busy || !selectedPlan || cloudAddonPriceUntilExpiry(selectedPlan, quantity) <= 0 || !canPurchaseCloudAddon(dashboardData?.account);
+    }
     const quick = $("ndcQuickRenew");
     const account = dashboardData?.account || {};
     const paidExpiry = Date.parse(account.expiresAt);
@@ -1547,6 +1618,50 @@
       message(err.message);
     }
   }
+  async function startCloudAddonPayment(event) {
+    event.preventDefault();
+    if (paymentBusy) return;
+    const form = event.currentTarget;
+    const message = text => {
+      const node = $("ndcCloudAddonStatus") || $("ndcRenewalStatus");
+      if (node) node.textContent = text;
+    };
+    const planId = form.querySelector('input[name="cloudOnlyPlan"]:checked')?.value;
+    const plan = (dashboardData?.cloudAddonPlans || []).find(item => item.id === planId);
+    const quantityInput = plan ? form.querySelector('[data-cloud-only-quantity="' + CSS.escape(plan.id) + '"]') : null;
+    const quantity = plan?.structure === "flex" ? Number(quantityInput?.value) : null;
+    if (!plan) { message("Choose an available Cloud Storage plan."); return; }
+    if (plan.structure === "flex" && (!Number.isInteger(quantity) || quantity < 1 || quantity > plan.maxCustomersPerMonth)) { message("Enter a valid monthly customer record quantity."); return; }
+    if (typeof Razorpay !== "function") { message("Razorpay Checkout did not load. Refresh and retry."); return; }
+    setPaymentBusy(true); message("Creating secure Cloud Storage payment…");
+    try {
+      const result = await api("/api/panel/cloud-addon/orders", { method: "POST", body: JSON.stringify({ cloudAddonPlanId: plan.id, ...(quantity ? { cloudAddonQuantity: quantity } : {}) }) });
+      const order = result.data || result;
+      if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error("Invalid payment order response.");
+      const quoteGst = order.gst || {};
+      renderCloudAddonSummary({ amount: Number(quoteGst.taxableAmount || order.baseAmount || order.amount) / 100, gst: Number(quoteGst.amount || 0) / 100, gstRate: Number(quoteGst.rate || dashboardData?.gstCheckout?.gstRate || 18), gstEnabled: quoteGst.enabled === true, total: Number(order.amount) / 100 });
+      let verificationStarted = false;
+      const checkout = new Razorpay({
+        key: order.keyId, order_id: order.orderId, amount: order.amount,
+        currency: order.currency || "INR", name: "Next Dimension Customs",
+        description: order.description || "VAHAN NDC TOOL - Cloud Storage add-on", theme: { color: "#d7bd55" },
+        handler: async payment => {
+          if (verificationStarted) return;
+          verificationStarted = true; message("Verifying your payment…");
+          try {
+            const verified = await api("/api/panel/payments/verify", { method: "POST", body: JSON.stringify(payment) });
+            if (verified.manualReview) message("Payment requires manual review. Contact support.");
+            else { await loadDashboard(); message("Payment verified! Cloud Storage is active through your subscription expiry."); }
+          } catch (error) { message("Payment completed, but verification is pending: " + error.message + ". Save payment ID " + payment.razorpay_payment_id + "."); }
+          finally { setPaymentBusy(false); }
+        },
+        modal: { ondismiss: () => { if (verificationStarted) return; setPaymentBusy(false); message("Checkout closed. Check your account before retrying if you paid."); } }
+      });
+      checkout.on("payment.failed", error => { if (verificationStarted) return; setPaymentBusy(false); message(error.error?.description || "Payment failed."); });
+      checkout.open();
+    } catch (error) { setPaymentBusy(false); message(error.message); }
+  }
+
   let passwordChangeBusy = false;
   async function changePassword(event) {
     event.preventDefault();
