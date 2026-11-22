@@ -903,6 +903,7 @@
           <span class="ndc-eyebrow">PLAN & BILLING</span>
           <h1>Subscription</h1>
           <p>Your current plan and renewal schedule.</p>
+          ${account.isDemo ? '<aside class="ndc-security-note"><strong>Demo access</strong><p>Purchase a subscription below to convert this demo account into a paid account. Your current demo access remains valid through its expiry, and any payment is verified by the server before paid access is granted.</p></aside>' : ''}
         </div>
 
         ${subscriptionVisual(account)}
@@ -916,10 +917,10 @@
               <div class="ndc-renewal-purchase-details">
               <fieldset class="ndc-choice-group"><legend>02 · Add more time</legend><p>Each month adds 30 days. Choose 1–12 months.</p>
               <div class="ndc-month-options">${Array.from({ length: 12 }, (_, i) => `<label class="ndc-choice ndc-month-choice"><input type="radio" name="renewalMonths" value="${i + 1}" ${i === 0 ? 'checked' : ''}><span><strong>${i + 1}</strong><small>${i === 0 ? 'month' : 'months'}</small></span></label>`).join('')}</div></fieldset>
-              <fieldset class="ndc-choice-group ndc-cloud-addon-options"><legend>03 · Optional Cloud Storage</legend><p>30-day record retention. Cloud logins use the device limit on the selected NDC plan. A new add-on period starts after any active add-on period.</p><label class="ndc-choice"><input type="radio" name="renewalCloudAddon" value="" checked><span><strong>No Cloud Storage</strong><em>Keep existing cloud access, if active</em></span></label><div class="ndc-plan-options">${(dashboardData.cloudAddonPlans || []).map(plan => '<label class="ndc-choice ndc-cloud-addon-choice"><input type="radio" name="renewalCloudAddon" value="' + esc(plan.id) + '"><span><small>CLOUD STORAGE ADD-ON</small><strong>' + esc(plan.name) + '</strong><b>' + esc(money(plan.monthlyPrice)) + '<small> / month</small></b><em>' + Number(plan.maxCustomersPerMonth).toLocaleString("en-IN") + ' customer records/month · retained for 30 days</em></span></label>').join("")}</div></fieldset>
+              <fieldset class="ndc-choice-group ndc-cloud-addon-options"><legend>03 · Optional Cloud Storage</legend><p>Uploaded documents auto-delete after 30 days; customer records remain as usage history. Cloud logins use the device limit on the selected NDC plan. A new add-on period starts after any active add-on period.</p><label class="ndc-choice"><input type="radio" name="renewalCloudAddon" value="" checked><span><strong>No Cloud Storage</strong><em>Keep existing cloud access, if active</em></span></label><div class="ndc-plan-options">${(dashboardData.cloudAddonPlans || []).map(plan => '<label class="ndc-choice ndc-cloud-addon-choice"><input type="radio" name="renewalCloudAddon" value="' + esc(plan.id) + '"><span><small>CLOUD STORAGE ADD-ON</small><strong>' + esc(plan.name) + '</strong><b>' + esc(money(plan.monthlyPrice)) + '<small> / month</small></b><em>' + Number(plan.maxCustomersPerMonth).toLocaleString("en-IN") + ' customer records/month · 12 document slots each; documents auto-delete after 30 days</em></span></label>').join("")}</div></fieldset>
               <div id="ndcRenewalOffer"></div>
               <div id="ndcRenewalPreview" class="ndc-renewal-preview" aria-live="polite"></div>
-              ${dashboardData.gstProfile?.gstin ? "" : `
+              ${dashboardData.gstProfile?.gstin && dashboardData.gstProfile?.businessName && dashboardData.gstProfile?.businessAddress && dashboardData.gstProfile?.stateCode ? "" : `
               <section class="ndc-checkout-billing"><span class="ndc-eyebrow">BILLING DETAILS</span><h3>Save your GST details</h3><p>Enter them now for future invoices. Optional while GST is off; required when GST checkout is enabled.</p>
                 <div class="ndc-checkout-billing-grid">
                   <label>GSTIN<input id="renewalGstin" maxlength="15" autocomplete="off" value="${esc(dashboardData.gstProfile?.gstin || "")}" ${dashboardData.gstCheckout?.enabled && !dashboardData.gstProfile?.gstin ? "required" : ""} ${dashboardData.gstInvoicelocked ? "readonly" : ""} ${dashboardData.gstProfileLocked ? "disabled" : ""}></label>
@@ -949,13 +950,13 @@
       const cloud = account.cloudAddon || {}, usage = cloud.usage || {};
       const starts = cloud.startsAt ? new Date(cloud.startsAt).toLocaleDateString("en-IN") : "—";
       const expires = cloud.expiresAt ? new Date(cloud.expiresAt).toLocaleDateString("en-IN") : "—";
-      sectionHTML = '<div class="ndc-page-heading"><span class="ndc-eyebrow">CUSTOMER CLOUD</span><h1>Cloud Storage</h1><p>Customer records are retained for 30 days. Cloud logins use your NDC plan device allowance (' + (Number(account.maxDevices) || 1) + ' devices).</p></div>' +
+      sectionHTML = '<div class="ndc-page-heading"><span class="ndc-eyebrow">CUSTOMER CLOUD</span><h1>Cloud Storage</h1><p>Uploaded documents auto-delete after 30 days; customer records remain as usage history. Cloud logins use your NDC plan device allowance (' + (Number(account.maxDevices) || 1) + ' devices).</p></div>' +
         '<div class="ndc-stat-grid"><article class="ndc-stat"><span>Cloud plan</span><strong>' + esc(cloud.planName || "Cloud Storage") + '</strong><small>' + esc(money(cloud.monthlyPrice || 0)) + ' / month</small></article>' +
         '<article class="ndc-stat"><span>Records created this month</span><strong>' + Number(usage.recordsCreated || 0).toLocaleString("en-IN") + ' / ' + Number(usage.limit || cloud.maxCustomersPerMonth || 0).toLocaleString("en-IN") + '</strong><small>Month ' + Number(usage.monthIndex || 1) + ' of ' + Number(usage.monthCount || 1) + '</small></article>' +
-        '<article class="ndc-stat"><span>Customer records stored</span><strong>' + Number(usage.recordsStored || 0).toLocaleString("en-IN") + '</strong><small>Records auto-delete after 30 days</small></article>' +
+        '<article class="ndc-stat"><span>Customer records stored</span><strong>' + Number(usage.recordsStored || 0).toLocaleString("en-IN") + '</strong><small>Customer records remain as billing evidence</small></article>' +
         '<article class="ndc-stat"><span>Add-on started</span><strong>' + esc(starts) + '</strong></article><article class="ndc-stat"><span>Add-on expires</span><strong>' + esc(expires) + '</strong></article>' +
         '<article class="ndc-stat"><span>Allowed device logins</span><strong>' + (Number(account.maxDevices) || 1) + '</strong><small>Shared with your NDC subscription</small></article></div>' +
-        '<section class="ndc-panel-card"><h2>Cloud usage</h2><p>Force-deleting a customer record removes it and its uploaded files. Deleted records still count toward this month’s creation limit.</p><button type="button" class="ndc-home-button" data-go-section="subscription">Manage subscription</button></section>';
+        '<section class="ndc-panel-card"><h2>Cloud usage</h2><p>Uploaded documents can be deleted individually. Customer records cannot be deleted and remain as usage and billing evidence.</p><button type="button" class="ndc-home-button" data-go-section="subscription">Manage subscription</button></section>';
     }
 
     // =======================================================
