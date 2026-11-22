@@ -640,3 +640,103 @@ button.icon-only:focus-visible {
   button.icon-only { width: 46px; min-width: 46px !important; height: 46px; min-height: 46px; }
   .customer-controls .icon-only { flex-basis: 46px !important; }
 }
+
+
+/* Compact mobile customer header and icon action rows. */
+@media(max-width:680px) {
+  .customer-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    flex-direction: initial;
+  }
+  .customer-heading > div:first-child { min-width: 0; }
+  .customer-heading h2,
+  .customer-heading .muted { overflow-wrap: anywhere; }
+  .customer-heading .customer-controls {
+    width: auto;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+  }
+  .customer-heading .customer-controls .icon-only {
+    flex: 0 0 46px !important;
+  }
+  .doc-actions:not(.native-capture-group) {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .doc-actions:not(.native-capture-group) .icon-only {
+    flex: 0 0 46px !important;
+  }
+  .native-capture-group {
+    display: grid !important;
+    grid-template-columns: repeat(3, 46px);
+    justify-content: start;
+    align-items: center;
+    gap: 8px;
+  }
+  .native-capture-group .native-capture-page {
+    grid-column: auto;
+    flex: 0 0 46px !important;
+  }
+  .native-capture-group .native-capture-save,
+  .native-capture-group .native-capture-status {
+    grid-column: 1 / -1;
+  }
+  .numbered-camera-icon {
+    position: relative;
+    display: block;
+    width: 23px;
+    height: 23px;
+  }
+  .numbered-camera-icon > svg {
+    display: block;
+    width: 23px;
+    height: 23px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .camera-number-badge {
+    position: absolute;
+    right: -7px;
+    bottom: -6px;
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #1a160b;
+    border-radius: 50%;
+    background: var(--gold2);
+    color: #17130a;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .native-capture-page[data-captured="true"] .camera-number-badge {
+    background: var(--ok);
+  }
+  .form20-actions {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+  .form20-actions .native-capture-group {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .form20-actions > .icon-only {
+    flex: 0 0 46px !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    justify-self: auto;
+  }
+}
