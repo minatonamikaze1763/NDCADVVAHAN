@@ -745,3 +745,38 @@ button.icon-only:focus-visible {
     justify-self: auto;
   }
 }
+
+
+/* Align capture pages left and combine/save action right on mobile. */
+.native-capture-pages { display: contents; }
+@media(max-width:680px) {
+  .native-capture-group {
+    display: flex !important;
+    width: 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .native-capture-pages {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+  }
+  .native-capture-group .native-capture-page {
+    flex: 0 0 46px !important;
+  }
+  .native-capture-group .native-capture-save {
+    flex: 1 1 126px;
+    width: auto;
+    min-width: 126px;
+    grid-column: auto;
+  }
+  .native-capture-group .native-capture-status {
+    flex: 0 0 100%;
+    grid-column: auto;
+  }
+  .form20-actions {
+    align-items: flex-start;
+  }
+}
