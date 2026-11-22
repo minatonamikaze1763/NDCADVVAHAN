@@ -648,10 +648,12 @@ button.icon-only:focus-visible {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
+    padding: 8px 10px;
     flex-direction: initial;
   }
   .customer-heading > div:first-child { min-width: 0; }
+  .customer-heading .eyebrow { display: none; }
   .customer-heading h2,
   .customer-heading .muted { overflow-wrap: anywhere; }
   .customer-heading .customer-controls {
@@ -666,12 +668,15 @@ button.icon-only:focus-visible {
   }
   .doc-actions:not(.native-capture-group) {
     display: flex;
+    width: 100%;
     flex-wrap: nowrap;
     align-items: center;
     gap: 8px;
   }
   .doc-actions:not(.native-capture-group) .icon-only {
-    flex: 0 0 46px !important;
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
   }
   .native-capture-group {
     display: grid !important;
