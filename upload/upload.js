@@ -4,8 +4,16 @@
   const $ = id => document.getElementById(id);
   const tokenKey = "ndcUploadPortalToken";
   const expiryKey = "ndcUploadPortalExpiresAt";
-  let token = sessionStorage.getItem(tokenKey) || "";
-  let sessionExpiry = Number(sessionStorage.getItem(expiryKey)) || 0;
+  const storedLocalToken = localStorage.getItem(tokenKey) || "";
+  const storedSessionToken = sessionStorage.getItem(tokenKey) || "";
+  let token = storedLocalToken || storedSessionToken;
+  let sessionExpiry = Number(storedLocalToken ? localStorage.getItem(expiryKey) : sessionStorage.getItem(expiryKey)) || 0;
+  if (token && !storedLocalToken) {
+    localStorage.setItem(tokenKey, token);
+    if (sessionExpiry) localStorage.setItem(expiryKey, String(sessionExpiry));
+  }
+  sessionStorage.removeItem(tokenKey);
+  sessionStorage.removeItem(expiryKey);
   let expiryTimer = null;
   let currentCustomer = null;
   let searchTimer;
@@ -37,6 +45,8 @@
     expiryTimer = null;
     sessionExpiry = 0;
     token = "";
+    localStorage.removeItem(tokenKey);
+    localStorage.removeItem(expiryKey);
     sessionStorage.removeItem(tokenKey);
     sessionStorage.removeItem(expiryKey);
   }
@@ -55,7 +65,8 @@
       return false;
     }
     sessionExpiry = expiresAt;
-    sessionStorage.setItem(expiryKey, String(expiresAt));
+    localStorage.setItem(expiryKey, String(expiresAt));
+    sessionStorage.removeItem(expiryKey);
     clearTimeout(expiryTimer);
     const checkExpiry = () => {
       const remaining = sessionExpiry - Date.now();
@@ -222,7 +233,11 @@
         searchCustomers(""),
         loadSettings().catch(error => status($("settingsStatus"), error.message, "error"))
       ]);
-    } catch { showLogin(); }
+    } catch (error) {
+      if (!token || (sessionExpiry && Date.now() >= sessionExpiry)) return showLogin();
+      showApp();
+      status($("searchStatus"), "Could not verify your saved session because the server is unreachable. Check your connection and reload.", "error");
+    }
   }
   $("loginForm").addEventListener("submit", async event => {
     event.preventDefault();
@@ -231,7 +246,8 @@
     try {
       const data = await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: $("username").value.trim(), password: $("password").value, deviceId: sessionDevice }) });
       token = data.token;
-      sessionStorage.setItem(tokenKey, token);
+      localStorage.setItem(tokenKey, token);
+      sessionStorage.removeItem(tokenKey);
       if (!saveSessionExpiry(data.expiresAt)) throw new Error("The server did not return a valid 24-hour session expiry.");
       $("password").value = ""; showApp();
       await Promise.all([
