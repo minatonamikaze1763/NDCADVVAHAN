@@ -18,6 +18,7 @@
   let currentCustomer = null;
   let pendingCloseHost = null;
   let searchTimer;
+  let desktopCameraCheckTimer = null;
   let autoForm20AsInspection = false;
   let persistedRetentionDays = "20";
   let sessionValidationPromise = null;
@@ -79,10 +80,12 @@
     }
     host.hidden = true;
     currentCustomer = null;
+    document.body.classList.remove("customer-editor-open");
   }
   function updateDocumentSaveButton(host) {
     const button = host?.querySelector(".save-bar .primary");
     if (button) button.disabled = !hasPendingDocumentChanges(host);
+    updateCustomerCloudStatus(host);
   }
   function setSaveBarrier(active) {
     const barrier = $("saveBarrier");
@@ -271,7 +274,7 @@
       reader.readAsDataURL(blob);
     });
   }
-  function showLogin() { $("loginView").hidden = false; $("appView").hidden = true; $("logout").hidden = true; $("settingsToggle").hidden = true; }
+  function showLogin() { $("loginView").hidden = false; $("appView").hidden = true; $("logout").hidden = true; $("settingsToggle").hidden = true; document.body.classList.remove("customer-editor-open"); }
   function showApp() { $("loginView").hidden = true; $("appView").hidden = false; $("logout").hidden = false; $("settingsToggle").hidden = false; }
   async function loadSettings() {
     const data = await request("/api/upload-portal/settings");
@@ -422,7 +425,7 @@
     finally { button.disabled = false; }
   });
   $("settingsView").hidden = true;
-  $("logout").addEventListener("click", async () => { try { await request("/api/auth/logout", { method: "POST" }); } catch {} clearClientSession(); currentCustomer = null; $("customerView").hidden = true; showLogin(); });
+  $("logout").addEventListener("click", async () => { try { await request("/api/auth/logout", { method: "POST" }); } catch {} clearClientSession(); currentCustomer = null; $("customerView").hidden = true; document.body.classList.remove("customer-editor-open"); showLogin(); });
   $("newCustomer").addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = null; $("customerForm").reset(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
   $("closeDialog").addEventListener("click", () => $("customerDialog").close());
   $("keepEditing").addEventListener("click", () => {
@@ -670,15 +673,18 @@
     state.classList.add("saved");
     const titleRow = row.querySelector(".doc-row-header");
     if (titleRow && !titleRow.querySelector(".cloud-saved-indicator")) titleRow.append(createCloudSavedIndicator());
-    const selector = row.querySelector("[data-subcategory]");
-    const actions = row.querySelector(".doc-actions");
-    row.querySelector(".preview-pair")?.remove();
+    const selector = row._subcategorySelect || row.querySelector("[data-subcategory]");
+    const actions = row._documentActions || row.querySelector(".doc-actions");
+    row._previewPair?.remove();
     row.querySelector(".file-details")?.remove();
     selector?.remove();
     actions?.remove();
     addPreviewPair(row, customer, category, saved);
     if (selector) row.append(selector);
     if (actions) row.append(actions);
+    registerDesktopDocumentRow(row);
+    if (host._activeDesktopRow === row) activateDesktopDocumentRow(row, host);
+    updateCustomerCloudStatus(host);
     const savedCount = Object.keys(customer.documents).length;
     const count = host.querySelector(".doc-toolbar .muted");
     if (count) count.textContent = savedCount + " of 12 saved";
@@ -995,6 +1001,7 @@
   }
   async function loadSelectedFilePreview(row, file) {
     if (!row || !file) return;
+    if (isDesktopWorkspace()) activateDesktopDocumentRow(row, row.closest(".customer-card"));
     setDocumentRowLoading(row, true);
     try {
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -1014,14 +1021,84 @@
     const date = value instanceof Date ? value : typeof value === "number" || /^\d+$/.test(String(value)) ? new Date(Number(value)) : new Date(value);
     return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleString();
   }
-  function createCloudSavedIndicator() {
+  function createCloudSavedIndicator(pending = false) {
     const indicator = document.createElement("span");
     indicator.className = "cloud-saved-indicator";
     indicator.setAttribute("role", "img");
-    indicator.setAttribute("aria-label", "Saved to cloud");
-    indicator.title = "Saved to cloud";
-    indicator.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.2 18h9.6a4.2 4.2 0 0 0 .4-8.4A5.5 5.5 0 0 0 7 8.4 4.8 4.8 0 0 0 7.2 18Z"/><path d="m9.4 13.2 1.8 1.8 3.8-3.8"/></svg>';
+    indicator.setAttribute("aria-label", pending ? "Files not saved to cloud" : "Saved to cloud");
+    indicator.title = pending ? "Files not saved to cloud" : "Saved to cloud";
+    indicator.innerHTML = pending
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.2 18h9.6a4.2 4.2 0 0 0 .4-8.4A5.5 5.5 0 0 0 7 8.4 4.8 4.8 0 0 0 7.2 18Z"/><path d="M12 15V9m-3 3 3-3 3 3"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.2 18h9.6a4.2 4.2 0 0 0 .4-8.4A5.5 5.5 0 0 0 7 8.4 4.8 4.8 0 0 0 7.2 18Z"/><path d="m9.4 13.2 1.8 1.8 3.8-3.8"/></svg>';
+    if (pending) indicator.classList.add("is-pending");
     return indicator;
+  }
+  function updateCustomerCloudStatus(host) {
+    const indicator = host?.querySelector(".customer-cloud-status");
+    if (!indicator) return;
+    const replacement = createCloudSavedIndicator(hasUnsavedEditorChanges(host));
+    replacement.classList.add("customer-cloud-status");
+    indicator.replaceWith(replacement);
+  }
+  function isDesktopWorkspace() {
+    return window.matchMedia("(min-width: 681px)").matches;
+  }
+  function registerDesktopDocumentRow(row) {
+    const nodes = [row._previewPair, row._subcategorySelect, row._captureHint, row._nativeCaptureControls].filter(node => node?.parentNode);
+    const parents = new Map();
+    for (const node of nodes) {
+      const parent = node.parentNode;
+      if (!parents.has(parent)) parents.set(parent, [...parent.childNodes]);
+    }
+    row._desktopMovableNodes = nodes;
+    row._desktopMobileOrders = parents;
+  }
+  function restoreDesktopDocumentRow(row) {
+    if (!row?._desktopMobileOrders) return;
+    for (const [parent, order] of row._desktopMobileOrders) {
+      for (const child of order) parent.append(child);
+    }
+    row.classList.remove("is-preview-active");
+  }
+  function activateDesktopDocumentRow(row, host) {
+    if (!row || !host || !isDesktopWorkspace()) return;
+    const panel = host.querySelector(".desktop-preview-panel");
+    const content = panel?.querySelector(".desktop-preview-content");
+    if (!panel || !content) return;
+    const previous = host._activeDesktopRow;
+    if (previous) restoreDesktopDocumentRow(previous);
+    content.replaceChildren();
+    const title = panel.querySelector(".desktop-preview-title");
+    if (title) title.textContent = row._docTitleText || row.querySelector(".doc-row-header h3")?.textContent || "Document preview";
+    const state = panel.querySelector(".desktop-preview-status");
+    if (state) state.textContent = row._docState?.textContent.trim() || (row._savedDocument ? "Saved to cloud" : "Choose a file or capture pages.");
+    const modified = row.querySelector(".doc-modified");
+    if (modified) content.append(modified.cloneNode(true));
+    for (const node of row._desktopMovableNodes || []) content.append(node);
+    row.classList.add("is-preview-active");
+    host._activeDesktopRow = row;
+  }
+  function syncDesktopDocumentLayout(host) {
+    if (!host || host.hidden) return;
+    if (isDesktopWorkspace()) {
+      const active = host._activeDesktopRow || host.querySelector(".doc-row[data-doc]");
+      if (active) activateDesktopDocumentRow(active, host);
+    } else if (host._activeDesktopRow) {
+      restoreDesktopDocumentRow(host._activeDesktopRow);
+      host._activeDesktopRow = null;
+    }
+  }
+  async function updateDesktopCameraAvailability() {
+    if (!isDesktopWorkspace()) {
+      document.body.classList.remove("desktop-camera-unavailable");
+      return;
+    }
+    try {
+      const devices = await navigator.mediaDevices?.enumerateDevices?.() || [];
+      document.body.classList.toggle("desktop-camera-unavailable", !devices.some(device => device.kind === "videoinput"));
+    } catch {
+      document.body.classList.add("desktop-camera-unavailable");
+    }
   }
   function createDocTitleRow(titleText, saved) {
     const header = document.createElement("div");
@@ -1061,7 +1138,7 @@
       });
       stored.append(tag, open);
     } else setPreview(stored, null, "Saved");
-    pair.append(selected, stored); row.append(pair); addModifiedLabel(row, saved); row._selectedPreview = selected; row._savedDocument = saved || null; addFileDetails(row, saved);
+    pair.append(selected, stored); row.append(pair); row._previewPair = pair; addModifiedLabel(row, saved); row._selectedPreview = selected; row._savedDocument = saved || null; addFileDetails(row, saved);
   }
   async function queueFiles(files, host) {
     if (!(await ensureActiveSession())) return;
@@ -1092,6 +1169,7 @@
     trash: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>',
     close: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m18 6-12 12M6 6l12 12"/></svg>',
     camera: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 4h-4L8 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4Z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+    preview: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>',
     upload: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M12 18v-7m-3 3 3-3 3 3"/></svg>'
   };
   function setIconButton(button, icon, label) {
@@ -1105,9 +1183,9 @@
     button.append(visibleLabel);
   }
   function renderCustomer(customer) {
-    const host = $("customerView"); host.replaceChildren(); host.hidden = false;
+    const host = $("customerView"); host.replaceChildren(); host.hidden = false; host._activeDesktopRow = null; document.body.classList.add("customer-editor-open");
     const head = document.createElement("div"); head.className = "customer-heading";
-    const titleBlock = document.createElement("div"); const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "CUSTOMER WORKSPACE"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = customer.chassisNumber; titleBlock.append(eyebrow, title, chassis);
+    const titleBlock = document.createElement("div"); const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "CUSTOMER WORKSPACE"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = customer.chassisNumber; const cloudStatus = createCloudSavedIndicator(false); cloudStatus.classList.add("customer-cloud-status"); titleBlock.append(eyebrow, title, chassis, cloudStatus);
     const controls = document.createElement("div"); controls.className = "customer-controls";
     const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["chassisNumber", "customerName", "address", "hp", "applicationNumber"]) $(key).value = customer[key] || ""; $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
     const removeCustomer = document.createElement("button"); removeCustomer.type = "button"; removeCustomer.className = "danger"; setIconButton(removeCustomer, "trash", "Delete customer"); removeCustomer.addEventListener("click", async () => { if (!confirm(`Delete ${customer.customerName} and all of its stored documents? This cannot be undone.`)) return; try { await request(`/api/upload-portal/customers/${customer._id}`, { method: "DELETE" }); host.hidden = true; currentCustomer = null; await searchCustomers($("search").value); } catch (error) { alert(error.message); } });
