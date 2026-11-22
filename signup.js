@@ -78,6 +78,8 @@
         const payable = orderQuote?.amount ?? amount + tax;
         const displayBase = orderQuote?.baseAmount ?? amount;
         const displayList = orderQuote?.listPrice ?? ((p ? p.monthlyPrice * m : amount) + cloudAmount);
+        const cloudListAmount = cloudAddon ? Math.min(cloudAmount, displayList) : 0;
+        const planListAmount = Math.max(0, displayList - cloudListAmount);
         const displayDiscount = orderQuote?.discountAmount ?? Math.max(0, displayList - displayBase);
         const displayTax = orderQuote?.taxAmount ?? tax;
         const devices = appliedOffer ? appliedOffer.maxDevices : p?.maxDevices;
@@ -88,7 +90,7 @@
             taxBox.hidden = !p;
             taxBox.replaceChildren();
             if (p) {
-                const totalGstRate = Number(orderQuote?.gstRate || checkoutGst.gstRate) || 18; const splitGstRate = totalGstRate / 2; const cgstAmount = checkoutGst.enabled ? Math.round(displayTax * 50) / 100 : 0; const sgstAmount = checkoutGst.enabled ? Number((displayTax - cgstAmount).toFixed(2)) : 0; const rows = [[cloudAddon ? "Subscription + Cloud Storage" : "Plan amount", displayList], ...(displayDiscount > 0 ? [["Discount / offer applied", displayDiscount]] : []), ["Taxable amount", displayBase], ["CGST (" + splitGstRate + "%)", cgstAmount], ["SGST (" + splitGstRate + "%)", sgstAmount], ["Total GST (" + totalGstRate + "%)", checkoutGst.enabled ? displayTax : 0], ["Total payable", payable]];
+                const totalGstRate = Number(orderQuote?.gstRate || checkoutGst.gstRate) || 18; const splitGstRate = totalGstRate / 2; const cgstAmount = checkoutGst.enabled ? Math.round(displayTax * 50) / 100 : 0; const sgstAmount = checkoutGst.enabled ? Number((displayTax - cgstAmount).toFixed(2)) : 0; const rows = [["Plan amount", planListAmount], ["Cloud plan amount", cloudListAmount], ["Total", displayList], ...(displayDiscount > 0 ? [["Discount / offer applied", displayDiscount]] : []), ["Taxable amount", displayBase], ["CGST (" + splitGstRate + "%)", cgstAmount], ["SGST (" + splitGstRate + "%)", sgstAmount], ["Total GST (" + totalGstRate + "%)", checkoutGst.enabled ? displayTax : 0], ["Total payable", payable]];
                 const heading = document.createElement("div"); heading.className = "ndc-checkout-summary-heading"; heading.textContent = "PAYMENT SUMMARY"; taxBox.append(heading);
                 const columns = document.createElement("div"); columns.className = "ndc-checkout-summary-columns"; const descCol = document.createElement("span"); descCol.textContent = "DESCRIPTION"; const amountCol = document.createElement("span"); amountCol.textContent = "AMOUNT"; columns.append(descCol, amountCol); taxBox.append(columns);
                 for (const [label, value] of rows) { const row = document.createElement("div"); row.className = "ndc-checkout-tax-row" + (label === "Total payable" ? " is-total" : ""); const name = document.createElement("span"); name.textContent = !checkoutGst.enabled && /^(CGST|SGST|Total GST)/.test(label) ? label + " · not charged" : label; const price = document.createElement("strong"); price.textContent = money(value); row.append(name, price); taxBox.append(row); }
