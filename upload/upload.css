@@ -605,3 +605,38 @@ main { margin-top: calc(var(--upload-topbar-height) + 30px); }
 @media(prefers-reduced-motion:reduce) {
   .file-loading-spinner { animation-duration: 2.5s; }
 }
+
+
+/* Compact, accessible icon-only customer and document actions. */
+button.icon-only {
+  display: inline-grid !important;
+  place-items: center;
+  flex: 0 0 48px;
+  width: 48px;
+  min-width: 48px !important;
+  height: 48px;
+  min-height: 48px;
+  padding: 0 !important;
+  border-radius: 12px;
+}
+button.icon-only svg {
+  display: block;
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.customer-controls { display: flex !important; justify-content: flex-start; gap: 9px; }
+.customer-controls .icon-only { flex: 0 0 48px !important; }
+.doc-actions .icon-only { justify-self: start; }
+button.icon-only:focus-visible {
+  outline: 2px solid var(--gold2);
+  outline-offset: 3px;
+}
+@media(max-width:420px) {
+  button.icon-only { width: 46px; min-width: 46px !important; height: 46px; min-height: 46px; }
+  .customer-controls .icon-only { flex-basis: 46px !important; }
+}
