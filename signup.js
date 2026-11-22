@@ -8,6 +8,63 @@
     try { saved = JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch { }
     const status = t => { $('ndcSignupStatus').textContent = t; };
     const persist = () => { try { sessionStorage.setItem(KEY, JSON.stringify(saved)); } catch { } };
+    function syncCloudChoices() {
+        const choices = $('signupCloudChoices');
+        if (!choices) return;
+        const selectedId = $('signupCloudAddon')?.value || '';
+        choices.querySelectorAll('.ndc-cloud-choice').forEach(choice => {
+            const isSelected = choice.dataset.planId === selectedId;
+            choice.setAttribute('aria-pressed', String(isSelected));
+            choice.classList.toggle('is-selected', isSelected);
+            choice.disabled = state !== 'idle';
+            const stateLabel = choice.querySelector('.ndc-cloud-choice-state');
+            if (stateLabel) stateLabel.textContent = isSelected ? 'Selected' : 'Select';
+        });
+    }
+    function renderCloudChoices() {
+        const choices = $('signupCloudChoices');
+        const cloudSelect = $('signupCloudAddon');
+        if (!choices || !cloudSelect) return;
+        choices.replaceChildren();
+        const options = [{ id: '', name: 'No cloud storage', price: 'Optional add-on', detail: 'Continue with your NDC plan only' },
+            ...Object.values(cloudAddonPlans).map(plan => ({
+                id: plan.id,
+                name: plan.name,
+                price: plan.structure === 'flex' ? money(plan.perCustomerPrice) + ' / record / month' : money(plan.monthlyPrice) + ' / month',
+                detail: Number(plan.maxCustomersPerMonth).toLocaleString('en-IN') + ' records · 12 document slots per record'
+            }))];
+        for (const plan of options) {
+            const choice = document.createElement('button');
+            choice.type = 'button';
+            choice.className = 'ndc-cloud-choice';
+            choice.dataset.planId = plan.id;
+            choice.setAttribute('aria-pressed', 'false');
+            const top = document.createElement('span');
+            top.className = 'ndc-cloud-choice-top';
+            const name = document.createElement('strong');
+            name.className = 'ndc-cloud-choice-name';
+            name.textContent = plan.name;
+            const selectedMark = document.createElement('span');
+            selectedMark.className = 'ndc-cloud-choice-state';
+            selectedMark.textContent = 'Select';
+            top.append(name, selectedMark);
+            const price = document.createElement('span');
+            price.className = 'ndc-cloud-choice-price';
+            price.textContent = plan.price;
+            const detail = document.createElement('span');
+            detail.className = 'ndc-cloud-choice-detail';
+            detail.textContent = plan.detail;
+            choice.append(top, price, detail);
+            choice.addEventListener('click', () => {
+                if (state !== 'idle') return;
+                cloudSelect.value = plan.id;
+                orderQuote = null;
+                update();
+            });
+            choices.append(choice);
+        }
+        syncCloudChoices();
+    }
     function update() {
         const p = plans[selected], m = Number($('signupMonths').value) || 1;
         const cloudAddonPlanId = $('signupCloudAddon')?.value || null;
@@ -51,6 +108,7 @@
         $('paymentProceed').disabled = !p || state !== 'idle'; $('paymentProceed').textContent = ['complete', 'review'].includes(state) ? 'Payment received' : state !== 'idle' ? 'Processing…' : p ? 'Pay securely · ' + money(payable) : 'Select a Plan to Continue';
         $('ndcSignupForm').querySelectorAll('input,select').forEach(n => n.disabled = state !== 'idle');
         offerWidget?.setBusy(state !== 'idle');
+        syncCloudChoices();
         syncCheckoutUI();
     }
     async function post(path, body) { const r = await fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(body), cache: 'no-store', signal: AbortSignal.timeout(45000) }); const d = await r.json().catch(() => ({})); if (!r.ok || d.success === false) throw Error(d.error || d.message || `Request failed (${r.status})`); return d; }
@@ -218,6 +276,7 @@
                 option.textContent = plan.name + ' · ' + (plan.structure === 'flex' ? money(plan.perCustomerPrice) + '/customer · up to ' : money(plan.monthlyPrice) + '/month · ') + Number(plan.maxCustomersPerMonth).toLocaleString('en-IN') + ' records';
                 cloudSelect.append(option);
             }
+            renderCloudChoices();
             cloudSelect?.addEventListener('change', () => { orderQuote = null; update(); });
             $('signupCloudAddonQuantity')?.addEventListener('input', () => { orderQuote = null; update(); });
             await NDCPlans.ready;
