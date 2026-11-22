@@ -835,3 +835,64 @@ button.icon-only:focus-visible {
     height: 46px;
   }
 }
+
+/* Desktop has room for descriptive, full-width action controls. */
+@media(min-width:681px) {
+  button.icon-only {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    flex: 1 1 140px !important;
+    width: auto !important;
+    min-width: 140px !important;
+    height: auto;
+    min-height: 46px;
+    padding: 10px 14px !important;
+    white-space: normal;
+  }
+  button.icon-only .button-label {
+    display: inline;
+    line-height: 1.25;
+    text-align: center;
+  }
+  .customer-controls { flex: 1 1 auto; }
+  .customer-controls .icon-only {
+    flex: 1 1 130px !important;
+    min-width: 130px !important;
+  }
+  .doc-actions:not(.native-capture-group) {
+    display: flex;
+    width: 100%;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .doc-actions:not(.native-capture-group) .icon-only {
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+  .native-capture-group {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .native-capture-group .native-capture-page {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+  .form20-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .form20-actions > .icon-only {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+/* Keep phone actions compact and icon-first. */
+@media(max-width:680px) {
+  button.icon-only .button-label { display: none; }
+}
