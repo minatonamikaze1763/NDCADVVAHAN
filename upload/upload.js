@@ -1098,7 +1098,7 @@
         : (row._savedDocument ? "" : "Not selected");
     }
     if (category === "form20" && row._pages?.length) {
-      state.textContent = row._pages.length + " Form 20 photos selected";
+      state.textContent = `${row._pages.length} Form 20 photos selected`;
       void loadSelectedFilePreview(row, row._pages[0]);
     } else if (row._selectedPreview) setPreview(row._selectedPreview, null, "Selected");
   }
