@@ -491,16 +491,28 @@
     // -------------------------------------------------------
 
     const paymentRows = payments.length
-      ? payments.map((payment) => `
+      ? payments.map((payment) => {
+          const cloudSnapshot = payment.cloudAddonSnapshot || null;
+          const cloudName = cloudSnapshot?.name || cloudSnapshot?.planName || "Cloud Storage";
+          const planName = payment.planName || "Subscription";
+          let paymentFor;
+          if (payment.purpose === "cloud-addon") {
+            paymentFor = "Cloud add-on · " + cloudName;
+          } else if (cloudSnapshot) {
+            paymentFor = (payment.purpose === "signup" ? "Signup plan · " : "Paid plan · ") + planName + " + Cloud Storage · " + cloudName;
+          } else if (payment.purpose === "signup") {
+            paymentFor = "Signup plan · " + planName;
+          } else if (payment.purpose === "renewal") {
+            paymentFor = "Paid plan · " + planName;
+          } else {
+            paymentFor = planName;
+          }
+          return `
           <tr>
             <td>${esc(date(payment.paidAt || payment.createdAt))}</td>
-
-            <td>
-              ${esc(money(payment.amount, payment.currency))}
-            </td>
-
+            <td>${esc(paymentFor)}</td>
+            <td>${esc(money(payment.amount, payment.currency))}</td>
             <td>${esc(payment.method || "—")}</td>
-
             <td>
               <span class="ndc-payment-status ndc-payment-${esc(
         String(payment.status || "unknown").replace(
@@ -511,13 +523,13 @@
                 ${esc(payment.status || "Unknown")}
               </span>
             </td>
-
             <td>${esc(payment.reference || "—")}</td>
           </tr>
-        `).join("")
+        `;
+        }).join("")
       : `
           <tr>
-            <td colspan="5" class="ndc-empty">
+            <td colspan="6" class="ndc-empty">
               No payment records available yet.
             </td>
           </tr>
@@ -1095,6 +1107,7 @@
               <thead>
                 <tr>
                   <th>Date</th>
+                  <th>Payment for</th>
                   <th>Amount</th>
                   <th>Method</th>
                   <th>Status</th>
