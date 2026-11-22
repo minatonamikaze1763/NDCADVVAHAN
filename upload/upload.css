@@ -903,3 +903,60 @@ button.icon-only:focus-visible {
 @media(max-width:680px) {
   button.icon-only .button-label { display: none; }
 }
+
+/* Refreshed multi-file upload panel and login account controls. */
+.bulk-upload {
+  margin: 14px 22px 0;
+  padding: 18px;
+  border: 1px solid #534621;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #1b190f, #11110f 72%);
+  display: grid;
+  justify-items: stretch;
+  gap: 14px;
+  cursor: pointer;
+  transition: border-color .18s, background .18s, box-shadow .18s;
+}
+.bulk-upload:hover,.bulk-upload.dragging,.bulk-upload:focus-within {
+  border-color: var(--gold2);
+  background: linear-gradient(145deg, #24200f, #13130f 72%);
+  box-shadow: 0 0 0 3px rgba(229,190,61,.08);
+}
+.bulk-upload-heading { display:flex; align-items:center; gap:13px; min-width:0; }
+.bulk-upload-icon {
+  width:46px; height:46px; flex:none; display:grid; place-items:center;
+  border:1px solid #675525; border-radius:12px;
+  background:linear-gradient(145deg,#30270f,#171610); color:var(--gold2);
+}
+.bulk-upload-icon svg,.bulk-choose svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.bulk-upload-copy { display:grid; gap:4px; min-width:0; }
+.bulk-upload-copy strong { font-size:.94rem; }
+.bulk-upload-copy span { color:var(--muted); font-size:.82rem; line-height:1.45; }
+.bulk-upload-dropzone {
+  min-height:74px; display:flex; align-items:center; justify-content:space-between; gap:14px;
+  padding:12px 14px; border:1px dashed #75612b; border-radius:12px;
+  background:rgba(6,6,5,.42);
+}
+.bulk-upload-prompt { color:var(--muted); font-size:.82rem; line-height:1.45; }
+.bulk-choose { display:inline-flex; align-items:center; justify-content:center; gap:9px; flex:none; min-height:42px; padding:9px 16px; border-radius:10px; }
+.bulk-choose svg { width:18px; height:18px; }
+.password-field { display:flex; align-items:stretch; position:relative; }
+.password-field input { flex:1; min-width:0; padding-right:54px; }
+.password-toggle {
+  position:absolute; right:5px; top:50%; transform:translateY(-50%);
+  width:40px; min-width:40px; min-height:38px; height:38px;
+  display:grid; place-items:center; padding:7px !important; border-radius:8px;
+}
+.password-toggle svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.login-form .remember-account {
+  display:flex; align-items:center; gap:9px; margin:0;
+  color:var(--muted); font-size:.83rem; cursor:pointer;
+}
+.login-form .remember-account input { width:17px; height:17px; min-height:0; margin:0; accent-color:var(--gold2); }
+.login-form .remember-account span { line-height:1.3; }
+@media(max-width:680px) {
+  .bulk-upload { margin:12px 14px 0; padding:14px; }
+  .bulk-upload-dropzone { align-items:stretch; flex-direction:column; gap:10px; }
+  .bulk-choose { width:100%; }
+  .bulk-upload-prompt { text-align:center; }
+}
