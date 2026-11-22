@@ -158,16 +158,6 @@
     return sessionValidationPromise;
   }
   async function request(path, options = {}, binary = false) {
-    const isAuthCheck = path === "/api/auth/login" || path === "/api/auth/me";
-    if (!isAuthCheck && !(await ensureActiveSession())) {
-      throw new Error(token
-        ? "Session could not be verified. Check your connection and retry."
-        : "Your session is no longer valid. Sign in again to continue.");
-    }
-    if (token && sessionExpiry && Date.now() >= sessionExpiry) {
-      expireSession();
-      throw new Error("Your 24-hour session has expired. Sign in again to continue.");
-    }
     const headers = new Headers(options.headers || {});
     if (token) headers.set("Authorization", `Bearer ${token}`);
     const response = await fetch(API + path, { ...options, headers });
@@ -300,22 +290,13 @@
     catch (error) { status($("settingsStatus"), error.message, "error"); }
   }
   $("settingsToggle").addEventListener("click", async () => {
-    if (!(await ensureActiveSession())) return;
     if ($("settingsView").hidden) await showSettings(); else showWorkspace();
   });
-  $("backToWorkspace").addEventListener("click", async () => {
-    if (await ensureActiveSession()) showWorkspace();
-  });
+  $("backToWorkspace").addEventListener("click", () => showWorkspace());
   const restoreSettingsControls = () => {
     $("retentionDays").value = persistedRetentionDays;
     $("autoForm20AsInspection").checked = autoForm20AsInspection;
   };
-  $("retentionDays").addEventListener("change", async () => {
-    if (!(await ensureActiveSession())) restoreSettingsControls();
-  });
-  $("autoForm20AsInspection").addEventListener("change", async () => {
-    if (!(await ensureActiveSession())) restoreSettingsControls();
-  });
   $("saveRetention").addEventListener("click", async () => {
     if (!(await ensureActiveSession())) { restoreSettingsControls(); return; }
     const button = $("saveRetention"); button.disabled = true; status($("settingsStatus"), "Saving setting…");
@@ -426,7 +407,7 @@
   });
   $("settingsView").hidden = true;
   $("logout").addEventListener("click", async () => { try { await request("/api/auth/logout", { method: "POST" }); } catch {} clearClientSession(); currentCustomer = null; $("customerView").hidden = true; document.body.classList.remove("customer-editor-open"); showLogin(); });
-  $("newCustomer").addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = null; $("customerForm").reset(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
+  $("newCustomer").addEventListener("click", () => { editingCustomerId = null; $("customerForm").reset(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
   $("closeDialog").addEventListener("click", () => $("customerDialog").close());
   $("keepEditing").addEventListener("click", () => {
     pendingCloseHost = null;
@@ -440,7 +421,7 @@
     if (host) closeCustomerEditor(host, true);
   });
   $("customerForm").addEventListener("submit", async event => {
-    event.preventDefault(); const button = event.currentTarget.querySelector("button[type=submit]"); button.disabled = true; status($("createStatus"), editingCustomerId ? "Saving customer…" : "Creating customer…");
+    event.preventDefault(); if (!(await ensureActiveSession())) return; const button = event.currentTarget.querySelector("button[type=submit]"); button.disabled = true; status($("createStatus"), editingCustomerId ? "Saving customer…" : "Creating customer…");
     try {
       const body = JSON.stringify({ chassisNumber: $("chassisNumber").value, customerName: $("customerName").value, address: $("address").value, hp: $("hp").value, applicationNumber: $("applicationNumber").value });
       const id = editingCustomerId;
@@ -494,11 +475,9 @@
       status($("searchStatus"), error.message, "error");
     }
   }
-  async function safeFileInput(category, isCamera) {
-    if (!(await ensureActiveSession())) return;
+  function safeFileInput(category, isCamera) {
     const input = document.createElement("input"); input.type = "file"; input.accept = isCamera ? "image/*" : "image/*,.pdf"; if (isCamera) input.capture = "environment";
     input.addEventListener("change", async () => {
-      if (!(await ensureActiveSession())) return;
       const row = document.querySelector(`[data-doc="${category}"]`);
       if (!row || !input.files?.[0]) return;
       row._file = input.files[0]; row._pages = [];
@@ -571,7 +550,6 @@
       button.setAttribute("aria-label", `Capture ${label}`);
       button.title = `Capture ${label}`;
       button.addEventListener("click", async () => {
-        if (!(await ensureActiveSession())) return;
         button.disabled = true;
         button.textContent = `Opening camera for ${label}…`;
         try {
@@ -752,7 +730,7 @@
     return globalThis.NDCDocumentMatcher?.match(name)?.id || "";
   }
   async function showFullscreenPreview(file, savedDetails = null) {
-    if (!file || !(await ensureActiveSession())) return;
+    if (!file) return;
     const isImage = file.type?.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(file.name || "");
     const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
     if (!isImage && !isPdf) return;
@@ -1209,7 +1187,6 @@
     else setPreview(row._selectedPreview, null, "Selected");
   }
   async function queueFiles(files, host) {
-    if (!(await ensureActiveSession())) return;
     const queue = host.querySelector(".bulk-queue");
     const options = documentDisplayOrder
       .map(id => [id, queuedDocumentName(id)])
@@ -1239,11 +1216,6 @@
       select.addEventListener("change", async () => {
         const nextCategory = select.value;
         select.disabled = true;
-        if (!(await ensureActiveSession())) {
-          select.value = assignedCategory;
-          select.disabled = false;
-          return;
-        }
         if (nextCategory && !fileKind) {
           select.value = assignedCategory;
           message.textContent = "Choose a PDF or image file.";
@@ -1292,7 +1264,7 @@
     const head = document.createElement("div"); head.className = "customer-heading";
     const titleBlock = document.createElement("div"); const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "CUSTOMER WORKSPACE"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = customer.chassisNumber; const cloudStatus = createCloudSavedIndicator(false); cloudStatus.classList.add("customer-cloud-status"); titleBlock.append(eyebrow, title, chassis, cloudStatus);
     const controls = document.createElement("div"); controls.className = "customer-controls";
-    const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["chassisNumber", "customerName", "address", "hp", "applicationNumber"]) $(key).value = customer[key] || ""; $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
+    const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", () => { editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["chassisNumber", "customerName", "address", "hp", "applicationNumber"]) $(key).value = customer[key] || ""; $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
     const removeCustomer = document.createElement("button"); removeCustomer.type = "button"; removeCustomer.className = "danger"; setIconButton(removeCustomer, "trash", "Delete customer"); removeCustomer.addEventListener("click", async () => { if (!confirm(`Delete ${customer.customerName} and all of its stored documents? This cannot be undone.`)) return; try { await request(`/api/upload-portal/customers/${customer._id}`, { method: "DELETE" }); host.hidden = true; document.body.classList.remove("customer-editor-open"); currentCustomer = null; await searchCustomers($("search").value); } catch (error) { alert(error.message); } });
     const close = document.createElement("button"); close.type = "button"; close.className = "quiet"; setIconButton(close, "close", "Close customer"); close.addEventListener("click", () => {
       if (!hasUnsavedEditorChanges(host)) {
@@ -1314,13 +1286,13 @@
     const picker = document.createElement("input"); picker.type = "file"; picker.multiple = true; picker.accept = "image/*,.pdf"; picker.className = "bulk-picker"; picker.setAttribute("aria-label", "Choose multiple documents");
     const chooseFiles = document.createElement("button"); chooseFiles.type = "button"; chooseFiles.className = "secondary bulk-choose";
     chooseFiles.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M12 18v-7m-3 3 3-3 3 3"/></svg><span>Choose files</span>';
-    chooseFiles.addEventListener("click", async event => { event.stopPropagation(); if (await ensureActiveSession()) picker.click(); });
+    chooseFiles.addEventListener("click", event => { event.stopPropagation(); picker.click(); });
     const dropzone = document.createElement("div"); dropzone.className = "bulk-upload-dropzone";
     const dropPrompt = document.createElement("span"); dropPrompt.className = "bulk-upload-prompt"; dropPrompt.textContent = "Tap anywhere here to browse, or drag files into this box";
     dropzone.append(dropPrompt, chooseFiles);
     const queue = document.createElement("div"); queue.className = "bulk-queue"; const bulkStatus = document.createElement("p"); bulkStatus.className = "status bulk-status";
     bulk.append(bulkHeading, dropzone, picker, queue, bulkStatus);
-    bulk.addEventListener("click", async event => { if (event.target !== chooseFiles && await ensureActiveSession()) picker.click(); });
+    bulk.addEventListener("click", event => { if (event.target !== chooseFiles) picker.click(); });
     bulk.addEventListener("dragover", event => { event.preventDefault(); bulk.classList.add("dragging"); });
     bulk.addEventListener("dragleave", () => bulk.classList.remove("dragging"));
     bulk.addEventListener("drop", event => { event.preventDefault(); bulk.classList.remove("dragging"); void queueFiles([...event.dataTransfer.files], host).catch(error => status(bulkStatus, error.message, "error")); });
@@ -1391,11 +1363,7 @@
       const actions = document.createElement("div"); actions.className = "doc-actions"; const camera = document.createElement("button"); camera.type = "button"; camera.className = "secondary desktop-camera-action"; setIconButton(camera, "camera", "Camera"); camera.addEventListener("click", () => safeFileInput(id, true)); const browse = document.createElement("button"); browse.type = "button"; browse.className = "secondary"; setIconButton(browse, "upload", "Choose file"); browse.addEventListener("click", () => safeFileInput(id, false)); actions.append(camera, browse);
       if (id === "address-proof") {
         const updateAadhaarOption = () => { const visible = addressTypeSelect.value === "Aadhaar"; aadhaarCaptureControls.hidden = !visible; aadhaarCaptureHint.hidden = !visible; };
-        addressTypeSelect.addEventListener("change", async () => {
-          if (!(await ensureActiveSession())) {
-            addressTypeSelect.value = addressTypeSelect.dataset.savedValue || "";
-            return;
-          }
+        addressTypeSelect.addEventListener("change", () => {
           addressTypeSelect.dataset.savedValue = addressTypeSelect.value;
           updateAadhaarOption();
         });
@@ -1418,8 +1386,7 @@
     });
     form20Actions.append(form20CaptureControls);
     const choose20 = document.createElement("button"); choose20.type = "button"; choose20.className = "secondary"; setIconButton(choose20, "upload", "Choose Form 20 PDF or photos");
-    choose20.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; const input = document.createElement("input"); input.type = "file"; input.accept = "application/pdf,image/*"; input.multiple = true; input.addEventListener("change", async () => {
-      if (!(await ensureActiveSession())) return;
+    choose20.addEventListener("click", () => { const input = document.createElement("input"); input.type = "file"; input.accept = "application/pdf,image/*"; input.multiple = true; input.addEventListener("change", async () => {
       const files = [...(input.files || [])]; const pdfs = files.filter(file => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
       if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = form20._savedDocument ? "Replacement selected" : "Form 20 file selected"; updateDocumentSaveButton(host); await loadSelectedFilePreview(form20, pdfs[0]); }
       else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} Form 20 photos selected` : "Upload a PDF (3+ pages) or capture three photos"; updateDocumentSaveButton(host); if (files[0]) await loadSelectedFilePreview(form20, files[0]); else setPreview(form20._selectedPreview, null, "Selected"); }

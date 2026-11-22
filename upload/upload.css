@@ -940,12 +940,25 @@ button.icon-only:focus-visible {
 .bulk-upload-prompt { color:var(--muted); font-size:.82rem; line-height:1.45; }
 .bulk-choose { display:inline-flex; align-items:center; justify-content:center; gap:9px; flex:none; min-height:42px; padding:9px 16px; border-radius:10px; }
 .bulk-choose svg { width:18px; height:18px; }
-.password-field { display:flex; align-items:stretch; position:relative; }
-.password-field input { flex:1; min-width:0; padding-right:54px; }
-.password-toggle {
-  position:absolute; right:5px; top:50%; transform:translateY(-50%);
-  width:40px; min-width:40px; min-height:38px; height:38px;
-  display:grid; place-items:center; padding:7px !important; border-radius:8px;
+.login-form .password-field { display:block; position:relative; width:100%; min-width:0; }
+.login-form .password-field>input { display:block; box-sizing:border-box; width:100%; min-width:0; padding-right:56px; }
+.login-form .password-field>button.password-toggle {
+  position:absolute;
+  z-index:1;
+  right:5px;
+  top:50%;
+  transform:translateY(-50%);
+  box-sizing:border-box;
+  display:grid !important;
+  place-items:center;
+  justify-content:center !important;
+  width:40px !important;
+  min-width:40px !important;
+  height:38px;
+  min-height:38px !important;
+  margin:0 !important;
+  padding:7px !important;
+  border-radius:8px;
 }
 .password-toggle svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 .login-form .remember-account {
