@@ -16,6 +16,7 @@
   sessionStorage.removeItem(expiryKey);
   let expiryTimer = null;
   let currentCustomer = null;
+  let pendingCloseHost = null;
   let searchTimer;
   let autoForm20AsInspection = false;
   let persistedRetentionDays = "20";
@@ -53,6 +54,31 @@
     return [...host.querySelectorAll(".doc-row[data-doc]")].some(row =>
       Boolean(row._file) || (Array.isArray(row._pages) && row._pages.length > 0)
     );
+  }
+  function hasUnsavedEditorChanges(host) {
+    return [...host.querySelectorAll(".doc-row[data-doc]")].some(row =>
+      Boolean(row._file)
+      || (Array.isArray(row._pages) && row._pages.length > 0)
+      || (Array.isArray(row._nativeCameraPhotos) && row._nativeCameraPhotos.some(Boolean))
+    );
+  }
+  function closeCustomerEditor(host, discardPending = false) {
+    if (discardPending) {
+      host.querySelectorAll(".file-preview").forEach(preview => {
+        if (preview._url) {
+          URL.revokeObjectURL(preview._url);
+          preview._url = null;
+        }
+      });
+      host.querySelectorAll(".doc-row[data-doc]").forEach(row => {
+        row._file = null;
+        row._pages = [];
+        row._nativeCameraPhotos = [];
+      });
+      host.replaceChildren();
+    }
+    host.hidden = true;
+    currentCustomer = null;
   }
   function updateDocumentSaveButton(host) {
     const button = host?.querySelector(".save-bar .primary");
@@ -399,6 +425,17 @@
   $("logout").addEventListener("click", async () => { try { await request("/api/auth/logout", { method: "POST" }); } catch {} clearClientSession(); currentCustomer = null; $("customerView").hidden = true; showLogin(); });
   $("newCustomer").addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = null; $("customerForm").reset(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
   $("closeDialog").addEventListener("click", () => $("customerDialog").close());
+  $("keepEditing").addEventListener("click", () => {
+    pendingCloseHost = null;
+    $("discardChangesDialog").close();
+  });
+  $("discardChangesDialog").addEventListener("cancel", () => { pendingCloseHost = null; });
+  $("discardAndClose").addEventListener("click", () => {
+    const host = pendingCloseHost;
+    pendingCloseHost = null;
+    $("discardChangesDialog").close();
+    if (host) closeCustomerEditor(host, true);
+  });
   $("customerForm").addEventListener("submit", async event => {
     event.preventDefault(); const button = event.currentTarget.querySelector("button[type=submit]"); button.disabled = true; status($("createStatus"), editingCustomerId ? "Saving customer…" : "Creating customer…");
     try {
@@ -627,9 +664,12 @@
     currentCustomer = customer;
     row._file = null;
     row._pages = [];
+    row._nativeCameraPhotos = [];
     const state = row.querySelector(".doc-state");
-    state.textContent = "Saved";
+    state.textContent = "";
     state.classList.add("saved");
+    const titleRow = row.querySelector(".doc-row-header");
+    if (titleRow && !titleRow.querySelector(".cloud-saved-indicator")) titleRow.append(createCloudSavedIndicator());
     const selector = row.querySelector("[data-subcategory]");
     const actions = row.querySelector(".doc-actions");
     row.querySelector(".preview-pair")?.remove();
@@ -974,21 +1014,22 @@
     const date = value instanceof Date ? value : typeof value === "number" || /^\d+$/.test(String(value)) ? new Date(Number(value)) : new Date(value);
     return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleString();
   }
+  function createCloudSavedIndicator() {
+    const indicator = document.createElement("span");
+    indicator.className = "cloud-saved-indicator";
+    indicator.setAttribute("role", "img");
+    indicator.setAttribute("aria-label", "Saved to cloud");
+    indicator.title = "Saved to cloud";
+    indicator.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.2 18h9.6a4.2 4.2 0 0 0 .4-8.4A5.5 5.5 0 0 0 7 8.4 4.8 4.8 0 0 0 7.2 18Z"/><path d="m9.4 13.2 1.8 1.8 3.8-3.8"/></svg>';
+    return indicator;
+  }
   function createDocTitleRow(titleText, saved) {
     const header = document.createElement("div");
     header.className = "doc-row-header";
     const title = document.createElement("h3");
     title.textContent = titleText;
     header.append(title);
-    if (saved) {
-      const indicator = document.createElement("span");
-      indicator.className = "cloud-saved-indicator";
-      indicator.setAttribute("role", "img");
-      indicator.setAttribute("aria-label", "Saved to cloud");
-      indicator.title = "Saved to cloud";
-      indicator.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.2 18h9.6a4.2 4.2 0 0 0 .4-8.4A5.5 5.5 0 0 0 7 8.4 4.8 4.8 0 0 0 7.2 18Z"/><path d="m9.4 13.2 1.8 1.8 3.8-3.8"/></svg>';
-      header.append(indicator);
-    }
+    if (saved) header.append(createCloudSavedIndicator());
     return header;
   }
   function addModifiedLabel(row, saved) {
@@ -1070,7 +1111,14 @@
     const controls = document.createElement("div"); controls.className = "customer-controls";
     const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["chassisNumber", "customerName", "address", "hp", "applicationNumber"]) $(key).value = customer[key] || ""; $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
     const removeCustomer = document.createElement("button"); removeCustomer.type = "button"; removeCustomer.className = "danger"; setIconButton(removeCustomer, "trash", "Delete customer"); removeCustomer.addEventListener("click", async () => { if (!confirm(`Delete ${customer.customerName} and all of its stored documents? This cannot be undone.`)) return; try { await request(`/api/upload-portal/customers/${customer._id}`, { method: "DELETE" }); host.hidden = true; currentCustomer = null; await searchCustomers($("search").value); } catch (error) { alert(error.message); } });
-    const close = document.createElement("button"); close.type = "button"; close.className = "quiet"; setIconButton(close, "close", "Close customer"); close.addEventListener("click", () => { host.hidden = true; currentCustomer = null; }); controls.append(edit, removeCustomer, close); head.append(titleBlock, controls); host.append(head);
+    const close = document.createElement("button"); close.type = "button"; close.className = "quiet"; setIconButton(close, "close", "Close customer"); close.addEventListener("click", () => {
+      if (!hasUnsavedEditorChanges(host)) {
+        closeCustomerEditor(host);
+        return;
+      }
+      pendingCloseHost = host;
+      $("discardChangesDialog").showModal();
+    }); controls.append(edit, removeCustomer, close); head.append(titleBlock, controls); host.append(head);
     const fields = document.createElement("div"); fields.className = "customer-fields"; [["Address", customer.address], ["HP", customer.hp], ["Application no.", customer.applicationNumber]].forEach(([label, value]) => { if (value) { const span = document.createElement("span"); span.textContent = `${label}: ${value}`; fields.append(span); } }); host.append(fields);
     const expires = document.createElement("p"); expires.className = "customer-expiry muted"; expires.textContent = `Customer record is automatically deleted after ${new Date(customer.expiresAt).toLocaleDateString()}. Uploaded documents follow your cloud retention setting.`; host.append(expires);
     const bulk = document.createElement("section"); bulk.className = "bulk-upload"; bulk.tabIndex = 0; bulk.setAttribute("aria-label", "Add multiple documents");
