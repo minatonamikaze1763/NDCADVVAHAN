@@ -1100,6 +1100,7 @@
       document.body.classList.remove("desktop-camera-unavailable");
       return;
     }
+    document.body.classList.add("desktop-camera-unavailable");
     try {
       const devices = await navigator.mediaDevices?.enumerateDevices?.() || [];
       document.body.classList.toggle("desktop-camera-unavailable", !devices.some(device => device.kind === "videoinput"));
