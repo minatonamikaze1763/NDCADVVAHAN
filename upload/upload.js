@@ -304,7 +304,7 @@
   function showApp() { $("loginView").hidden = true; $("appView").hidden = false; $("logout").hidden = false; $("settingsToggle").hidden = false; if ($("welcomeBack").hidden) setWelcomeBack(""); }
   async function loadSettings() {
     const data = await request("/api/upload-portal/settings");
-    persistedRetentionDays = String(data.retentionDays || 20);
+    persistedRetentionDays = String(data.documentRetentionDays || data.retentionDays || 30);
     $("retentionDays").value = persistedRetentionDays;
     autoForm20AsInspection = data.autoForm20AsInspection === true;
     $("autoForm20AsInspection").checked = autoForm20AsInspection;
@@ -1369,7 +1369,6 @@
     const titleBlock = document.createElement("div"); const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "CUSTOMER WORKSPACE"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = customer.chassisNumber; titleBlock.append(eyebrow, title, chassis);
     const controls = document.createElement("div"); controls.className = "customer-controls";
     const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["chassisNumber", "customerName", "address", "hp", "applicationNumber"]) $(key).value = customer[key] || ""; $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
-    const removeCustomer = document.createElement("button"); removeCustomer.type = "button"; removeCustomer.className = "danger"; setIconButton(removeCustomer, "trash", "Delete customer"); removeCustomer.addEventListener("click", async () => { if (!confirm(`Delete ${customer.customerName} and all of its stored documents? This cannot be undone.`)) return; try { await request(`/api/upload-portal/customers/${customer._id}`, { method: "DELETE" }); host.hidden = true; currentCustomer = null; await searchCustomers($("search").value); } catch (error) { alert(error.message); } });
     const close = document.createElement("button"); close.type = "button"; close.className = "quiet"; setIconButton(close, "close", "Close customer"); close.addEventListener("click", () => {
       if (!hasUnsavedEditorChanges(host)) {
         closeCustomerEditor(host);
@@ -1377,7 +1376,7 @@
       }
       pendingCloseHost = host;
       $("discardChangesDialog").showModal();
-    }); controls.append(edit, removeCustomer, close); head.append(titleBlock, controls); host.append(head);
+    }); controls.append(edit, close); head.append(titleBlock, controls); host.append(head);
     const fields = document.createElement("div"); fields.className = "customer-fields"; [["Address", customer.address], ["HP", customer.hp], ["Application no.", customer.applicationNumber]].forEach(([label, value]) => { if (value) { const span = document.createElement("span"); span.textContent = `${label}: ${value}`; fields.append(span); } }); host.append(fields);
     const expires = document.createElement("p"); expires.className = "customer-expiry muted"; expires.textContent = `Customer record is automatically deleted after ${new Date(customer.expiresAt).toLocaleDateString()}. Uploaded documents follow your cloud retention setting.`; host.append(expires);
     const bulk = document.createElement("section"); bulk.className = "bulk-upload"; bulk.tabIndex = 0; bulk.setAttribute("aria-label", "Add multiple documents");
