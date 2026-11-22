@@ -317,16 +317,67 @@
       status($("searchStatus"), "Could not verify your saved session because the server is unreachable. Check your connection and reload.", "error");
     }
   }
+  const rememberedAccountsKey = "ndcUploadPortalRememberedAccounts";
+  function getRememberedAccounts() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(rememberedAccountsKey) || "[]");
+      if (!Array.isArray(stored)) return [];
+      return [...new Set(stored.filter(name => typeof name === "string").map(name => name.trim()).filter(Boolean))].slice(0, 10);
+    } catch { return []; }
+  }
+  function refreshRememberedAccounts(selectedName = "") {
+    const select = $("savedAccounts");
+    const accounts = getRememberedAccounts();
+    select.replaceChildren(new Option("Choose a saved account", ""));
+    accounts.forEach(name => select.add(new Option(name, name)));
+    $("savedAccountsField").hidden = accounts.length === 0;
+    select.value = accounts.find(name => name.toLowerCase() === selectedName.toLowerCase()) || "";
+  }
+  function syncRememberAccountChoice() {
+    const username = $("username").value.trim().toLowerCase();
+    $("rememberAccount").checked = Boolean(username) && getRememberedAccounts().some(name => name.toLowerCase() === username);
+  }
+  function saveRememberedAccount(username) {
+    const normalized = username.trim();
+    let accounts = getRememberedAccounts().filter(name => name.toLowerCase() !== normalized.toLowerCase());
+    if ($("rememberAccount").checked) accounts.unshift(normalized);
+    localStorage.setItem(rememberedAccountsKey, JSON.stringify(accounts.slice(0, 10)));
+    refreshRememberedAccounts($("rememberAccount").checked ? normalized : "");
+  }
+  refreshRememberedAccounts();
+  $("savedAccounts").addEventListener("change", () => {
+    const account = $("savedAccounts").value;
+    if (account) {
+      $("username").value = account;
+      $("rememberAccount").checked = true;
+    }
+  });
+  $("username").addEventListener("input", syncRememberAccountChoice);
+  $("togglePassword").addEventListener("click", () => {
+    const password = $("password");
+    const showing = password.type === "password";
+    password.type = showing ? "text" : "password";
+    const label = showing ? "Hide password" : "Show password";
+    const button = $("togglePassword");
+    button.setAttribute("aria-label", label);
+    button.title = label;
+    button.setAttribute("aria-pressed", String(showing));
+    button.innerHTML = showing
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m3 3 18 18"/><path d="M10.6 5.1A10.9 10.9 0 0 1 12 5c6.4 0 10 7 10 7a15.7 15.7 0 0 1-3 3.8"/><path d="M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10.8 10.8 0 0 0 4-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+  });
   $("loginForm").addEventListener("submit", async event => {
     event.preventDefault();
     const button = event.currentTarget.querySelector("button[type=submit]"); button.disabled = true;
     status($("loginStatus"), "Signing in…");
+    const username = $("username").value.trim();
     try {
-      const data = await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: $("username").value.trim(), password: $("password").value, deviceId: sessionDevice }) });
+      const data = await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password: $("password").value, deviceId: sessionDevice }) });
       token = data.token;
       localStorage.setItem(tokenKey, token);
       sessionStorage.removeItem(tokenKey);
       if (!saveSessionExpiry(data.expiresAt)) throw new Error("The server did not return a valid 24-hour session expiry.");
+      saveRememberedAccount(username);
       $("password").value = ""; showApp();
       await Promise.all([
         searchCustomers(""),
@@ -966,10 +1017,21 @@
     const fields = document.createElement("div"); fields.className = "customer-fields"; [["Address", customer.address], ["HP", customer.hp], ["Application no.", customer.applicationNumber]].forEach(([label, value]) => { if (value) { const span = document.createElement("span"); span.textContent = `${label}: ${value}`; fields.append(span); } }); host.append(fields);
     const expires = document.createElement("p"); expires.className = "customer-expiry muted"; expires.textContent = `Customer record is automatically deleted after ${new Date(customer.expiresAt).toLocaleDateString()}. Uploaded documents follow your cloud retention setting.`; host.append(expires);
     const bulk = document.createElement("section"); bulk.className = "bulk-upload"; bulk.tabIndex = 0; bulk.setAttribute("aria-label", "Add multiple documents");
-    const bulkTitle = document.createElement("strong"); bulkTitle.textContent = "Add multiple documents"; const bulkHint = document.createElement("span"); bulkHint.textContent = "Drop files here or tap to choose. Filenames are used to suggest document rows.";
+    const bulkHeading = document.createElement("div"); bulkHeading.className = "bulk-upload-heading";
+    const bulkIcon = document.createElement("span"); bulkIcon.className = "bulk-upload-icon"; bulkIcon.setAttribute("aria-hidden", "true"); bulkIcon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 16V4m-5 5 5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>';
+    const bulkCopy = document.createElement("div"); bulkCopy.className = "bulk-upload-copy";
+    const bulkTitle = document.createElement("strong"); bulkTitle.textContent = "Add multiple documents";
+    const bulkHint = document.createElement("span"); bulkHint.textContent = "Drop files here or choose them from your device. Filenames help suggest document rows.";
+    bulkCopy.append(bulkTitle, bulkHint); bulkHeading.append(bulkIcon, bulkCopy);
     const picker = document.createElement("input"); picker.type = "file"; picker.multiple = true; picker.accept = "image/*,.pdf"; picker.className = "bulk-picker"; picker.setAttribute("aria-label", "Choose multiple documents");
-    const chooseFiles = document.createElement("button"); chooseFiles.type = "button"; chooseFiles.className = "secondary"; chooseFiles.textContent = "Choose multiple files"; chooseFiles.addEventListener("click", async event => { event.stopPropagation(); if (await ensureActiveSession()) picker.click(); });
-    const queue = document.createElement("div"); queue.className = "bulk-queue"; const bulkStatus = document.createElement("p"); bulkStatus.className = "status bulk-status"; bulk.append(bulkTitle, bulkHint, chooseFiles, picker, queue, bulkStatus);
+    const chooseFiles = document.createElement("button"); chooseFiles.type = "button"; chooseFiles.className = "secondary bulk-choose";
+    chooseFiles.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M12 18v-7m-3 3 3-3 3 3"/></svg><span>Choose files</span>';
+    chooseFiles.addEventListener("click", async event => { event.stopPropagation(); if (await ensureActiveSession()) picker.click(); });
+    const dropzone = document.createElement("div"); dropzone.className = "bulk-upload-dropzone";
+    const dropPrompt = document.createElement("span"); dropPrompt.className = "bulk-upload-prompt"; dropPrompt.textContent = "Tap anywhere here to browse, or drag files into this box";
+    dropzone.append(dropPrompt, chooseFiles);
+    const queue = document.createElement("div"); queue.className = "bulk-queue"; const bulkStatus = document.createElement("p"); bulkStatus.className = "status bulk-status";
+    bulk.append(bulkHeading, dropzone, picker, queue, bulkStatus);
     bulk.addEventListener("click", async event => { if (event.target !== chooseFiles && await ensureActiveSession()) picker.click(); });
     bulk.addEventListener("dragover", event => { event.preventDefault(); bulk.classList.add("dragging"); });
     bulk.addEventListener("dragleave", () => bulk.classList.remove("dragging"));
