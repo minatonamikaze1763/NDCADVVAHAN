@@ -98,16 +98,38 @@
       <section id="settingsView" class="card settings-card" hidden aria-labelledby="settingsTitle"><div class="settings-heading"><div><p class="eyebrow">WORKSPACE SETTINGS</p><h2 id="settingsTitle">Document settings</h2><p class="muted">Manage cloud retention and VAHAN upload preferences for this company.</p></div><button id="backToWorkspace" class="secondary" type="button">Back to workspace</button></div><label for="retentionDays">Uploaded customer documents are automatically deleted after</label><div class="retention-control"><select id="retentionDays" disabled><option value="30">30 days</option></select></div><small class="retention-note">Customer records are retained as cloud usage and billing history. You may delete individual documents; customer records cannot be deleted.</small><div class="extension-setting"><p class="eyebrow">VAHAN EXTENSION PREFERENCE</p><label class="setting-toggle" for="autoForm20AsInspection"><input id="autoForm20AsInspection" type="checkbox"><span><strong>Auto copy Form 20 as Inspection</strong><small>Save the Form 20 PDF to the Inspection document slot as well.</small></span></label></div><button id="saveRetention" class="primary" type="button">Save settings</button><p id="settingsStatus" class="status" role="status"></p></section>
     </section>
   </main>
-  <dialog id="customerDialog" class="dialog">
-    <form id="customerForm" class="form-grid">
-      <div class="dialog-heading"><div><p id="dialogEyebrow" class="eyebrow">NEW CUSTOMER</p><h2 id="dialogTitle">Create customer</h2></div><button id="closeDialog" class="quiet" type="button" aria-label="Close">✕</button></div>
-      <label>Chassis number <span class="required">Required</span><input id="chassisNumber" maxlength="17" required autocomplete="off"></label>
-      <label>Customer name <span class="required">Required</span><input id="customerName" maxlength="120" required autocomplete="name"></label>
-      <label>Address <span class="optional">Optional</span><textarea id="address" rows="2" maxlength="500"></textarea></label>
-      <label>HP / hypothecation <span class="optional">Optional</span><input id="hp" maxlength="160"></label>
-      <label>Application number <span class="optional">Optional</span><input id="applicationNumber" maxlength="100"></label>
+  <dialog id="customerDialog" class="dialog customer-dialog">
+    <form id="customerForm" class="form-grid customer-form-grid">
+      <div class="dialog-heading customer-form-heading">
+        <div class="customer-form-heading-copy">
+          <p id="dialogEyebrow" class="eyebrow">NEW CUSTOMER</p>
+          <h2 id="dialogTitle">Create customer</h2>
+          <p class="customer-form-note">Add the required customer details, then include any optional reference information.</p>
+        </div>
+        <button id="closeDialog" class="quiet customer-dialog-close" type="button" aria-label="Close">✕</button>
+      </div>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Chassis number</span><span class="required">Required</span></span>
+        <input id="chassisNumber" maxlength="17" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter chassis number">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Customer name</span><span class="required">Required</span></span>
+        <input id="customerName" maxlength="120" required autocomplete="name" placeholder="Enter customer name">
+      </label>
+      <label class="customer-field customer-field-wide">
+        <span class="customer-field-heading"><span>Address</span><span class="optional">Optional</span></span>
+        <textarea id="address" rows="3" maxlength="500" placeholder="Enter customer address"></textarea>
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>HP / hypothecation</span><span class="optional">Optional</span></span>
+        <input id="hp" maxlength="160" placeholder="Financier or hypothecation details">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Application number</span><span class="optional">Optional</span></span>
+        <input id="applicationNumber" maxlength="100" placeholder="Enter application number">
+      </label>
       <p id="createStatus" class="status full" role="status"></p>
-      <button class="primary full" type="submit">Create customer</button>
+      <button class="primary full customer-form-submit" type="submit">Create customer</button>
     </form>
   </dialog>
   <dialog id="logoutDialog" class="dialog logout-dialog" aria-labelledby="logoutTitle" aria-describedby="logoutMessage">
