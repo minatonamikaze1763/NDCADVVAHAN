@@ -1374,7 +1374,7 @@
     
     <script src="plan-catalog.js?v=306e61018fff" defer></script>
     
-    <script src="signup.js?v=00adf40fe607" defer></script>
+    <script src="signup.js?v=cloud-one-time-20261123" defer></script>
     
     <script src="offers-showcase.js?v=2ca242495092" defer></script>
     
@@ -1706,12 +1706,18 @@
             </div>
             <section class="ndc-cloud-checkout" aria-labelledby="signupCloudHeading">
               <h4 id="signupCloudHeading">Optional Cloud Storage</h4>
-              <p>Uploaded documents auto-delete after 30 days; customer records stay as usage history. Cloud logins use your NDC plan device limit.</p>
-              <span class="ndc-cloud-choice-label">Choose a cloud storage option</span>
-              <div id="signupCloudChoices" class="ndc-cloud-choices" role="group" aria-label="Cloud add-on plan"></div>
+              <p>Buy a one-time record allowance. Uploaded documents auto-delete after 30 days; customer records remain as usage history.</p>
+              <label class="ndc-cloud-addon-toggle" for="signupCloudEnabled">
+                <input type="checkbox" id="signupCloudEnabled">
+                <span><strong>Add Cloud Storage</strong><em>Turn this on to choose cloud plans. The allowance is purchased once and does not renew monthly.</em></span>
+              </label>
+              <div id="signupCloudOptions" hidden>
+                <span class="ndc-cloud-choice-label">Choose a cloud plan</span>
+                <div id="signupCloudChoices" class="ndc-cloud-choices" role="group" aria-label="Cloud add-on plan"></div>
+              </div>
               <select id="signupCloudAddon" class="ndc-cloud-native-select" aria-hidden="true" tabindex="-1"><option value="">No Cloud Storage add-on</option></select>
-              <label id="signupCloudQuantityLabel" for="signupCloudAddonQuantity" hidden>Monthly customer record limit</label><input id="signupCloudAddonQuantity" type="number" min="1" step="1" value="100" hidden>
-              <small id="signupCloudPrice"></small>
+              <label id="signupCloudQuantityLabel" for="signupCloudAddonQuantity" hidden>Additional customer records</label><input id="signupCloudAddonQuantity" type="number" min="1" step="1" value="100" hidden>
+              <small id="signupCloudPrice" aria-live="polite"></small>
             </section>
             <div id="signupGstFields" class="ndc-gst-checkout-fields">
               <span class="payment-label">GST BILLING DETAILS</span>
