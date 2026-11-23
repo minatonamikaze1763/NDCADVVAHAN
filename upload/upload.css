@@ -100,7 +100,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d9a91d77;border-color
 .camera-capture-photos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .camera-photo-thumb{min-width:0;display:grid;gap:6px;text-align:center;color:var(--gold2);font-size:.76rem}
 .camera-photo-thumb img{width:100%;height:94px;object-fit:cover;border:1px solid #514528;border-radius:9px;background:#0b0b0a}
-.camera-capture-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.camera-capture-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
 .camera-capture-actions button{min-height:42px}
 @media(max-width:680px){
  .camera-dialog{width:calc(100vw - 18px);max-height:96dvh;border-radius:15px}
@@ -1442,4 +1442,81 @@ body:has(#settingsView:not([hidden])) .workspace-dashboard { display:none; }
 @media (max-width:680px) {
   #customerView .bulk-upload-heading { list-style:none; }
   #customerView .doc-file-summary { display:none; }
+}
+
+/* Corrected wide customer workspace: lightweight backdrop and aligned document actions. */
+@media (min-width:681px) {
+  .topbar { width:min(1600px,calc(100% - 32px)); backdrop-filter:none; }
+  main { max-width:1600px; }
+  body:has(#customerView:not([hidden])) .customer-backdrop { background:rgba(0,0,0,.78); backdrop-filter:none; }
+  #customerView:not([hidden]) {
+    width:min(1600px,calc(100vw - 40px));
+    box-shadow:0 16px 42px rgba(0,0,0,.54);
+  }
+  #customerView .customer-title-line { display:flex; align-items:center; gap:12px; min-width:0; }
+  #customerView .customer-title-line .eyebrow { flex:none; margin:0; white-space:nowrap; }
+  #customerView .customer-title-line h2 { min-width:0; margin:0; overflow-wrap:anywhere; }
+  #customerView .customer-title-block > .muted { margin:5px 0 0; }
+  #customerView .doc-row,
+  #customerView .doc-row.full { grid-column:auto; }
+  #customerView .doc-row-header { grid-column:1 / -1; grid-row:1; min-width:0; }
+  #customerView .doc-row-header h3 { overflow-wrap:anywhere; }
+  #customerView .doc-state { grid-row:2; }
+  #customerView .doc-row:not(:has(.doc-state.saved)) .doc-actions:not(.form20-actions) { display:grid !important; }
+  #customerView .doc-actions:not(.native-capture-group) {
+    grid-column:1 / -1;
+    grid-row:4;
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    align-items:stretch;
+    gap:7px;
+    width:100%;
+    min-width:0;
+  }
+  #customerView .doc-actions:not(.native-capture-group) > button {
+    display:inline-flex !important;
+    width:100% !important;
+    min-width:0 !important;
+    min-height:38px;
+    height:auto;
+    flex:initial !important;
+    padding:7px 8px !important;
+    white-space:normal;
+    font-size:.76rem;
+  }
+  #customerView .doc-actions:not(.native-capture-group) > button .button-label { display:inline; }
+  #customerView .doc-actions:not(.native-capture-group) > button[aria-label="Camera"] { display:none !important; }
+  #customerView .doc-file-summary { grid-row:3; }
+  #customerView .doc-file-summary .doc-summary-preview { display:none; }
+  #customerView .doc-row .subcat { grid-row:5; grid-column:1 / -1; min-width:0; }
+  #customerView .aadhar-capture-hint,
+  #customerView .aadhaar-native-capture { display:none !important; }
+  #customerView .doc-actions.form20-actions {
+    grid-column:1 / -1;
+    grid-row:4;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:7px;
+    width:100%;
+  }
+  #customerView .form20-actions .native-capture-group { display:none !important; }
+  #customerView .form20-actions > button {
+    display:inline-flex !important;
+    width:100% !important;
+    min-width:0 !important;
+    min-height:38px;
+    height:auto;
+    flex:initial !important;
+    padding:7px 8px !important;
+    white-space:normal;
+    font-size:.76rem;
+  }
+  #customerView .form20-actions > button .button-label { display:inline; }
+}
+@media (min-width:681px) and (max-width:1100px) {
+  #customerView .doc-list { grid-template-columns:minmax(0,1fr); }
+}
+@media (max-width:680px) {
+  #customerView .customer-title-line { display:flex; flex-direction:column; align-items:flex-start; gap:3px; }
+  #customerView .customer-title-line .eyebrow { margin:0; }
 }
