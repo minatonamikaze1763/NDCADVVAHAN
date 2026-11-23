@@ -2192,3 +2192,76 @@ body:has(#settingsView:not([hidden])) .workspace-dashboard { display:none; }
 #customerView .save-bar .primary:disabled {
   cursor:not-allowed !important;
 }
+
+/* Upload workspace layout refinements: compact header spacing and an in-flow Form 20 section. */
+main {
+  margin-top: var(--upload-topbar-height) !important;
+}
+@media (max-width:680px) {
+  main { margin-top: var(--upload-topbar-height) !important; }
+}
+#customerView > .customer-heading + .customer-fields {
+  padding-top: 7px;
+}
+#customerView > .customer-heading + .customer-expiry {
+  padding-top: 2px;
+}
+.form20-section {
+  min-width: 0;
+  padding: 0 22px 18px;
+}
+.form20-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0 0 10px;
+}
+.form20-section-heading h2 {
+  margin: 0;
+  font: 600 1rem/1.35 "Space Grotesk", sans-serif;
+}
+.form20-section-heading p {
+  margin: 0;
+  font-size: .8rem;
+}
+.form20-section .doc-row[data-doc="form20"] {
+  position: static;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto;
+  gap: 10px;
+}
+.form20-section .doc-row[data-doc="form20"] > .form20-actions {
+  position: static !important;
+  inset: auto !important;
+  display: flex !important;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  transform: none !important;
+}
+.form20-section .form20-actions > button {
+  position: static !important;
+  inset: auto !important;
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 96px;
+  max-width: 100%;
+  margin: 0;
+  transform: none !important;
+}
+@media (max-width:680px) {
+  .form20-section { padding: 0 14px 14px; }
+  .form20-section .doc-row[data-doc="form20"] { padding: 12px; }
+  .form20-section .doc-row[data-doc="form20"] > .form20-actions {
+    justify-content: stretch;
+  }
+  .form20-section .form20-actions > button {
+    flex: 1 1 120px;
+    min-width: 0;
+  }
+}
