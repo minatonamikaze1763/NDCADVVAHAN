@@ -664,6 +664,14 @@ body.ndc-dashboard-v2 {
 @media(max-width:600px){.ndc-payment-trust{padding:16px 14px}.ndc-payment-trust p{font-size:.88rem}}
 @media(max-width:600px){.ndc-checkout-billing-grid{grid-template-columns:1fr}.ndc-checkout-billing-grid .wide{grid-column:auto}.ndc-checkout-payment-summary{padding-left:14px;padding-right:14px}.ndc-checkout-summary-heading{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}}
 
+/* Cloud purchase call-to-action and visible subscription payment summary. */
+.ndc-dashboard-v2 .ndc-renewal-payment-summary{display:block;min-height:120px;margin:20px 0 18px;scroll-margin-top:24px}
+.ndc-dashboard-v2 #ndcCloudPurchaseSubmit.ndc-cloud-pay-button{display:flex;align-items:center;justify-content:center;width:100%;min-height:60px;margin:20px 0 12px;padding:16px 24px;border:1px solid rgba(255,237,168,.82);border-radius:16px;background:linear-gradient(115deg,#f6df91 0%,#e4c457 52%,#c79e34 100%);color:#17140b;font-size:1rem;font-weight:800;letter-spacing:.01em;line-height:1.25;text-align:center;box-shadow:0 10px 25px rgba(215,189,85,.22),inset 0 1px 0 rgba(255,255,255,.55);transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
+.ndc-dashboard-v2 #ndcCloudPurchaseSubmit.ndc-cloud-pay-button:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.04);box-shadow:0 14px 30px rgba(215,189,85,.3),inset 0 1px 0 rgba(255,255,255,.65)}
+.ndc-dashboard-v2 #ndcCloudPurchaseSubmit.ndc-cloud-pay-button:active:not(:disabled){transform:translateY(0)}
+.ndc-dashboard-v2 #ndcCloudPurchaseSubmit.ndc-cloud-pay-button:disabled{opacity:.55;filter:saturate(.5)}
+@media(max-width:600px){.ndc-dashboard-v2 #ndcCloudPurchaseSubmit.ndc-cloud-pay-button{min-height:56px;padding:14px 18px;font-size:.96rem}}
+
 /* Invoice filtering controls and two-column billing summary headers. */
 .ndc-invoice-filters{display:grid;grid-template-columns:minmax(210px,2fr) minmax(140px,1fr) minmax(140px,1fr) auto auto;gap:12px;align-items:end;margin:4px 0 10px;padding:16px;border:1px solid rgba(215,189,85,.25);border-radius:14px;background:#11110f}
 .ndc-invoice-filters label{display:grid;gap:7px;color:#d6c66f;font-size:.86rem;font-weight:650}
