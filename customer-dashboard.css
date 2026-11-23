@@ -665,7 +665,7 @@ body.ndc-dashboard-v2 {
 @media(max-width:600px){.ndc-checkout-billing-grid{grid-template-columns:1fr}.ndc-checkout-billing-grid .wide{grid-column:auto}.ndc-checkout-payment-summary{padding-left:14px;padding-right:14px}.ndc-checkout-summary-heading{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}}
 
 /* Cloud purchase call-to-action and visible subscription payment summary. */
-.ndc-dashboard-v2 .ndc-renewal-payment-summary{display:block;min-height:120px;margin:20px 0 18px;scroll-margin-top:24px}
+.ndc-dashboard-v2 #ndcRenewalTotal.ndc-renewal-payment-summary{display:block!important;visibility:visible!important;opacity:1!important;min-height:120px;margin:20px 0 18px;scroll-margin-top:24px}
 .ndc-dashboard-v2 #ndcCloudPurchaseSubmit.ndc-cloud-pay-button{display:flex;align-items:center;justify-content:center;width:100%;min-height:60px;margin:20px 0 12px;padding:16px 24px;border:1px solid rgba(255,237,168,.82);border-radius:16px;background:linear-gradient(115deg,#f6df91 0%,#e4c457 52%,#c79e34 100%);color:#17140b;font-size:1rem;font-weight:800;letter-spacing:.01em;line-height:1.25;text-align:center;box-shadow:0 10px 25px rgba(215,189,85,.22),inset 0 1px 0 rgba(255,255,255,.55);transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
 .ndc-dashboard-v2 #ndcCloudPurchaseSubmit.ndc-cloud-pay-button:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.04);box-shadow:0 14px 30px rgba(215,189,85,.3),inset 0 1px 0 rgba(255,255,255,.65)}
 .ndc-dashboard-v2 #ndcCloudPurchaseSubmit.ndc-cloud-pay-button:active:not(:disabled){transform:translateY(0)}
