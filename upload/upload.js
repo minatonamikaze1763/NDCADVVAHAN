@@ -1102,6 +1102,12 @@
         preview.setAttribute("aria-label", file || row._pages?.length ? "Preview selected document" : row._savedDocument ? "Preview saved document" : "No document to preview");
         preview.title = preview.getAttribute("aria-label");
       }
+      const deleteButton = row.querySelector(".doc-delete-action");
+      if (deleteButton && !row._savedDocument) {
+        const canDelete = Boolean(file || row._file || row._pages?.length);
+        deleteButton.disabled = !canDelete;
+        deleteButton.title = canDelete ? "Clear selected document" : "No document to delete";
+      }
     }
     return box._previewReady;
   }
@@ -1199,7 +1205,7 @@
       catch(error) { preview.title = error.message || "Preview unavailable"; }
       finally { preview.disabled = false; }
     });
-    summary.append(filename, preview); row.append(summary);
+    summary.append(filename, preview); row.append(summary); row._summaryPreviewButton = preview;
     addModifiedLabel(row, saved); row._selectedPreview = selected; row._savedDocument = saved || null; addFileDetails(row, saved);
   }
   function bulkFileAssignmentLabel(category, file) {
@@ -1397,7 +1403,7 @@
   function renderCustomer(customer) {
     const host = $("customerView"); host.replaceChildren(); host.hidden = false;
     const head = document.createElement("div"); head.className = "customer-heading";
-    const titleBlock = document.createElement("div"); const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "CUSTOMER WORKSPACE"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = customer.chassisNumber; titleBlock.append(eyebrow, title, chassis);
+    const titleBlock = document.createElement("div"); titleBlock.className = "customer-title-block"; const titleLine = document.createElement("div"); titleLine.className = "customer-title-line"; const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "CUSTOMER WORKSPACE"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = customer.chassisNumber; titleLine.append(eyebrow, title); titleBlock.append(titleLine, chassis);
     const controls = document.createElement("div"); controls.className = "customer-controls";
     const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["chassisNumber", "customerName", "address", "hp", "applicationNumber"]) $(key).value = customer[key] || ""; $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
     const close = document.createElement("button"); close.type = "button"; close.className = "quiet"; setIconButton(close, "close", "Close customer"); close.addEventListener("click", () => {
@@ -1487,7 +1493,7 @@
         });
         row.append(select, aadhaarCaptureHint, aadhaarCaptureControls);
       }
-      const actions = document.createElement("div"); actions.className = "doc-actions"; const camera = document.createElement("button"); camera.type = "button"; camera.className = "secondary"; setIconButton(camera, "camera", "Camera"); camera.addEventListener("click", () => safeFileInput(id, true)); const browse = document.createElement("button"); browse.type = "button"; browse.className = "secondary"; setIconButton(browse, "upload", "Choose file"); browse.addEventListener("click", () => safeFileInput(id, false)); actions.append(camera, browse);
+      const actions = document.createElement("div"); actions.className = "doc-actions"; const camera = document.createElement("button"); camera.type = "button"; camera.className = "secondary"; setIconButton(camera, "camera", "Camera"); camera.addEventListener("click", () => safeFileInput(id, true)); const browse = document.createElement("button"); browse.type = "button"; browse.className = "secondary"; setIconButton(browse, "upload", "Upload"); browse.addEventListener("click", () => safeFileInput(id, false)); actions.append(camera, browse, row._summaryPreviewButton);
       if (id === "address-proof") {
         const updateAadhaarOption = () => { const visible = addressTypeSelect.value === "Aadhaar"; aadhaarCaptureControls.hidden = !visible; aadhaarCaptureHint.hidden = !visible; };
         addressTypeSelect.addEventListener("change", async () => {
@@ -1501,25 +1507,25 @@
         addressTypeSelect.dataset.savedValue = addressTypeSelect.value;
         updateAadhaarOption();
       }
-      if (saved) { const remove = document.createElement("button"); remove.type = "button"; remove.className = "danger"; setIconButton(remove, "trash", "Remove document"); remove.addEventListener("click", async () => { if (!confirm(`Remove ${name}?`)) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/${id}`, { method: "DELETE" }); await openCustomer(customer._id); } catch (error) { alert(error.message); } }); actions.append(remove); }
+      const remove = document.createElement("button"); remove.type = "button"; remove.className = "danger doc-delete-action"; setIconButton(remove, "trash", "Delete"); remove.disabled = !saved; remove.title = saved ? "Delete saved document" : "No saved document to delete"; remove.addEventListener("click", async () => { if (saved) { if (!confirm(`Delete ${name}?`)) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/${id}`, { method: "DELETE" }); await openCustomer(customer._id); } catch (error) { alert(error.message); } return; } if (!row._file && !row._pages?.length) return; row._file = null; row._pages = []; setPreview(row._selectedPreview, null, "Selected"); state.textContent = "Not selected"; updateDocumentSaveButton(host); }); actions.append(remove);
       row.append(actions); list.append(row);
     });
     const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const saved20 = customer.documents?.form20; const ftitle = createDocTitleRow((documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)", saved20); const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? "" : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
-    const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions";
+    const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions"; form20Actions.append(row._summaryPreviewButton);
     const form20CaptureControls = document.createElement("div"); form20CaptureControls.className = "doc-actions native-capture-group";
     addNativeMultiPhotoCapture(form20CaptureControls, form20, {
       labels:["Page 1", "Page 2", "Page 3"], documentName:"Form 20", saveLabel:"Combine and save Form 20 PDF",
       onSave:(photos, progress) => saveCapturedForm20(customer, host, form20, photos, progress)
     });
     form20Actions.append(form20CaptureControls);
-    const choose20 = document.createElement("button"); choose20.type = "button"; choose20.className = "secondary"; setIconButton(choose20, "upload", "Choose Form 20 PDF or photos");
+    const choose20 = document.createElement("button"); choose20.type = "button"; choose20.className = "secondary"; setIconButton(choose20, "upload", "Upload");
     choose20.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; const input = document.createElement("input"); input.type = "file"; input.accept = "application/pdf,image/*"; input.multiple = true; input.addEventListener("change", async () => {
       if (!(await ensureActiveSession())) return;
       const files = [...(input.files || [])]; const pdfs = files.filter(file => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
       if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = form20._savedDocument ? "Replacement selected" : "Form 20 file selected"; updateDocumentSaveButton(host); await loadSelectedFilePreview(form20, pdfs[0]); }
       else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} Form 20 photos selected` : "Upload a PDF (3+ pages) or capture three photos"; updateDocumentSaveButton(host); if (files[0]) await loadSelectedFilePreview(form20, files[0]); else setPreview(form20._selectedPreview, null, "Selected"); }
     }); input.click(); });
-    form20Actions.append(choose20); form20.append(form20Actions); list.insertBefore(form20, list.children[3] || null); host.append(list);
+    form20Actions.append(choose20); const delete20 = document.createElement("button"); delete20.type = "button"; delete20.className = "danger doc-delete-action"; setIconButton(delete20, "trash", "Delete"); delete20.disabled = !saved20; delete20.title = saved20 ? "Delete saved Form 20" : "No saved document to delete"; delete20.addEventListener("click", async () => { if (saved20) { if (!confirm("Delete Form 20?")) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, { method:"DELETE" }); await openCustomer(customer._id); } catch(error) { alert(error.message); } return; } if (!form20._file && !form20._pages?.length) return; form20._file = null; form20._pages = []; setPreview(form20._selectedPreview, null, "Selected"); fstate.textContent = "Upload a PDF (3+ pages) or capture three photos"; updateDocumentSaveButton(host); }); form20Actions.append(delete20); form20.append(form20Actions); list.insertBefore(form20, list.children[3] || null); host.append(list);
     const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status save-description"; result.textContent = "Select files to save (up to 12)."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected"; save.disabled = true; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar); updateDocumentSaveButton(host);
   }
   async function openCustomer(id) { try { const data = await request(`/api/upload-portal/customers/${id}`); currentCustomer = data.customer; renderCustomer(currentCustomer); } catch (error) { status($("searchStatus"), error.message, "error"); } }
