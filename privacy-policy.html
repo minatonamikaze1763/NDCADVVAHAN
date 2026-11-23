@@ -694,9 +694,9 @@
               in VAHAN Cloud unless you deliberately upload them there. Local
               extension settings and prepared copies may remain on your device
               until cleared or deleted. VAHAN Cloud customer records and files
-              that you choose to upload are automatically deleted according to
-              the company retention setting: 7, 14 or 20 days, with 20 days as
-              the default. The workspace shows the record expiration date.
+              that you choose to upload are automatically deleted 30 days after upload. Customer records
+              and their usage history remain after document files are deleted
+              and continue to count toward the purchased cloud record allowance.
               Server-side account information, subscription and payment
               transaction records, referral records, sessions and security logs
               may be retained as necessary for authentication, service
@@ -714,9 +714,10 @@
               You choose whether to upload files to VAHAN Cloud. If you do not,
               the extension prepares directly selected files on your device
               and sends them to the VAHAN portal as part of your chosen upload
-              workflow; VAHAN Cloud does not fetch or store them. You can manage
-              Cloud retention in the workspace settings, review extension
-              settings, and remove locally stored extension data through
+              workflow; VAHAN Cloud does not fetch or store them. Cloud documents are automatically deleted 30 days after
+              upload, while customer records remain as usage history. You can
+              review cloud usage in the workspace, review extension settings,
+              and remove locally stored extension data through
               Chrome's available extension-data controls.
             </p>
             <p>
@@ -745,9 +746,14 @@
               Cloud workspace are sent to NDC and stored under the registered
               dealership account, encrypted at rest in the configured MongoDB
               Atlas storage. Cloud uploads support ZIP downloads and requested
-              document retrieval, and follow the company retention setting
-              (7, 14 or 20 days; 20 by default). VAHAN applies its own practices after documents are
-              submitted to its portal.
+              document retrieval, and Uploaded cloud documents are automatically deleted 30 days
+              after upload; customer records remain as usage history. Cloud
+              record plans are one-time purchases: their allowance does not
+              reset monthly and remains across paid-plan renewals. Cloud upload
+              access requires an active paid subscription and pauses if paid
+              access expires; the stored allowance remains on the account and
+              becomes usable again after renewal. VAHAN applies its own
+              practices after documents are submitted to its portal.
             </p>
             <ul>
               <li>
@@ -794,11 +800,59 @@
           <section class="section" id="terms">
             <h2>Terms &amp; Conditions</h2>
             <p>
-              These terms govern use of VAHAN NDC TOOL and the NDC customer
-              panel. Review them before purchasing or using the service.
-              Purchase details shown at checkout, including price, duration and
-              device allowance, form part of your subscription.
+              These terms govern use of VAHAN NDC TOOL, the NDC customer panel
+              and VAHAN Cloud. Review the plan details shown at checkout,
+              including price, duration, record allowance and device limit,
+              before purchasing.
             </p>
+            <h3>Paid plans</h3>
+            <ul>
+              <li>
+                Paid plans are sold in 30-day periods. Your paid access begins
+                after payment is verified. Each selected month adds 30 days to
+                your paid subscription. If you renew while access is active, the
+                added time starts from your current paid expiry so remaining
+                paid time is preserved. If access has expired, renewed access
+                starts after the new payment is verified.
+              </li>
+              <li>
+                Each paid plan has the device/login allowance shown at checkout.
+                Cloud logins use that same allowance. Keep your credentials
+                private and do not share access beyond your purchased limit.
+              </li>
+            </ul>
+            <h3>Cloud record plans and add-ons</h3>
+            <ul>
+              <li>
+                Cloud record allowance starts at zero. You may buy a cloud plan
+                by itself from the Cloud Storage area or select cloud storage
+                as an add-on to a paid plan. A mixed checkout includes the paid
+                plan and the selected cloud allowance; buying cloud storage
+                does not add days to a paid plan.
+              </li>
+              <li>
+                Cloud plans are one-time purchases priced by the record
+                allowance shown at checkout, not recurring monthly
+                subscriptions. Each purchase adds its stated number of records
+                to your account allowance. The allowance is not reset each
+                month and remains available across paid-plan renewals. It does
+                not expire solely because a paid plan renews or reaches expiry.
+              </li>
+              <li>
+                Each cloud customer record includes 12 document slots.
+                Uploaded document files are automatically deleted 30 days
+                after upload; customer records remain as usage history and
+                continue to count toward the purchased record allowance.
+              </li>
+              <li>
+                An active paid subscription is required to use cloud upload
+                access. If paid access expires, cloud uploads pause; the
+                purchased cloud record allowance remains on the account and is
+                available again after paid access is renewed. Cloud access uses
+                the device/login limit of the active paid plan.
+              </li>
+            </ul>
+            <h3>Using the service</h3>
             <ul>
               <li>
                 Use the tool only with authorized accounts and documents you are
@@ -811,11 +865,6 @@
                 assignments, readability and the final portal result. Optional
                 automation does not guarantee acceptance, registration approval
                 or uninterrupted availability.
-              </li>
-              <li>
-                Keep credentials private and observe your plan's device limits.
-                Access may be restricted for expiry, non-payment, misuse or
-                security reasons; contact support to resolve access issues.
               </li>
               <li>
                 The subscription grants limited use of the software for its
