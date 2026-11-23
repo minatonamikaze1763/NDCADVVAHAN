@@ -2081,49 +2081,69 @@ body:has(#settingsView:not([hidden])) .workspace-dashboard { display:none; }
 
 
 
-/* Sticky customer panel header, isolated Form 20 action strip, and idle save cursor. */
+/* Compact sticky customer header; match the Save footer and keep Form 20 actions in flow. */
 @media (min-width:681px) {
   #customerView:not([hidden]) {
     padding-top:0 !important;
   }
   #customerView > .customer-heading {
+    box-sizing:border-box;
     position:sticky !important;
     top:0 !important;
     left:auto !important;
     z-index:40 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
     width:100% !important;
+    height:71px !important;
+    min-height:71px !important;
     margin:0 !important;
+    padding:15px 22px !important;
+    border:0;
+    border-bottom:1px solid var(--line);
+    border-radius:0 !important;
+    background:#111e !important;
+    backdrop-filter:blur(12px);
+    box-shadow:none !important;
     transform:none !important;
-    border-radius:0 0 8px 8px;
   }
-  #customerView .doc-actions:not(.native-capture-group) > button {
-    position:static !important;
-    inset:auto !important;
-    grid-area:auto !important;
-    grid-column:auto !important;
-    grid-row:auto !important;
-    float:none !important;
-    flex:0 0 96px !important;
-    width:96px !important;
-    min-width:96px !important;
-    max-width:96px !important;
+  #customerView .customer-title-block {
+    min-width:0;
+  }
+  #customerView .customer-title-block h2 {
+    margin:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:1rem;
+    line-height:1.25;
+  }
+  #customerView .customer-heading .customer-controls {
+    flex:none;
+    align-items:center;
+    gap:8px;
+  }
+  #customerView .customer-heading .customer-controls > button {
     height:40px !important;
     min-height:40px !important;
-    padding:8px 10px !important;
-    border-radius:7px !important;
-    margin:0 !important;
-    transform:none !important;
+  }
+  #customerView .doc-row[data-doc="form20"] {
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+    gap:8px !important;
+    grid-template:none !important;
   }
   #customerView .doc-row[data-doc="form20"] > .form20-action-strip {
     position:static !important;
     inset:auto !important;
     display:flex !important;
+    flex:0 0 auto !important;
     flex-flow:row nowrap !important;
     align-items:center !important;
     justify-content:flex-end !important;
     gap:8px !important;
-    grid-column:1 / -1 !important;
-    grid-row:4 !important;
     width:100% !important;
     min-width:0 !important;
     margin:0 !important;
@@ -2150,15 +2170,23 @@ body:has(#settingsView:not([hidden])) .workspace-dashboard { display:none; }
   #customerView .doc-row[data-doc="form20"] > .form20-action-strip > .form20-action-preview {
     order:0 !important;
   }
-}
-@media (max-width:680px) {
-  #customerView .doc-actions:not(.native-capture-group) > button,
-  #customerView .form20-action-strip > button {
-    box-sizing:border-box;
+  #customerView .doc-actions:not(.native-capture-group) > button {
+    position:static !important;
+    inset:auto !important;
+    grid-area:auto !important;
+    grid-column:auto !important;
+    grid-row:auto !important;
+    float:none !important;
+    flex:0 0 96px !important;
+    width:96px !important;
+    min-width:96px !important;
+    max-width:96px !important;
+    height:40px !important;
+    min-height:40px !important;
+    padding:8px 10px !important;
     border-radius:7px !important;
-    min-height:42px;
-    padding:9px 8px !important;
-    cursor:pointer;
+    margin:0 !important;
+    transform:none !important;
   }
 }
 #customerView .save-bar .primary:disabled {
