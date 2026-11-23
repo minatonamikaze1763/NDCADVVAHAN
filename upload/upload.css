@@ -2469,3 +2469,14 @@ dialog.customer-dialog {
   .customer-form-grid #createStatus,
   .customer-form-submit { grid-column: 1; }
 }
+
+/* Reduce compositing cost across the upload portal. */
+*, *::before, *::after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+main {
+  margin-top: calc(var(--upload-topbar-height) + 20px) !important;
+}
