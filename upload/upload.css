@@ -2805,3 +2805,33 @@ main {
     margin-top:0 !important;
   }
 }
+
+/* Address Proof has an extra selector: reserve explicit compact rows for it. */
+@media (min-width:681px) {
+  #customerView .doc-row[data-doc="address-proof"] {
+    grid-template-rows:min-content min-content min-content min-content !important;
+    grid-auto-rows:min-content !important;
+    align-content:start !important;
+    min-height:0 !important;
+  }
+  #customerView .doc-row[data-doc="address-proof"] > .doc-row-header {
+    grid-column:1 !important;
+    grid-row:1 !important;
+  }
+  #customerView .doc-row[data-doc="address-proof"] > .doc-state {
+    grid-column:1 !important;
+    grid-row:2 !important;
+  }
+  #customerView .doc-row[data-doc="address-proof"] > .doc-file-summary {
+    grid-column:1 !important;
+    grid-row:3 !important;
+  }
+  #customerView .doc-row[data-doc="address-proof"] > .doc-actions:not(.native-capture-group) {
+    grid-column:2 !important;
+    grid-row:1 / 4 !important;
+  }
+  #customerView .doc-row[data-doc="address-proof"] > .subcat {
+    grid-column:1 / -1 !important;
+    grid-row:4 !important;
+  }
+}
