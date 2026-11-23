@@ -2835,3 +2835,36 @@ main {
     grid-row:4 !important;
   }
 }
+
+/* Fixed desktop/tablet tracks prevent the Address Proof card from stretching. */
+@media (min-width:681px) {
+  #customerView .doc-row[data-doc="address-proof"] {
+    grid-template-rows:22px 18px 18px 42px !important;
+    grid-auto-rows:0px !important;
+    align-content:start !important;
+    height:auto !important;
+    min-height:0 !important;
+  }
+  #customerView .doc-row[data-doc="address-proof"] > .doc-row-header {
+    grid-column:1 !important;
+    grid-row:1 !important;
+  }
+  #customerView .doc-row[data-doc="address-proof"] > .doc-state {
+    grid-column:1 !important;
+    grid-row:2 !important;
+  }
+  #customerView .doc-row[data-doc="address-proof"] > .doc-file-summary {
+    grid-column:1 !important;
+    grid-row:3 !important;
+  }
+  #customerView .doc-row[data-doc="address-proof"] > .doc-actions:not(.native-capture-group) {
+    grid-column:2 !important;
+    grid-row:1 / 4 !important;
+    align-self:center !important;
+  }
+  #customerView .doc-row[data-doc="address-proof"] > .subcat {
+    grid-column:1 / -1 !important;
+    grid-row:4 !important;
+    align-self:stretch !important;
+  }
+}
