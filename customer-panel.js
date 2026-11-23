@@ -32,6 +32,9 @@
   function normalizeCloudPlans(plans) {
     return (Array.isArray(plans) ? plans : []).map(normalizeCloudPlan).filter(Boolean);
   }
+  function razorpaySecurityPanel() {
+    return '<aside class="ndc-payment-trust" aria-label="Payment security"><div class="ndc-payment-trust-heading"><svg class="ndc-payment-trust-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z"/><path d="m8 12 3 3 5-6"/></svg><strong>Payments secured by Razorpay</strong></div><a class="ndc-payment-trust-logo" href="https://razorpay.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit Razorpay (opens in a new tab)"><img src="https://razorpay.com/assets/razorpay-logo.svg" width="112" height="26" alt="Razorpay" loading="lazy" decoding="async" referrerpolicy="no-referrer"></a><p>Your payment is processed through Razorpay Checkout. Choose from the payment methods available at checkout and complete authentication with your bank or payment app.</p><span class="ndc-payment-trust-note">Never share your OTP, UPI PIN or banking password with NDC support.</span></aside>';
+  }
   function subscriptionVisual(account) {
     const expiry = Date.parse(account.expiresAt), now = Date.now() + serverClockOffset;
     const remaining = Number.isFinite(expiry) ? Math.max(0, expiry - now) : null;
@@ -955,7 +958,8 @@
               </section>
               `}
               <div id="ndcRenewalTotal" class="ndc-checkout-payment-summary" aria-live="polite"></div>
-              <button class="ndc-home-button" id="ndcRenewalSubmit" type="submit">Continue to secure payment</button>
+              <button class="ndc-home-button" id="ndcRenewalSubmit" type="submit">Pay securely</button>
+              ${razorpaySecurityPanel()}
               <p id="ndcRenewalStatus" role="status" aria-live="polite"></p>
             </div>
             </form>
@@ -993,7 +997,7 @@
         <section class="ndc-panel-card ndc-cloud-purchase"><h2>Buy or add Cloud Storage</h2><p>A cloud plan is a one-time purchase. It adds records to your existing balance and does not renew your paid subscription.</p>
           <fieldset class="ndc-choice-group"><legend>Choose a cloud plan</legend><div class="ndc-plan-options">${(dashboardData.cloudAddonPlans || []).map((plan, index) => '<div class="ndc-cloud-plan-card"><label class="ndc-choice ndc-cloud-purchase-choice"><input type="radio" name="cloudPurchasePlan" value="' + esc(plan.id) + '"' + (index === 0 ? ' checked' : '') + '><span><small>CLOUD STORAGE · ' + (plan.structure === "flex" ? "FLEX · ONE TIME" : "FIXED · ONE TIME") + '</small><strong>' + esc(plan.name) + '</strong><b>' + esc(money(plan.structure === "flex" ? plan.perCustomerPrice : plan.price)) + (plan.structure === "flex" ? '<small> / record · one time</small>' : '<small> one time</small>') + '</b><em>' + (plan.structure === "flex" ? "Select additional records, up to " + Number(plan.recordLimit).toLocaleString("en-IN") : "Adds " + Number(plan.recordLimit).toLocaleString("en-IN") + " customer records") + ' · 12 document slots each</em></span></label>' + (plan.structure === "flex" ? '<label class="ndc-cloud-flex-quantity" data-cloud-purchase-quantity-wrap="' + esc(plan.id) + '" hidden><span>Additional customer records</span><input type="number" min="1" max="' + Number(plan.recordLimit) + '" value="' + Math.min(100, Number(plan.recordLimit) || 100) + '" inputmode="numeric" data-cloud-purchase-quantity="' + esc(plan.id) + '" aria-label="Additional customer records"></label>' : "") + '</div>').join("")}</div></fieldset>
           <div id="ndcCloudOffer"></div><div id="ndcCloudPurchaseTotal" class="ndc-checkout-payment-summary" aria-live="polite"></div>
-          <button type="button" class="ndc-home-button" id="ndcCloudPurchaseSubmit">Purchase Cloud Storage</button><p id="ndcCloudPurchaseStatus" role="status" aria-live="polite"></p>
+          <button type="button" class="ndc-home-button" id="ndcCloudPurchaseSubmit">Pay securely</button>${razorpaySecurityPanel()}<p id="ndcCloudPurchaseStatus" role="status" aria-live="polite"></p>
         </section>`;
     }
 
@@ -1475,7 +1479,9 @@
     const list = plan ? (plan.structure === 'flex' ? Number(plan.perCustomerPrice) * recordLimit : Number(plan.price)) : 0;
     const taxable = cloudAppliedOffer ? Number(cloudAppliedOffer.amountPaise) / 100 : list;
     const rate = Number(dashboardData?.gstCheckout?.gstRate) || 18, gst = dashboardData?.gstCheckout?.enabled ? Math.round(taxable * rate) / 100 : 0, total = taxable + gst, root = $('ndcCloudPurchaseTotal');
-    if (root) root.innerHTML = '<div class="ndc-checkout-summary-heading">ONE-TIME CLOUD PAYMENT</div><div class="ndc-checkout-tax-row"><span>Records added</span><strong>' + esc(Number(recordLimit).toLocaleString('en-IN')) + '</strong></div><div class="ndc-checkout-tax-row"><span>Cloud plan amount</span><strong>' + esc(money(list)) + '</strong></div>' + (list > taxable ? '<div class="ndc-checkout-tax-row"><span>Offer discount</span><strong>−' + esc(money(list - taxable)) + '</strong></div>' : '') + '<div class="ndc-checkout-tax-row"><span>GST ' + (dashboardData?.gstCheckout?.enabled ? '(' + rate + '%)' : '· not charged') + '</span><strong>' + esc(money(gst)) + '</strong></div><div class="ndc-checkout-tax-row is-total"><span>Total payable</span><strong>' + esc(money(total)) + '</strong></div>';
+    if (root) renderRenewalSummary({ planAmount: 0, cloudAmount: list, list, discount: Math.max(0, list - taxable), taxable, gst, gstRate: rate, gstEnabled: dashboardData?.gstCheckout?.enabled === true, total, recordsAdded: recordLimit }, "ndcCloudPurchaseTotal");
+    const payButton = $("ndcCloudPurchaseSubmit");
+    if (payButton) { payButton.disabled = paymentBusy || !plan; if (!paymentBusy && !plan) payButton.textContent = "Select a cloud plan"; }
   }
   const RENEWAL_PRICES = {};
   function cloudQuantityFor(plan) {
@@ -1501,23 +1507,42 @@
   }
   function renewalTotal() {
     const plan = document.querySelector('input[name="renewalPlan"]:checked')?.value, months = Number(document.querySelector('input[name="renewalMonths"]:checked')?.value || 1);
-    const addonId = document.querySelector('input[name="renewalCloudAddon"]:checked')?.value;
+    const cloudEnabled = $("ndcRenewalCloudEnabled")?.checked === true;
+    const addonId = cloudEnabled ? document.querySelector('input[name="renewalCloudAddon"]:checked')?.value : null;
     const addonPlan = (dashboardData?.cloudAddonPlans || []).find(item => item.id === addonId);
     syncCloudQuantityFields();
-    const addonAmount = addonPlan ? (addonPlan.structure === "flex" ? Number(addonPlan.perCustomerPrice) * cloudQuantityFor(addonPlan) : Number(addonPlan.price)) : 0;
-    if ($("ndcRenewalTotal") && RENEWAL_PRICES[plan]) {
-      const offerIncludesCloud = !!appliedOffer?.cloudAddonPlanId;
-      const list = RENEWAL_PRICES[plan] * months + addonAmount, taxable = (appliedOffer ? appliedOffer.amountPaise / 100 : RENEWAL_PRICES[plan] * months) + (offerIncludesCloud ? 0 : addonAmount);
+    const planAmount = (Number(RENEWAL_PRICES[plan]) || 0) * months;
+    const cloudAmount = addonPlan ? (addonPlan.structure === "flex" ? Number(addonPlan.perCustomerPrice) * cloudQuantityFor(addonPlan) : Number(addonPlan.price)) : 0;
+    if ($("ndcRenewalTotal") && planAmount >= 0) {
+      const offerIncludesCloud = !!appliedOffer?.cloudAddonPlanId && cloudEnabled;
+      const list = planAmount + cloudAmount;
+      const taxable = (appliedOffer ? Number(appliedOffer.amountPaise) / 100 : planAmount) + (offerIncludesCloud ? 0 : cloudAmount);
       const gstRate = Number(dashboardData?.gstCheckout?.gstRate) || 18, gst = dashboardData?.gstCheckout?.enabled ? Math.round(taxable * gstRate) / 100 : 0;
-      renderRenewalSummary({ list, taxable, discount: Math.max(0, list - taxable), gst, gstRate, gstEnabled: dashboardData?.gstCheckout?.enabled === true, total: taxable + gst });
+      renderRenewalSummary({ planAmount, cloudAmount, list, taxable, discount: Math.max(0, list - taxable), gst, gstRate, gstEnabled: dashboardData?.gstCheckout?.enabled === true, total: taxable + gst });
     }
     renewalPreview();
   }
 
   function renderRenewalSummary(summary, targetId = "ndcRenewalTotal") {
     const root = $(targetId); if (!root) return;
-    const rows = [ ["Plan / offer amount", summary.list], ...(summary.discount > 0 ? [["Discount / offer applied", summary.discount]] : []), ["Taxable amount", summary.taxable], [summary.gstEnabled ? "GST (" + summary.gstRate + "%)" : "GST · not charged", summary.gst], ["Total payable", summary.total] ];
-    root.innerHTML = '<div class="ndc-checkout-summary-heading">PAYMENT SUMMARY</div><div class="ndc-checkout-summary-columns"><span>DESCRIPTION</span><span>AMOUNT</span></div>' + rows.map(([label, value]) => '<div class="ndc-checkout-tax-row' + (label === "Total payable" ? ' is-total' : '') + '"><span>' + esc(label) + '</span><strong>' + esc(money(value)) + '</strong></div>').join('') + '<small class="ndc-checkout-summary-note">' + (summary.gstEnabled ? 'GST is calculated after any plan or offer discount.' : 'GST is currently not charged. The amount shown is the amount you will pay.') + '</small>';
+    const gstRate = Number(summary.gstRate) || 18, halfRate = gstRate / 2;
+    const cgst = Number(summary.cgst ?? (Number(summary.gst) / 2)) || 0;
+    const sgst = Number(summary.sgst ?? (Number(summary.gst) - cgst)) || 0;
+    const rows = [
+      ["Plan amount", Number(summary.planAmount ?? summary.list) || 0],
+      ["Cloud plan amount", Number(summary.cloudAmount) || 0],
+      ["Total", Number(summary.list) || 0],
+      ["Discount / offer applied", Number(summary.discount) || 0],
+      ["Taxable amount", Number(summary.taxable) || 0],
+      ...(Number.isFinite(Number(summary.recordsAdded)) ? [["Records added", Number(summary.recordsAdded).toLocaleString("en-IN"), true]] : []),
+      [summary.gstEnabled ? "CGST (" + halfRate + "%)" : "CGST (" + halfRate + "%) · not charged", cgst],
+      [summary.gstEnabled ? "SGST (" + halfRate + "%)" : "SGST (" + halfRate + "%) · not charged", sgst],
+      [summary.gstEnabled ? "Total GST (" + gstRate + "%)" : "Total GST (" + gstRate + "%) · not charged", Number(summary.gst) || 0],
+      ["Total payable", Number(summary.total) || 0]
+    ];
+    root.innerHTML = '<div class="ndc-checkout-summary-heading">PAYMENT SUMMARY</div><div class="ndc-checkout-summary-columns"><span>DESCRIPTION</span><span>AMOUNT</span></div>' + rows.map(([label, value, plain]) => '<div class="ndc-checkout-tax-row' + (label === "Total payable" ? ' is-total' : '') + '"><span>' + esc(label) + '</span><strong>' + esc(plain ? value : money(value)) + '</strong></div>').join('') + '<small class="ndc-checkout-summary-note">' + (summary.gstEnabled ? 'GST is calculated after any plan or offer discount.' : 'GST is currently not charged. The amount shown is the amount you will pay.') + '</small>';
+    const button = $(targetId === "ndcCloudPurchaseTotal" ? "ndcCloudPurchaseSubmit" : "ndcRenewalSubmit");
+    if (button && !paymentBusy) button.textContent = "Pay securely · " + money(summary.total);
   }
 
   function renewalBillingPayload() {
@@ -1596,7 +1621,9 @@
       const order = result.data || result;
       if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error("Invalid payment order response.");
       const quoteGst = order.gst || {};
-      renderRenewalSummary({ list: Number(quoteGst.listPrice || order.baseAmount || order.amount) / 100, discount: Number(quoteGst.discountAmount || 0) / 100, taxable: Number(quoteGst.taxableAmount || order.baseAmount || order.amount) / 100, gst: Number(quoteGst.amount || 0) / 100, gstRate: Number(quoteGst.rate || dashboardData?.gstCheckout?.gstRate || 18), gstEnabled: quoteGst.enabled === true, total: Number(order.amount) / 100 }, standaloneCloud ? "ndcCloudPurchaseTotal" : "ndcRenewalTotal");
+      const orderCloudAmount = cloudAddonPlan ? (cloudAddonPlan.structure === "flex" ? Number(cloudAddonPlan.perCustomerPrice) * Number(cloudAddonQuantity || 0) : Number(cloudAddonPlan.price)) : 0;
+      const orderPlanAmount = planId ? (Number(RENEWAL_PRICES[planId]) || 0) * Number(months || 1) : 0;
+      renderRenewalSummary({ planAmount: standaloneCloud ? 0 : orderPlanAmount, cloudAmount: orderCloudAmount, list: Number(quoteGst.listPrice || order.baseAmount || order.amount) / 100, discount: Number(quoteGst.discountAmount || 0) / 100, taxable: Number(quoteGst.taxableAmount || order.baseAmount || order.amount) / 100, gst: Number(quoteGst.amount || 0) / 100, gstRate: Number(quoteGst.rate || dashboardData?.gstCheckout?.gstRate || 18), gstEnabled: quoteGst.enabled === true, total: Number(order.amount) / 100, ...(standaloneCloud ? { recordsAdded: cloudAddonQuantity ?? cloudAddonPlan?.recordLimit ?? 0 } : {}) }, standaloneCloud ? "ndcCloudPurchaseTotal" : "ndcRenewalTotal");
       let verificationStarted = false;
       const checkout = new Razorpay({
         key: order.keyId, order_id: order.orderId, amount: order.amount,
