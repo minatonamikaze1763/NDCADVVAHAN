@@ -2868,3 +2868,22 @@ main {
     align-self:stretch !important;
   }
 }
+
+/* Align saved indicators beside titles and stretch neighboring cards to the tallest card. */
+.doc-row-header {
+  justify-content:flex-start !important;
+  gap:8px !important;
+}
+.doc-row-header h3 {
+  flex:0 1 auto !important;
+  width:auto !important;
+  max-width:100%;
+}
+.doc-row-header .cloud-saved-indicator {
+  margin-left:0 !important;
+}
+@media (min-width:681px) {
+  #customerView .doc-list {
+    align-items:stretch !important;
+  }
+}
