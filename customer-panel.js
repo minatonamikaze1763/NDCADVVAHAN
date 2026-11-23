@@ -966,6 +966,14 @@
               <div id="ndcRenewalTotal" class="ndc-checkout-payment-summary ndc-renewal-payment-summary" aria-live="polite"></div>
               <button class="ndc-home-button" id="ndcRenewalSubmit" type="submit">Pay securely</button>
               ${razorpaySecurityPanel()}
+              <div id="ndcRenewalVerification" class="ndc-renewal-verification" role="status" aria-live="assertive" aria-atomic="true" hidden>
+                <div class="ndc-renewal-verification-card">
+                  <span class="ndc-renewal-verification-spinner" aria-hidden="true"></span>
+                  <p class="ndc-renewal-verification-label">PAYMENT VERIFICATION</p>
+                  <h2>Verifying your renewal</h2>
+                  <p>We received the payment response and are confirming it securely. Please keep this page open while we update your subscription.</p>
+                </div>
+              </div>
               <p id="ndcRenewalStatus" role="status" aria-live="polite"></p>
             </div>
             </form>
@@ -1597,9 +1605,17 @@
   async function startRenewalPayment(planId, months, statusId, cloudAddonPlanId = null, standaloneCloud = false) {
     if (paymentBusy) return;
     const message = (text) => {
+      const isRenewalVerification = !standaloneCloud && statusId === "ndcRenewalStatus" &&
+        String(text || "").startsWith("Verifying your payment");
+      const verificationPanel = $("ndcRenewalVerification");
+      if (verificationPanel) {
+        verificationPanel.hidden = !isRenewalVerification;
+        if (isRenewalVerification) verificationPanel.setAttribute("aria-busy", "true");
+        else verificationPanel.removeAttribute("aria-busy");
+      }
       // Resolve the current node: navigation may re-render during checkout.
       const node = $(statusId) || $("ndcQuickRenewStatus") || $("ndcRenewalStatus");
-      if (node) node.textContent = text;
+      if (node) node.textContent = isRenewalVerification && verificationPanel ? "" : text;
     };
     const activeOfferWidget = standaloneCloud ? cloudOfferWidget : offerWidget;
     if (activeOfferWidget?.isLoading() || activeOfferWidget?.hasUnapplied()) {
