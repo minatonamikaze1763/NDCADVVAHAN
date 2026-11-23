@@ -100,7 +100,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d9a91d77;border-color
 .camera-capture-photos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .camera-photo-thumb{min-width:0;display:grid;gap:6px;text-align:center;color:var(--gold2);font-size:.76rem}
 .camera-photo-thumb img{width:100%;height:94px;object-fit:cover;border:1px solid #514528;border-radius:9px;background:#0b0b0a}
-.camera-capture-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.camera-capture-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
 .camera-capture-actions button{min-height:42px}
 @media(max-width:680px){
  .camera-dialog{width:calc(100vw - 18px);max-height:96dvh;border-radius:15px}
@@ -1467,7 +1467,7 @@ body:has(#settingsView:not([hidden])) .workspace-dashboard { display:none; }
     grid-column:1 / -1;
     grid-row:4;
     display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-columns:repeat(3,minmax(0,1fr));
     align-items:stretch;
     gap:7px;
     width:100%;
