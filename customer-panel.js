@@ -27,7 +27,7 @@
     if (!Number.isInteger(recordLimit) || recordLimit < 1 || !["fixed", "flex"].includes(plan.structure)) return null;
     if (plan.structure === "fixed" && (!Number.isFinite(price) || price < 0)) return null;
     if (plan.structure === "flex" && (!Number.isFinite(perCustomerPrice) || perCustomerPrice < 0)) return null;
-    return { ...plan, recordLimit, price, perCustomerPrice };
+    return { ...plan, recordLimit, ...(Number.isFinite(price) ? { price } : {}), perCustomerPrice };
   }
   function normalizeCloudPlans(plans) {
     return (Array.isArray(plans) ? plans : []).map(normalizeCloudPlan).filter(Boolean);
