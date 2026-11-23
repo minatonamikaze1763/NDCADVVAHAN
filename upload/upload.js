@@ -851,220 +851,57 @@
     const isImage = file.type?.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(file.name || "");
     const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
     if (!isImage && !isPdf) return;
-    const overlay = document.createElement("div");
-    overlay.className = "fullscreen-preview";
-    overlay.setAttribute("role", "dialog");
-    overlay.setAttribute("aria-modal", "true");
-    overlay.setAttribute("aria-label", `Preview ${file.name || "document"}`);
-    const panel = document.createElement("section");
-    panel.className = "fullscreen-preview-panel";
+
+    const dialog = document.createElement("dialog");
+    dialog.className = "native-preview-dialog";
+    dialog.setAttribute("aria-label", `Preview ${file.name || "document"}`);
     const header = document.createElement("header");
-    header.className = "fullscreen-preview-header";
-    const fileInfo = document.createElement("div");
-    fileInfo.className = "fullscreen-preview-file";
+    header.className = "native-preview-header";
     const title = document.createElement("strong");
-    title.className = "fullscreen-preview-title";
+    title.className = "native-preview-title";
     title.textContent = file.name || "Document preview";
-    const metadata = document.createElement("span");
-    metadata.className = "fullscreen-preview-meta";
-    metadata.textContent = savedDetails
-      ? [savedDetails.originalSize != null ? `Original size: ${readableSize(savedDetails.originalSize)}` : "", savedDetails.size != null ? `Saved size: ${readableSize(savedDetails.size)}` : "", isPdf ? "PDF document" : "Image"].filter(Boolean).join(" · ")
-      : `${readableSize(file.size)} · ${isPdf ? "PDF document" : "Image"}`;
-    fileInfo.append(title, metadata);
     const close = document.createElement("button");
     close.type = "button";
-    close.className = "fullscreen-preview-close";
+    close.className = "quiet native-preview-close";
     close.textContent = "Close";
-    close.setAttribute("aria-label", "Close preview");
-    const toolbar = document.createElement("div");
-    toolbar.className = "fullscreen-preview-toolbar";
-    const zoomControls = document.createElement("div");
-    zoomControls.className = "preview-control-group";
-    const makeButton = (label, labelTitle, handler, extraClass = "") => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = `preview-tool-button ${extraClass}`.trim();
-      button.textContent = label;
-      button.title = labelTitle;
-      button.addEventListener("click", handler);
-      return button;
-    };
-    let zoom = 1, fitScale = 1, pdfDocument = null, loadingTask = null, renderTask = null, renderSequence = 0, pageNumber = 1, closed = false, image = null, imageUrl = "";
-    const zoomValue = document.createElement("span");
-    zoomValue.className = "preview-zoom-value";
-    zoomValue.setAttribute("aria-live", "polite");
-    const updateZoomLabel = () => { zoomValue.textContent = `${Math.round(zoom * 100)}%`; };
-    const stage = document.createElement("div");
-    stage.className = "fullscreen-preview-stage";
-    const body = document.createElement("div");
-    body.className = "fullscreen-preview-body";
-    body.setAttribute("role", "region");
-    body.setAttribute("aria-label", "Document preview");
-    const pageControls = document.createElement("div");
-    pageControls.className = "preview-control-group preview-page-controls";
-    const pageValue = document.createElement("span");
-    pageValue.className = "preview-page-value";
-    pageValue.setAttribute("aria-live", "polite");
-    const previousPage = makeButton("‹", "Previous page", () => { if (pageNumber > 1) { pageNumber--; updatePageControls(); void renderPdfPage(); } });
-    const nextPage = makeButton("›", "Next page", () => { if (pdfDocument && pageNumber < pdfDocument.numPages) { pageNumber++; updatePageControls(); void renderPdfPage(); } });
-    const updatePageControls = () => {
-      pageValue.textContent = pdfDocument ? `${pageNumber} / ${pdfDocument.numPages}` : "Loading PDF…";
-      previousPage.disabled = !pdfDocument || pageNumber <= 1;
-      nextPage.disabled = !pdfDocument || pageNumber >= pdfDocument.numPages;
-    };
-    if (!isPdf) pageControls.hidden = true;
-    const updateImageSize = () => {
-      if (!image?.naturalWidth || closed) return;
-      const w = Math.max(120, body.clientWidth - 44), h = Math.max(120, body.clientHeight - 44);
-      fitScale = Math.min(1, w / image.naturalWidth, h / image.naturalHeight);
-      image.style.width = `${Math.max(1, image.naturalWidth * fitScale * zoom)}px`;
-      image.style.height = `${Math.max(1, image.naturalHeight * fitScale * zoom)}px`;
-    };
-    const renderPdfPage = async () => {
-      if (!pdfDocument || closed) return;
-      const sequence = ++renderSequence;
-      if (renderTask) { try { renderTask.cancel(); } catch {} renderTask = null; }
-      try {
-        const page = await pdfDocument.getPage(pageNumber);
-        if (closed || sequence !== renderSequence) return;
-        const initial = page.getViewport({scale:1});
-        const w = Math.max(120, body.clientWidth - 44), h = Math.max(120, body.clientHeight - 44);
-        fitScale = Math.min(1, w / initial.width, h / initial.height);
-        const viewport = page.getViewport({scale:fitScale * zoom});
-        const outputScale = Math.min(window.devicePixelRatio || 1, 2);
-        const canvas = document.createElement("canvas");
-        canvas.className = "custom-pdf-page";
-        canvas.width = Math.ceil(viewport.width * outputScale);
-        canvas.height = Math.ceil(viewport.height * outputScale);
-        canvas.style.width = `${viewport.width}px`;
-        canvas.style.height = `${viewport.height}px`;
-        const context = canvas.getContext("2d", {alpha:false});
-        context.fillStyle = "#fff";
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        stage.replaceChildren(canvas);
-        const task = page.render({canvasContext:context, viewport, transform:outputScale === 1 ? null : [outputScale,0,0,outputScale,0,0]});
-        renderTask = task;
-        await task.promise;
-        if (sequence === renderSequence) renderTask = null;
-      } catch (error) {
-        if (error?.name === "RenderingCancelledException" || closed || sequence !== renderSequence) return;
-        const message = document.createElement("p");
-        message.className = "preview-error";
-        message.textContent = "This PDF could not be displayed. It may be damaged or password protected.";
-        stage.replaceChildren(message);
-      }
-    };
-    const setZoom = next => {
-      zoom = Math.min(4, Math.max(.25, Math.round(next * 20) / 20));
-      updateZoomLabel();
-      if (isImage) updateImageSize();
-      else if (pdfDocument) void renderPdfPage();
-    };
-    zoomControls.append(
-      makeButton("−", "Zoom out", () => setZoom(zoom - .15)),
-      zoomValue,
-      makeButton("+", "Zoom in", () => setZoom(zoom + .15)),
-      makeButton("Fit", "Fit document to preview", () => setZoom(1), "preview-fit-button")
-    );
-    pageControls.prepend(previousPage);
-    pageControls.append(pageValue, nextPage);
-    const hint = document.createElement("span");
-    hint.className = "preview-zoom-hint";
-    hint.textContent = "Scroll or Ctrl + scroll to zoom";
-    toolbar.append(zoomControls, pageControls, hint);
-    body.append(stage);
-    header.append(fileInfo, close);
-    panel.append(header, toolbar, body);
-    overlay.append(panel);
-    const previousFocus = document.activeElement;
-    const cleanup = () => {
-      if (closed) return;
-      closed = true;
-      if (renderTask) { try { renderTask.cancel(); } catch {} }
-      if (loadingTask) void loadingTask.destroy().catch(() => {});
-      if (pdfDocument) void pdfDocument.destroy().catch(() => {});
-      if (imageUrl) URL.revokeObjectURL(imageUrl);
-      overlay.remove();
-      document.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("resize", onResize);
-      if (previousFocus instanceof HTMLElement) previousFocus.focus({preventScroll:true});
-    };
-    const onKeyDown = event => {
-      if (event.key === "Escape") cleanup();
-      else if (event.key === "+" || event.key === "=") { event.preventDefault(); setZoom(zoom + .15); }
-      else if (event.key === "-") { event.preventDefault(); setZoom(zoom - .15); }
-      else if (event.key === "0") { event.preventDefault(); setZoom(1); }
-      else if (event.key === "ArrowLeft" && isPdf && pageNumber > 1) { pageNumber--; updatePageControls(); void renderPdfPage(); }
-      else if (event.key === "ArrowRight" && isPdf && pdfDocument && pageNumber < pdfDocument.numPages) { pageNumber++; updatePageControls(); void renderPdfPage(); }
-    };
-    const onResize = () => { if (isImage) updateImageSize(); else if (pdfDocument) void renderPdfPage(); };
-    const onWheel = event => { event.preventDefault(); if (event.deltaY) setZoom(zoom + (event.deltaY < 0 ? .1 : -.1)); };
-    close.addEventListener("click", cleanup);
-    overlay.addEventListener("click", event => { if (event.target === overlay) cleanup(); });
-    body.addEventListener("wheel", onWheel, {passive:false});
-    document.addEventListener("keydown", onKeyDown);
-    window.addEventListener("resize", onResize);
-    document.body.append(overlay);
-    updateZoomLabel();
-    updatePageControls();
-    if (isImage) {
-      imageUrl = URL.createObjectURL(file);
-      image = document.createElement("img");
-      image.className = "custom-image-page";
-      image.alt = file.name || "Image preview";
-      image.addEventListener("load", updateImageSize, {once:true});
-      image.addEventListener("error", () => {
-        const message = document.createElement("p");
-        message.className = "preview-error";
-        message.textContent = "This image could not be displayed.";
-        stage.replaceChildren(message);
-      }, {once:true});
-      stage.replaceChildren(image);
-      image.src = imageUrl;
-    } else {
-      const pdfjs = globalThis.pdfjsLib;
-      if (!pdfjs?.getDocument) stage.textContent = "The custom PDF viewer could not be loaded. Refresh the page and try again.";
-      else {
-        pdfjs.GlobalWorkerOptions.workerSrc = "/upload/vendor/pdf.worker.min.js?v=3.11.174";
-        try {
-          const data = await file.arrayBuffer();
-          if (closed) return;
-          loadingTask = pdfjs.getDocument({data});
-          pdfDocument = await loadingTask.promise;
-          if (closed) return;
-          updatePageControls();
-          await renderPdfPage();
-        } catch (error) {
-          if (closed) return;
-          const message = document.createElement("p");
-          message.className = "preview-error";
-          message.textContent = "This PDF could not be opened. It may be damaged or password protected.";
-          stage.replaceChildren(message);
-        }
-      }
+    close.addEventListener("click", () => dialog.close());
+    header.append(title, close);
+
+    const content = document.createElement("div");
+    content.className = "native-preview-content";
+    let mimeType = file.type;
+    if (isPdf) mimeType = "application/pdf";
+    else if (!mimeType) {
+      const extension = String(file.name || "").split(".").pop().toLowerCase();
+      mimeType = ({jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",webp:"image/webp"})[extension] || "application/octet-stream";
     }
-    if (!closed) close.focus();
+    const previewSource = URL.createObjectURL(file.slice(0, file.size, mimeType));
+    if (isPdf) {
+      const frame = document.createElement("iframe");
+      frame.className = "native-preview-pdf";
+      frame.title = `Browser PDF preview: ${file.name || "document"}`;
+      frame.src = previewSource;
+      content.append(frame);
+    } else {
+      const image = document.createElement("img");
+      image.className = "native-preview-image";
+      image.alt = file.name || "Image preview";
+      image.src = previewSource;
+      content.append(image);
+    }
+    dialog.append(header, content);
+    dialog.addEventListener("close", () => {
+      URL.revokeObjectURL(previewSource);
+      dialog.remove();
+    }, {once:true});
+    dialog.addEventListener("click", event => {
+      if (event.target === dialog) dialog.close();
+    });
+    document.body.append(dialog);
+    dialog.showModal();
+    close.focus();
   }
 
-  async function renderPdfThumbnail(file, button, mark, hint) {
-    const pdfjs = window.pdfjsLib;
-    if (!pdfjs || typeof pdfjs.getDocument !== "function") return;
-    let loadingTask, pdf;
-    try {
-      loadingTask = pdfjs.getDocument({data:new Uint8Array(await file.arrayBuffer()),useWorkerFetch:false,isEvalSupported:false,disableWorker:true});
-      pdf = await loadingTask.promise;
-      const page = await pdf.getPage(1), base = page.getViewport({scale:1});
-      const viewport = page.getViewport({scale:Math.min(220 / base.width,112 / base.height)});
-      const canvas = document.createElement("canvas"); canvas.className = "pdf-preview-canvas";
-      canvas.width = Math.max(1,Math.ceil(viewport.width)); canvas.height = Math.max(1,Math.ceil(viewport.height)); canvas.setAttribute("aria-hidden","true");
-      const context = canvas.getContext("2d",{alpha:false}); if (!context) return;
-      context.fillStyle = "#fff"; context.fillRect(0,0,canvas.width,canvas.height);
-      await page.render({canvasContext:context,viewport,background:"#fff"}).promise;
-      if (button.isConnected) { mark.hidden = true; hint.textContent = "Page 1 · Open full preview"; button.insertBefore(canvas,hint); }
-      page.cleanup();
-    } catch (_) { hint.textContent = "Open PDF preview"; }
-    finally { if (pdf) await pdf.destroy().catch(()=>{}); else if (loadingTask) await loadingTask.destroy().catch(()=>{}); }
-  }
   function setPreview(box, file, label, savedDetails = null) {
     if (box._url) URL.revokeObjectURL(box._url);
     box._previewReady = Promise.resolve();
@@ -1084,12 +921,14 @@
         const pdfButton = document.createElement("button"); pdfButton.type = "button"; pdfButton.className = "pdf-preview-thumb"; pdfButton.setAttribute("aria-label", `Preview PDF ${file.name || ""} · ${readableSize(file.size)}`);
         const mark = document.createElement("span"); mark.className = "pdf-preview-mark"; mark.textContent = "PDF";
         const hint = document.createElement("span"); hint.className = "pdf-preview-hint"; hint.textContent = "Loading first page…";
-        pdfButton.append(mark, hint); pdfButton.addEventListener("click", () => showFullscreenPreview(file, savedDetails)); box.append(pdfButton);
-        box._previewReady = renderPdfThumbnail(file, pdfButton, mark, hint);
+        hint.textContent = "Open in browser PDF viewer";
+        pdfButton.append(mark, hint);
+        pdfButton.addEventListener("click", () => showFullscreenPreview(file, savedDetails));
+        box.append(pdfButton);
       } else {
         const unsupported = document.createElement("span"); unsupported.className = "file-preview-label"; unsupported.textContent = "Preview unavailable"; box.append(unsupported);
       }
-      const full = document.createElement("button"); full.type = "button"; full.className = "preview-fullscreen"; full.textContent = "Open preview"; full.addEventListener("click", () => showFullscreenPreview(file, savedDetails)); box.append(full);
+      const full = document.createElement("button"); full.type = "button"; full.className = "preview-fullscreen"; full.textContent = "Open browser preview"; full.addEventListener("click", () => showFullscreenPreview(file, savedDetails)); box.append(full);
     }
     const row = box.closest(".doc-row");
     const pair = box.closest(".preview-pair");
