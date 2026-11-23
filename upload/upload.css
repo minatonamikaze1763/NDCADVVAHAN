@@ -2024,3 +2024,56 @@ body:has(#settingsView:not([hidden])) .workspace-dashboard { display:none; }
     padding:7px 9px !important;
   }
 }
+
+/* Match only the customer header's Edit and Close controls. */
+#customerView .customer-heading .customer-controls {
+  display:flex !important;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:nowrap;
+  gap:8px;
+}
+#customerView .customer-heading .customer-controls > button {
+  box-sizing:border-box;
+  display:inline-flex;
+  flex:0 0 150px !important;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:150px !important;
+  min-width:150px !important;
+  max-width:150px;
+  height:44px;
+  min-height:44px;
+  padding:10px 14px !important;
+  border-radius:7px !important;
+  line-height:1.2;
+  white-space:nowrap;
+  font-size:.82rem;
+}
+#customerView .customer-heading .customer-controls > button:last-child {
+  border:1px solid #80504a;
+  background:#321e1c;
+  color:#f2c5bd;
+}
+#customerView .customer-heading .customer-controls > button:last-child:hover:not(:disabled) {
+  border-color:#b26459;
+  background:#482522;
+  color:#fff0ec;
+  transform:none;
+}
+@media(max-width:680px) {
+  #customerView .customer-heading .customer-controls {
+    width:100%;
+    justify-content:flex-end;
+    gap:8px;
+  }
+  #customerView .customer-heading .customer-controls > button {
+    flex:1 1 0 !important;
+    width:auto !important;
+    min-width:0 !important;
+    max-width:none;
+    padding:9px 8px !important;
+    font-size:.76rem;
+  }
+}
