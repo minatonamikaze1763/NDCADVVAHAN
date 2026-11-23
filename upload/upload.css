@@ -2710,7 +2710,7 @@ main {
 @media (min-width:681px) {
   #customerView .doc-row[data-doc]:not([data-doc="form20"]) {
     display:grid !important;
-    grid-template-columns:minmax(0,1fr) max-content !important;
+    grid-template-columns:minmax(0,1fr) 276px !important;
     grid-template-rows:auto auto auto;
     align-items:center;
     gap:4px 14px;
