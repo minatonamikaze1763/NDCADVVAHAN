@@ -2668,3 +2668,9 @@ main {
   .workspace-use-card,
   .workspace-handoff-card { padding:13px; }
 }
+
+
+/* Separate the cloud usage guide from the settings panel. */
+.workspace-use-section {
+  margin-bottom:20px;
+}
