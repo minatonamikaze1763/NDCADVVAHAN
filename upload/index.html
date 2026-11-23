@@ -83,6 +83,12 @@
         <section class="card search-card">
           <label for="search">Find a customer</label>
           <input id="search" placeholder="Search by customer name or chassis number" autocomplete="off">
+          <form id="customerDateFilter" class="customer-date-filter">
+            <label for="customerFromDate">From date<input id="customerFromDate" type="date" required></label>
+            <label for="customerToDate">To date<input id="customerToDate" type="date" required></label>
+            <button class="secondary" type="submit">Load records</button>
+            <button id="todayDateFilter" class="quiet" type="button">Today</button>
+          </form>
           <p class="eyebrow recent-customers-label">RECENT CUSTOMERS</p>
           <div id="customerResults" class="customer-results"></div>
           <p id="searchStatus" class="status" role="status"></p>
