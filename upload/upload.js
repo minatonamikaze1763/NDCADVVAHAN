@@ -1070,24 +1070,39 @@
     box._previewReady = Promise.resolve();
     box.replaceChildren();
     const tag = document.createElement("span"); tag.className = "file-preview-title"; tag.textContent = label; box.append(tag);
-    if (!file) { const empty = document.createElement("span"); empty.className = "file-preview-label"; empty.textContent = label === "Selected" ? "No file selected" : "No saved file"; box.append(empty); return box._previewReady; }
-    const isImage = file.type?.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(file.name || "");
-    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
-    if (isImage) {
-      const url = URL.createObjectURL(file); box._url = url;
-      const image = document.createElement("img"); image.alt = file.name || "Document preview"; image.className = "file-preview-thumb"; image.addEventListener("click", () => showFullscreenPreview(file, savedDetails));
-      box._previewReady = new Promise(resolve => { image.addEventListener("load", resolve, {once:true}); image.addEventListener("error", resolve, {once:true}); });
-      box.append(image); image.src = url;
-    } else if (isPdf) {
-      const pdfButton = document.createElement("button"); pdfButton.type = "button"; pdfButton.className = "pdf-preview-thumb"; pdfButton.setAttribute("aria-label", `Preview PDF ${file.name || ""} · ${readableSize(file.size)}`);
-      const mark = document.createElement("span"); mark.className = "pdf-preview-mark"; mark.textContent = "PDF";
-      const hint = document.createElement("span"); hint.className = "pdf-preview-hint"; hint.textContent = "Loading first page…";
-      pdfButton.append(mark, hint); pdfButton.addEventListener("click", () => showFullscreenPreview(file, savedDetails)); box.append(pdfButton);
-      box._previewReady = renderPdfThumbnail(file, pdfButton, mark, hint);
+    if (!file) {
+      const empty = document.createElement("span"); empty.className = "file-preview-label"; empty.textContent = label === "Selected" ? "No file selected" : "No saved file"; box.append(empty);
     } else {
-      const unsupported = document.createElement("span"); unsupported.className = "file-preview-label"; unsupported.textContent = "Preview unavailable"; box.append(unsupported);
+      const isImage = file.type?.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(file.name || "");
+      const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
+      if (isImage) {
+        const url = URL.createObjectURL(file); box._url = url;
+        const image = document.createElement("img"); image.alt = file.name || "Document preview"; image.className = "file-preview-thumb"; image.addEventListener("click", () => showFullscreenPreview(file, savedDetails));
+        box._previewReady = new Promise(resolve => { image.addEventListener("load", resolve, {once:true}); image.addEventListener("error", resolve, {once:true}); });
+        box.append(image); image.src = url;
+      } else if (isPdf) {
+        const pdfButton = document.createElement("button"); pdfButton.type = "button"; pdfButton.className = "pdf-preview-thumb"; pdfButton.setAttribute("aria-label", `Preview PDF ${file.name || ""} · ${readableSize(file.size)}`);
+        const mark = document.createElement("span"); mark.className = "pdf-preview-mark"; mark.textContent = "PDF";
+        const hint = document.createElement("span"); hint.className = "pdf-preview-hint"; hint.textContent = "Loading first page…";
+        pdfButton.append(mark, hint); pdfButton.addEventListener("click", () => showFullscreenPreview(file, savedDetails)); box.append(pdfButton);
+        box._previewReady = renderPdfThumbnail(file, pdfButton, mark, hint);
+      } else {
+        const unsupported = document.createElement("span"); unsupported.className = "file-preview-label"; unsupported.textContent = "Preview unavailable"; box.append(unsupported);
+      }
+      const full = document.createElement("button"); full.type = "button"; full.className = "preview-fullscreen"; full.textContent = "Open preview"; full.addEventListener("click", () => showFullscreenPreview(file, savedDetails)); box.append(full);
     }
-    const full = document.createElement("button"); full.type = "button"; full.className = "preview-fullscreen"; full.textContent = "Open preview"; full.addEventListener("click", () => showFullscreenPreview(file, savedDetails)); box.append(full);
+    const row = box.closest(".doc-row");
+    const pair = box.closest(".preview-pair");
+    if (row && pair && box === pair.firstElementChild) {
+      const filename = row.querySelector(".doc-file-summary-name");
+      const preview = row.querySelector(".doc-summary-preview");
+      if (filename) filename.textContent = file?.name || row._savedDocument?.filename || "No document saved";
+      if (preview) {
+        preview.disabled = !(file || row._savedDocument || row._pages?.length);
+        preview.setAttribute("aria-label", file || row._pages?.length ? "Preview selected document" : row._savedDocument ? "Preview saved document" : "No document to preview");
+        preview.title = preview.getAttribute("aria-label");
+      }
+    }
     return box._previewReady;
   }
   function setDocumentRowLoading(row, loading) {
@@ -1169,7 +1184,23 @@
       });
       stored.append(tag, open);
     } else setPreview(stored, null, "Saved");
-    pair.append(selected, stored); row.append(pair); addModifiedLabel(row, saved); row._selectedPreview = selected; row._savedDocument = saved || null; addFileDetails(row, saved);
+    pair.append(selected, stored);
+    row.append(pair);
+    const summary = document.createElement("div"); summary.className = "doc-file-summary";
+    const filename = document.createElement("span"); filename.className = "doc-file-summary-name"; filename.textContent = saved?.filename || "No document saved";
+    const preview = document.createElement("button"); preview.type = "button"; preview.className = "doc-summary-preview"; preview.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    preview.disabled = !saved; preview.setAttribute("aria-label", saved ? "Preview saved document" : "No document to preview"); preview.title = preview.getAttribute("aria-label");
+    preview.addEventListener("click", async () => {
+      if (row._file) { showFullscreenPreview(row._file); return; }
+      if (row._pages?.length) { showFullscreenPreview(row._pages[0]); return; }
+      if (!row._savedDocument) return;
+      preview.disabled = true;
+      try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, {}, true); const savedFile = new File([blob], row._savedDocument.filename, {type:row._savedDocument.contentType || blob.type}); showFullscreenPreview(savedFile, row._savedDocument); }
+      catch(error) { preview.title = error.message || "Preview unavailable"; }
+      finally { preview.disabled = false; }
+    });
+    summary.append(filename, preview); row.append(summary);
+    addModifiedLabel(row, saved); row._selectedPreview = selected; row._savedDocument = saved || null; addFileDetails(row, saved);
   }
   function bulkFileAssignmentLabel(category, file) {
     if (!category) return "Unmatched";
@@ -1379,8 +1410,8 @@
     }); controls.append(edit, close); head.append(titleBlock, controls); host.append(head);
     const fields = document.createElement("div"); fields.className = "customer-fields"; [["Address", customer.address], ["HP", customer.hp], ["Application no.", customer.applicationNumber]].forEach(([label, value]) => { if (value) { const span = document.createElement("span"); span.textContent = `${label}: ${value}`; fields.append(span); } }); host.append(fields);
     const expires = document.createElement("p"); expires.className = "customer-expiry muted"; expires.textContent = `Customer record is automatically deleted after ${new Date(customer.expiresAt).toLocaleDateString()}. Uploaded documents follow your cloud retention setting.`; host.append(expires);
-    const bulk = document.createElement("section"); bulk.className = "bulk-upload"; bulk.tabIndex = 0; bulk.setAttribute("aria-label", "Add multiple documents");
-    const bulkHeading = document.createElement("div"); bulkHeading.className = "bulk-upload-heading";
+    const bulk = document.createElement("details"); bulk.className = "bulk-upload"; bulk.tabIndex = 0; bulk.open = window.matchMedia("(max-width:680px)").matches; bulk.setAttribute("aria-label", "Add multiple documents");
+    const bulkHeading = document.createElement("summary"); bulkHeading.className = "bulk-upload-heading";
     const bulkIcon = document.createElement("span"); bulkIcon.className = "bulk-upload-icon"; bulkIcon.setAttribute("aria-hidden", "true"); bulkIcon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 16V4m-5 5 5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>';
     const bulkCopy = document.createElement("div"); bulkCopy.className = "bulk-upload-copy";
     const bulkTitle = document.createElement("strong"); bulkTitle.textContent = "Add multiple documents";
