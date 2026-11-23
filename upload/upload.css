@@ -1147,3 +1147,37 @@ button.password-toggle {
   .logout-actions { flex-direction:column-reverse; }
   .logout-actions button { width:100%; }
 }
+
+/* Desktop and tablet customer workspace floating panel. */
+@media (min-width:681px) {
+  body:has(#customerView:not([hidden])) .customer-backdrop {
+    display:block;
+  }
+  .customer-backdrop {
+    position:fixed;
+    inset:var(--upload-topbar-height) 0 0;
+    z-index:50;
+    background:rgba(0,0,0,.68);
+    backdrop-filter:blur(4px);
+  }
+  #customerView:not([hidden]) {
+    position:fixed;
+    z-index:70;
+    top:calc(var(--upload-topbar-height) + 14px);
+    left:50%;
+    transform:translateX(-50%);
+    width:min(1040px,calc(100vw - 36px));
+    max-height:calc(100dvh - var(--upload-topbar-height) - 30px);
+    overflow:auto;
+    overscroll-behavior:contain;
+    border:1px solid #67572f;
+    background:linear-gradient(145deg,#171715,#10100f);
+    box-shadow:0 24px 80px rgba(0,0,0,.7);
+  }
+  #customerView .customer-heading {
+    top:0;
+  }
+}
+@media (max-width:680px) {
+  .customer-backdrop { display:none !important; }
+}
