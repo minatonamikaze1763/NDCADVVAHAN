@@ -1246,7 +1246,7 @@
   function renderCustomer(customer) {
     const host = $("customerView"); host.replaceChildren(); host.hidden = false;
     const head = document.createElement("div"); head.className = "customer-heading";
-    const titleBlock = document.createElement("div"); titleBlock.className = "customer-title-block"; const titleLine = document.createElement("div"); titleLine.className = "customer-title-line"; const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "CUSTOMER WORKSPACE"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = customer.chassisNumber; titleLine.append(eyebrow, title); titleBlock.append(titleLine, chassis);
+    const titleBlock = document.createElement("div"); titleBlock.className = "customer-title-block"; const title = document.createElement("h2"); title.textContent = customer.customerName; const chassis = document.createElement("p"); chassis.className = "muted"; chassis.textContent = customer.chassisNumber; titleBlock.append(title, chassis);
     const controls = document.createElement("div"); controls.className = "customer-controls";
     const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["chassisNumber", "customerName", "address", "hp", "applicationNumber"]) $(key).value = customer[key] || ""; $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
     const close = document.createElement("button"); close.type = "button"; close.className = "quiet"; setIconButton(close, "close", "Close customer"); close.addEventListener("click", () => {
@@ -1354,10 +1354,10 @@
       row.append(actions); list.append(row);
     });
     const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const saved20 = customer.documents?.form20; const ftitle = createDocTitleRow((documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)", saved20); const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? "" : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
-    const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions";
+    const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions form20-action-strip";
     const form20Preview = form20._summaryPreviewButton;
     if (form20Preview) {
-      form20Preview.className = "secondary form20-preview-action";
+      form20Preview.className = "secondary form20-action-preview";
       form20Preview.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span class="button-label">Preview</span>';
       form20Preview.setAttribute("aria-label", saved20 ? "Preview saved Form 20" : "No Form 20 to preview");
       form20Preview.title = form20Preview.getAttribute("aria-label");
