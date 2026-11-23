@@ -1511,7 +1511,7 @@
       row.append(actions); list.append(row);
     });
     const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const saved20 = customer.documents?.form20; const ftitle = createDocTitleRow((documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)", saved20); const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? "" : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
-    const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions"; form20Actions.append(row._summaryPreviewButton);
+    const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions"; form20Actions.append(form20._summaryPreviewButton);
     const form20CaptureControls = document.createElement("div"); form20CaptureControls.className = "doc-actions native-capture-group";
     addNativeMultiPhotoCapture(form20CaptureControls, form20, {
       labels:["Page 1", "Page 2", "Page 3"], documentName:"Form 20", saveLabel:"Combine and save Form 20 PDF",
@@ -1578,9 +1578,8 @@
     catch (error) { const response = host.querySelector("#saveStatus") || result; status(response, error.message, "error"); }
     finally { setSaveBarrier(false); updateDocumentSaveButton(host); }
   }
-  void validate();
-})();
-
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && token && sessionExpiry && Date.now() >= sessionExpiry) expireSession();
   });
+  void validate();
+})();
