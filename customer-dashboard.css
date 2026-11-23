@@ -743,3 +743,54 @@ body.ndc-dashboard-v2 {
 .ndc-portfolio-page .ndc-cloud-addon-choice { min-width: 220px; }
 .ndc-portfolio-page #ndcCloudStorageNav[hidden] { display: none; }
 .ndc-portfolio-page [data-section="cloud-storage"] { border-color: rgba(214, 183, 84, .38); }
+
+/* Cloud checkout controls and plan cards */
+.ndc-dashboard-v2 .ndc-cloud-addon-toggle {
+    display:flex; align-items:center; gap:14px; width:min(100%,620px); min-height:64px;
+    margin:12px 0 18px !important; padding:14px 16px !important;
+    border:1px solid #d7bd5555; border-radius:14px;
+    background:linear-gradient(120deg,#d7bd5512,#111); color:var(--text); cursor:pointer;
+}
+.ndc-dashboard-v2 .ndc-cloud-addon-toggle input[type="checkbox"] {
+    position:static !important; flex:0 0 21px; width:21px !important; height:21px !important;
+    margin:0 !important; opacity:1 !important; accent-color:var(--gold); appearance:auto;
+}
+.ndc-dashboard-v2 .ndc-cloud-addon-toggle > span {
+    display:grid; gap:3px; min-width:0; padding:0 !important; border:0 !important;
+    background:transparent !important; box-shadow:none !important;
+}
+.ndc-dashboard-v2 .ndc-cloud-addon-toggle strong { display:block; color:var(--gold-light); font-size:15px; }
+.ndc-dashboard-v2 .ndc-cloud-addon-toggle em { color:var(--muted); font-size:12px; font-style:normal; line-height:1.5; }
+.ndc-dashboard-v2 #ndcRenewalCloudOptions[hidden] { display:none !important; }
+.ndc-dashboard-v2 #ndcRenewalCloudOptions .ndc-plan-options,
+.ndc-dashboard-v2 .ndc-cloud-purchase .ndc-plan-options {
+    grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); gap:14px; align-items:stretch;
+}
+.ndc-dashboard-v2 .ndc-cloud-plan-card { display:grid; align-content:start; gap:10px; min-width:0; }
+.ndc-dashboard-v2 .ndc-cloud-plan-card > .ndc-choice { height:100%; min-width:0; }
+.ndc-dashboard-v2 .ndc-cloud-plan-card .ndc-cloud-addon-choice > span,
+.ndc-dashboard-v2 .ndc-cloud-plan-card .ndc-cloud-purchase-choice > span {
+    display:flex; flex-direction:column; gap:8px; min-height:190px; height:100%; padding:18px; overflow-wrap:anywhere;
+}
+.ndc-dashboard-v2 .ndc-cloud-plan-card .ndc-choice small {
+    display:block; color:var(--gold-light); font-size:10px; font-weight:700; letter-spacing:.08em; line-height:1.4;
+}
+.ndc-dashboard-v2 .ndc-cloud-plan-card .ndc-choice strong {
+    display:block; margin:0; color:var(--text); font-size:17px; line-height:1.35; overflow-wrap:anywhere;
+}
+.ndc-dashboard-v2 .ndc-cloud-plan-card .ndc-choice b { display:block; margin:4px 0; color:var(--gold-light); font-size:23px; line-height:1.25; }
+.ndc-dashboard-v2 .ndc-cloud-plan-card .ndc-choice b small {
+    display:inline; margin-left:4px; color:var(--muted); font-size:11px; font-weight:500; letter-spacing:0;
+}
+.ndc-dashboard-v2 .ndc-cloud-plan-card .ndc-choice em {
+    display:block; margin:auto 0 0; color:var(--muted); font-size:12px; font-style:normal; line-height:1.55;
+}
+.ndc-dashboard-v2 .ndc-cloud-flex-quantity {
+    display:grid; gap:6px; padding:12px; border:1px solid var(--line); border-radius:12px; background:#0d0e10;
+}
+@media(max-width:600px) {
+    .ndc-dashboard-v2 .ndc-cloud-addon-toggle { width:100%; }
+    .ndc-dashboard-v2 #ndcRenewalCloudOptions .ndc-plan-options,
+    .ndc-dashboard-v2 .ndc-cloud-purchase .ndc-plan-options { grid-template-columns:1fr; }
+    .ndc-dashboard-v2 .ndc-cloud-plan-card .ndc-choice > span { min-height:165px; }
+}
