@@ -654,6 +654,14 @@ body.ndc-dashboard-v2 {
 .ndc-checkout-tax-row.is-total{margin:4px -4px 0;padding:12px 4px 2px;border:0;color:#e3ca5e;font-weight:800}
 .ndc-checkout-tax-row.is-total strong{color:#e3ca5e;font-size:1.08rem}
 .ndc-checkout-summary-note{display:block;margin-top:10px;color:#a9a398;line-height:1.55}
+.ndc-payment-trust{display:grid;justify-items:center;gap:12px;margin:16px 0 4px;padding:18px 20px;border:1px solid rgba(215,189,85,.28);border-radius:16px;background:linear-gradient(145deg,#171612,#10100f);color:#d9d5c9;text-align:center}
+.ndc-payment-trust-heading{display:flex;align-items:center;justify-content:center;gap:9px;color:#e6d38a;font-weight:750}
+.ndc-payment-trust-shield{width:19px;height:19px;flex:0 0 auto}
+.ndc-payment-trust-logo{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:8px 16px;border-radius:10px;background:#fff}
+.ndc-payment-trust-logo img{display:block;width:112px;height:26px;object-fit:contain}
+.ndc-payment-trust p{max-width:620px;margin:0;color:#b6b1a6;line-height:1.55}
+.ndc-payment-trust-note{color:#aaa69d;font-size:.82rem;line-height:1.5}
+@media(max-width:600px){.ndc-payment-trust{padding:16px 14px}.ndc-payment-trust p{font-size:.88rem}}
 @media(max-width:600px){.ndc-checkout-billing-grid{grid-template-columns:1fr}.ndc-checkout-billing-grid .wide{grid-column:auto}.ndc-checkout-payment-summary{padding-left:14px;padding-right:14px}.ndc-checkout-summary-heading{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}}
 
 /* Invoice filtering controls and two-column billing summary headers. */
