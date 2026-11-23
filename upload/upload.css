@@ -2287,3 +2287,45 @@ main {
 .form20-section .form20-action-preview:disabled {
   opacity: .58 !important;
 }
+
+/* Customer record creation date and range filters. */
+.customer-created-date {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1.35;
+}
+.customer-date-filter {
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) minmax(130px, 1fr) auto auto;
+  align-items: end;
+  gap: 8px;
+  margin: 12px 0 14px;
+}
+.customer-date-filter label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: .75rem;
+  font-weight: 600;
+}
+.customer-date-filter input {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 9px;
+  font: inherit;
+  color: var(--text);
+  color-scheme: dark;
+}
+.customer-date-filter button {
+  min-height: 40px;
+  white-space: nowrap;
+}
+@media (max-width:680px) {
+  .customer-date-filter {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .customer-date-filter button { width: 100%; }
+}
