@@ -1355,10 +1355,14 @@
     });
     const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const saved20 = customer.documents?.form20; const ftitle = createDocTitleRow((documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)", saved20); const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? "" : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
     const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions";
-    const form20Preview = document.createElement("button"); form20Preview.type = "button"; form20Preview.className = "secondary form20-preview-action"; form20Preview.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span class="button-label">Preview</span>';
-    form20Preview.disabled = !saved20; form20Preview.setAttribute("aria-label", saved20 ? "Preview saved Form 20" : "No Form 20 to preview"); form20Preview.title = form20Preview.getAttribute("aria-label");
-    form20Preview.addEventListener("click", () => form20._summaryPreviewButton.click());
-    form20Actions.append(form20Preview);
+    const form20Preview = form20._summaryPreviewButton;
+    if (form20Preview) {
+      form20Preview.className = "secondary form20-preview-action";
+      form20Preview.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span class="button-label">Preview</span>';
+      form20Preview.setAttribute("aria-label", saved20 ? "Preview saved Form 20" : "No Form 20 to preview");
+      form20Preview.title = form20Preview.getAttribute("aria-label");
+      form20Actions.append(form20Preview);
+    }
     const form20CaptureControls = document.createElement("div"); form20CaptureControls.className = "doc-actions native-capture-group"; form20CaptureControls.hidden = !window.matchMedia("(max-width:680px)").matches;
     addNativeMultiPhotoCapture(form20CaptureControls, form20, {
       labels:["Page 1", "Page 2", "Page 3"], documentName:"Form 20", saveLabel:"Combine and save Form 20 PDF",
