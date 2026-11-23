@@ -2572,3 +2572,25 @@ main {
   .workspace-start-card #newCustomer { display:none; }
   .workspace-start-card { padding:16px !important; }
 }
+
+
+/* Keep disabled settings controls calm and make the customer bar surfaces opaque. */
+#saveRetention:disabled {
+  cursor:not-allowed !important;
+  transform:none !important;
+}
+#saveRetention:disabled:hover {
+  transform:none !important;
+}
+#customerView > .customer-heading {
+  background:#11110f !important;
+  background-image:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+#customerView .save-bar {
+  background:#11110f !important;
+  background-image:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
