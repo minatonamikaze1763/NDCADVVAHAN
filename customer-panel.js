@@ -53,7 +53,7 @@
     const cloud = account.cloudAddon || {}, usage = cloud.usage || {};
     const limit = Number(cloud.recordLimit || usage.limit) || 0;
     const used = Number(usage.recordsCreated) || 0, left = Math.max(0, limit - used);
-    return `<section class="ndc-panel-card ndc-cloud-summary"><div class="ndc-card-heading"><div><span class="ndc-eyebrow">CLOUD STORAGE</span><h2>${cloud.active ? esc(cloud.planName || "Cloud Storage") : "Add Cloud Storage"}</h2></div><button type="button" class="ndc-text-button" data-go-section="cloud-storage">${cloud.active ? "Manage cloud" : "View plans"}</button></div><div class="ndc-detail-line"><span>Total customer record allowance</span><b>${limit.toLocaleString("en-IN")}</b></div><div class="ndc-detail-line"><span>Records remaining</span><b>${left.toLocaleString("en-IN")}</b></div>${cloud.active ? `<div class="ndc-detail-line"><span>Allowance status</span><b>Persists through paid-plan renewals</b></div>` : '<p>Cloud record allowance: 0. Buy a one-time plan from Cloud Storage or add it to a paid-plan checkout.</p>'}</section>`;
+    return `<section class="ndc-panel-card ndc-cloud-summary"><div class="ndc-card-heading"><div><span class="ndc-eyebrow">CLOUD DASHBOARD</span><h2>${cloud.active ? esc(cloud.planName || "Cloud Storage") : "Add Cloud Storage"}</h2></div><button type="button" class="ndc-text-button" data-go-section="cloud-storage">${cloud.active ? "Manage cloud" : "View plans"}</button></div><div class="ndc-detail-line"><span>Total customer record allowance</span><b>${limit.toLocaleString("en-IN")}</b></div><div class="ndc-detail-line"><span>Total customer records used</span><b>${used.toLocaleString("en-IN")}</b></div><div class="ndc-detail-line"><span>Records remaining</span><b>${left.toLocaleString("en-IN")}</b></div>${cloud.active ? `<div class="ndc-detail-line"><span>Allowance status</span><b>Persists through paid-plan renewals</b></div>` : '<p>Cloud record allowance: 0. Buy a one-time plan from Cloud Dashboard or add it to a paid-plan checkout.</p>'}</section>`;
   }
   function referralCard(account) {
     const code = account.referralCode || '';
@@ -659,6 +659,12 @@
             <small>${esc(planPrice)}</small>
           </article>
 
+          <article class="ndc-stat ndc-stat-cloud-usage">
+            <span>Total customer records used</span>
+            <strong>${Number(account.cloudAddon?.usage?.recordsCreated || 0).toLocaleString("en-IN")}</strong>
+            <small>Customer records added to your cloud allowance</small>
+          </article>
+
           <article class="ndc-stat">
             <span>Account status</span>
             <strong>${esc(statusLabel(status))}</strong>
@@ -943,6 +949,7 @@
               <div class="ndc-month-options">${Array.from({ length: 12 }, (_, i) => `<label class="ndc-choice ndc-month-choice"><input type="radio" name="renewalMonths" value="${i + 1}" ${i === 0 ? 'checked' : ''}><span><strong>${i + 1}</strong><small>${i === 0 ? 'month' : 'months'}</small></span></label>`).join('')}</div></fieldset>
               <fieldset class="ndc-choice-group ndc-cloud-addon-options"><legend>03 · Optional Cloud Storage</legend><p>Cloud plans are one-time record allowances. The added records remain available through paid-plan renewals. Uploaded documents auto-delete after 30 days; cloud logins use the device limit on the selected NDC plan.</p><label class="ndc-cloud-addon-toggle"><input type="checkbox" id="ndcRenewalCloudEnabled"><span><strong>Add Cloud Storage</strong><em>Choose this only if you want cloud storage with this subscription.</em></span></label><div id="ndcRenewalCloudOptions" hidden><div class="ndc-plan-options">${(dashboardData.cloudAddonPlans || []).map(plan => '<div class="ndc-cloud-plan-card"><label class="ndc-choice ndc-cloud-addon-choice"><input type="radio" name="renewalCloudAddon" value="' + esc(plan.id) + '"><span><small>CLOUD STORAGE · ' + (plan.structure === "flex" ? "FLEX · ONE TIME" : "FIXED · ONE TIME") + '</small><strong>' + esc(plan.name) + '</strong><b>' + esc(money(plan.structure === "flex" ? plan.perCustomerPrice : plan.price)) + (plan.structure === "flex" ? '<small> / record · one time</small>' : '<small> one time</small>') + '</b><em>' + (plan.structure === "flex" ? "Choose additional records, up to " + Number(plan.recordLimit).toLocaleString("en-IN") : Number(plan.recordLimit).toLocaleString("en-IN") + " customer records") + ' · 12 document slots each; documents auto-delete after 30 days</em></span></label>' + (plan.structure === "flex" ? '<label class="ndc-cloud-flex-quantity" data-cloud-quantity-wrap="' + esc(plan.id) + '" hidden><span>Additional customer records</span><input type="number" min="1" max="' + Number(plan.recordLimit) + '" value="' + Math.min(100, Number(plan.recordLimit) || 100) + '" inputmode="numeric" data-cloud-quantity="' + esc(plan.id) + '" aria-label="Additional customer records"></label>' : "") + '</div>').join("")}</div></div></div></fieldset>
               <div id="ndcRenewalOffer"></div>
+              <div id="ndcRenewalTotal" class="ndc-checkout-payment-summary ndc-renewal-payment-summary" aria-live="polite"></div>
               <div id="ndcRenewalPreview" class="ndc-renewal-preview" aria-live="polite"></div>
               ${dashboardData.gstProfile?.gstin && dashboardData.gstProfile?.businessName && dashboardData.gstProfile?.businessAddress && dashboardData.gstProfile?.stateCode ? "" : `
               <section class="ndc-checkout-billing"><span class="ndc-eyebrow">BILLING DETAILS</span><h3>Save your GST details</h3><p>Enter them now for future invoices. Optional while GST is off; required when GST checkout is enabled.</p>
@@ -957,7 +964,6 @@
                 ${dashboardData.gstProfileLocked ? '<small>These details were submitted during signup and are locked. Contact support to request a correction.</small>' : ''}
               </section>
               `}
-              <div id="ndcRenewalTotal" class="ndc-checkout-payment-summary" aria-live="polite"></div>
               <button class="ndc-home-button" id="ndcRenewalSubmit" type="submit">Pay securely</button>
               ${razorpaySecurityPanel()}
               <p id="ndcRenewalStatus" role="status" aria-live="polite"></p>
@@ -981,7 +987,7 @@
       const historyRows = history.length ? history.map(item => `<tr><td>${esc(item.planName || item.planId || "Cloud Storage")}</td><td>${Number(item.addedRecords || 0).toLocaleString("en-IN")}</td><td>${Number(item.totalRecords || 0).toLocaleString("en-IN")}</td><td>${esc(money(item.amountPaid || 0))}</td><td>${esc(date(item.purchasedAt))}</td></tr>`).join("") : '<tr><td colspan="5" class="ndc-empty">No cloud add-on purchases yet.</td></tr>';
       const cloudPaymentRows = cloudPayments.length ? cloudPayments.map(payment => `<tr><td>${esc(date(payment.paidAt || payment.createdAt))}</td><td>${esc(payment.cloudAddonSnapshot?.name || payment.planName || "Cloud Storage")}${payment.planId ? " · paid plan + cloud" : " · cloud only"}</td><td>${esc(money(payment.cloudAddonSnapshot?.amountPaid ?? payment.amount, payment.currency || "INR"))}</td><td>${esc(payment.status || "Unknown")}</td><td class="ndc-mono">${esc(payment.reference || "—")}</td></tr>`).join("") : '<tr><td colspan="5" class="ndc-empty">No cloud add-on payments recorded yet.</td></tr>';
       sectionHTML = `
-        <div class="ndc-page-heading"><span class="ndc-eyebrow">CUSTOMER CLOUD</span><h1>Cloud Storage</h1><p>Buy a cloud record allowance once. Upload access pauses if your paid subscription expires, but the allowance remains on your account and is available again after renewal. Uploaded documents auto-delete after 30 days; customer records remain as usage history. Cloud logins use your NDC plan device allowance (${Number(account.maxDevices) || 1} devices).</p></div>
+        <div class="ndc-page-heading"><span class="ndc-eyebrow">CUSTOMER CLOUD</span><h1>Cloud Dashboard</h1><p>Buy a cloud record allowance once. Upload access pauses if your paid subscription expires, but the allowance remains on your account and is available again after renewal. Uploaded documents auto-delete after 30 days; customer records remain as usage history. Cloud logins use your NDC plan device allowance (${Number(account.maxDevices) || 1} devices).</p></div>
         <div class="ndc-stat-grid">
           <article class="ndc-stat"><span>Cloud plan</span><strong>${esc(cloud.active ? cloud.planName || "Cloud Storage" : "No cloud records yet")}</strong><small>${cloud.active ? "Purchased once · allowance persists across paid-plan renewals" : "Cloud record allowance: 0"}</small></article>
           <article class="ndc-stat"><span>Customer records used</span><strong>${recordsUsed.toLocaleString("en-IN")} / ${recordLimit.toLocaleString("en-IN")}</strong><small>Total records used from your allowance</small></article>
@@ -997,7 +1003,7 @@
         <section class="ndc-panel-card ndc-cloud-purchase"><h2>Buy or add Cloud Storage</h2><p>A cloud plan is a one-time purchase. It adds records to your existing balance and does not renew your paid subscription.</p>
           <fieldset class="ndc-choice-group"><legend>Choose a cloud plan</legend><div class="ndc-plan-options">${(dashboardData.cloudAddonPlans || []).map((plan, index) => '<div class="ndc-cloud-plan-card"><label class="ndc-choice ndc-cloud-purchase-choice"><input type="radio" name="cloudPurchasePlan" value="' + esc(plan.id) + '"' + (index === 0 ? ' checked' : '') + '><span><small>CLOUD STORAGE · ' + (plan.structure === "flex" ? "FLEX · ONE TIME" : "FIXED · ONE TIME") + '</small><strong>' + esc(plan.name) + '</strong><b>' + esc(money(plan.structure === "flex" ? plan.perCustomerPrice : plan.price)) + (plan.structure === "flex" ? '<small> / record · one time</small>' : '<small> one time</small>') + '</b><em>' + (plan.structure === "flex" ? "Select additional records, up to " + Number(plan.recordLimit).toLocaleString("en-IN") : "Adds " + Number(plan.recordLimit).toLocaleString("en-IN") + " customer records") + ' · 12 document slots each</em></span></label>' + (plan.structure === "flex" ? '<label class="ndc-cloud-flex-quantity" data-cloud-purchase-quantity-wrap="' + esc(plan.id) + '" hidden><span>Additional customer records</span><input type="number" min="1" max="' + Number(plan.recordLimit) + '" value="' + Math.min(100, Number(plan.recordLimit) || 100) + '" inputmode="numeric" data-cloud-purchase-quantity="' + esc(plan.id) + '" aria-label="Additional customer records"></label>' : "") + '</div>').join("")}</div></fieldset>
           <div id="ndcCloudOffer"></div><div id="ndcCloudPurchaseTotal" class="ndc-checkout-payment-summary" aria-live="polite"></div>
-          <button type="button" class="ndc-home-button" id="ndcCloudPurchaseSubmit">Pay securely</button>${razorpaySecurityPanel()}<p id="ndcCloudPurchaseStatus" role="status" aria-live="polite"></p>
+          <button type="button" class="ndc-home-button ndc-cloud-pay-button" id="ndcCloudPurchaseSubmit">Pay securely</button>${razorpaySecurityPanel()}<p id="ndcCloudPurchaseStatus" role="status" aria-live="polite"></p>
         </section>`;
     }
 
