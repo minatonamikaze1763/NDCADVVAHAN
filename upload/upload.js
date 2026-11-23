@@ -2,6 +2,9 @@
 (() => {
   const API = "https://server.nextdimensioncustoms.in";
   const $ = id => document.getElementById(id);
+  function localDateInputValue(date = new Date()) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  }
   const tokenKey = "ndcUploadPortalToken";
   const expiryKey = "ndcUploadPortalExpiresAt";
   const storedLocalToken = localStorage.getItem(tokenKey) || "";
@@ -554,6 +557,23 @@
     } catch (error) { status($("createStatus"), error.message, "error"); }
     finally { button.disabled = false; }
   });
+  const defaultRecordDate = localDateInputValue();
+  $("customerFromDate").value = defaultRecordDate;
+  $("customerToDate").value = defaultRecordDate;
+  $("customerDateFilter").addEventListener("submit", event => {
+    event.preventDefault();
+    const from = $("customerFromDate").value;
+    const to = $("customerToDate").value;
+    if (!from || !to) { status($("searchStatus"), "Choose both From and To dates.", "error"); return; }
+    if (from > to) { status($("searchStatus"), "From date must be on or before To date.", "error"); return; }
+    searchCustomers($("search").value);
+  });
+  $("todayDateFilter").addEventListener("click", () => {
+    const today = localDateInputValue();
+    $("customerFromDate").value = today;
+    $("customerToDate").value = today;
+    searchCustomers($("search").value);
+  });
   $("search").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => searchCustomers($("search").value), 250); });
   let customerSearchSequence = 0;
   function renderCustomerSkeletons(host) {
@@ -582,13 +602,18 @@
     renderCustomerSkeletons(host);
     status($("searchStatus"), "Loading customer records…");
     try {
-      const data = await request(`/api/upload-portal/customers?q=${encodeURIComponent(query)}`);
+      const params = new URLSearchParams({
+        q: query,
+        from: $("customerFromDate").value || localDateInputValue(),
+        to: $("customerToDate").value || localDateInputValue()
+      });
+      const data = await request(`/api/upload-portal/customers?${params.toString()}`);
       if (requestSequence !== customerSearchSequence) return;
       host.replaceChildren();
       host.removeAttribute("aria-busy");
       data.customers.forEach(customer => {
         const button = document.createElement("button"); button.type = "button"; button.className = "result-row";
-        const title = document.createElement("span"); title.textContent = customer.customerName; const meta = document.createElement("small"); meta.textContent = `${customer.chassisNumber} · ${Object.keys(customer.documents || {}).length} documents saved`;
+        const title = document.createElement("span"); title.textContent = customer.customerName; const meta = document.createElement("small"); meta.textContent = `${customer.chassisNumber} · Created ${formatRecordCreatedAt(customer.createdAt)} · ${Object.keys(customer.documents || {}).length} documents saved`;
         const right = document.createElement("span"); right.append(title, meta); const arrow = document.createElement("b"); arrow.textContent = "›"; button.append(right, arrow); button.addEventListener("click", () => openCustomer(customer._id)); host.append(button);
       });
       status($("searchStatus"), data.customers.length ? `${data.customers.length} customer${data.customers.length === 1 ? "" : "s"} found.` : query ? "No matching customer found." : "Create a customer to start uploading.");
@@ -985,6 +1010,12 @@
     const date = value instanceof Date ? value : typeof value === "number" || /^\d+$/.test(String(value)) ? new Date(Number(value)) : new Date(value);
     return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleString();
   }
+  function formatRecordCreatedAt(value) {
+    if (!value) return "Date unavailable";
+    const date = value instanceof Date ? value : new Date(value);
+    return Number.isNaN(date.getTime()) ? "Date unavailable"
+      : new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+  }
   function createCloudSavedIndicator() {
     const indicator = document.createElement("span");
     indicator.className = "cloud-saved-indicator";
@@ -1246,7 +1277,8 @@
   function renderCustomer(customer) {
     const host = $("customerView"); host.replaceChildren(); host.hidden = false;
     const head = document.createElement("div"); head.className = "customer-heading";
-    const titleBlock = document.createElement("div"); titleBlock.className = "customer-title-block"; const title = document.createElement("h2"); title.textContent = customer.customerName + " - " + customer.chassisNumber; titleBlock.append(title);
+    const titleBlock = document.createElement("div"); titleBlock.className = "customer-title-block"; const title = document.createElement("h2"); title.textContent = customer.customerName + " - " + customer.chassisNumber;
+    const created = document.createElement("p"); created.className = "customer-created-date"; created.textContent = `Created ${formatRecordCreatedAt(customer.createdAt)}`; titleBlock.append(title, created);
     const controls = document.createElement("div"); controls.className = "customer-controls";
     const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["chassisNumber", "customerName", "address", "hp", "applicationNumber"]) $(key).value = customer[key] || ""; $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
     const close = document.createElement("button"); close.type = "button"; close.className = "quiet"; setIconButton(close, "close", "Close customer"); close.addEventListener("click", () => {
