@@ -1859,3 +1859,61 @@ body:has(#settingsView:not([hidden])) .workspace-dashboard { display:none; }
   #customerView .doc-actions:not(.native-capture-group) > .danger,
   #customerView .doc-actions.form20-actions > .danger { min-width:68px !important; }
 }
+
+
+/* Keep Form 20's three actions grouped; use a dedicated preview control. */
+@media (min-width:681px) {
+  #customerView .doc-actions.form20-actions {
+    display:grid !important;
+    grid-template-columns:repeat(3,max-content);
+    grid-template-rows:38px;
+    grid-auto-flow:row;
+    align-items:center;
+    justify-content:end;
+    gap:7px;
+    width:max-content;
+    min-width:0;
+  }
+  #customerView .doc-actions.form20-actions > .form20-preview-action {
+    grid-column:1;
+    grid-row:1;
+  }
+  #customerView .doc-actions.form20-actions > button:not(.form20-preview-action):not(.danger) {
+    grid-column:2;
+    grid-row:1;
+  }
+  #customerView .doc-actions.form20-actions > .danger {
+    grid-column:3;
+    grid-row:1;
+  }
+  #customerView .doc-actions.form20-actions > .native-capture-group,
+  #customerView .doc-actions.form20-actions > .native-capture-group * {
+    display:none !important;
+    visibility:hidden !important;
+  }
+  #customerView .doc-actions.form20-actions > button {
+    position:static !important;
+    inset:auto !important;
+    align-self:center;
+    justify-self:stretch;
+    width:auto !important;
+    min-width:78px !important;
+    max-width:none;
+    min-height:38px;
+    height:38px;
+    margin:0;
+    transform:none !important;
+  }
+}
+@media (min-width:681px) and (max-width:1000px) {
+  #customerView .doc-actions.form20-actions {
+    grid-template-rows:36px;
+    gap:5px;
+  }
+  #customerView .doc-actions.form20-actions > button {
+    min-width:72px !important;
+    min-height:36px;
+    height:36px;
+  }
+  #customerView .doc-actions.form20-actions > .danger { min-width:68px !important; }
+}
