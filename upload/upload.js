@@ -1096,7 +1096,10 @@
     if (row && pair && box === pair.firstElementChild) {
       const filename = row.querySelector(".doc-file-summary-name");
       const preview = row.querySelector(".doc-summary-preview");
-      if (filename) filename.textContent = file?.name || row._savedDocument?.filename || "No document saved";
+      const summary = row.querySelector(".doc-file-summary");
+      const hasDocument = Boolean(file || row._savedDocument || row._pages?.length);
+      if (summary) summary.hidden = !hasDocument;
+      if (filename) filename.textContent = file?.name || row._savedDocument?.filename || (hasDocument ? "Document selected" : "No document saved");
       if (preview) {
         preview.disabled = !(file || row._savedDocument || row._pages?.length);
         preview.setAttribute("aria-label", file || row._pages?.length ? "Preview selected document" : row._savedDocument ? "Preview saved document" : "No document to preview");
@@ -1192,9 +1195,10 @@
     } else setPreview(stored, null, "Saved");
     pair.append(selected, stored);
     row.append(pair);
-    const summary = document.createElement("div"); summary.className = "doc-file-summary";
+    const summary = document.createElement("div"); summary.className = "doc-file-summary"; summary.hidden = !saved;
     const filename = document.createElement("span"); filename.className = "doc-file-summary-name"; filename.textContent = saved?.filename || "No document saved";
-    const preview = document.createElement("button"); preview.type = "button"; preview.className = "doc-summary-preview"; preview.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const preview = document.createElement("button"); preview.type = "button"; preview.className = "secondary icon-only doc-summary-preview"; preview.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const previewLabel = document.createElement("span"); previewLabel.className = "button-label"; previewLabel.textContent = "Preview"; preview.append(previewLabel);
     preview.disabled = !saved; preview.setAttribute("aria-label", saved ? "Preview saved document" : "No document to preview"); preview.title = preview.getAttribute("aria-label");
     preview.addEventListener("click", async () => {
       if (row._file) { showFullscreenPreview(row._file); return; }
@@ -1512,7 +1516,7 @@
     });
     const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const saved20 = customer.documents?.form20; const ftitle = createDocTitleRow((documentDisplayOrder.indexOf("form20") + 1) + ". Form 20 (Finance)", saved20); const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? "" : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
     const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions"; form20Actions.append(form20._summaryPreviewButton);
-    const form20CaptureControls = document.createElement("div"); form20CaptureControls.className = "doc-actions native-capture-group";
+    const form20CaptureControls = document.createElement("div"); form20CaptureControls.className = "doc-actions native-capture-group"; form20CaptureControls.hidden = !window.matchMedia("(max-width:680px)").matches;
     addNativeMultiPhotoCapture(form20CaptureControls, form20, {
       labels:["Page 1", "Page 2", "Page 3"], documentName:"Form 20", saveLabel:"Combine and save Form 20 PDF",
       onSave:(photos, progress) => saveCapturedForm20(customer, host, form20, photos, progress)
