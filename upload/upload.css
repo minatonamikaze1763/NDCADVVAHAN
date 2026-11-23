@@ -2776,3 +2776,32 @@ main {
     grid-template-columns:minmax(0,1fr) !important;
   }
 }
+
+/* Keep document cards content-sized; the empty Address Proof preview must not add height. */
+@media (min-width:681px) {
+  #customerView .doc-list {
+    align-items:start !important;
+    grid-auto-rows:min-content;
+  }
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) {
+    align-content:start !important;
+    grid-auto-rows:min-content;
+  }
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .doc-row-header {
+    min-height:0 !important;
+    align-self:start !important;
+  }
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .doc-state {
+    align-self:start !important;
+  }
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .preview-pair {
+    display:none !important;
+  }
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .doc-file-summary[hidden] {
+    display:none !important;
+  }
+  #customerView .doc-row[data-doc="address-proof"] > .subcat {
+    align-self:start !important;
+    margin-top:0 !important;
+  }
+}
