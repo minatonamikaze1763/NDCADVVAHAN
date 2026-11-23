@@ -1157,6 +1157,7 @@ body:has(#settingsView:not([hidden])) .workspace-dashboard { display:none; }
   .topbar {
     left:50%;
     width:min(1392px,calc(100% - 40px));
+    padding:0 22px;
     transform:translateX(-50%);
     border-left:1px solid #302b1d;
     border-right:1px solid #302b1d;
