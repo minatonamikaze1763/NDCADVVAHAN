@@ -2706,10 +2706,11 @@ main {
   background:var(--gold2);
 }
 
-/* Use the same desktop and tablet document-card layout for saved and empty rows. */
+/* One shared card layout for empty and saved customer document rows. */
 @media (min-width:681px) {
   #customerView .doc-row[data-doc]:not([data-doc="form20"]) {
-    grid-template-columns:minmax(0,1fr) minmax(268px,max-content) !important;
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) max-content !important;
     grid-template-rows:auto auto auto;
     align-items:center;
     gap:4px 14px;
@@ -2721,6 +2722,8 @@ main {
     min-width:0;
   }
   #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .doc-row-header h3 {
+    flex:1 1 auto !important;
+    width:100%;
     min-width:0;
     overflow-wrap:anywhere;
     word-break:normal;
@@ -2740,7 +2743,7 @@ main {
     grid-column:2 !important;
     grid-row:1 / 4 !important;
     display:flex !important;
-    flex-flow:row nowrap;
+    flex-flow:row nowrap !important;
     align-items:center;
     justify-content:flex-end;
     gap:6px;
@@ -2751,10 +2754,11 @@ main {
     align-self:center;
   }
   #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .doc-actions:not(.native-capture-group) > button {
-    flex:0 0 auto !important;
-    width:auto !important;
+    flex:0 0 82px !important;
+    width:82px !important;
     min-width:82px !important;
-    max-width:none;
+    max-width:82px;
+    white-space:nowrap;
   }
   #customerView .doc-row[data-doc="address-proof"] > .subcat {
     grid-column:1 / -1 !important;
@@ -2765,5 +2769,10 @@ main {
   #customerView .doc-row[data-doc="address-proof"] > .aadhar-capture-hint {
     display:none !important;
     visibility:hidden !important;
+  }
+}
+@media (min-width:681px) and (max-width:1100px) {
+  #customerView .doc-list {
+    grid-template-columns:minmax(0,1fr) !important;
   }
 }
