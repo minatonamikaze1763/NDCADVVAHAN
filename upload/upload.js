@@ -33,7 +33,7 @@
     ["pan-card", "PAN Card"], ["owner-photo", "Owners Photo"]
   ];
   const addressTypes = ["Aadhaar", "Bank Passbook", "Electricity Bill", "Gas Bill", "Water Bill", "Passport", "Voter ID", "Ration Card", "Telephone Bill", "GST Certificate"];
-  const documentDisplayOrder = ["address-proof", "insurance", "dealer-invoice", "form20", "inspection", "form22", "form21", "frontphoto", "owner-photo", "owner-signature", "pan-card", "chassis-photo"];
+  const documentDisplayOrder = ["address-proof", "insurance", "dealer-invoice", "inspection", "form22", "form21", "frontphoto", "owner-photo", "owner-signature", "pan-card", "chassis-photo", "form20"];
   const sessionDevice = localStorage.getItem("ndcUploadPortalDeviceId") || crypto.randomUUID();
   localStorage.setItem("ndcUploadPortalDeviceId", sessionDevice);
   function status(el, message, type = "") { if (!el) return; el.textContent = message; el.className = `status ${type}`; }
@@ -1355,14 +1355,21 @@
     });
     const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const saved20 = customer.documents?.form20; const ftitle = createDocTitleRow("Form 20 (Finance)", saved20); const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? "" : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
     const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions form20-action-strip";
-    const form20Preview = form20._summaryPreviewButton;
-    if (form20Preview) {
-      form20Preview.className = "secondary form20-action-preview";
-      form20Preview.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span class="button-label">Preview</span>';
-      form20Preview.setAttribute("aria-label", saved20 ? "Preview saved Form 20" : "No Form 20 to preview");
-      form20Preview.title = form20Preview.getAttribute("aria-label");
-      form20Actions.append(form20Preview);
-    }
+    const form20Preview = document.createElement("button"); form20Preview.type = "button"; form20Preview.className = "secondary form20-action-preview";
+    form20Preview.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span class="button-label">Preview</span>';
+    const updateForm20PreviewButton = () => { const available = !!(form20._file || form20._pages?.length || form20._savedDocument); form20Preview.disabled = !available; form20Preview.setAttribute("aria-label", available ? "Preview Form 20" : "No Form 20 to preview"); form20Preview.title = form20Preview.getAttribute("aria-label"); };
+    form20Preview.addEventListener("click", async () => {
+      if (form20._file) { showFullscreenPreview(form20._file); return; }
+      if (form20._pages?.length) { showFullscreenPreview(form20._pages[0]); return; }
+      const saved = form20._savedDocument;
+      if (!saved) return;
+      form20Preview.disabled = true;
+      try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, {}, true); const savedFile = new File([blob], saved.filename, {type:saved.contentType || blob.type}); showFullscreenPreview(savedFile, saved); }
+      catch(error) { form20Preview.title = error.message || "Preview unavailable"; }
+      finally { updateForm20PreviewButton(); }
+    });
+    updateForm20PreviewButton();
+    form20Actions.append(form20Preview);
     const form20CaptureControls = document.createElement("div"); form20CaptureControls.className = "doc-actions native-capture-group"; form20CaptureControls.hidden = !window.matchMedia("(max-width:680px)").matches;
     addNativeMultiPhotoCapture(form20CaptureControls, form20, {
       labels:["Page 1", "Page 2", "Page 3"], documentName:"Form 20", saveLabel:"Combine and save Form 20 PDF",
@@ -1373,15 +1380,13 @@
     choose20.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; const input = document.createElement("input"); input.type = "file"; input.accept = "application/pdf,image/*"; input.multiple = true; input.addEventListener("change", async () => {
       if (!(await ensureActiveSession())) return;
       const files = [...(input.files || [])]; const pdfs = files.filter(file => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
-      if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = form20._savedDocument ? "Replacement selected" : "Form 20 file selected"; updateDocumentSaveButton(host); await loadSelectedFilePreview(form20, pdfs[0]); }
-      else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} Form 20 photos selected` : "Upload a PDF (3+ pages) or capture three photos"; updateDocumentSaveButton(host); if (files[0]) await loadSelectedFilePreview(form20, files[0]); else setPreview(form20._selectedPreview, null, "Selected"); }
+      if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = form20._savedDocument ? "Replacement selected" : "Form 20 file selected"; updateDocumentSaveButton(host); updateForm20PreviewButton(); await loadSelectedFilePreview(form20, pdfs[0]); }
+      else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} Form 20 photos selected` : "Upload a PDF (3+ pages) or capture three photos"; updateDocumentSaveButton(host); updateForm20PreviewButton(); if (files[0]) await loadSelectedFilePreview(form20, files[0]); else setPreview(form20._selectedPreview, null, "Selected"); }
     }); input.click(); });
-    form20Actions.append(choose20); const delete20 = document.createElement("button"); delete20.type = "button"; delete20.className = "danger doc-delete-action"; setIconButton(delete20, "trash", "Delete"); delete20.disabled = !saved20; delete20.title = saved20 ? "Delete saved Form 20" : "No saved document to delete"; delete20.addEventListener("click", async () => { if (saved20) { if (!confirm("Delete Form 20?")) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, { method:"DELETE" }); await openCustomer(customer._id); } catch(error) { alert(error.message); } return; } if (!form20._file && !form20._pages?.length) return; form20._file = null; form20._pages = []; setPreview(form20._selectedPreview, null, "Selected"); fstate.textContent = "Upload a PDF (3+ pages) or capture three photos"; updateDocumentSaveButton(host); }); form20Actions.append(delete20); form20.append(form20Actions);
+    form20Actions.append(choose20); const delete20 = document.createElement("button"); delete20.type = "button"; delete20.className = "danger doc-delete-action"; setIconButton(delete20, "trash", "Delete"); delete20.disabled = !saved20; delete20.title = saved20 ? "Delete saved Form 20" : "No saved document to delete"; delete20.addEventListener("click", async () => { if (saved20) { if (!confirm("Delete Form 20?")) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, { method:"DELETE" }); await openCustomer(customer._id); } catch(error) { alert(error.message); } return; } if (!form20._file && !form20._pages?.length) return; form20._file = null; form20._pages = []; setPreview(form20._selectedPreview, null, "Selected"); fstate.textContent = "Upload a PDF (3+ pages) or capture three photos"; updateForm20PreviewButton(); updateDocumentSaveButton(host); }); form20Actions.append(delete20); form20.append(form20Actions);
     const form20Section = document.createElement("section"); form20Section.className = "form20-section"; form20Section.setAttribute("aria-labelledby", "form20SectionTitle");
-    const form20SectionHeading = document.createElement("div"); form20SectionHeading.className = "form20-section-heading";
-    const form20SectionTitle = document.createElement("h2"); form20SectionTitle.id = "form20SectionTitle"; form20SectionTitle.textContent = "Form 20 document";
-    const form20SectionHint = document.createElement("p"); form20SectionHint.className = "muted"; form20SectionHint.textContent = "Finance Form 20 is kept separate from the other VAHAN document rows.";
-    form20SectionHeading.append(form20SectionTitle, form20SectionHint); form20Section.append(form20SectionHeading, form20);
+    const form20SectionTitle = document.createElement("h2"); form20SectionTitle.id = "form20SectionTitle"; form20SectionTitle.className = "form20-section-title"; form20SectionTitle.textContent = "Form 20 document";
+    form20Section.append(form20SectionTitle, form20);
     host.append(list, form20Section);
     const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status save-description"; result.textContent = "Select files to save (up to 12)."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected"; save.disabled = true; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar); updateDocumentSaveButton(host);
   }
