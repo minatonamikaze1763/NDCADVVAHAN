@@ -1952,3 +1952,75 @@ body:has(#settingsView:not([hidden])) .workspace-dashboard { display:none; }
   min-width:0;
   min-height:0;
 }
+
+
+/* Form 20 keeps its complete action cluster on a dedicated tile row. */
+@media (min-width:681px) {
+  #customerView .doc-row[data-doc="form20"] {
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto auto auto auto;
+    align-items:center;
+  }
+  #customerView .doc-row[data-doc="form20"] > .doc-row-header {
+    grid-column:1;
+    grid-row:1;
+  }
+  #customerView .doc-row[data-doc="form20"] > .doc-state {
+    grid-column:1;
+    grid-row:2;
+  }
+  #customerView .doc-row[data-doc="form20"] > .doc-file-summary {
+    grid-column:1;
+    grid-row:3;
+  }
+  #customerView .doc-row[data-doc="form20"] > .doc-actions.form20-actions {
+    position:static !important;
+    grid-column:1 / -1;
+    grid-row:4;
+    justify-self:stretch;
+    align-self:center;
+    display:flex !important;
+    flex-flow:row nowrap;
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px;
+    width:100%;
+    max-width:none;
+    min-width:0;
+    margin:0;
+    transform:none !important;
+  }
+  #customerView .doc-actions:not(.native-capture-group) > button,
+  #customerView .doc-actions.form20-actions > button {
+    position:static !important;
+    inset:auto !important;
+    display:inline-flex !important;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    min-width:88px !important;
+    width:auto !important;
+    height:38px;
+    min-height:38px;
+    padding:7px 11px !important;
+    border-radius:7px !important;
+    line-height:1.2;
+    transform:none !important;
+    transition-property:background,border-color,color,box-shadow;
+  }
+  #customerView .doc-actions.form20-actions > .native-capture-group,
+  #customerView .doc-actions.form20-actions > .native-capture-group * {
+    display:none !important;
+    visibility:hidden !important;
+  }
+}
+@media (min-width:681px) and (max-width:1000px) {
+  #customerView .doc-row[data-doc="form20"] > .doc-actions.form20-actions {
+    gap:6px;
+  }
+  #customerView .doc-actions:not(.native-capture-group) > button,
+  #customerView .doc-actions.form20-actions > button {
+    min-width:78px !important;
+    padding:7px 9px !important;
+  }
+}
