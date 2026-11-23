@@ -2594,3 +2594,77 @@ main {
   backdrop-filter:none !important;
   -webkit-backdrop-filter:none !important;
 }
+
+
+/* Workspace guide for device access and document handoff. */
+.workspace-use-section {
+  margin-top:20px;
+  padding:22px;
+  box-shadow:none !important;
+}
+.workspace-use-heading { margin-bottom:17px; }
+.workspace-use-heading .eyebrow { margin-bottom:7px; }
+.workspace-use-heading h2 {
+  margin:0 0 7px;
+  font-size:1.25rem;
+}
+.workspace-use-heading .muted {
+  max-width:760px;
+  margin:0;
+  font-size:.86rem;
+  line-height:1.5;
+}
+.workspace-device-grid,
+.workspace-handoff-grid {
+  display:grid;
+  gap:10px;
+}
+.workspace-device-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.workspace-handoff-grid {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  margin-top:12px;
+}
+.workspace-use-card,
+.workspace-handoff-card {
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  min-width:0;
+  padding:15px;
+  border:1px solid #343128;
+  border-radius:9px;
+  background:#0e0e0c;
+}
+.workspace-use-number,
+.workspace-handoff-icon {
+  display:grid;
+  flex:0 0 32px;
+  width:32px;
+  height:32px;
+  place-items:center;
+  border:1px solid #6a5520;
+  border-radius:7px;
+  background:#d9a91d12;
+  color:var(--gold2);
+  font:700 .72rem/1 "Space Grotesk",sans-serif;
+}
+.workspace-handoff-icon { font-size:1rem; }
+.workspace-use-card h3,
+.workspace-handoff-card h3 {
+  margin:0 0 4px;
+  font-size:.88rem;
+}
+.workspace-use-card p,
+.workspace-handoff-card p {
+  margin:0;
+  color:var(--muted);
+  font-size:.78rem;
+  line-height:1.5;
+}
+@media(max-width:760px) {
+  .workspace-use-section { margin-top:16px; padding:18px; }
+  .workspace-device-grid { grid-template-columns:1fr; }
+  .workspace-handoff-grid { grid-template-columns:1fr; }
+  .workspace-use-card,
+  .workspace-handoff-card { padding:13px; }
+}
