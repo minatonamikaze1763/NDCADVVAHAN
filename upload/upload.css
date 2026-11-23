@@ -2077,3 +2077,91 @@ body:has(#settingsView:not([hidden])) .workspace-dashboard { display:none; }
     font-size:.76rem;
   }
 }
+
+
+/* Stable customer header and equal document action buttons. */
+@media (min-width:681px) {
+  #customerView:not([hidden]) {
+    padding-top:118px;
+  }
+  #customerView > .customer-heading {
+    position:fixed !important;
+    top:var(--upload-topbar-height,68px) !important;
+    left:50% !important;
+    z-index:120 !important;
+    width:min(1600px,calc(100vw - 40px)) !important;
+    margin:0 !important;
+    transform:translateX(-50%) !important;
+  }
+  #customerView .doc-actions:not(.native-capture-group) > button {
+    position:static !important;
+    inset:auto !important;
+    grid-area:auto !important;
+    float:none !important;
+    flex:0 0 96px !important;
+    width:96px !important;
+    min-width:96px !important;
+    max-width:96px !important;
+    height:40px !important;
+    min-height:40px !important;
+    padding:8px 10px !important;
+    border-radius:7px !important;
+    margin:0 !important;
+    transform:none !important;
+  }
+  #customerView .doc-actions:not(.native-capture-group) {
+    position:static !important;
+    inset:auto !important;
+    transform:none !important;
+  }
+  #customerView .doc-row[data-doc="form20"] > .doc-actions.form20-actions {
+    position:static !important;
+    display:flex !important;
+    flex-flow:row nowrap !important;
+    align-items:center !important;
+    justify-content:flex-end !important;
+    gap:8px !important;
+    grid-column:1 / -1 !important;
+    grid-row:4 !important;
+    width:100% !important;
+    min-width:0 !important;
+    margin:0 !important;
+    transform:none !important;
+  }
+  #customerView .doc-row[data-doc="form20"] > .doc-actions.form20-actions > button {
+    position:static !important;
+    inset:auto !important;
+    grid-area:auto !important;
+    float:none !important;
+    flex:0 0 96px !important;
+    width:96px !important;
+    min-width:96px !important;
+    max-width:96px !important;
+    height:40px !important;
+    min-height:40px !important;
+    padding:8px 10px !important;
+    border-radius:7px !important;
+    margin:0 !important;
+    transform:none !important;
+  }
+  #customerView .doc-row[data-doc="form20"] > .doc-actions.form20-actions > .form20-preview-action {
+    position:static !important;
+    inset:auto !important;
+    grid-area:auto !important;
+    grid-column:auto !important;
+    grid-row:auto !important;
+    order:0 !important;
+  }
+}
+@media (max-width:680px) {
+  #customerView .doc-actions:not(.native-capture-group) > button,
+  #customerView .doc-actions.form20-actions > button {
+    box-sizing:border-box;
+    border-radius:7px !important;
+    min-height:42px;
+    padding:9px 8px !important;
+  }
+  #customerView .doc-actions .danger {
+    min-width:0 !important;
+  }
+}
