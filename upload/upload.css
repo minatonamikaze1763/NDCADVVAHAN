@@ -2683,3 +2683,36 @@ main {
 #customerView > .customer-fields:empty + .customer-expiry {
   padding-top:0 !important;
 }
+
+/* Keep the Address Proof card on a single fluid track so Aadhaar controls
+   cannot squeeze its heading or overlap the regular upload actions. */
+#customerView .doc-row[data-doc="address-proof"] {
+  grid-template-columns:minmax(0,1fr);
+  min-width:0;
+}
+#customerView .doc-row[data-doc="address-proof"] > * {
+  grid-column:1 / -1;
+  min-width:0;
+}
+
+/* Match the recent-customer scroller to the NDC black-and-gold theme. */
+.workspace-dashboard .customer-results {
+  padding-right:10px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--gold) #171714;
+}
+.workspace-dashboard .customer-results::-webkit-scrollbar {
+  width:8px;
+}
+.workspace-dashboard .customer-results::-webkit-scrollbar-track {
+  background:#171714;
+  border-radius:999px;
+}
+.workspace-dashboard .customer-results::-webkit-scrollbar-thumb {
+  background:linear-gradient(180deg,var(--gold2),var(--gold));
+  border:2px solid #171714;
+  border-radius:999px;
+}
+.workspace-dashboard .customer-results::-webkit-scrollbar-thumb:hover {
+  background:var(--gold2);
+}
