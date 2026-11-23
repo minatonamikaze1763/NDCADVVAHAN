@@ -835,3 +835,19 @@ body #payment > .container {
     transition: none;
   }
 }
+
+/* Visible opt-in control for the optional one-time cloud add-on. */
+#payment .ndc-cloud-addon-toggle {
+  display:flex; align-items:center; gap:12px; width:min(100%,620px); min-height:64px;
+  margin:12px 0 16px; padding:14px 16px; border:1px solid rgba(215,189,85,.42);
+  border-radius:14px; background:linear-gradient(125deg,rgba(215,189,85,.1),#11100d);
+  color:#f4f0e4; cursor:pointer;
+}
+#payment .ndc-cloud-addon-toggle input[type="checkbox"] {
+  flex:0 0 21px; width:21px; height:21px; margin:0; accent-color:#d7bd55;
+}
+#payment .ndc-cloud-addon-toggle > span { display:grid; gap:3px; min-width:0; }
+#payment .ndc-cloud-addon-toggle strong { color:#f2d889; font-size:14px; }
+#payment .ndc-cloud-addon-toggle em { color:#aaa69d; font-size:12px; font-style:normal; line-height:1.5; }
+#payment #signupCloudOptions[hidden] { display:none !important; }
+@media(max-width:600px) { #payment .ndc-cloud-addon-toggle { width:100%; } }
