@@ -13,7 +13,7 @@
         if (!Number.isInteger(recordLimit) || recordLimit < 1 || !['fixed', 'flex'].includes(plan.structure)) return null;
         if (plan.structure === 'fixed' && (!Number.isFinite(price) || price < 0)) return null;
         if (plan.structure === 'flex' && (!Number.isFinite(perCustomerPrice) || perCustomerPrice < 0)) return null;
-        return { ...plan, recordLimit, price, perCustomerPrice };
+        return { ...plan, recordLimit, ...(Number.isFinite(price) ? { price } : {}), perCustomerPrice };
     }
     let selected = null, state = 'idle', saved = null, dialog = null;
     let appliedOffer = null, offerWidget = null, cloudAddonPlans = {};
@@ -92,7 +92,10 @@
         const cloudAddonPlanId = cloudEnabled ? cloudSelect?.value || null : null;
         const cloudAddon = cloudAddonPlans[cloudAddonPlanId] || null;
         const quantityInput = $('signupCloudAddonQuantity');
-        const cloudQuantity = cloudAddon?.structure === 'flex' ? Math.max(1, Number(quantityInput?.value) || 1) : null;
+        const cloudMaximum = Number(cloudAddon?.recordLimit) || 0;
+        const cloudQuantity = cloudAddon?.structure === 'flex'
+            ? Math.max(1, Math.min(cloudMaximum, Math.floor(Number(quantityInput?.value) || 1))) : null;
+        if (cloudAddon?.structure === 'flex' && quantityInput) quantityInput.value = String(cloudQuantity);
         const cloudAmount = !cloudAddon ? 0 : cloudAddon.structure === 'flex'
             ? Number(cloudAddon.perCustomerPrice) * cloudQuantity : Number(cloudAddon.price);
         const paidListAmount = p ? Number(p.monthlyPrice) * m : 0;
