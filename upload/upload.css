@@ -2705,3 +2705,65 @@ main {
 .workspace-dashboard .customer-results::-webkit-scrollbar-thumb:hover {
   background:var(--gold2);
 }
+
+/* Use the same desktop and tablet document-card layout for saved and empty rows. */
+@media (min-width:681px) {
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) {
+    grid-template-columns:minmax(0,1fr) minmax(268px,max-content) !important;
+    grid-template-rows:auto auto auto;
+    align-items:center;
+    gap:4px 14px;
+    min-width:0;
+  }
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .doc-row-header {
+    grid-column:1 !important;
+    grid-row:1 !important;
+    min-width:0;
+  }
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .doc-row-header h3 {
+    min-width:0;
+    overflow-wrap:anywhere;
+    word-break:normal;
+  }
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .doc-state {
+    grid-column:1 !important;
+    grid-row:2 !important;
+    min-width:0;
+  }
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .doc-file-summary {
+    grid-column:1 !important;
+    grid-row:3 !important;
+    min-width:0;
+    max-width:100%;
+  }
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .doc-actions:not(.native-capture-group) {
+    grid-column:2 !important;
+    grid-row:1 / 4 !important;
+    display:flex !important;
+    flex-flow:row nowrap;
+    align-items:center;
+    justify-content:flex-end;
+    gap:6px;
+    width:max-content;
+    max-width:100%;
+    min-width:0;
+    justify-self:end;
+    align-self:center;
+  }
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .doc-actions:not(.native-capture-group) > button {
+    flex:0 0 auto !important;
+    width:auto !important;
+    min-width:82px !important;
+    max-width:none;
+  }
+  #customerView .doc-row[data-doc="address-proof"] > .subcat {
+    grid-column:1 / -1 !important;
+    grid-row:4 !important;
+    min-width:0;
+  }
+  #customerView .doc-row[data-doc="address-proof"] > .aadhaar-native-capture,
+  #customerView .doc-row[data-doc="address-proof"] > .aadhar-capture-hint {
+    display:none !important;
+    visibility:hidden !important;
+  }
+}
