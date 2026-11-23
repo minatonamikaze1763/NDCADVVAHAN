@@ -2265,3 +2265,25 @@ main {
     min-width: 0;
   }
 }
+
+/* Final Form 20 and document-grid refinements. */
+.form20-section-title {
+  margin: 0 0 10px;
+  font: 600 1rem/1.35 "Space Grotesk", sans-serif;
+}
+#customerView .doc-list {
+  align-items: stretch !important;
+  row-gap: 8px;
+}
+.form20-section .form20-action-preview {
+  display: inline-flex !important;
+  visibility: visible !important;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 96px;
+  opacity: 1;
+}
+.form20-section .form20-action-preview:disabled {
+  opacity: .58 !important;
+}
