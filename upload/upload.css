@@ -2480,3 +2480,95 @@ dialog.customer-dialog {
 main {
   margin-top: calc(var(--upload-topbar-height) + 20px) !important;
 }
+
+
+/* Workspace start card: useful, top-aligned guidance beside customer search. */
+.workspace-start-card {
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start !important;
+  align-items:stretch;
+  gap:0;
+}
+.workspace-start-heading .eyebrow { margin:0 0 8px; }
+.workspace-start-heading h2 { margin:0 0 8px; }
+.workspace-start-heading > .muted {
+  max-width:42rem;
+  margin:0 0 18px;
+  line-height:1.55;
+}
+.workspace-start-card #newCustomer {
+  width:100%;
+  min-height:46px;
+  margin:0 0 16px;
+}
+.workspace-guide {
+  padding:15px 16px;
+  border:1px solid #383328;
+  border-radius:11px;
+  background:#0e0e0c;
+}
+.workspace-guide-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding-bottom:11px;
+  border-bottom:1px solid #2d2a23;
+  color:var(--text);
+  font-size:.88rem;
+}
+.workspace-guide-heading span {
+  color:var(--gold2);
+  font-size:.72rem;
+  font-weight:700;
+  white-space:nowrap;
+}
+.workspace-guide-steps {
+  display:grid;
+  gap:0;
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+.workspace-guide-steps li {
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  min-width:0;
+  padding:12px 0;
+}
+.workspace-guide-steps li + li { border-top:1px solid #25231e; }
+.workspace-guide-number {
+  display:grid;
+  flex:0 0 30px;
+  width:30px;
+  height:30px;
+  place-items:center;
+  border:1px solid #6a5520;
+  border-radius:7px;
+  background:#d9a91d12;
+  color:var(--gold2);
+  font:700 .7rem/1 "Space Grotesk",sans-serif;
+}
+.workspace-guide-steps li > span:last-child {
+  display:grid;
+  min-width:0;
+  gap:3px;
+}
+.workspace-guide-steps strong {
+  color:var(--text);
+  font-size:.81rem;
+  line-height:1.35;
+}
+.workspace-guide-steps small {
+  color:var(--muted);
+  font-size:.75rem;
+  line-height:1.45;
+}
+@media(max-width:680px) {
+  .workspace-guide { display:none; }
+  .workspace-start-heading,
+  .workspace-start-card #newCustomer { display:none; }
+  .workspace-start-card { padding:16px !important; }
+}
