@@ -22,7 +22,6 @@
   let pendingCloseHost = null;
   let searchTimer;
   let autoForm20AsInspection = false;
-  let persistedRetentionDays = "20";
   let sessionValidationPromise = null;
   let logoutInProgress = false;
 
@@ -307,10 +306,10 @@
   function showApp() { $("loginView").hidden = true; $("appView").hidden = false; $("logout").hidden = false; $("settingsToggle").hidden = false; if ($("welcomeBack").hidden) setWelcomeBack(""); }
   async function loadSettings() {
     const data = await request("/api/upload-portal/settings");
-    persistedRetentionDays = String(data.documentRetentionDays || data.retentionDays || 30);
-    $("retentionDays").value = persistedRetentionDays;
     autoForm20AsInspection = data.autoForm20AsInspection === true;
     $("autoForm20AsInspection").checked = autoForm20AsInspection;
+    $("saveRetention").disabled = true;
+    status($("settingsStatus"), "");
   }
   function showWorkspace() {
     $("settingsView").hidden = true;
@@ -335,28 +334,37 @@
   $("backToWorkspace").addEventListener("click", async () => {
     if (await ensureActiveSession()) showWorkspace();
   });
-  const restoreSettingsControls = () => {
-    $("retentionDays").value = persistedRetentionDays;
-    $("autoForm20AsInspection").checked = autoForm20AsInspection;
+  const updateSettingsSaveState = () => {
+    $("saveRetention").disabled = $("autoForm20AsInspection").checked === autoForm20AsInspection;
   };
-  $("retentionDays").addEventListener("change", async () => {
-    if (!(await ensureActiveSession())) restoreSettingsControls();
-  });
+  const restoreSettingsControls = () => {
+    $("autoForm20AsInspection").checked = autoForm20AsInspection;
+    updateSettingsSaveState();
+  };
   $("autoForm20AsInspection").addEventListener("change", async () => {
-    if (!(await ensureActiveSession())) restoreSettingsControls();
+    if (!(await ensureActiveSession())) { restoreSettingsControls(); return; }
+    status($("settingsStatus"), "");
+    updateSettingsSaveState();
   });
   $("saveRetention").addEventListener("click", async () => {
+    const button = $("saveRetention");
+    if (button.disabled) return;
     if (!(await ensureActiveSession())) { restoreSettingsControls(); return; }
-    const button = $("saveRetention"); button.disabled = true; status($("settingsStatus"), "Saving setting…");
+    button.disabled = true;
     try {
-      const data = await request("/api/upload-portal/settings", {method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({retentionDays:Number($("retentionDays").value),autoForm20AsInspection:$("autoForm20AsInspection").checked})});
+      const data = await request("/api/upload-portal/settings", {
+        method:"PUT",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({autoForm20AsInspection:$("autoForm20AsInspection").checked})
+      });
       autoForm20AsInspection = data.autoForm20AsInspection === true;
-      persistedRetentionDays = String(data.retentionDays || $("retentionDays").value || 20);
-      $("retentionDays").value = persistedRetentionDays;
       $("autoForm20AsInspection").checked = autoForm20AsInspection;
-      status($("settingsStatus"), data.message || "Workspace settings updated.", "success");
-    } catch (error) { status($("settingsStatus"), error.message, "error"); }
-    finally { button.disabled = false; }
+      button.disabled = true;
+      status($("settingsStatus"), "Settings saved", "success");
+    } catch (error) {
+      status($("settingsStatus"), error.message, "error");
+      updateSettingsSaveState();
+    }
   });
   function setSessionBarrier(active) {
     $("sessionBarrier").hidden = !active;
