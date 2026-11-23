@@ -2674,3 +2674,12 @@ main {
 .workspace-use-section {
   margin-bottom:20px;
 }
+
+
+/* An empty optional customer-details strip should not create a blank band. */
+#customerView > .customer-heading + .customer-fields:empty {
+  display:none !important;
+}
+#customerView > .customer-fields:empty + .customer-expiry {
+  padding-top:0 !important;
+}
