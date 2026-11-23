@@ -1401,7 +1401,7 @@ body:has(#settingsView:not([hidden])) .workspace-dashboard { display:none; }
   }
   #customerView .doc-summary-preview:disabled { opacity:.38; }
   #customerView .preview-pair { display:none; }
-  #customerView .doc-row:not(:has(.doc-state.saved)) .doc-actions { display:none; }
+  #customerView .doc-row:not(:has(.doc-state.saved)) .doc-actions:not(.form20-actions) { display:none; }
   #customerView .doc-actions:not(.form20-actions) {
     grid-column:2;
     grid-row:1;
@@ -1409,7 +1409,9 @@ body:has(#settingsView:not([hidden])) .workspace-dashboard { display:none; }
     justify-content:flex-end;
     gap:4px;
   }
-  #customerView .doc-actions:not(.form20-actions) .icon-only { display:none !important; }
+  #customerView .doc-actions:not(.form20-actions) button[aria-label="Camera"],
+  #customerView .doc-actions:not(.form20-actions) button[aria-label="Choose file"] { display:none !important; }
+  #customerView .doc-modified { display:none; }
   #customerView .doc-actions:not(.form20-actions) .danger {
     width:28px;
     min-width:28px;
