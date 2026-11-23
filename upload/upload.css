@@ -2887,3 +2887,12 @@ main {
     align-items:stretch !important;
   }
 }
+
+/* Override the desktop title-fill rule so saved icons stay next to every title. */
+@media (min-width:681px) {
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .doc-row-header h3,
+  #customerView .doc-row[data-doc="form20"] > .doc-row-header h3 {
+    flex:0 1 auto !important;
+    width:auto !important;
+  }
+}
