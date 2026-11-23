@@ -9,7 +9,7 @@
   <link rel="apple-touch-icon" href="/logo.png?v=e43be25972f4">
   <meta name="robots" content="noindex, nofollow">
   <title>VAHAN Document Upload | NDC</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="upload.css?v=solid-bars-settings-cursor-20261123">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="upload.css?v=cloud-usage-guide-20261123">
 </head>
 <body>
   <header class="topbar"><a class="brand" href="/" aria-label="Next Dimension Customs, VAHAN Cloud"><img src="/logo.png" alt="Next Dimension Customs"><span class="brand-copy"><strong>VAHAN CLOUD</strong><small>NEXT DIMENSION CUSTOMS</small></span></a><nav class="topbar-actions" aria-label="Account"><button id="settingsToggle" class="quiet" type="button" hidden>Settings</button><button id="logout" class="quiet" hidden>Log out</button></nav></header>
@@ -102,6 +102,39 @@
           <p id="searchStatus" class="status" role="status"></p>
         </section>
       </div>
+      <section class="card workspace-use-section" aria-labelledby="workspaceUseTitle">
+        <div class="workspace-use-heading">
+          <div>
+            <p class="eyebrow">YOUR DOCUMENTS, WHERE YOU NEED THEM</p>
+            <h2 id="workspaceUseTitle">Use VAHAN Cloud on any device</h2>
+            <p class="muted">Sign in to the same workspace from a phone, tablet, or desktop. Your customer records and saved files stay together.</p>
+          </div>
+        </div>
+        <div class="workspace-device-grid">
+          <article class="workspace-use-card">
+            <span class="workspace-use-number">01</span>
+            <div><h3>Phone</h3><p>Open VAHAN Cloud in your mobile browser to capture or choose documents and add them to a customer.</p></div>
+          </article>
+          <article class="workspace-use-card">
+            <span class="workspace-use-number">02</span>
+            <div><h3>Tablet</h3><p>Use the browser workspace to find customers, review saved files, and manage documents on a larger screen.</p></div>
+          </article>
+          <article class="workspace-use-card">
+            <span class="workspace-use-number">03</span>
+            <div><h3>Desktop</h3><p>Upload several files at once, preview documents, and organize each customer's file set.</p></div>
+          </article>
+        </div>
+        <div class="workspace-handoff-grid">
+          <article class="workspace-handoff-card">
+            <span class="workspace-handoff-icon" aria-hidden="true">↓</span>
+            <div><h3>Download a ZIP</h3><p>Download a customer's saved documents as a ZIP when you need a local copy or want to share the files.</p></div>
+          </article>
+          <article class="workspace-handoff-card">
+            <span class="workspace-handoff-icon" aria-hidden="true">↗</span>
+            <div><h3>Send documents to VAHAN</h3><p>Open the VAHAN NDC Tool extension and fetch the customer's cloud documents to continue the upload in VAHAN.</p></div>
+          </article>
+        </div>
+      </section>
       <section id="customerView" class="card customer-card" hidden></section>
       <section id="settingsView" class="card settings-card" hidden aria-labelledby="settingsTitle"><div class="settings-heading"><div><p class="eyebrow">WORKSPACE SETTINGS</p><h2 id="settingsTitle">Document settings</h2><p class="muted">Manage VAHAN upload preferences for this company.</p></div><button id="backToWorkspace" class="secondary" type="button">Back to workspace</button></div><div class="extension-setting"><p class="eyebrow">VAHAN EXTENSION PREFERENCE</p><label class="setting-toggle" for="autoForm20AsInspection"><input id="autoForm20AsInspection" type="checkbox"><span><strong>Auto copy Form 20 as Inspection</strong><small>Save the Form 20 PDF to the Inspection document slot as well.</small></span></label></div><button id="saveRetention" class="primary" type="button" disabled>Save settings</button><p id="settingsStatus" class="status" role="status"></p></section>
     </section>
