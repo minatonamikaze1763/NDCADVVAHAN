@@ -1258,7 +1258,7 @@
       $("discardChangesDialog").showModal();
     }); controls.append(edit, close); head.append(titleBlock, controls); host.append(head);
     const fields = document.createElement("div"); fields.className = "customer-fields"; [["Address", customer.address], ["HP", customer.hp], ["Application no.", customer.applicationNumber]].forEach(([label, value]) => { if (value) { const span = document.createElement("span"); span.textContent = `${label}: ${value}`; fields.append(span); } }); host.append(fields);
-    const expires = document.createElement("p"); expires.className = "customer-expiry muted"; expires.textContent = `Customer record is automatically deleted after ${new Date(customer.expiresAt).toLocaleDateString()}. Uploaded documents follow your cloud retention setting.`; host.append(expires);
+    const expires = document.createElement("p"); expires.className = "customer-expiry muted"; expires.textContent = "Customer records are retained for cloud usage history. Uploaded documents are automatically deleted after 30 days."; host.append(expires);
     const bulk = document.createElement("details"); bulk.className = "bulk-upload"; bulk.tabIndex = 0; bulk.open = window.matchMedia("(max-width:680px)").matches; bulk.setAttribute("aria-label", "Add multiple documents");
     const bulkHeading = document.createElement("summary"); bulkHeading.className = "bulk-upload-heading";
     const bulkIcon = document.createElement("span"); bulkIcon.className = "bulk-upload-icon"; bulkIcon.setAttribute("aria-hidden", "true"); bulkIcon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 16V4m-5 5 5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>';
