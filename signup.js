@@ -1,7 +1,20 @@
 (() => {
     'use strict';
     const API = 'https://server.nextdimensioncustoms.in', KEY = 'ndcSignupCompletionV2', plans = {}, $ = id => document.getElementById(id);
-    const money = (n, c = 'INR') => new Intl.NumberFormat('en-IN', { style: 'currency', currency: c }).format(n);
+    const money = (n, c = 'INR') => {
+        const value = Number(n);
+        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: c }).format(Number.isFinite(value) ? value : 0);
+    };
+    function normalizeCloudPlan(plan) {
+        if (!plan || typeof plan.id !== 'string' || typeof plan.name !== 'string') return null;
+        const recordLimit = Number(plan.recordLimit ?? plan.maxCustomerRecords ?? plan.maxCustomersPerMonth);
+        const price = Number(plan.price ?? plan.monthlyPrice);
+        const perCustomerPrice = Number(plan.perCustomerPrice);
+        if (!Number.isInteger(recordLimit) || recordLimit < 1 || !['fixed', 'flex'].includes(plan.structure)) return null;
+        if (plan.structure === 'fixed' && (!Number.isFinite(price) || price < 0)) return null;
+        if (plan.structure === 'flex' && (!Number.isFinite(perCustomerPrice) || perCustomerPrice < 0)) return null;
+        return { ...plan, recordLimit, ...(Number.isFinite(price) ? { price } : {}), perCustomerPrice };
+    }
     let selected = null, state = 'idle', saved = null, dialog = null;
     let appliedOffer = null, offerWidget = null, cloudAddonPlans = {};
     let checkoutGst = { enabled: false, gstRate: 18 }, orderQuote = null;
@@ -12,6 +25,8 @@
         const choices = $('signupCloudChoices');
         if (!choices) return;
         const selectedId = $('signupCloudAddon')?.value || '';
+        const options = $('signupCloudOptions');
+        if (options) options.hidden = $('signupCloudEnabled')?.checked !== true;
         choices.querySelectorAll('.ndc-cloud-choice').forEach(choice => {
             const isSelected = choice.dataset.planId === selectedId;
             choice.setAttribute('aria-pressed', String(isSelected));
@@ -26,13 +41,14 @@
         const cloudSelect = $('signupCloudAddon');
         if (!choices || !cloudSelect) return;
         choices.replaceChildren();
-        const options = [{ id: '', name: 'No cloud storage', price: 'Optional add-on', detail: 'Continue with your NDC plan only' },
-            ...Object.values(cloudAddonPlans).map(plan => ({
-                id: plan.id,
-                name: plan.name,
-                price: plan.structure === 'flex' ? money(plan.perCustomerPrice) + ' / record / month' : money(plan.monthlyPrice) + ' / month',
-                detail: Number(plan.maxCustomersPerMonth).toLocaleString('en-IN') + ' records · 12 document slots per record'
-            }))];
+        const options = Object.values(cloudAddonPlans).map(plan => ({
+            id: plan.id,
+            name: plan.name,
+            price: plan.structure === 'flex' ? money(plan.perCustomerPrice) + ' / record · one time' : money(plan.price) + ' · one time',
+            detail: plan.structure === 'flex'
+                ? 'Choose records to add, up to ' + Number(plan.recordLimit).toLocaleString('en-IN') + ' · 12 document slots each'
+                : Number(plan.recordLimit).toLocaleString('en-IN') + ' total records · 12 document slots each'
+        }));
         for (const plan of options) {
             const choice = document.createElement('button');
             choice.type = 'button';
@@ -57,7 +73,10 @@
             choice.append(top, price, detail);
             choice.addEventListener('click', () => {
                 if (state !== 'idle') return;
+                if (appliedOffer?.cloudAddonPlanId && appliedOffer.cloudAddonPlanId !== plan.id) offerWidget?.clear('Offer removed because the cloud plan changed.');
                 cloudSelect.value = plan.id;
+                const toggle = $('signupCloudEnabled');
+                if (toggle && !toggle.checked) toggle.checked = true;
                 orderQuote = null;
                 update();
             });
@@ -67,18 +86,28 @@
     }
     function update() {
         const p = plans[selected], m = Number($('signupMonths').value) || 1;
-        const cloudAddonPlanId = $('signupCloudAddon')?.value || null;
+        const cloudEnabled = $('signupCloudEnabled')?.checked === true;
+        const cloudSelect = $('signupCloudAddon');
+        if (!cloudEnabled && cloudSelect) cloudSelect.value = '';
+        const cloudAddonPlanId = cloudEnabled ? cloudSelect?.value || null : null;
         const cloudAddon = cloudAddonPlans[cloudAddonPlanId] || null;
         const quantityInput = $('signupCloudAddonQuantity');
-        const cloudQuantity = cloudAddon?.structure === 'flex' ? Math.max(1, Number(quantityInput?.value) || 1) : null;
-        const cloudMonthlyAmount = !cloudAddon ? 0 : cloudAddon.structure === 'flex' ? Number(cloudAddon.perCustomerPrice) * cloudQuantity : Number(cloudAddon.monthlyPrice);
-        const cloudAmount = cloudMonthlyAmount * m;
-        const amount = (appliedOffer ? appliedOffer.amountPaise / 100 : p?.monthlyPrice * m) + cloudAmount;
+        const cloudMaximum = Number(cloudAddon?.recordLimit) || 0;
+        const cloudQuantity = cloudAddon?.structure === 'flex'
+            ? Math.max(1, Math.min(cloudMaximum, Math.floor(Number(quantityInput?.value) || 1))) : null;
+        if (cloudAddon?.structure === 'flex' && quantityInput) quantityInput.value = String(cloudQuantity);
+        const cloudAmount = !cloudAddon ? 0 : cloudAddon.structure === 'flex'
+            ? Number(cloudAddon.perCustomerPrice) * cloudQuantity : Number(cloudAddon.price);
+        const paidListAmount = p ? Number(p.monthlyPrice) * m : 0;
+        const listAmount = paidListAmount + cloudAmount;
+        const offerAmount = appliedOffer ? Number(appliedOffer.amountPaise) / 100 : paidListAmount;
+        const offerIncludesCloud = Boolean(appliedOffer?.cloudAddonPlanId || appliedOffer?.type === 'mixed_plan_cloud');
+        const amount = appliedOffer ? offerAmount + (offerIncludesCloud ? 0 : cloudAmount) : listAmount;
         const tax = checkoutGst.enabled && p ? Math.round(amount * checkoutGst.gstRate) / 100 : 0;
         const payable = orderQuote?.amount ?? amount + tax;
         const displayBase = orderQuote?.baseAmount ?? amount;
-        const displayList = orderQuote?.listPrice ?? ((p ? p.monthlyPrice * m : amount) + cloudAmount);
-        const cloudListAmount = cloudAddon ? Math.min(cloudAmount, displayList) : 0;
+        const displayList = orderQuote?.listPrice ?? listAmount;
+        const cloudListAmount = cloudAddon ? cloudAmount : 0;
         const planListAmount = Math.max(0, displayList - cloudListAmount);
         const displayDiscount = orderQuote?.discountAmount ?? Math.max(0, displayList - displayBase);
         const displayTax = orderQuote?.taxAmount ?? tax;
@@ -100,14 +129,20 @@
         const gstFields = $('signupGstFields');
         if (gstFields) { gstFields.hidden = false; for (const input of gstFields.querySelectorAll('input,textarea')) { input.disabled = state !== 'idle'; input.required = checkoutGst.enabled && input.id !== 'signupTradeName' && input.id !== 'signupBusinessPhone'; } } $('selectedPlanLogins').textContent = p ? `1 User · ${devices} devices · ${m} month(s)` : 'Choose a subscription plan to continue.';
         if (quantityInput) {
-            quantityInput.hidden = cloudAddon?.structure !== 'flex';
+            quantityInput.hidden = !cloudEnabled || cloudAddon?.structure !== 'flex';
             quantityInput.required = cloudAddon?.structure === 'flex';
             if ($('signupCloudQuantityLabel')) $('signupCloudQuantityLabel').hidden = cloudAddon?.structure !== 'flex';
-            quantityInput.disabled = state !== 'idle' || cloudAddon?.structure !== 'flex';
-            if (cloudAddon?.structure === 'flex') { quantityInput.max = String(cloudAddon.maxCustomersPerMonth); quantityInput.value = String(Math.min(Number(quantityInput.value) || 100, Number(cloudAddon.maxCustomersPerMonth))); quantityInput.min = "1"; }
+            quantityInput.disabled = state !== 'idle' || !cloudEnabled || cloudAddon?.structure !== 'flex';
+            if (cloudAddon?.structure === 'flex') { quantityInput.max = String(cloudAddon.recordLimit); quantityInput.value = String(Math.min(Number(quantityInput.value) || 100, Number(cloudAddon.recordLimit))); quantityInput.min = "1"; }
         }
-        const cloudPrice = $('signupCloudPrice'); if (cloudPrice) cloudPrice.textContent = !cloudAddon ? 'No cloud records included without an add-on.' : cloudAddon.structure === 'flex' ? money(cloudAddon.perCustomerPrice) + ' per customer record/month × ' + (cloudQuantity || 1) + ' records · 12 document slots per record' : money(cloudAddon.monthlyPrice) + ' per month · ' + Number(cloudAddon.maxCustomersPerMonth).toLocaleString('en-IN') + ' records · 12 document slots per record';
-        $('paymentProceed').disabled = !p || state !== 'idle'; $('paymentProceed').textContent = ['complete', 'review'].includes(state) ? 'Payment received' : state !== 'idle' ? 'Processing…' : p ? 'Pay securely · ' + money(payable) : 'Select a Plan to Continue';
+        const cloudPrice = $('signupCloudPrice');
+        if (cloudPrice) cloudPrice.textContent = !cloudEnabled
+            ? 'No cloud add-on selected. Cloud record allowance starts at 0.'
+            : !cloudAddon ? 'Choose a cloud plan to add cloud records.'
+            : cloudAddon.structure === 'flex'
+                ? money(cloudAddon.perCustomerPrice) + ' × ' + (cloudQuantity || 1) + ' records · one-time charge · 12 document slots each'
+                : money(cloudAddon.price) + ' one-time charge · ' + Number(cloudAddon.recordLimit).toLocaleString('en-IN') + ' records · 12 document slots each';
+        $('paymentProceed').disabled = !p || state !== 'idle' || (cloudEnabled && !cloudAddon); $('paymentProceed').textContent = ['complete', 'review'].includes(state) ? 'Payment received' : state !== 'idle' ? 'Processing…' : p ? 'Pay securely · ' + money(payable) : 'Select a Plan to Continue';
         $('ndcSignupForm').querySelectorAll('input,select').forEach(n => n.disabled = state !== 'idle');
         offerWidget?.setBusy(state !== 'idle');
         syncCloudChoices();
@@ -269,18 +304,30 @@
             const cloudResponse = await fetch(API + '/api/public/cloud-addon-plans', { cache: 'no-store', headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(12000) });
             if (cloudResponse.ok) {
                 const cloudData = await cloudResponse.json();
-                for (const plan of cloudData.plans || []) cloudAddonPlans[plan.id] = plan;
+                for (const rawPlan of cloudData.plans || []) {
+                    const plan = normalizeCloudPlan(rawPlan);
+                    if (plan) cloudAddonPlans[plan.id] = plan;
+                }
             }
             const cloudSelect = $('signupCloudAddon');
             for (const plan of Object.values(cloudAddonPlans)) {
                 const option = document.createElement('option');
                 option.value = plan.id;
-                option.textContent = plan.name + ' · ' + (plan.structure === 'flex' ? money(plan.perCustomerPrice) + '/customer · up to ' : money(plan.monthlyPrice) + '/month · ') + Number(plan.maxCustomersPerMonth).toLocaleString('en-IN') + ' records';
+                option.textContent = plan.name + ' · ' + (plan.structure === 'flex' ? money(plan.perCustomerPrice) + '/record once · up to ' : money(plan.price) + ' one time · ') + Number(plan.recordLimit).toLocaleString('en-IN') + ' records';
                 cloudSelect.append(option);
             }
             renderCloudChoices();
             cloudSelect?.addEventListener('change', () => { orderQuote = null; update(); });
-            $('signupCloudAddonQuantity')?.addEventListener('input', () => { orderQuote = null; update(); });
+            $('signupCloudEnabled')?.addEventListener('change', event => {
+                if (!event.currentTarget.checked && appliedOffer?.cloudAddonPlanId) offerWidget?.clear('Offer removed because the cloud add-on was turned off.');
+                orderQuote = null;
+                update();
+            });
+            $('signupCloudAddonQuantity')?.addEventListener('input', () => {
+                if (appliedOffer?.cloudAddonPlanId && Number(appliedOffer.cloudAddonQuantity) !== Number($('signupCloudAddonQuantity').value)) offerWidget?.clear('Offer removed because the cloud record quantity changed.');
+                orderQuote = null;
+                update();
+            });
             await NDCPlans.ready;
             const container = document.querySelector('.pricing');
             const custom = container.querySelector('.plan');
@@ -310,7 +357,20 @@
         $('signupMonths').replaceChildren(); for (let i = 1; i <= 12; i++) { const o = document.createElement('option'); o.value = i; o.textContent = `${i} month${i === 1 ? '' : 's'}`; $('signupMonths').append(o); } $('signupMonths').onchange = () => { if(appliedOffer && appliedOffer.months !== Number($('signupMonths').value)) offerWidget?.clear('Offer removed because the duration changed.'); update(); };
         if(window.NDCOfferCode && $('ndcSignupOffer')) offerWidget = NDCOfferCode.mount($('ndcSignupOffer'), {
             request: code => post('/api/public/offers/preview', {code}), isBusy: () => state !== 'idle',
-            onApply: offer => { if(!plans[offer.planId]) throw Error('This offer plan is unavailable. Refresh and try again.'); appliedOffer=offer; selected=offer.planId; $('signupMonths').value=offer.months; update(); },
+            onApply: offer => {
+                if (!plans[offer.planId]) throw Error('This offer plan is unavailable. Refresh and try again.');
+                if (offer.cloudAddonPlanId) {
+                    const cloudPlan = cloudAddonPlans[offer.cloudAddonPlanId];
+                    if (!cloudPlan) throw Error('The cloud plan required by this offer is unavailable.');
+                    $('signupCloudEnabled').checked = true;
+                    $('signupCloudAddon').value = cloudPlan.id;
+                    if (cloudPlan.structure === 'flex' && Number(offer.cloudAddonQuantity) > 0) $('signupCloudAddonQuantity').value = String(offer.cloudAddonQuantity);
+                }
+                appliedOffer = offer;
+                selected = offer.planId;
+                $('signupMonths').value = offer.months;
+                update();
+            },
             onClear: () => { appliedOffer=null; update(); }
         }); $('ndcSignupForm').addEventListener('submit', begin); $('ndcSignupLogin').onclick = () => $('ndcUserButton')?.click();
         window.NDCApplySignupOffer = async code => {

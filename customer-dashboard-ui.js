@@ -6,6 +6,7 @@
 
         const paths = {
             overview: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+            'cloud-storage': '<path d="M7.5 19h9a4.5 4.5 0 0 0 .3-9A5.5 5.5 0 0 0 6 8.7 4 4 0 0 0 7.5 19Z"/>',
             profile: '<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/>',
             setup: '<path d="m9 12 2 2 4-4"/><rect x="4" y="3" width="16" height="18" rx="2"/>',
             subscription: '<rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18M7 15h4"/>',
