@@ -1320,10 +1320,6 @@
     bulk.addEventListener("dragleave", () => bulk.classList.remove("dragging"));
     bulk.addEventListener("drop", event => { event.preventDefault(); bulk.classList.remove("dragging"); void queueFiles([...event.dataTransfer.files], host).catch(error => status(bulkStatus, error.message, "error")); });
     picker.addEventListener("change", () => { const files = [...picker.files]; picker.value = ""; void queueFiles(files, host).catch(error => status(bulkStatus, error.message, "error")); }); host.append(bulk);
-    if (window.matchMedia("(max-width:680px)").matches) requestAnimationFrame(() => {
-      const uploadTop = bulk.getBoundingClientRect().top - host.getBoundingClientRect().top + host.scrollTop - head.getBoundingClientRect().height - 12;
-      host.scrollTo({ top: Math.max(0, uploadTop), behavior: "smooth" });
-    });
     const toolbar = document.createElement("div"); toolbar.className = "doc-toolbar";
     const label = document.createElement("strong"); label.textContent = "VAHAN documents";
     const count = document.createElement("span"); count.className = "muted"; count.textContent = Object.keys(customer.documents || {}).length + " of 12 saved";
@@ -1433,6 +1429,10 @@
     form20Section.append(form20SectionTitle, form20);
     host.append(list, form20Section);
     const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status save-description"; result.textContent = "Select files to save (up to 12)."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected"; save.disabled = true; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar); updateDocumentSaveButton(host);
+    if (window.matchMedia("(max-width:680px)").matches) requestAnimationFrame(() => requestAnimationFrame(() => {
+      const uploadTop = bulk.getBoundingClientRect().top - host.getBoundingClientRect().top + host.scrollTop - head.getBoundingClientRect().height - 12;
+      host.scrollTo({ top: Math.max(0, uploadTop), behavior: "smooth" });
+    }));
   }
   async function openCustomer(id) { try { const data = await request(`/api/upload-portal/customers/${id}`); currentCustomer = data.customer; renderCustomer(currentCustomer); } catch (error) { status($("searchStatus"), error.message, "error"); } }
   async function saveDocuments(customer, host, button) {
