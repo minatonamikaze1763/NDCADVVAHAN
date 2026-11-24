@@ -991,7 +991,7 @@
       const extra = extraDevicesData || {}, entitlements = extra.extraDeviceEntitlements || [];
       const maxQuantity = Math.max(0, Math.min(Number(extra.settings?.maxPerPurchase) || 0,
         (Number(extra.settings?.maxPerCustomer) || 0) - (Number(extra.activeExtraDeviceCount) || 0),
-        20 - (Number(extra.currentDeviceLimit) || Number(account.maxDevices) || 1)));
+        100 - (Number(extra.currentDeviceLimit) || Number(account.maxDevices) || 1)));
       const purchases = [...(extra.purchases || [])].sort((a,b) => new Date(b.paidAt || 0) - new Date(a.paidAt || 0));
       const entitlementRows = entitlements.map(item => `<tr><td>${Number(item.quantity) || 0}</td><td>${esc(money(item.monthlyPrice))}</td><td>${esc(date(item.startsAt))}</td><td>${esc(date(item.expiresAt))}</td><td>${item.active ? "Active" : esc(item.status || "Expired")}</td><td>${item.active ? `<button type="button" class="ndc-text-button" data-unlink-extra-device="${esc(item.id)}">Unlink</button>` : "—"}</td></tr>`).join("") || '<tr><td colspan="6" class="ndc-empty">No extra device entitlements yet.</td></tr>';
       const purchaseRows = purchases.map(item => `<tr><td>${esc(date(item.paidAt))}</td><td>${Number(item.quantity) || 0}</td><td>${esc(money(item.monthlyPrice))}</td><td>${esc(money(item.taxableAmount))}</td><td>${esc(money(item.gstAmount))}</td><td>${esc(money(item.amount))}</td><td>${esc(item.reference || "—")}</td></tr>`).join("") || '<tr><td colspan="7" class="ndc-empty">No verified purchases yet.</td></tr>';
