@@ -2660,6 +2660,9 @@ main {
   font-size:.78rem;
   line-height:1.5;
 }
+@media(max-width:680px) {
+  .workspace-use-section { display:none !important; }
+}
 @media(max-width:760px) {
   .workspace-use-section { margin-top:16px; padding:18px; }
   .workspace-device-grid { grid-template-columns:1fr; }
