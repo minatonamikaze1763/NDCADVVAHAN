@@ -1320,6 +1320,10 @@
     bulk.addEventListener("dragleave", () => bulk.classList.remove("dragging"));
     bulk.addEventListener("drop", event => { event.preventDefault(); bulk.classList.remove("dragging"); void queueFiles([...event.dataTransfer.files], host).catch(error => status(bulkStatus, error.message, "error")); });
     picker.addEventListener("change", () => { const files = [...picker.files]; picker.value = ""; void queueFiles(files, host).catch(error => status(bulkStatus, error.message, "error")); }); host.append(bulk);
+    if (window.matchMedia("(max-width:680px)").matches) requestAnimationFrame(() => {
+      const uploadTop = bulk.getBoundingClientRect().top - host.getBoundingClientRect().top + host.scrollTop - head.getBoundingClientRect().height - 12;
+      host.scrollTo({ top: Math.max(0, uploadTop), behavior: "smooth" });
+    });
     const toolbar = document.createElement("div"); toolbar.className = "doc-toolbar";
     const label = document.createElement("strong"); label.textContent = "VAHAN documents";
     const count = document.createElement("span"); count.className = "muted"; count.textContent = Object.keys(customer.documents || {}).length + " of 12 saved";
