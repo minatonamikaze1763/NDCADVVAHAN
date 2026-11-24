@@ -1008,7 +1008,7 @@
         <section class="ndc-panel-card"><h2>Cloud usage</h2><p>Used: ${recordsUsed.toLocaleString("en-IN")} · Remaining: ${recordsLeft.toLocaleString("en-IN")} · Total purchased allowance: ${recordLimit.toLocaleString("en-IN")}. The record balance does not reset monthly. Documents can be deleted individually. Customer records cannot be deleted and remain as usage and billing evidence.</p></section>
         <section class="ndc-panel-card"><h2>Cloud limit history</h2><p>Each completed cloud purchase adds its customer record allowance to your account. Purchases remain available through paid-plan renewals.</p><div class="ndc-table-wrap"><table class="ndc-table"><thead><tr><th>Cloud plan</th><th>Records added</th><th>Total allowance</th><th>Amount paid</th><th>Purchased</th></tr></thead><tbody>${historyRows}</tbody></table></div></section>
         <section class="ndc-panel-card"><h2>Cloud add-on payments</h2><p>This history contains transactions that included a cloud add-on. The main Payments tab continues to show every paid plan and cloud transaction.</p><div class="ndc-table-wrap"><table class="ndc-table"><thead><tr><th>Date</th><th>Purchase</th><th>Cloud amount</th><th>Status</th><th>Reference</th></tr></thead><tbody>${cloudPaymentRows}</tbody></table></div></section>
-        <section class="ndc-panel-card ndc-cloud-purchase"><div class="ndc-card-heading" style="display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px"><h2>Buy or add Cloud Storage</h2><button type="button" class="ndc-text-button" data-cloud-purchase-toggle aria-expanded="true" aria-controls="ndcCloudPurchaseBody" aria-label="Collapse cloud storage purchase options" style="min-width:36px;height:36px;padding:0;border:1px solid var(--line);border-radius:10px;font-size:22px;line-height:1">−</button></div><div id="ndcCloudPurchaseBody"><p>A cloud plan is a one-time purchase. It adds records to your existing balance and does not renew your paid subscription.</p>
+        <section class="ndc-panel-card ndc-cloud-purchase"><div class="ndc-card-heading" style="display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px"><h2 style="color:var(--gold)">Buy or add Cloud Storage</h2><button type="button" class="ndc-text-button" data-cloud-purchase-toggle aria-expanded="true" aria-controls="ndcCloudPurchaseBody" aria-label="Collapse cloud storage purchase options" style="min-width:36px;height:36px;padding:0;border:1px solid var(--line);border-radius:10px;font-size:22px;line-height:1">−</button></div><div id="ndcCloudPurchaseBody"><p>A cloud plan is a one-time purchase. It adds records to your existing balance and does not renew your paid subscription.</p>
           <fieldset class="ndc-choice-group"><legend>Choose a cloud plan</legend><div class="ndc-plan-options">${(dashboardData.cloudAddonPlans || []).map((plan, index) => '<div class="ndc-cloud-plan-card"><label class="ndc-choice ndc-cloud-purchase-choice"><input type="radio" name="cloudPurchasePlan" value="' + esc(plan.id) + '"' + (index === 0 ? ' checked' : '') + '><span><small>CLOUD STORAGE · ' + (plan.structure === "flex" ? "FLEX · ONE TIME" : "FIXED · ONE TIME") + '</small><strong>' + esc(plan.name) + '</strong><b>' + esc(money(plan.structure === "flex" ? plan.perCustomerPrice : plan.price)) + (plan.structure === "flex" ? '<small> / record · one time</small>' : '<small> one time</small>') + '</b><em>' + (plan.structure === "flex" ? "Select additional records, up to " + Number(plan.recordLimit).toLocaleString("en-IN") : "Adds " + Number(plan.recordLimit).toLocaleString("en-IN") + " customer records") + ' · 12 document slots each</em></span></label>' + (plan.structure === "flex" ? '<label class="ndc-cloud-flex-quantity" data-cloud-purchase-quantity-wrap="' + esc(plan.id) + '" hidden><span>Additional customer records</span><input type="number" min="1" max="' + Number(plan.recordLimit) + '" value="' + Math.min(100, Number(plan.recordLimit) || 100) + '" inputmode="numeric" data-cloud-purchase-quantity="' + esc(plan.id) + '" aria-label="Additional customer records"></label>' : "") + '</div>').join("")}</div></fieldset>
           <div id="ndcCloudOffer"></div><div id="ndcCloudPurchaseTotal" class="ndc-checkout-payment-summary" aria-live="polite"></div>
           <button type="button" class="ndc-home-button ndc-cloud-pay-button" id="ndcCloudPurchaseSubmit">Pay securely</button>${razorpaySecurityPanel()}<p id="ndcCloudPurchaseStatus" role="status" aria-live="polite"></p></div>
@@ -1768,14 +1768,17 @@
     });
     document.addEventListener("click", e => {
       const toggle = e.target?.closest("[data-cloud-purchase-toggle]");
-      if (toggle) {
-        const body = document.getElementById(toggle.getAttribute("aria-controls"));
+      const section = e.target?.closest(".ndc-cloud-purchase");
+      const interactive = e.target?.closest("button, a, input, select, textarea, label, [contenteditable='true']");
+      if (toggle || (section && !interactive)) {
+        const button = toggle || section.querySelector("[data-cloud-purchase-toggle]");
+        const body = document.getElementById(button.getAttribute("aria-controls"));
         if (!body) return;
-        const expanded = toggle.getAttribute("aria-expanded") === "true";
+        const expanded = button.getAttribute("aria-expanded") === "true";
         body.hidden = expanded;
-        toggle.setAttribute("aria-expanded", String(!expanded));
-        toggle.setAttribute("aria-label", expanded ? "Expand cloud storage purchase options" : "Collapse cloud storage purchase options");
-        toggle.textContent = expanded ? "+" : "−";
+        button.setAttribute("aria-expanded", String(!expanded));
+        button.setAttribute("aria-label", expanded ? "Expand cloud storage purchase options" : "Collapse cloud storage purchase options");
+        button.textContent = expanded ? "+" : "−";
         return;
       }
       if (e.target?.closest("#ndcCloudPurchaseSubmit")) purchaseCloudStorage();
