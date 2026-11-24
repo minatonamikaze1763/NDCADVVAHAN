@@ -8,6 +8,7 @@
 
   const TOKEN_KEY = "ndc_customer_panel_token";
   let dashboardData = null;
+  let extraDevicesData = null;
   let activeSection = "overview";
   let redirecting = false;
   let logoutInProgress = false;
@@ -81,13 +82,15 @@
     const current = Date.parse(account.expiresAt);
     const base = Number.isFinite(current) ? Math.max(now, current) : now;
     const end = new Date(base + plan.durationDays * months * 86400000);
-    const deviceLimit = appliedOffer?.maxDevices || planDevices(account, plan);
+    const renewedExtraCount = Number($("ndcExtraDeviceRenewalQuantity")?.value) || 0;
+    const deviceLimit = (appliedOffer?.maxDevices || planDevices(account, plan)) + renewedExtraCount;
     const upgrade = Number(deviceLimit) > Number(account.maxDevices);
     const downgrade = Number(deviceLimit) < Number(account.maxDevices) && current > now;
     const switchAt = account.scheduledPlan?.startsAt || account.expiresAt;
 
-    const listAmount = Number(plan.monthlyPrice) * months;
-    const finalAmount = appliedOffer ? Number(appliedOffer.amountPaise) / 100 : listAmount;
+    const extraDeviceAmount = renewedExtraCount * Number(extraDevicesData?.settings?.monthlyPrice || 0) * months;
+    const listAmount = Number(plan.monthlyPrice) * months + extraDeviceAmount;
+    const finalAmount = (appliedOffer ? Number(appliedOffer.amountPaise) / 100 : Number(plan.monthlyPrice) * months) + extraDeviceAmount;
     const priceBeforeOffer = appliedOffer && Number.isFinite(listAmount) &&
       Number.isFinite(finalAmount) && finalAmount < listAmount
       ? '<s class="ndc-preview-price-original">' + esc(money(listAmount)) + '</s>'
@@ -125,7 +128,7 @@
       '<div class="ndc-preview-total"><span>Total payment</span>' +
         '<div class="ndc-preview-prices">' + priceBeforeOffer +
           '<strong>' + esc(money(finalAmount)) + '</strong></div></div>' +
-      '<p>' + deviceNote + upgradeNote + timingNote +
+      '<p>' + deviceNote + upgradeNote + (renewedExtraCount ? `${renewedExtraCount} extra device${renewedExtraCount === 1 ? "" : "s"} renew for ${esc(money(extraDeviceAmount))} and begin at your new subscription period. ` : "No extra devices selected for renewal. Existing paid device access stays active until its current expiry. ") + timingNote +
         ' Preview dates are estimates until the server confirms payment.</p>';
   }
 
@@ -298,7 +301,7 @@
       const response = await api("/api/panel/dashboard");
 
       dashboardData = response.dashboard || response;
-      const extras = await Promise.allSettled([api("/api/panel/gst-profile"), api("/api/panel/gst-invoices"), fetch(API_BASE + "/api/public/cloud-addon-plans", { cache: "no-store" }).then(response => { if (!response.ok) throw Error("Cloud plans unavailable"); return response.json(); })]);
+      const extras = await Promise.allSettled([api("/api/panel/gst-profile"), api("/api/panel/gst-invoices"), fetch(API_BASE + "/api/public/cloud-addon-plans", { cache: "no-store" }).then(response => { if (!response.ok) throw Error("Cloud plans unavailable"); return response.json(); }), api("/api/panel/extra-devices")]);
       dashboardData.cloudAddonPlans = extras[2].status === "fulfilled" ? normalizeCloudPlans(extras[2].value.plans) : [];
       dashboardData.gstProfile = extras[0].status === "fulfilled" ? extras[0].value.profile : {};
       dashboardData.gstInvoicelocked = extras[0].status === "fulfilled" && extras[0].value.gstinLocked;
@@ -307,6 +310,7 @@
       try { const gst = await fetch(API_BASE + "/api/public/gst-checkout-settings", { cache: "no-store" }); if (gst.ok) { const settings = await gst.json(); dashboardData.gstCheckout = { enabled: settings.enabled === true, gstRate: Number(settings.gstRate) || 18 }; } } catch {}
       dashboardData.gstInvoices = extras[1].status === "fulfilled" ? (extras[1].value.invoices || []) : [];
       dashboardData.gstInvoiceError = extras[1].status === "rejected" ? (extras[1].reason?.message || "Unable to load invoice records.") : "";
+      extraDevicesData = extras[3].status === "fulfilled" ? extras[3].value : null;
 
       if (!dashboardData?.account) {
         throw new Error("Customer account information is unavailable.");
@@ -316,6 +320,7 @@
       serverClockOffset = Number.isFinite(serverTime) ? serverTime - Date.now() : 0;
       renderDashboard();
       renewalTotal();
+      extraDevicePurchaseTotal();
 
     } catch (error) {
       if (redirecting) return;
@@ -947,7 +952,7 @@
               <div class="ndc-renewal-purchase-details">
               <fieldset class="ndc-choice-group"><legend>02 · Add more time</legend><p>Each month adds 30 days. Choose 1–12 months.</p>
               <div class="ndc-month-options">${Array.from({ length: 12 }, (_, i) => `<label class="ndc-choice ndc-month-choice"><input type="radio" name="renewalMonths" value="${i + 1}" ${i === 0 ? 'checked' : ''}><span><strong>${i + 1}</strong><small>${i === 0 ? 'month' : 'months'}</small></span></label>`).join('')}</div></fieldset>
-              <fieldset class="ndc-choice-group ndc-cloud-addon-options"><legend>03 · Optional Cloud Storage</legend><p>Cloud plans are one-time record allowances. The added records remain available through paid-plan renewals. Uploaded documents auto-delete after 30 days; cloud logins use the device limit on the selected NDC plan.</p><label class="ndc-cloud-addon-toggle"><input type="checkbox" id="ndcRenewalCloudEnabled"><span><strong>Add Cloud Storage</strong><em>Choose this only if you want cloud storage with this subscription.</em></span></label><div id="ndcRenewalCloudOptions" hidden><div class="ndc-plan-options">${(dashboardData.cloudAddonPlans || []).map(plan => '<div class="ndc-cloud-plan-card"><label class="ndc-choice ndc-cloud-addon-choice"><input type="radio" name="renewalCloudAddon" value="' + esc(plan.id) + '"><span><small>CLOUD STORAGE · ' + (plan.structure === "flex" ? "FLEX · ONE TIME" : "FIXED · ONE TIME") + '</small><strong>' + esc(plan.name) + '</strong><b>' + esc(money(plan.structure === "flex" ? plan.perCustomerPrice : plan.price)) + (plan.structure === "flex" ? '<small> / record · one time</small>' : '<small> one time</small>') + '</b><em>' + (plan.structure === "flex" ? "Choose additional records, up to " + Number(plan.recordLimit).toLocaleString("en-IN") : Number(plan.recordLimit).toLocaleString("en-IN") + " customer records") + ' · 12 document slots each; documents auto-delete after 30 days</em></span></label>' + (plan.structure === "flex" ? '<label class="ndc-cloud-flex-quantity" data-cloud-quantity-wrap="' + esc(plan.id) + '" hidden><span>Additional customer records</span><input type="number" min="1" max="' + Number(plan.recordLimit) + '" value="' + Math.min(100, Number(plan.recordLimit) || 100) + '" inputmode="numeric" data-cloud-quantity="' + esc(plan.id) + '" aria-label="Additional customer records"></label>' : "") + '</div>').join("")}</div></div></fieldset>
+              <fieldset class="ndc-choice-group ndc-extra-device-renewal"><legend>03 · Optional Extra Device Renewal</legend><p>Choose how many currently paid extra devices to carry into this subscription period. Existing access remains active through its current expiry.</p><label for="ndcExtraDeviceRenewalQuantity">Extra devices to renew</label><select id="ndcExtraDeviceRenewalQuantity">${Array.from({ length: Number(extraDevicesData?.activeExtraDeviceCount || 0) + 1 }, (_, i) => `<option value="${i}" ${i === 0 ? "selected" : ""}>${i === 0 ? "None" : i + " device" + (i === 1 ? "" : "s")}</option>`).join("")}</select><small>${extraDevicesData?.activeExtraDeviceCount ? `${money(extraDevicesData.settings?.monthlyPrice)} per device per month` : "You have no currently active paid extra devices to renew."}</small></fieldset><fieldset class="ndc-choice-group ndc-cloud-addon-options"><legend>04 · Optional Cloud Storage</legend><p>Cloud plans are one-time record allowances. The added records remain available through paid-plan renewals. Uploaded documents auto-delete after 30 days; cloud logins use the device limit on the selected NDC plan.</p><label class="ndc-cloud-addon-toggle"><input type="checkbox" id="ndcRenewalCloudEnabled"><span><strong>Add Cloud Storage</strong><em>Choose this only if you want cloud storage with this subscription.</em></span></label><div id="ndcRenewalCloudOptions" hidden><div class="ndc-plan-options">${(dashboardData.cloudAddonPlans || []).map(plan => '<div class="ndc-cloud-plan-card"><label class="ndc-choice ndc-cloud-addon-choice"><input type="radio" name="renewalCloudAddon" value="' + esc(plan.id) + '"><span><small>CLOUD STORAGE · ' + (plan.structure === "flex" ? "FLEX · ONE TIME" : "FIXED · ONE TIME") + '</small><strong>' + esc(plan.name) + '</strong><b>' + esc(money(plan.structure === "flex" ? plan.perCustomerPrice : plan.price)) + (plan.structure === "flex" ? '<small> / record · one time</small>' : '<small> one time</small>') + '</b><em>' + (plan.structure === "flex" ? "Choose additional records, up to " + Number(plan.recordLimit).toLocaleString("en-IN") : Number(plan.recordLimit).toLocaleString("en-IN") + " customer records") + ' · 12 document slots each; documents auto-delete after 30 days</em></span></label>' + (plan.structure === "flex" ? '<label class="ndc-cloud-flex-quantity" data-cloud-quantity-wrap="' + esc(plan.id) + '" hidden><span>Additional customer records</span><input type="number" min="1" max="' + Number(plan.recordLimit) + '" value="' + Math.min(100, Number(plan.recordLimit) || 100) + '" inputmode="numeric" data-cloud-quantity="' + esc(plan.id) + '" aria-label="Additional customer records"></label>' : "") + '</div>').join("")}</div></div></fieldset>
               <div id="ndcRenewalOffer"></div>
               <div id="ndcRenewalPreview" class="ndc-renewal-preview" aria-live="polite"></div>
               ${dashboardData.gstProfile?.gstin && dashboardData.gstProfile?.businessName && dashboardData.gstProfile?.businessAddress && dashboardData.gstProfile?.stateCode ? "" : `
@@ -980,6 +985,24 @@
           </div>
         </section>
       `;
+    }
+
+    else if (activeSection === "extra-devices") {
+      const extra = extraDevicesData || {}, entitlements = extra.extraDeviceEntitlements || [];
+      const maxQuantity = Math.max(0, Math.min(Number(extra.settings?.maxPerPurchase) || 0,
+        (Number(extra.settings?.maxPerCustomer) || 0) - (Number(extra.activeExtraDeviceCount) || 0),
+        20 - (Number(extra.currentDeviceLimit) || Number(account.maxDevices) || 1)));
+      const purchases = [...(extra.purchases || [])].sort((a,b) => new Date(b.paidAt || 0) - new Date(a.paidAt || 0));
+      const entitlementRows = entitlements.map(item => `<tr><td>${Number(item.quantity) || 0}</td><td>${esc(money(item.monthlyPrice))}</td><td>${esc(date(item.startsAt))}</td><td>${esc(date(item.expiresAt))}</td><td>${item.active ? "Active" : esc(item.status || "Expired")}</td><td>${item.active ? `<button type="button" class="ndc-text-button" data-unlink-extra-device="${esc(item.id)}">Unlink</button>` : "—"}</td></tr>`).join("") || '<tr><td colspan="6" class="ndc-empty">No extra device entitlements yet.</td></tr>';
+      const purchaseRows = purchases.map(item => `<tr><td>${esc(date(item.paidAt))}</td><td>${Number(item.quantity) || 0}</td><td>${esc(money(item.monthlyPrice))}</td><td>${esc(money(item.taxableAmount))}</td><td>${esc(money(item.gstAmount))}</td><td>${esc(money(item.amount))}</td><td>${esc(item.reference || "—")}</td></tr>`).join("") || '<tr><td colspan="7" class="ndc-empty">No verified purchases yet.</td></tr>';
+      sectionHTML = `
+        <div class="ndc-page-heading"><span class="ndc-eyebrow">DEVICE ACCESS</span><h1>Extra Devices</h1><p>Purchase additional VAHAN NDC TOOL logins for your current paid subscription.</p></div>
+        <section class="ndc-panel-card ndc-extra-device-allocation"><div class="ndc-card-heading"><div><span class="ndc-eyebrow">CURRENT ALLOCATION</span><h2>${Number(extra.currentDeviceLimit) || Number(account.maxDevices) || 1} device logins</h2></div><span class="ndc-membership-state">${Number(extra.activeExtraDeviceCount) || 0} paid extra</span></div><div class="ndc-detail-line"><span>Included plan allocation</span><b>${Number(extra.baseDeviceLimit) || Number(account.baseMaxDevices) || 1}</b></div><div class="ndc-detail-line"><span>Current subscription expiry</span><b>${esc(date(extra.expiresAt || account.expiresAt))}</b></div><p>Standalone extra device purchases end with your current subscription and never add subscription days.</p></section>
+        <section class="ndc-panel-card ndc-extra-device-purchase"><span class="ndc-eyebrow">SECURE CHECKOUT</span><h2>Purchase extra device logins</h2><p>${extra.eligible ? `${esc(money(extra.settings?.monthlyPrice))} per device for each 30-day billing cycle. Your first charge is prorated through ${esc(date(extra.expiresAt || account.expiresAt))}.` : esc(extra.eligibilityMessage || "Extra device purchases are unavailable for this account right now.")}</p>
+          ${extra.eligible && maxQuantity > 0 ? `<label for="ndcExtraDevicePurchaseQuantity">Quantity</label><select id="ndcExtraDevicePurchaseQuantity">${Array.from({length:maxQuantity},(_,i)=>`<option value="${i+1}">${i+1} device${i===0?"":"s"}</option>`).join("")}</select><div id="ndcExtraDevicePurchaseSummary" class="ndc-checkout-payment-summary" aria-live="polite"></div><button class="ndc-home-button" id="ndcExtraDevicePurchaseSubmit" type="button">Pay securely</button>${razorpaySecurityPanel()}<div class="ndc-renewal-verification" id="ndcExtraDeviceVerification" role="status" aria-live="assertive" hidden><div class="ndc-renewal-verification-card"><span class="ndc-renewal-verification-spinner" aria-hidden="true"></span><p class="ndc-renewal-verification-label">PAYMENT VERIFICATION</p><h2>Verifying your payment</h2><p>Please keep this page open while we confirm your device access.</p></div></div><p id="ndcExtraDevicePurchaseStatus" role="status" aria-live="polite"></p>` : `<p class="ndc-extra-device-unavailable">${esc(extra.eligibilityMessage || "Your current device limit or purchase allowance has been reached.")}</p>`}
+        </section>
+        <section class="ndc-panel-card"><h2>Device entitlement history</h2><div class="ndc-table-wrap"><table class="ndc-table"><thead><tr><th>Quantity</th><th>Monthly rate</th><th>Starts</th><th>Expires</th><th>Status</th><th>Action</th></tr></thead><tbody>${entitlementRows}</tbody></table></div></section>
+        <section class="ndc-panel-card"><h2>Extra device purchase history</h2><div class="ndc-table-wrap"><table class="ndc-table"><thead><tr><th>Paid on</th><th>Quantity</th><th>Monthly rate</th><th>Taxable</th><th>GST</th><th>Total paid</th><th>Payment reference</th></tr></thead><tbody>${purchaseRows}</tbody></table></div></section>`;
     }
 
     // =======================================================
@@ -1415,6 +1438,7 @@
       "profile",
       "setup",
       "subscription",
+      "extra-devices",
       "cloud-storage",
       "payments",
       "gst-invoices",
@@ -1432,6 +1456,7 @@
 
     renderDashboard();
     renewalTotal();
+    extraDevicePurchaseTotal();
   }
 
   function mountRenewalOffer() {
@@ -1524,17 +1549,30 @@
     const cloudEnabled = $("ndcRenewalCloudEnabled")?.checked === true;
     const addonId = cloudEnabled ? document.querySelector('input[name="renewalCloudAddon"]:checked')?.value : null;
     const addonPlan = (dashboardData?.cloudAddonPlans || []).find(item => item.id === addonId);
+    const extraDeviceQuantity = plan ? Number($("ndcExtraDeviceRenewalQuantity")?.value) || 0 : 0;
+    const extraDeviceAmount = extraDeviceQuantity * Number(extraDevicesData?.settings?.monthlyPrice || 0) * months;
     syncCloudQuantityFields();
     const planAmount = (Number(RENEWAL_PRICES[plan]) || 0) * months;
     const cloudAmount = addonPlan ? (addonPlan.structure === "flex" ? Number(addonPlan.perCustomerPrice) * cloudQuantityFor(addonPlan) : Number(addonPlan.price)) : 0;
     if ($("ndcRenewalTotal") && planAmount >= 0) {
       const offerIncludesCloud = !!appliedOffer?.cloudAddonPlanId && cloudEnabled;
-      const list = planAmount + cloudAmount;
-      const taxable = (appliedOffer ? Number(appliedOffer.amountPaise) / 100 : planAmount) + (offerIncludesCloud ? 0 : cloudAmount);
+      const list = planAmount + cloudAmount + extraDeviceAmount;
+      const taxable = (appliedOffer ? Number(appliedOffer.amountPaise) / 100 : planAmount) + (offerIncludesCloud ? 0 : cloudAmount) + extraDeviceAmount;
       const gstRate = Number(dashboardData?.gstCheckout?.gstRate) || 18, gst = dashboardData?.gstCheckout?.enabled ? Math.round(taxable * gstRate) / 100 : 0;
-      renderRenewalSummary({ planAmount, cloudAmount, list, taxable, discount: Math.max(0, list - taxable), gst, gstRate, gstEnabled: dashboardData?.gstCheckout?.enabled === true, total: taxable + gst });
+      renderRenewalSummary({ planAmount, cloudAmount, extraDeviceAmount, list, taxable, discount: Math.max(0, list - taxable), gst, gstRate, gstEnabled: dashboardData?.gstCheckout?.enabled === true, total: taxable + gst });
     }
     renewalPreview();
+  }
+
+  function extraDevicePurchaseTotal() {
+    const root = $("ndcExtraDevicePurchaseSummary"), quantity = Number($("ndcExtraDevicePurchaseQuantity")?.value) || 0;
+    if (!root || !extraDevicesData?.eligible || quantity < 1) return;
+    const expiry = Date.parse(extraDevicesData.expiresAt), now = Date.now() + serverClockOffset;
+    const remaining = Math.max(0, expiry - now), monthlyPaise = Math.round(Number(extraDevicesData.settings?.monthlyPrice || 0) * 100);
+    const taxable = Math.ceil(monthlyPaise * quantity * remaining / (30 * 86400000)) / 100;
+    const rate = Number(dashboardData?.gstCheckout?.gstRate) || 18;
+    const gst = dashboardData?.gstCheckout?.enabled ? Math.round(taxable * rate) / 100 : 0;
+    renderRenewalSummary({ planAmount: 0, cloudAmount: 0, extraDevicePurchaseAmount: taxable, list: taxable, taxable, discount: 0, gst, gstRate: rate, gstEnabled: dashboardData?.gstCheckout?.enabled === true, total: taxable + gst }, "ndcExtraDevicePurchaseSummary");
   }
 
   function renderRenewalSummary(summary, targetId = "ndcRenewalTotal") {
@@ -1545,6 +1583,8 @@
     const rows = [
       ["Plan amount", Number(summary.planAmount ?? summary.list) || 0],
       ["Cloud plan amount", Number(summary.cloudAmount) || 0],
+      ...(Number(summary.extraDeviceAmount) > 0 ? [["Extra device renewal", Number(summary.extraDeviceAmount)]] : []),
+      ...(Number(summary.extraDevicePurchaseAmount) > 0 ? [["Extra devices", Number(summary.extraDevicePurchaseAmount)]] : []),
       ["Total", Number(summary.list) || 0],
       ["Discount / offer applied", Number(summary.discount) || 0],
       ["Taxable amount", Number(summary.taxable) || 0],
@@ -1555,7 +1595,7 @@
       ["Total payable", Number(summary.total) || 0]
     ];
     root.innerHTML = '<div class="ndc-checkout-summary-heading">PAYMENT SUMMARY</div><div class="ndc-checkout-summary-columns"><span>DESCRIPTION</span><span>AMOUNT</span></div>' + rows.map(([label, value, plain]) => '<div class="ndc-checkout-tax-row' + (label === "Total payable" ? ' is-total' : '') + '"><span>' + esc(label) + '</span><strong>' + esc(plain ? value : money(value)) + '</strong></div>').join('') + '<small class="ndc-checkout-summary-note">' + (summary.gstEnabled ? 'GST is calculated after any plan or offer discount.' : 'GST is currently not charged. The amount shown is the amount you will pay.') + '</small>';
-    const button = $(targetId === "ndcCloudPurchaseTotal" ? "ndcCloudPurchaseSubmit" : "ndcRenewalSubmit");
+    const button = $(targetId === "ndcCloudPurchaseTotal" ? "ndcCloudPurchaseSubmit" : targetId === "ndcExtraDevicePurchaseSummary" ? "ndcExtraDevicePurchaseSubmit" : "ndcRenewalSubmit");
     if (button && !paymentBusy) button.textContent = "Pay securely · " + money(summary.total);
   }
 
@@ -1576,7 +1616,7 @@
   function setPaymentBusy(busy) {
     paymentBusy = busy;
     offerWidget?.setBusy(busy); cloudOfferWidget?.setBusy(busy);
-    document.querySelectorAll('input[name="renewalPlan"], input[name="renewalMonths"], input[name="renewalCloudAddon"], #ndcRenewalCloudEnabled, [data-cloud-quantity], input[name="cloudPurchasePlan"], [data-cloud-purchase-quantity], #ndcCloudPurchaseSubmit').forEach(input => input.disabled = busy || (input.matches('[data-cloud-quantity]') && input.closest('[data-cloud-quantity-wrap]')?.hidden) || (input.matches('[data-cloud-purchase-quantity]') && input.closest('[data-cloud-purchase-quantity-wrap]')?.hidden));
+    document.querySelectorAll('input[name="renewalPlan"], input[name="renewalMonths"], input[name="renewalCloudAddon"], #ndcRenewalCloudEnabled, #ndcExtraDeviceRenewalQuantity, [data-cloud-quantity], input[name="cloudPurchasePlan"], [data-cloud-purchase-quantity], #ndcCloudPurchaseSubmit, #ndcExtraDevicePurchaseQuantity, #ndcExtraDevicePurchaseSubmit').forEach(input => input.disabled = busy || (input.matches('[data-cloud-quantity]') && input.closest('[data-cloud-quantity-wrap]')?.hidden) || (input.matches('[data-cloud-purchase-quantity]') && input.closest('[data-cloud-purchase-quantity-wrap]')?.hidden));
     const quick = $("ndcQuickRenew");
     const account = dashboardData?.account || {};
     const paidExpiry = Date.parse(account.expiresAt);
@@ -1585,7 +1625,7 @@
       !dashboardData?.account?.expiresAt || dashboardData?.account?.renewal?.canRenew === false ||
       dashboardData?.account?.approved !== true || dashboardData?.account?.disabled || dashboardData?.account?.banned ||
       Date.now() + serverClockOffset >= panelExpiry;
-    ["ndcRenewalSubmit", "ndcRenewalPlan", "ndcRenewalMonths"].forEach(id => {
+    ["ndcRenewalSubmit", "ndcRenewalPlan", "ndcRenewalMonths", "ndcExtraDevicePurchaseSubmit"].forEach(id => {
       if ($(id)) $(id).disabled = busy;
     });
   }
@@ -1593,7 +1633,7 @@
   async function renewSubscription(event) {
     event.preventDefault();
     if (offerWidget?.isLoading() || offerWidget?.hasUnapplied()) { $("ndcRenewalStatus").textContent = 'Apply or remove your offer code before continuing.'; return; }
-    await startRenewalPayment(document.querySelector('input[name="renewalPlan"]:checked').value, Number(document.querySelector('input[name="renewalMonths"]:checked').value), "ndcRenewalStatus", document.querySelector('input[name="renewalCloudAddon"]:checked')?.value || null);
+    await startRenewalPayment(document.querySelector('input[name="renewalPlan"]:checked').value, Number(document.querySelector('input[name="renewalMonths"]:checked').value), "ndcRenewalStatus", document.querySelector('input[name="renewalCloudAddon"]:checked')?.value || null, false, Number($("ndcExtraDeviceRenewalQuantity")?.value) || 0);
   }
 
   async function purchaseCloudStorage() {
@@ -1602,7 +1642,59 @@
     if (cloudOfferWidget?.isLoading() || cloudOfferWidget?.hasUnapplied()) { $('ndcCloudPurchaseStatus').textContent = 'Apply or remove your cloud offer code before continuing.'; return; }
     await startRenewalPayment(null, 1, 'ndcCloudPurchaseStatus', planId, true);
   }
-  async function startRenewalPayment(planId, months, statusId, cloudAddonPlanId = null, standaloneCloud = false) {
+
+  async function purchaseExtraDevices() {
+    if (paymentBusy) return;
+    const quantity = Number($("ndcExtraDevicePurchaseQuantity")?.value);
+    const status = $("ndcExtraDevicePurchaseStatus");
+    if (!Number.isInteger(quantity) || quantity < 1 || !extraDevicesData?.eligible) { if (status) status.textContent = "Extra devices are not available for this selection."; return; }
+    if (typeof Razorpay !== "function") { status.textContent = "Razorpay Checkout did not load. Refresh and retry."; return; }
+    setPaymentBusy(true); status.textContent = "Creating secure payment order…";
+    try {
+      const result = await api("/api/panel/extra-devices/orders", { method: "POST", body: JSON.stringify({ quantity }) });
+      const order = result.data || result;
+      if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error("Invalid payment order response.");
+      const gst = order.gst || {}, quote = order.extraDevices || {};
+      renderRenewalSummary({ planAmount: 0, cloudAmount: 0, extraDevicePurchaseAmount: Number(quote.taxableAmount) || Number(order.baseAmount) / 100, list: Number(gst.listPrice || order.baseAmount || order.amount) / 100, discount: Number(gst.discountAmount || 0) / 100, taxable: Number(gst.taxableAmount || order.baseAmount || order.amount) / 100, gst: Number(gst.amount || 0) / 100, gstRate: Number(gst.rate || dashboardData?.gstCheckout?.gstRate || 18), gstEnabled: gst.enabled === true, total: Number(order.amount) / 100 }, "ndcExtraDevicePurchaseSummary");
+      let verifying = false;
+      const verification = $("ndcExtraDeviceVerification");
+      const checkout = new Razorpay({
+        key: order.keyId, order_id: order.orderId, amount: order.amount, currency: order.currency || "INR",
+        name: "Next Dimension Customs", description: order.description || "VAHAN NDC TOOL - Extra devices", theme: { color: "#d7bd55" },
+        handler: async payment => {
+          if (verifying) return; verifying = true;
+          status.textContent = "Verifying your payment…"; if (verification) verification.hidden = false;
+          try {
+            const verified = await api("/api/panel/payments/verify", { method: "POST", body: JSON.stringify(payment) });
+            if (verification) verification.hidden = true;
+            status.textContent = verified.manualReview ? "Payment received. Device activation needs a support review." : "Payment verified. Your extra devices are active.";
+            await loadDashboard();
+          } catch (error) {
+            if (verification) verification.hidden = true;
+            status.textContent = `Payment received; verification is pending. Save payment ID ${payment.razorpay_payment_id}. ${error.message}`;
+          } finally { setPaymentBusy(false); }
+        },
+        modal: { ondismiss: () => { if (!verifying) { setPaymentBusy(false); status.textContent = "Checkout closed. If money was deducted, wait for payment confirmation before trying again."; } } }
+      });
+      checkout.on("payment.failed", event => { status.textContent = event?.error?.description || "Payment did not complete. No device access was activated."; setPaymentBusy(false); });
+      checkout.open();
+    } catch (error) { status.textContent = error.message; setPaymentBusy(false); }
+  }
+
+  async function unlinkExtraDevice(button) {
+    if (paymentBusy || !button?.dataset.unlinkExtraDevice) return;
+    if (!confirm("Unlink this paid extra device allocation now? The unused time is not refunded.")) return;
+    button.disabled = true; button.textContent = "Unlinking…";
+    try {
+      await api(`/api/panel/extra-devices/${encodeURIComponent(button.dataset.unlinkExtraDevice)}`, { method: "DELETE" });
+      await loadDashboard();
+      if (activeSection === "extra-devices") extraDevicePurchaseTotal();
+    } catch (error) {
+      alert(error.message);
+      button.disabled = false; button.textContent = "Unlink";
+    }
+  }
+    async function startRenewalPayment(planId, months, statusId, cloudAddonPlanId = null, standaloneCloud = false, extraDeviceRenewalQuantity = 0) {
     if (paymentBusy) return;
     const message = (text) => {
       const isRenewalVerification = !standaloneCloud && statusId === "ndcRenewalStatus" &&
@@ -1638,14 +1730,15 @@
     message("Creating secure payment order…");
     try {
       const result = await api("/api/panel/payments/orders", {
-        method: "POST", body: JSON.stringify({ ...(planId ? { planId } : {}), months, ...(cloudAddonPlanId ? { cloudAddonPlanId, ...(cloudAddonQuantity ? { cloudAddonQuantity } : {}) } : {}), ...renewalBillingPayload(), ...(standaloneCloud && cloudAppliedOffer?.cloudAddonPlanId === cloudAddonPlanId && cloudAppliedOffer?.months === months ? { offerCode: cloudAppliedOffer.code } : (!standaloneCloud && appliedOffer && appliedOffer.months === months && appliedOffer.planId === planId ? { offerCode: appliedOffer.code } : {})) })
+        method: "POST", body: JSON.stringify({ ...(planId ? { planId } : {}), months, ...(extraDeviceRenewalQuantity > 0 && !standaloneCloud ? { extraDeviceRenewalQuantity } : {}), ...(cloudAddonPlanId ? { cloudAddonPlanId, ...(cloudAddonQuantity ? { cloudAddonQuantity } : {}) } : {}), ...renewalBillingPayload(), ...(standaloneCloud && cloudAppliedOffer?.cloudAddonPlanId === cloudAddonPlanId && cloudAppliedOffer?.months === months ? { offerCode: cloudAppliedOffer.code } : (!standaloneCloud && appliedOffer && appliedOffer.months === months && appliedOffer.planId === planId ? { offerCode: appliedOffer.code } : {})) })
       });
       const order = result.data || result;
       if (!order.keyId || !order.orderId || !Number.isFinite(Number(order.amount))) throw Error("Invalid payment order response.");
       const quoteGst = order.gst || {};
       const orderCloudAmount = cloudAddonPlan ? (cloudAddonPlan.structure === "flex" ? Number(cloudAddonPlan.perCustomerPrice) * Number(cloudAddonQuantity || 0) : Number(cloudAddonPlan.price)) : 0;
       const orderPlanAmount = planId ? (Number(RENEWAL_PRICES[planId]) || 0) * Number(months || 1) : 0;
-      renderRenewalSummary({ planAmount: standaloneCloud ? 0 : orderPlanAmount, cloudAmount: orderCloudAmount, list: Number(quoteGst.listPrice || order.baseAmount || order.amount) / 100, discount: Number(quoteGst.discountAmount || 0) / 100, taxable: Number(quoteGst.taxableAmount || order.baseAmount || order.amount) / 100, gst: Number(quoteGst.amount || 0) / 100, gstRate: Number(quoteGst.rate || dashboardData?.gstCheckout?.gstRate || 18), gstEnabled: quoteGst.enabled === true, total: Number(order.amount) / 100, ...(standaloneCloud ? { recordsAdded: cloudAddonQuantity ?? cloudAddonPlan?.recordLimit ?? 0 } : {}) }, standaloneCloud ? "ndcCloudPurchaseTotal" : "ndcRenewalTotal");
+      const orderExtraDeviceAmount = Number(order.extraDevices?.taxableAmount) || 0;
+      renderRenewalSummary({ planAmount: standaloneCloud ? 0 : orderPlanAmount, cloudAmount: orderCloudAmount, extraDeviceAmount: orderExtraDeviceAmount, list: Number(quoteGst.listPrice || order.baseAmount || order.amount) / 100, discount: Number(quoteGst.discountAmount || 0) / 100, taxable: Number(quoteGst.taxableAmount || order.baseAmount || order.amount) / 100, gst: Number(quoteGst.amount || 0) / 100, gstRate: Number(quoteGst.rate || dashboardData?.gstCheckout?.gstRate || 18), gstEnabled: quoteGst.enabled === true, total: Number(order.amount) / 100, ...(standaloneCloud ? { recordsAdded: cloudAddonQuantity ?? cloudAddonPlan?.recordLimit ?? 0 } : {}) }, standaloneCloud ? "ndcCloudPurchaseTotal" : "ndcRenewalTotal");
       let verificationStarted = false;
       const checkout = new Razorpay({
         key: order.keyId, order_id: order.orderId, amount: order.amount,
@@ -1753,6 +1846,7 @@
     document.addEventListener("input", e => {
       if (e.target?.matches("[data-cloud-quantity]")) renewalTotal();
       if (e.target?.matches("[data-cloud-purchase-quantity]")) cloudPurchaseTotal();
+      if (e.target?.id === "ndcExtraDevicePurchaseQuantity") extraDevicePurchaseTotal();
     });
     document.addEventListener("change", e => {
       if (e.target?.id === "ndcRenewalCloudEnabled") {
@@ -1760,13 +1854,16 @@
         if (!e.target.checked) document.querySelectorAll('input[name="renewalCloudAddon"]').forEach(input => input.checked = false);
         if (appliedOffer) offerWidget?.clear("Offer removed because your selection changed.");
         renewalTotal();
-      } else if (e.target?.name === "renewalPlan" || e.target?.name === "renewalMonths" || e.target?.name === "renewalCloudAddon") {
+      } else if (e.target?.name === "renewalPlan" || e.target?.name === "renewalMonths" || e.target?.name === "renewalCloudAddon" || e.target?.id === "ndcExtraDeviceRenewalQuantity") {
         if (appliedOffer) offerWidget?.clear("Offer removed because your selection changed.");
         renewalTotal();
       } else if (e.target?.matches("[data-cloud-quantity]")) renewalTotal();
       else if (e.target?.matches('input[name="cloudPurchasePlan"], [data-cloud-purchase-quantity]')) cloudPurchaseTotal();
     });
     document.addEventListener("click", e => {
+      if (e.target?.closest("#ndcExtraDevicePurchaseSubmit")) { void purchaseExtraDevices(); return; }
+      const unlink = e.target?.closest("[data-unlink-extra-device]");
+      if (unlink) { void unlinkExtraDevice(unlink); return; }
       const toggle = e.target?.closest("[data-cloud-purchase-toggle]");
       if (toggle) {
         const body = document.getElementById(toggle.getAttribute("aria-controls"));

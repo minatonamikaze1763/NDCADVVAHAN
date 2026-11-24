@@ -9,12 +9,12 @@
 
     <title>Customer Portal | Next Dimension Customs</title>
 
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css?v=extra-devices-20261124" />
     <link rel="stylesheet" href="customer-trust.css?v=20261106-company" />
 
     <script src="auth.js?v=20261108-device-names" defer></script>
     <script src="plan-catalog.js" defer></script>
-    <script src="customer-panel.js?v=cloud-storage-toggle-20261124" defer></script>
+    <script src="customer-panel.js?v=extra-devices-20261124" defer></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="email-tools.js" defer></script>
     <link rel="stylesheet" href="offer-code.css">
@@ -65,6 +65,11 @@
             <button type="button" data-section="subscription">
               <span>◇</span>
               Subscription
+            </button>
+
+            <button type="button" data-section="extra-devices">
+              <span aria-hidden="true">⊕</span>
+              Extra Devices
             </button>
 
             <button type="button" id="ndcCloudStorageNav" data-section="cloud-storage" hidden>
