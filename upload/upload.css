@@ -2568,8 +2568,7 @@ main {
 }
 @media(max-width:680px) {
   .workspace-guide { display:none; }
-  .workspace-start-heading,
-  .workspace-start-card #newCustomer { display:none; }
+  .workspace-start-heading { display:none; }
   .workspace-start-card { padding:16px !important; }
 }
 
