@@ -49,6 +49,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d9a91d77;border-color
 .doc-row .doc-state{font-size:.76rem;color:var(--muted);overflow-wrap:anywhere}
 .doc-state.saved{color:var(--ok)}
 .doc-actions{display:flex;gap:9px;flex-wrap:wrap}
+.doc-actions .smartscan-action{border-color:#9a7d34;color:#f0cb55;font-weight:700}
 .doc-actions button,.form20-pages button{min-height:36px;padding:7px 10px;font-size:.8rem}
 .doc-actions input[type=file]{display:none}
 .subcat{font-size:.8rem}
@@ -2898,3 +2899,4 @@ main {
     width:auto !important;
   }
 }
+

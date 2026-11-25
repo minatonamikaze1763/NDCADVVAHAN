@@ -22,6 +22,8 @@
   let pendingCloseHost = null;
   let searchTimer;
   let autoForm20AsInspection = false;
+  let smartScanEnabled = false;
+  let smartScanModulePromise = null;
   let sessionValidationPromise = null;
   let logoutInProgress = false;
 
@@ -307,6 +309,7 @@
   async function loadSettings() {
     const data = await request("/api/upload-portal/settings");
     autoForm20AsInspection = data.autoForm20AsInspection === true;
+    smartScanEnabled = data.smartScanEnabled === true;
     $("autoForm20AsInspection").checked = autoForm20AsInspection;
     $("saveRetention").disabled = true;
     status($("settingsStatus"), "");
@@ -646,6 +649,42 @@
     });
     input.click();
   }
+  async function selectSmartScan(category, multiple = false) {
+    if (!smartScanEnabled || !(await ensureActiveSession())) return null;
+    await ensureSmartScanModule();
+    const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.multiple = multiple;
+    const files = await new Promise(resolve => {
+      input.addEventListener("change", () => resolve([...(input.files || [])]), {once:true});
+      input.addEventListener("cancel", () => resolve([]), {once:true}); input.click();
+    });
+    if (category === "form20" && multiple && files.length && files.length !== 3) { status($("saveStatus"), "Select exactly three Form 20 pages.", "error"); return []; }
+    const outputs = [];
+    for (const selected of files) {
+      let source = selected;
+      while (source) {
+        const maxBytes = category === "form20" && files.length > 1 ? Math.floor((390 * 1024 - 20 * 1024) / files.length) : category === "form20" ? 390 * 1024 : 400000;
+        const result = await window.NDCSmartScan.openEditor({file:source, category, maxBytes});
+        if (result?.retake) {
+          const retry = document.createElement("input"); retry.type = "file"; retry.accept = "image/*";
+          source = await new Promise(resolve => { retry.addEventListener("change", () => resolve(retry.files?.[0] || null), {once:true}); retry.addEventListener("cancel", () => resolve(null), {once:true}); retry.click(); });
+          continue;
+        }
+        source = null;
+        if (result) outputs.push(result);
+      }
+    }
+    return outputs;
+  }
+  function ensureSmartScanModule() {
+    if (window.NDCSmartScan) return Promise.resolve(window.NDCSmartScan);
+    if (!smartScanModulePromise) smartScanModulePromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script"); script.src = "/upload/smartscan-engine.js?v=smartscan-20261125";
+      script.onload = () => window.NDCSmartScan ? resolve(window.NDCSmartScan) : reject(new Error("SmartScan did not initialize. Refresh the page and retry."));
+      script.onerror = () => { smartScanModulePromise = null; reject(new Error("SmartScan could not be loaded. Check your connection and retry.")); };
+      document.head.append(script);
+    });
+    return smartScanModulePromise;
+  }
   function capturePhotoFromDefaultCamera() {
     return new Promise(resolve => {
       const input = document.createElement("input");
@@ -717,7 +756,13 @@
             progress.textContent = `No photo selected for ${label}. You can try again.`;
             return;
           }
-          photos[index] = photo;
+          if (smartScanEnabled) {
+            await ensureSmartScanModule();
+            const scanned = await window.NDCSmartScan.openEditor({file:photo,category:row.dataset.doc,maxBytes:row.dataset.doc === "form20" ? Math.floor((390 * 1024 - 20 * 1024) / labels.length) : 180000});
+            if (!scanned) { progress.textContent = `Scan canceled for ${label}. You can try again.`; return; }
+            if (scanned.retake) { progress.textContent = `Retake ${label} and scan it again.`; return; }
+            photos[index] = scanned;
+          } else photos[index] = photo;
           saved = false;
           update();
         } catch (error) {
@@ -750,6 +795,11 @@
     update();
   }
   async function photoAsJpeg(file, targetBytes) {
+    if (file.ndcSmartScan && file.type === "image/jpeg" && file.size <= targetBytes) {
+      const scannedBitmap = await createImageBitmap(file);
+      try { return {bytes:new Uint8Array(await file.arrayBuffer()),width:scannedBitmap.width,height:scannedBitmap.height}; }
+      finally { scannedBitmap.close?.(); }
+    }
     const bitmap = await createImageBitmap(file);
     try {
       let width = bitmap.width, height = bitmap.height;
@@ -1376,7 +1426,9 @@
         });
         row.append(select, aadhaarCaptureHint, aadhaarCaptureControls);
       }
-      const actions = document.createElement("div"); actions.className = "doc-actions"; const camera = document.createElement("button"); camera.type = "button"; camera.className = "secondary"; setIconButton(camera, "camera", "Camera"); camera.addEventListener("click", () => safeFileInput(id, true)); const browse = document.createElement("button"); browse.type = "button"; browse.className = "secondary"; setIconButton(browse, "upload", "Upload"); browse.addEventListener("click", () => safeFileInput(id, false)); actions.append(camera, browse, row._summaryPreviewButton);
+      const actions = document.createElement("div"); actions.className = "doc-actions"; const camera = document.createElement("button"); camera.type = "button"; camera.className = "secondary"; setIconButton(camera, "camera", "Camera"); camera.addEventListener("click", () => safeFileInput(id, true)); const browse = document.createElement("button"); browse.type = "button"; browse.className = "secondary"; setIconButton(browse, "upload", "Upload"); browse.addEventListener("click", () => safeFileInput(id, false)); actions.append(camera, browse);
+      if (smartScanEnabled) { const scan = document.createElement("button"); scan.type = "button"; scan.className = "secondary smartscan-action"; scan.textContent = "Scan Document"; scan.addEventListener("click", async () => { if (id === "address-proof" && !addressTypeSelect?.value) { status($("saveStatus"), "Choose an Address Proof type before scanning.", "error"); return; } scan.disabled = true; try { const files = await selectSmartScan(id); if (!files?.length) return; row._file = files[0]; row._pages = []; row.querySelector(".doc-state").textContent = row._savedDocument ? "Scanned replacement ready" : "Scanned image ready"; updateDocumentSaveButton($("customerView")); await loadSelectedFilePreview(row, row._file); } catch (error) { status($("saveStatus"), error.message, "error"); } finally { scan.disabled = false; } }); actions.append(scan); }
+      actions.append(row._summaryPreviewButton);
       if (id === "address-proof") {
         const updateAadhaarOption = () => { const visible = addressTypeSelect.value === "Aadhaar"; aadhaarCaptureControls.hidden = !visible; aadhaarCaptureHint.hidden = !visible; };
         addressTypeSelect.addEventListener("change", async () => {
@@ -1423,7 +1475,12 @@
       if (pdfs.length) { if (pdfs.length !== 1 || files.length !== 1) { status($("saveStatus"), "Choose one Form 20 PDF by itself.", "error"); return; } form20._file = pdfs[0]; form20._pages = []; form20.querySelector(".doc-state").textContent = form20._savedDocument ? "Replacement selected" : "Form 20 file selected"; updateDocumentSaveButton(host); updateForm20PreviewButton(); await loadSelectedFilePreview(form20, pdfs[0]); }
       else { form20._file = null; form20._pages = files.slice(0, 30); form20.querySelector(".doc-state").textContent = files.length ? `${files.length} Form 20 photos selected` : "Upload a PDF (3+ pages) or capture three photos"; updateDocumentSaveButton(host); updateForm20PreviewButton(); if (files[0]) await loadSelectedFilePreview(form20, files[0]); else setPreview(form20._selectedPreview, null, "Selected"); }
     }); input.click(); });
-    form20Actions.append(choose20); const delete20 = document.createElement("button"); delete20.type = "button"; delete20.className = "danger doc-delete-action"; setIconButton(delete20, "trash", "Delete"); delete20.disabled = !saved20; delete20.title = saved20 ? "Delete saved Form 20" : "No saved document to delete"; delete20.addEventListener("click", async () => { if (saved20) { if (!confirm("Delete Form 20?")) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, { method:"DELETE" }); await openCustomer(customer._id); } catch(error) { alert(error.message); } return; } if (!form20._file && !form20._pages?.length) return; form20._file = null; form20._pages = []; setPreview(form20._selectedPreview, null, "Selected"); fstate.textContent = "Upload a PDF (3+ pages) or capture three photos"; updateForm20PreviewButton(); updateDocumentSaveButton(host); }); form20Actions.append(delete20); form20.append(form20Actions);
+    form20Actions.append(choose20);
+    if (smartScanEnabled) {
+      const scan20 = document.createElement("button"); scan20.type = "button"; scan20.className = "secondary smartscan-action"; scan20.textContent = "Scan Document";
+      scan20.addEventListener("click", async () => { scan20.disabled = true; try { const files = await selectSmartScan("form20", true); if (!files?.length) return; if (files.length !== 3) { status($("saveStatus"), "Select or scan exactly three Form 20 pages.", "error"); return; } form20._file = null; form20._pages = files; fstate.textContent = `${files.length} scanned Form 20 page${files.length === 1 ? "" : "s"} ready`; updateForm20PreviewButton(); updateDocumentSaveButton(host); await loadSelectedFilePreview(form20, files[0]); } catch (error) { status($("saveStatus"), error.message, "error"); } finally { scan20.disabled = false; } }); form20Actions.append(scan20);
+    }
+    const delete20 = document.createElement("button"); delete20.type = "button"; delete20.className = "danger doc-delete-action"; setIconButton(delete20, "trash", "Delete"); delete20.disabled = !saved20; delete20.title = saved20 ? "Delete saved Form 20" : "No saved document to delete"; delete20.addEventListener("click", async () => { if (saved20) { if (!confirm("Delete Form 20?")) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, { method:"DELETE" }); await openCustomer(customer._id); } catch(error) { alert(error.message); } return; } if (!form20._file && !form20._pages?.length) return; form20._file = null; form20._pages = []; setPreview(form20._selectedPreview, null, "Selected"); fstate.textContent = "Upload a PDF (3+ pages) or capture three photos"; updateForm20PreviewButton(); updateDocumentSaveButton(host); }); form20Actions.append(delete20); form20.append(form20Actions);
     const form20Section = document.createElement("section"); form20Section.className = "form20-section"; form20Section.setAttribute("aria-labelledby", "form20SectionTitle");
     const form20SectionTitle = document.createElement("h2"); form20SectionTitle.id = "form20SectionTitle"; form20SectionTitle.className = "form20-section-title"; form20SectionTitle.textContent = "Form 20 document";
     form20Section.append(form20SectionTitle, form20);
@@ -1443,7 +1500,7 @@
     for (const [category] of categories.filter(([id]) => id !== "form20")) {
       const row = host.querySelector(`[data-doc="${category}"]`); const file = row?._file; if (!file) continue;
       const subcategory = row.querySelector("[data-subcategory]")?.value || ""; if (category === "address-proof" && !subcategory) { failures.push("Address Proof: select a type."); continue; }
-      try { status(result, `Preparing ${row.querySelector("h3").textContent}…`); const prepared = await prepareUploadFile(file, category); await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": file.type || "application/octet-stream", "X-NDC-Upload-Type": prepared.type || file.type, "X-NDC-Original-Filename": file.name, "X-NDC-Original-Size": String(file.size), "X-NDC-Original-Last-Modified": String(file.lastModified || Date.now()), ...(subcategory ? { "X-NDC-Subcategory": subcategory } : {}) }, body: prepared }); saved++; }
+      try { status(result, `Preparing ${row.querySelector("h3").textContent}…`); const prepared = await prepareUploadFile(file, category); await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, { method: "PUT", headers: { "Content-Type": "application/octet-stream", "X-NDC-Original-Type": file.type || "application/octet-stream", "X-NDC-Upload-Type": prepared.type || file.type, "X-NDC-Original-Filename": file.name, "X-NDC-Original-Size": String(file.size), "X-NDC-Original-Last-Modified": String(file.lastModified || Date.now()), ...(file.ndcSmartScan ? {"X-NDC-Processed":"smartscan-v1"} : {}), ...(subcategory ? { "X-NDC-Subcategory": subcategory } : {}) }, body: prepared }); saved++; }
       catch (error) { failures.push(`${row.querySelector("h3").textContent}: ${error.message}`); }
     }
     const form20Row = host.querySelector('[data-doc="form20"]');
@@ -1489,3 +1546,4 @@
   });
   void validate();
 })();
+
