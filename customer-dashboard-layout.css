@@ -382,3 +382,9 @@ body.ndc-dashboard-v2 {
         transform:rotate(90deg);
     }
 }
+/* Keep the Extra Devices summary and checkout cards compact. */
+.ndc-dashboard-v2 .ndc-extra-device-allocation,
+.ndc-dashboard-v2 .ndc-extra-device-purchase {
+    width:100%;
+    max-width:600px;
+}
