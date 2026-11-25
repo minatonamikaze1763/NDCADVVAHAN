@@ -1,0 +1,107 @@
+/* Public homepage Do’s & Don’ts section */
+.ndc-guidelines-section {
+  border-block: 1px solid var(--line);
+  background: var(--panel);
+}
+.ndc-guidelines-section .section-head {
+  max-width: 820px;
+  margin-bottom: 30px;
+}
+.ndc-guidelines-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+.ndc-guidelines-card {
+  min-width: 0;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--bg);
+}
+.ndc-guidelines-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 20px;
+  color: var(--gold);
+  font-size: 19px;
+  line-height: 1.4;
+}
+.ndc-guidelines-svg-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.ndc-guidelines-icon {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ndc-guidelines-icon--do {
+  color: #58c78a;
+}
+.ndc-guidelines-icon--dont {
+  color: #ef6b6b;
+}
+.ndc-guidelines-list {
+  display: grid;
+  gap: 13px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ndc-guidelines-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.ndc-guidelines-notice {
+  margin-top: 22px;
+  padding: 22px 24px;
+  border: 1px solid rgba(215, 182, 79, .45);
+  border-left: 3px solid var(--gold);
+  border-radius: 14px;
+  background: rgba(215, 182, 79, .07);
+}
+.ndc-guidelines-notice h3 {
+  margin: 0 0 8px;
+  color: var(--gold);
+  font-size: 17px;
+  line-height: 1.4;
+}
+.ndc-guidelines-notice p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+@media (max-width: 760px) {
+  .ndc-guidelines-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .ndc-guidelines-section .section-head {
+    margin-bottom: 24px;
+  }
+  .ndc-guidelines-card {
+    padding: 21px;
+  }
+  .ndc-guidelines-notice {
+    padding: 19px;
+  }
+}
