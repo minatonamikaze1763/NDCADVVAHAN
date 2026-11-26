@@ -4726,6 +4726,7 @@ footer {
 .ndc-access-card { display: grid; grid-template-columns: minmax(180px, .7fr) minmax(0, 1.6fr); gap: 48px; align-items: center; padding: 48px; border: 1px solid var(--line); border-radius: 24px; background: radial-gradient(ellipse at top left, rgba(215,182,79,.1), transparent 65%), var(--panel); }
 .ndc-chrome-art { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 28px 0; color: var(--text); font-weight: 600; }
 .ndc-chrome-logo { display: block; width: 140px; height: 140px; filter: drop-shadow(0 12px 24px rgba(0,0,0,.3)); }
+.ndc-access-copy > .kicker { margin-bottom: 10px; }
 .ndc-access-copy h2 { margin: 12px 0 18px; font-size: clamp(28px, 3.5vw, 42px); line-height: 1.2; }
 .ndc-access-copy > p { color: var(--muted); margin: 0 0 24px; }
 .ndc-access-copy .ndc-access-note { margin: 16px 0 0; font-size: 12px; }
