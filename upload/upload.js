@@ -96,6 +96,8 @@
     if (active) {
       $("saveBarrierTitle").textContent = title;
       $("saveBarrierDescription").textContent = description;
+      const eyebrow = barrier.querySelector(".eyebrow");
+      if (eyebrow) eyebrow.textContent = title === "Preparing your documents" ? "VAHAN CLOUD · SAVE IN PROGRESS" : "VAHAN CLOUD · PLEASE WAIT";
     }
     barrier.hidden = !active;
     document.body.classList.toggle("save-active", active);
