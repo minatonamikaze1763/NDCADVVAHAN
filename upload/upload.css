@@ -2956,3 +2956,18 @@ main {
     pointer-events:none !important;
   }
 }
+
+/* Independent, free Cloud Workspace session allowance notice. */
+.cloud-device-policy-notice {
+  display:grid;
+  gap:6px;
+  margin:18px 0;
+  padding:14px 16px;
+  border:1px solid rgba(215,189,85,.42);
+  border-radius:14px;
+  background:linear-gradient(135deg,rgba(215,189,85,.12),rgba(15,15,15,.72));
+  color:var(--text,#f7f3e9);
+}
+.cloud-device-policy-notice strong { color:#f2d889; font-size:14px; }
+.cloud-device-policy-notice span { color:var(--muted,#aaa69d); font-size:12px; line-height:1.6; }
+

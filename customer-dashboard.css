@@ -834,3 +834,19 @@ body.ndc-dashboard-v2 {
     .ndc-dashboard-v2 .ndc-cloud-purchase .ndc-plan-options { grid-template-columns:1fr; }
     .ndc-dashboard-v2 .ndc-cloud-plan-card .ndc-choice > span { min-height:165px; }
 }
+
+.ndc-dashboard-v2 .ndc-cloud-workspace-devices { display:grid; gap:14px; border-color:rgba(215,189,85,.35); }
+.ndc-dashboard-v2 .ndc-workspace-device-heading { display:flex; align-items:center; gap:13px; }
+.ndc-dashboard-v2 .ndc-workspace-device-heading h2 { margin:2px 0 0; }
+.ndc-dashboard-v2 .ndc-workspace-device-icon { display:grid; place-items:center; width:48px; height:48px; flex:0 0 48px; border:1px solid rgba(215,189,85,.35); border-radius:14px; color:var(--gold-light); background:rgba(215,189,85,.08); }
+.ndc-dashboard-v2 .ndc-workspace-device-icon svg { width:25px; height:25px; }
+.ndc-dashboard-v2 .ndc-workspace-device-count { display:flex; justify-content:space-between; gap:12px; color:var(--muted); }
+.ndc-dashboard-v2 .ndc-workspace-device-count strong { color:var(--text); }
+.ndc-dashboard-v2 .ndc-workspace-device-progress { height:9px; overflow:hidden; border-radius:99px; background:var(--panel2); }
+.ndc-dashboard-v2 .ndc-workspace-device-progress span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--gold),var(--gold-light)); transition:width .2s ease; }
+.ndc-dashboard-v2 .ndc-workspace-device-included { margin:0; color:var(--gold-light); font-weight:700; }
+.ndc-dashboard-v2 .ndc-workspace-device-note { margin:0; color:var(--muted); font-size:12px; }
+@media(max-width:600px) {
+    .ndc-dashboard-v2 .ndc-workspace-device-count { align-items:flex-start; }
+}
+

@@ -9,7 +9,7 @@
   <link rel="apple-touch-icon" href="/logo.png?v=e43be25972f4">
   <meta name="robots" content="noindex, nofollow">
   <title>VAHAN Document Upload | NDC</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="upload.css?v=mobile-delete-disabled-20261126">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="upload.css?v=cloud-workspace-auth-20261126">
 </head>
 <body>
   <header class="topbar"><a class="brand" href="/" aria-label="Next Dimension Customs, VAHAN Cloud"><img src="/logo.png" alt="Next Dimension Customs"><span class="brand-copy"><strong>VAHAN CLOUD</strong><small>NEXT DIMENSION CUSTOMS</small></span></a><nav class="topbar-actions" aria-label="Account"><button id="settingsToggle" class="quiet" type="button" hidden>Settings</button><button id="logout" class="quiet" hidden>Log out</button></nav></header>
@@ -46,6 +46,7 @@
       </div>
       <div class="login-form-panel">
         <div class="login-form-heading"><p class="eyebrow">SECURE ACCESS</p><h2>Sign in</h2><p class="muted">Use your VAHAN NDC TOOL account credentials.</p></div>
+        <aside class="cloud-device-policy-notice" aria-label="Cloud Workspace device login policy"><strong>20 Free Cloud Workspace Device Logins</strong><span>Your dealership can access NDC Cloud Workspace on up to 20 devices simultaneously at no additional cost. Cloud Workspace logins are independent of your VAHAN NDC TOOL extension device allowance.</span></aside>
         <form id="loginForm" class="form-grid login-form">
           <label id="savedAccountsField" for="savedAccounts" hidden>Saved account<select id="savedAccounts"><option value="">Choose a saved account</option></select></label>
           <label for="username">Username<input id="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
@@ -54,7 +55,7 @@
           <button class="primary full" type="submit">Continue →</button>
         </form>
         <p id="loginStatus" class="status login-status" role="status" aria-live="polite"></p>
-        <p class="login-footnote">Cloud access requires an active add-on. Your NDC plan device limit still applies.</p>
+        <p class="login-footnote">Cloud access requires an active subscription and valid Cloud Storage entitlement.</p>
       </div>
     </section>
     <section id="appView" hidden>
@@ -199,7 +200,8 @@
   <script src="document-matcher.js"></script>
   <script src="/upload/vendor/pdf.min.js?v=3.11.174"></script>
   <script src="/upload/vendor/jspdf.umd.min.js?v=2.5.1"></script>
-  <script src="upload.js?v=mobile-upload-scroll-20261126" defer></script>
+  <script src="upload.js?v=cloud-workspace-auth-20261126" defer></script>
 </body>
 </html>
+
 

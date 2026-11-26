@@ -5,8 +5,13 @@
   function localDateInputValue(date = new Date()) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   }
-  const tokenKey = "ndcUploadPortalToken";
-  const expiryKey = "ndcUploadPortalExpiresAt";
+  const tokenKey = "ndcCloudWorkspaceToken";
+  const expiryKey = "ndcCloudWorkspaceExpiresAt";
+  // Legacy workspace clients stored an extension-scope token. Clear only this page's old keys; never migrate or revoke that token.
+  for (const key of ["ndcUploadPortalToken", "ndcUploadPortalExpiresAt"]) {
+    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
+  }
   const storedLocalToken = localStorage.getItem(tokenKey) || "";
   const storedSessionToken = sessionStorage.getItem(tokenKey) || "";
   let token = storedLocalToken || storedSessionToken;
@@ -38,8 +43,8 @@
   ];
   const addressTypes = ["Aadhaar", "Bank Passbook", "Electricity Bill", "Gas Bill", "Water Bill", "Passport", "Voter ID", "Ration Card", "Telephone Bill", "GST Certificate"];
   const documentDisplayOrder = ["address-proof", "insurance", "dealer-invoice", "inspection", "form22", "form21", "frontphoto", "owner-photo", "owner-signature", "pan-card", "chassis-photo", "form20"];
-  const sessionDevice = localStorage.getItem("ndcUploadPortalDeviceId") || crypto.randomUUID();
-  localStorage.setItem("ndcUploadPortalDeviceId", sessionDevice);
+  const sessionDevice = localStorage.getItem("ndcCloudWorkspaceDeviceId") || crypto.randomUUID();
+  localStorage.setItem("ndcCloudWorkspaceDeviceId", sessionDevice);
   function status(el, message, type = "") { if (!el) return; el.textContent = message; el.className = `status ${type}`; }
   // Best-effort browser-page shortcut deterrence only; browser chrome can still open DevTools.
   document.addEventListener("contextmenu", event => event.preventDefault(), true);
@@ -113,7 +118,7 @@
     const message = "Cloud subscription not taken. Choose a Cloud Storage add-on in your customer panel to use /upload.";
     const oldToken = token;
     if (oldToken) {
-      try { await fetch(API + "/api/auth/logout", { method: "POST", headers: { Authorization: "Bearer " + oldToken } }); } catch {}
+      try { await fetch(API + "/api/cloud/auth/logout", { method: "POST", headers: { Authorization: "Bearer " + oldToken } }); } catch {}
     }
     clearClientSession();
     showLogin();
@@ -164,7 +169,7 @@
     if (!sessionValidationPromise) {
       sessionValidationPromise = (async () => {
         try {
-          const data = await request("/api/auth/me");
+          const data = await request("/api/cloud/auth/me");
           if (!hasCloudSubscription(data.user)) {
             await rejectCloudSubscription();
             return false;
@@ -188,7 +193,7 @@
     return sessionValidationPromise;
   }
   async function request(path, options = {}, binary = false) {
-    const isAuthCheck = path === "/api/auth/login" || path === "/api/auth/me";
+    const isAuthCheck = path === "/api/cloud/auth/login" || path === "/api/cloud/auth/me";
     if (!isAuthCheck && !(await ensureActiveSession())) {
       throw new Error(token
         ? "Session could not be verified. Check your connection and retry."
@@ -204,9 +209,10 @@
     const type = response.headers.get("content-type") || "";
     if (!response.ok) {
       const data = type.includes("application/json") ? await response.json().catch(() => ({})) : null;
-      if (data?.code === "CLOUD_SUBSCRIPTION_REQUIRED") {
+      if (data?.code === "CLOUD_ENTITLEMENT_REQUIRED" || data?.code === "CLOUD_SUBSCRIPTION_REQUIRED") {
         expireSession("Cloud subscription not taken. Choose a Cloud Storage add-on in your customer panel to use /upload.");
-      } else if (response.status === 401 || response.status === 403) expireSession("Your session is no longer valid. Sign in again to continue.");
+      } else if (data?.code === "SESSION_REVOKED") expireSession("This Cloud Workspace session was signed out because the 20-device limit was reached, or the session was revoked. Sign in again to continue.");
+      else if (data?.code === "SESSION_EXPIRED" || response.status === 401 || response.status === 403) expireSession("Your Cloud Workspace session is no longer valid. Sign in again to continue.");
       const error = new Error(data?.error || `Request failed (${response.status}).`);
       error.code = data?.code || null;
       throw error;
@@ -388,7 +394,7 @@
     if (sessionExpiry && Date.now() >= sessionExpiry) return expireSession();
     setSessionBarrier(true);
     try {
-      const data = await request("/api/auth/me");
+      const data = await request("/api/cloud/auth/me");
       if (!hasCloudSubscription(data.user)) return rejectCloudSubscription();
       if (!saveSessionExpiry(data.sessionExpiresAt)) return expireSession();
       showApp();
@@ -462,7 +468,7 @@
     status($("loginStatus"), "Signing in…");
     const username = $("username").value.trim();
     try {
-      const data = await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password: $("password").value, deviceId: sessionDevice }) });
+      const data = await request("/api/cloud/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password: $("password").value, deviceId: sessionDevice }) });
       token = data.token;
       if (!hasCloudSubscription(data.user)) {
         await rejectCloudSubscription();
@@ -522,7 +528,7 @@
     let logoutRequest;
     try {
       // Start server-side revocation immediately; do not wait for a UI animation or auth preflight.
-      logoutRequest = fetch(API + "/api/auth/logout", { method: "POST", headers });
+      logoutRequest = fetch(API + "/api/cloud/auth/logout", { method: "POST", headers });
     } catch (error) {
       logoutWarning = "This device was signed out, but the server could not confirm session revocation. Reconnect and sign out again.";
     }
@@ -1620,4 +1626,5 @@
   });
   void validate();
 })();
+
 
