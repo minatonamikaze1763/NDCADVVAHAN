@@ -2900,3 +2900,15 @@ main {
   }
 }
 
+
+
+/* Keep the desktop SmartScan action label inside its button. */
+@media (min-width: 681px) {
+  #customerView .doc-row[data-doc]:not([data-doc="form20"]) > .doc-actions:not(.native-capture-group) > button.smartscan-action {
+    flex: 0 0 auto !important;
+    width: max-content !important;
+    min-width: max-content !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+  }
+}
