@@ -43,6 +43,25 @@
     try { bitmap = await imageFrom(file); const scale = Math.min(1, 500 / Math.max(bitmap.width, bitmap.height)), canvas = document.createElement("canvas"); canvas.width = Math.max(1, Math.round(bitmap.width * scale)); canvas.height = Math.max(1, Math.round(bitmap.height * scale)); const ctx = canvas.getContext("2d", { willReadFrequently: true }); if (!ctx) return { crop: null, confidence: 0 }; ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height); const result = detectBounds(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height); canvas.width = canvas.height = 0; return result; }
     finally { bitmap?.close?.(); }
   }
+  function fitCropToDocumentMode(crop, mode, imageWidth, imageHeight) {
+    if (!crop || !["identity", "document"].includes(mode)) return crop;
+    const imageAspect = Number(imageWidth) / Number(imageHeight);
+    if (!Number.isFinite(imageAspect) || imageAspect <= 0) return crop;
+    const x = clamp(crop.x, 0, .92), y = clamp(crop.y, 0, .92);
+    const w = clamp(crop.w, .08, 1 - x), h = clamp(crop.h, .08, 1 - y);
+    const currentAspect = w * imageAspect / h;
+    const targetAspects = mode === "identity" ? [85.6 / 54] : [210 / 297, 297 / 210];
+    const targetAspect = targetAspects.reduce((best, value) =>
+      Math.abs(Math.log(currentAspect / value)) < Math.abs(Math.log(currentAspect / best)) ? value : best
+    );
+    let fittedWidth = w, fittedHeight = h;
+    if (currentAspect > targetAspect) fittedWidth = fittedHeight * targetAspect / imageAspect;
+    else fittedHeight = fittedWidth * imageAspect / targetAspect;
+    const centerX = x + w / 2, centerY = y + h / 2;
+    const fittedX = clamp(centerX - fittedWidth / 2, 0, 1 - fittedWidth);
+    const fittedY = clamp(centerY - fittedHeight / 2, 0, 1 - fittedHeight);
+    return { x: fittedX, y: fittedY, w: fittedWidth, h: fittedHeight };
+  }
   async function inspect(file) {
     let bitmap;
     try { bitmap = await imageFrom(file); } catch { return ["This image could not be decoded. Choose another photo."]; }
@@ -139,7 +158,7 @@
       const draw = () => { image.style.display = showOriginal || !processedImage.src ? "block" : "none"; processedImage.style.display = showOriginal || !processedImage.src ? "none" : "block"; const stage = image.parentElement.getBoundingClientRect(), rect = image.getBoundingClientRect(); cropBox.style.left = `${rect.left - stage.left + crop.x * rect.width}px`; cropBox.style.top = `${rect.top - stage.top + crop.y * rect.height}px`; cropBox.style.width = `${crop.w * rect.width}px`; cropBox.style.height = `${crop.h * rect.height}px`; cropBox.hidden = !showOriginal; $("[data-brightness-value]").value = options().brightness > 0 ? `+${options().brightness}` : options().brightness; $("[data-contrast-value]").value = `${options().contrast}%`; };
       const schedulePreview = (showEnhanced = true) => { clearTimeout(previewTimer); const generation = ++previewGeneration; previewTimer = setTimeout(async () => { try { const output = await render(file, category, crop, options(), maxBytes); if (cancelled || generation !== previewGeneration) return; const url = URL.createObjectURL(output); processedImage.src = url; if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl); previewObjectUrl = url; sizeLabel.textContent = `Estimated final image: ${(output.size / 1024).toFixed(0)} KB`; if (showEnhanced) showOriginal = false; draw(); } catch (error) { if (!cancelled && generation === previewGeneration) warning.textContent = error.message; } }, 160); };
       const quality = inspect(file).then(messages => { if (messages.length) warning.textContent = messages.join(" "); });
-      const detected = async () => { try { const found = await detect(file); if (found.crop && found.confidence >= .28) crop = found.crop; else warning.textContent = "Document edges are uncertain. Check the full page and adjust the crop manually; no automatic crop was applied."; } catch { warning.textContent = "Automatic crop was unavailable. Adjust the crop manually."; } finally { draw(); } };
+      const detected = async () => { try { const found = await detect(file); if (found.crop && found.confidence >= .28) crop = fitCropToDocumentMode(found.crop, options().mode, image.naturalWidth, image.naturalHeight); else warning.textContent = "Document edges are uncertain. Check the full page and adjust the crop manually; no automatic crop was applied."; } catch { warning.textContent = "Automatic crop was unavailable. Adjust the crop manually."; } finally { draw(); } };
       const cleanup = value => { cancelled = true; clearTimeout(previewTimer); URL.revokeObjectURL(previewUrl); if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl); dialog.close(); dialog.remove(); resolve(value || null); };
       dialog.addEventListener("click", async event => {
         const button = event.target.closest("[data-action]"); if (!button) return;
