@@ -2693,6 +2693,8 @@ footer {
   font-weight: 600;
 }
 .ndc-renewal-buttons {
+  /* Keep the agreement directly above the quick-renew payment button. */
+  .ndc-payment-terms { margin: 0 0 2px; text-align: center; }
   display: flex;
   flex-direction: column;
   justify-content: center;
