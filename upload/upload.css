@@ -2912,3 +2912,36 @@ main {
     white-space: nowrap !important;
   }
 }
+
+/* Mobile Form 20 preview: keep the eye icon compact and show its label. */
+@media (max-width:680px) {
+  #customerView .doc-row[data-doc="form20"] > .form20-action-strip > .form20-action-preview {
+    box-sizing:border-box !important;
+    display:inline-flex !important;
+    flex:0 0 auto !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:7px !important;
+    width:max-content !important;
+    min-width:96px !important;
+    max-width:150px !important;
+    height:40px !important;
+    min-height:40px !important;
+    padding:8px 10px !important;
+    white-space:nowrap !important;
+  }
+  #customerView .doc-row[data-doc="form20"] > .form20-action-strip > .form20-action-preview svg {
+    display:block !important;
+    flex:0 0 18px !important;
+    width:18px !important;
+    height:18px !important;
+    max-width:18px !important;
+    max-height:18px !important;
+  }
+  #customerView .doc-row[data-doc="form20"] > .form20-action-strip > .form20-action-preview .button-label {
+    display:inline !important;
+    visibility:visible !important;
+    flex:0 1 auto !important;
+    line-height:1.2 !important;
+  }
+}
