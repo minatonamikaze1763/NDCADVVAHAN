@@ -4729,6 +4729,7 @@ footer {
 .ndc-access-copy h2 { margin: 12px 0 18px; font-size: clamp(28px, 3.5vw, 42px); line-height: 1.2; }
 .ndc-access-copy > p { color: var(--muted); margin: 0 0 24px; }
 .ndc-access-copy .ndc-access-note { margin: 16px 0 0; font-size: 12px; }
+.ndc-platform-support-badge { display: inline-flex; max-width: 100%; margin: 0 0 18px; padding: 8px 12px; border: 1px solid rgba(215,182,79,.5); border-radius: 999px; background: rgba(215,182,79,.12); color: var(--gold); font-size: 12px; font-weight: 700; line-height: 1.4; }
 .ndc-access-copy .btn { max-width: 100%; white-space: normal; text-align: center; }
 @media (max-width: 700px) {
   .ndc-access-section { padding: 48px 0; }
