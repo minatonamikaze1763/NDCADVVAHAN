@@ -4742,5 +4742,5 @@ footer {
 
 
 /* Payment terms notice shown immediately before payment actions. */
-p.ndc-payment-terms { margin: 12px 0 8px; color: var(--muted, #aaa); font-size: 12px; line-height: 1.5; }
-p.ndc-payment-terms a { color: var(--gold, #d7bd55); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.ndc-payment-terms { margin: 12px 0 8px; color: var(--muted, #aaa); font-size: 12px; line-height: 1.5; }
+.ndc-payment-terms a { color: var(--gold, #d7bd55); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
