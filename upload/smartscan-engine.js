@@ -148,7 +148,7 @@
         if (action === "retake") { cleanup({ retake: true }); return; }
         if (action === "compare") { showOriginal = !showOriginal; draw(); return; }
         if (action === "adjust") { showOriginal = true; draw(); return; }
-        if (action === "autocrop") { showOriginal = true; await detected(); schedulePreview(); return; }
+        if (action === "autocrop") { showOriginal = true; await detected(); schedulePreview(false); return; }
         if (action === "reset") { crop = { ...auto }; $("[data-mode]").value = mode; $("[data-filter]").value = defaults.filter; $("[data-brightness]").value = defaults.brightness; $("[data-contrast]").value = defaults.contrast; showOriginal = false; draw(); schedulePreview(); return; }
         if (action === "save" && !busy) {
           busy = true; button.disabled = true; button.textContent = "Processing…"; warning.textContent = "Processing locally on this device…";
@@ -158,10 +158,10 @@
       });
       cropBox.addEventListener("pointerdown", event => { const handle = event.target.closest("[data-corner]"); if (!handle) return; drag = { corner: handle.dataset.corner, startX: event.clientX, startY: event.clientY, crop: { ...crop } }; handle.setPointerCapture(event.pointerId); event.preventDefault(); });
       dialog.addEventListener("pointermove", event => { if (!drag) return; const rect = image.getBoundingClientRect(), dx = (event.clientX - drag.startX) / rect.width, dy = (event.clientY - drag.startY) / rect.height, c = drag.crop, x2 = c.x + c.w, y2 = c.y + c.h; crop = { x: drag.corner.includes("w") ? clamp(c.x + dx, 0, x2 - .08) : c.x, y: drag.corner.includes("n") ? clamp(c.y + dy, 0, y2 - .08) : c.y, w: drag.corner.includes("e") ? clamp(c.w + dx, .08, 1 - c.x) : c.w, h: drag.corner.includes("s") ? clamp(c.h + dy, .08, 1 - c.y) : c.h }; if (drag.corner.includes("w")) crop.w = x2 - crop.x; if (drag.corner.includes("n")) crop.h = y2 - crop.y; draw(); schedulePreview(false); });
-      dialog.addEventListener("pointerup", () => { if (!drag) return; drag = null; schedulePreview(); });
+      dialog.addEventListener("pointerup", () => { if (!drag) return; drag = null; schedulePreview(false); });
       const modeControl = $("[data-mode]");
       dialog.querySelectorAll("input,select").forEach(control => control.addEventListener("input", () => { draw(); schedulePreview(control !== modeControl); }));
-      modeControl.addEventListener("change", async () => { if (!cancelled && options().mode !== "photo") { showOriginal = true; await detected(); } schedulePreview(); });
+      modeControl.addEventListener("change", async () => { const keepCropVisible = showOriginal; if (!cancelled && options().mode !== "photo") { showOriginal = true; await detected(); } schedulePreview(!keepCropVisible); });
       dialog.addEventListener("cancel", event => { event.preventDefault(); cleanup(null); }, { once: true });
       draw(); dialog.showModal(); void quality.then(async () => { if (!cancelled && MAGIC.autoCrop && options().mode !== "photo") { showOriginal = true; await detected(); } schedulePreview(); });
     });
