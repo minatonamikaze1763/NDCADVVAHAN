@@ -1543,7 +1543,13 @@
     form20Section.append(form20SectionTitle, form20);
     host.append(list, form20Section);
     const bar = document.createElement("div"); bar.className = "save-bar"; const result = document.createElement("p"); result.id = "saveStatus"; result.className = "status save-description"; result.textContent = "Select files to save (up to 12)."; const save = document.createElement("button"); save.type = "button"; save.className = "primary"; save.textContent = "Save selected"; save.disabled = true; save.addEventListener("click", () => saveDocuments(customer, host, save)); bar.append(result, save); host.append(bar); updateDocumentSaveButton(host);
-    if (window.matchMedia("(max-width:680px)").matches) requestAnimationFrame(() => requestAnimationFrame(() => {
+  }
+  function scrollCustomerToUploadArea(host) {
+    if (!host || !window.matchMedia("(max-width:680px)").matches) return;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const bulk = host.querySelector(".bulk-upload");
+      const head = host.querySelector(".customer-heading");
+      if (host.hidden || !bulk || !head) return;
       const uploadTop = bulk.getBoundingClientRect().top - host.getBoundingClientRect().top + host.scrollTop - head.getBoundingClientRect().height - 12;
       host.scrollTo({ top: Math.max(0, uploadTop), behavior: "smooth" });
     }));
@@ -1556,6 +1562,7 @@
         renderCustomer(currentCustomer);
       } catch (error) { status($("searchStatus"), error.message, "error"); }
     });
+    scrollCustomerToUploadArea($("customerView"));
   }
   async function saveDocuments(customer, host, button) {
     if (!hasPendingDocumentChanges(host)) return;
