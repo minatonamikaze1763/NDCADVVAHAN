@@ -2945,3 +2945,14 @@ main {
     line-height:1.2 !important;
   }
 }
+
+/* Mobile: make unavailable document delete actions clearly inactive. */
+@media (max-width:680px) {
+  #customerView .doc-row .doc-delete-action:disabled {
+    opacity:.32 !important;
+    filter:saturate(.35) !important;
+    cursor:not-allowed !important;
+    box-shadow:none !important;
+    pointer-events:none !important;
+  }
+}
