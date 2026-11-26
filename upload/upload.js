@@ -709,7 +709,7 @@
   function ensureSmartScanModule() {
     if (window.NDCSmartScan) return Promise.resolve(window.NDCSmartScan);
     if (!smartScanModulePromise) smartScanModulePromise = new Promise((resolve, reject) => {
-      const script = document.createElement("script"); script.src = "/upload/smartscan-engine.js?v=smartscan-auto-preview-20261126";
+      const script = document.createElement("script"); script.src = "/upload/smartscan-engine.js?v=document-dimension-autocrop-20261126";
       script.onload = () => window.NDCSmartScan ? resolve(window.NDCSmartScan) : reject(new Error("SmartScan did not initialize. Refresh the page and retry."));
       script.onerror = () => { smartScanModulePromise = null; reject(new Error("SmartScan could not be loaded. Check your connection and retry.")); };
       document.head.append(script);
