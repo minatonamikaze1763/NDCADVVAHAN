@@ -90,12 +90,21 @@
     const button = host?.querySelector(".save-bar .primary");
     if (button) button.disabled = !hasPendingDocumentChanges(host);
   }
-  function setSaveBarrier(active) {
+  function setSaveBarrier(active, title = "Preparing your documents", description = "Please wait. Documents are being renamed, compressed, and saved to the cloud.") {
     const barrier = $("saveBarrier");
     if (!barrier) return;
+    if (active) {
+      $("saveBarrierTitle").textContent = title;
+      $("saveBarrierDescription").textContent = description;
+    }
     barrier.hidden = !active;
     document.body.classList.toggle("save-active", active);
     if (active) barrier.focus({preventScroll:true});
+  }
+  async function withLoadingBarrier(title, description, action) {
+    setSaveBarrier(true, title, description);
+    try { return await action(); }
+    finally { setSaveBarrier(false); }
   }
   function hasCloudSubscription(user) { return user?.cloudAddon?.active === true; }
   async function rejectCloudSubscription() {
@@ -1135,8 +1144,14 @@
       open.append(openIcon, openLabel);
       open.addEventListener("click", async () => {
         open.disabled = true;
-        try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, {}, true); const savedFile = new File([blob], saved.filename, {type:saved.contentType || blob.type}); setPreview(stored, savedFile, "Saved", saved); showFullscreenPreview(savedFile, saved); }
-        catch(error) { openLabel.textContent = "Preview unavailable"; open.title = error.message; }
+        try {
+          await withLoadingBarrier("Loading preview", "Please wait while we load this document preview.", async () => {
+            const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, {}, true);
+            const savedFile = new File([blob], saved.filename, {type:saved.contentType || blob.type});
+            setPreview(stored, savedFile, "Saved", saved);
+            await showFullscreenPreview(savedFile, saved);
+          });
+        } catch(error) { openLabel.textContent = "Preview unavailable"; open.title = error.message; }
         finally { open.disabled = false; }
       });
       stored.append(tag, open);
@@ -1153,8 +1168,13 @@
       if (row._pages?.length) { showFullscreenPreview(row._pages[0]); return; }
       if (!row._savedDocument) return;
       preview.disabled = true;
-      try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, {}, true); const savedFile = new File([blob], row._savedDocument.filename, {type:row._savedDocument.contentType || blob.type}); showFullscreenPreview(savedFile, row._savedDocument); }
-      catch(error) { preview.title = error.message || "Preview unavailable"; }
+      try {
+        await withLoadingBarrier("Loading preview", "Please wait while we load this document preview.", async () => {
+          const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/${category}`, {}, true);
+          const savedFile = new File([blob], row._savedDocument.filename, {type:row._savedDocument.contentType || blob.type});
+          await showFullscreenPreview(savedFile, row._savedDocument);
+        });
+      } catch(error) { preview.title = error.message || "Preview unavailable"; }
       finally { preview.disabled = false; }
     });
     summary.append(filename, preview); row.append(summary); row._summaryPreviewButton = preview;
@@ -1476,8 +1496,13 @@
       const saved = form20._savedDocument;
       if (!saved) return;
       form20Preview.disabled = true;
-      try { const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, {}, true); const savedFile = new File([blob], saved.filename, {type:saved.contentType || blob.type}); showFullscreenPreview(savedFile, saved); }
-      catch(error) { form20Preview.title = error.message || "Preview unavailable"; }
+      try {
+        await withLoadingBarrier("Loading preview", "Please wait while we load this document preview.", async () => {
+          const blob = await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, {}, true);
+          const savedFile = new File([blob], saved.filename, {type:saved.contentType || blob.type});
+          await showFullscreenPreview(savedFile, saved);
+        });
+      } catch(error) { form20Preview.title = error.message || "Preview unavailable"; }
       finally { updateForm20PreviewButton(); }
     });
     updateForm20PreviewButton();
@@ -1511,7 +1536,15 @@
       host.scrollTo({ top: Math.max(0, uploadTop), behavior: "smooth" });
     }));
   }
-  async function openCustomer(id) { try { const data = await request(`/api/upload-portal/customers/${id}`); currentCustomer = data.customer; renderCustomer(currentCustomer); } catch (error) { status($("searchStatus"), error.message, "error"); } }
+  async function openCustomer(id) {
+    await withLoadingBarrier("Loading upload panel", "Please wait while we load the customer upload panel.", async () => {
+      try {
+        const data = await request(`/api/upload-portal/customers/${id}`);
+        currentCustomer = data.customer;
+        renderCustomer(currentCustomer);
+      } catch (error) { status($("searchStatus"), error.message, "error"); }
+    });
+  }
   async function saveDocuments(customer, host, button) {
     if (!hasPendingDocumentChanges(host)) return;
     button.disabled = true;
