@@ -642,8 +642,28 @@
       if (!(await ensureActiveSession())) return;
       const row = document.querySelector(`[data-doc="${category}"]`);
       if (!row || !input.files?.[0]) return;
-      row._file = input.files[0]; row._pages = [];
-      row.querySelector(".doc-state").textContent = row._savedDocument ? "Replacement selected" : "File selected";
+      let selected = input.files[0];
+      if (isCamera && smartScanEnabled) {
+        try {
+          await ensureSmartScanModule();
+          while (selected) {
+            const scanned = await window.NDCSmartScan.openEditor({file:selected,category,maxBytes:category === "form20" ? 390 * 1024 : 400000});
+            if (!scanned) return;
+            if (scanned.retake) {
+              selected = await capturePhotoFromDefaultCamera();
+              continue;
+            }
+            selected = scanned;
+            break;
+          }
+          if (!selected) return;
+        } catch (error) {
+          status($("saveStatus"), error.message, "error");
+          return;
+        }
+      }
+      row._file = selected; row._pages = [];
+      row.querySelector(".doc-state").textContent = row._savedDocument ? (isCamera && smartScanEnabled ? "Scanned replacement ready" : "Replacement selected") : (isCamera && smartScanEnabled ? "Scanned image ready" : "File selected");
       updateDocumentSaveButton($("customerView"));
       await loadSelectedFilePreview(row, row._file);
     });
