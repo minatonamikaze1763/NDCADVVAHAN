@@ -1,7 +1,7 @@
 /* NDC SmartScan: client-only image review and preparation. */
 (() => {
   "use strict";
-  const MAGIC = Object.freeze({ filter: "magic", brightness: 3, contrast: 117, autoCrop: true });
+  const MAGIC = Object.freeze({ filter: "magic", brightness: 4, contrast: 160, autoCrop: true });
   const MODES = Object.freeze({
     "address-proof": "identity", "pan-card": "identity", insurance: "document",
     "dealer-invoice": "document", form20: "document", inspection: "document",
@@ -118,7 +118,7 @@
           let rMean = 0, gMean = 0, bMean = 0, samples = 0;
           for (let i = 0; i < px.length; i += 64) { rMean += px[i]; gMean += px[i + 1]; bMean += px[i + 2]; samples++; }
           const avg = (rMean + gMean + bMean) / (3 * Math.max(1, samples));
-          const wb = options.filter === "magic" ? [clamp(avg / (rMean / samples || avg), .94, 1.06), clamp(avg / (gMean / samples || avg), .94, 1.06), clamp(avg / (bMean / samples || avg), .94, 1.06)] : [1, 1, 1];
+          const wb = options.filter === "magic" ? [clamp(avg / (rMean / samples || avg), .90, 1.10), clamp(avg / (gMean / samples || avg), .90, 1.10), clamp(avg / (bMean / samples || avg), .90, 1.10)] : [1, 1, 1];
           for (let start = 0; start < px.length; start += 262144) {
             const end = Math.min(px.length, start + 262144);
             for (let i = start; i < end; i += 4) {
