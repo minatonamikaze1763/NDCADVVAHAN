@@ -887,6 +887,7 @@
     row._file = null;
     row._pages = [];
     row._nativeCameraPhotos = [];
+    row._savedDocument = saved || null;
     const state = row.querySelector(".doc-state");
     state.textContent = "";
     state.classList.add("saved");
@@ -901,6 +902,7 @@
     addPreviewPair(row, customer, category, saved);
     if (selector) row.append(selector);
     if (actions) row.append(actions);
+    updateDocumentRowDeleteButton(row);
     const savedCount = Object.keys(customer.documents).length;
     const count = host.querySelector(".doc-toolbar .muted");
     if (count) count.textContent = savedCount + " of 12 saved";
@@ -1016,6 +1018,19 @@
     close.focus();
   }
 
+  function updateDocumentRowDeleteButton(row) {
+    const button = row?.querySelector(".doc-delete-action");
+    if (!button) return;
+    const hasSelected = Boolean(row._file)
+      || (Array.isArray(row._pages) && row._pages.length > 0)
+      || (Array.isArray(row._nativeCameraPhotos) && row._nativeCameraPhotos.some(Boolean));
+    const hasSaved = Boolean(row._savedDocument);
+    button.disabled = !hasSelected && !hasSaved;
+    const name = row._documentName || "document";
+    button.title = hasSelected ? "Clear selected " + name
+      : hasSaved ? "Delete saved " + name
+      : "No document to delete";
+  }
   function setPreview(box, file, label, savedDetails = null) {
     if (box._url) URL.revokeObjectURL(box._url);
     box._previewReady = Promise.resolve();
@@ -1058,12 +1073,7 @@
         preview.setAttribute("aria-label", file || row._pages?.length ? "Preview selected document" : row._savedDocument ? "Preview saved document" : "No document to preview");
         preview.title = preview.getAttribute("aria-label");
       }
-      const deleteButton = row.querySelector(".doc-delete-action");
-      if (deleteButton && !row._savedDocument) {
-        const canDelete = Boolean(file || row._file || row._pages?.length);
-        deleteButton.disabled = !canDelete;
-        deleteButton.title = canDelete ? "Clear selected document" : "No document to delete";
-      }
+      updateDocumentRowDeleteButton(row);
     }
     return box._previewReady;
   }
@@ -1456,7 +1466,7 @@
     const list = document.createElement("div"); list.className = "doc-list";
     documentDisplayOrder.filter(id => id !== "form20").forEach(id => {
       const name = categories.find(([category]) => category === id)?.[1] || id;
-      const row = document.createElement("section"); row.className = "doc-row"; row.dataset.doc = id; const titleText = (documentDisplayOrder.indexOf(id) + 1) + ". " + name; const state = document.createElement("div"); state.className = "doc-state"; const saved = customer.documents?.[id]; state.textContent = saved ? "" : "Not selected"; if (saved) state.classList.add("saved"); row.append(createDocTitleRow(titleText, saved), state); addPreviewPair(row, customer, id, saved);
+      const row = document.createElement("section"); row.className = "doc-row"; row.dataset.doc = id; row._documentName = name; const titleText = (documentDisplayOrder.indexOf(id) + 1) + ". " + name; const state = document.createElement("div"); state.className = "doc-state"; const saved = customer.documents?.[id]; state.textContent = saved ? "" : "Not selected"; if (saved) state.classList.add("saved"); row.append(createDocTitleRow(titleText, saved), state); addPreviewPair(row, customer, id, saved);
       let addressTypeSelect = null, aadhaarCaptureHint = null, aadhaarCaptureControls = null;
       if (id === "address-proof") {
         const select = document.createElement("select"); select.className = "subcat"; select.dataset.subcategory = "true"; select.innerHTML = '<option value="">Choose address proof type</option>'; addressTypes.forEach(type => { const option = document.createElement("option"); option.value = type; option.textContent = type; select.append(option); }); if (saved?.subcategory) select.value = saved.subcategory; addressTypeSelect = select;
@@ -1484,10 +1494,10 @@
         addressTypeSelect.dataset.savedValue = addressTypeSelect.value;
         updateAadhaarOption();
       }
-      const remove = document.createElement("button"); remove.type = "button"; remove.className = "danger doc-delete-action"; setIconButton(remove, "trash", "Delete"); remove.disabled = !saved; remove.title = saved ? "Delete saved document" : "No saved document to delete"; remove.addEventListener("click", async () => { if (saved) { if (!confirm(`Delete ${name}?`)) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/${id}`, { method: "DELETE" }); await openCustomer(customer._id); } catch (error) { alert(error.message); } return; } if (!row._file && !row._pages?.length) return; row._file = null; row._pages = []; setPreview(row._selectedPreview, null, "Selected"); state.textContent = "Not selected"; updateDocumentSaveButton(host); }); actions.append(remove);
+      const remove = document.createElement("button"); remove.type = "button"; remove.className = "danger doc-delete-action"; setIconButton(remove, "trash", "Delete"); remove.addEventListener("click", async () => { if (row._file || row._pages?.length || row._nativeCameraPhotos?.some(Boolean)) { row._file = null; row._pages = []; row._nativeCameraPhotos = []; setPreview(row._selectedPreview, null, "Selected"); state.textContent = row._savedDocument ? "" : "Not selected"; state.classList.toggle("saved", Boolean(row._savedDocument)); updateDocumentRowDeleteButton(row); updateDocumentSaveButton(host); return; } const currentSaved = row._savedDocument; if (!currentSaved || !confirm(`Delete ${name}?`)) return; remove.disabled = true; try { await withLoadingBarrier(`Deleting ${name}`, `Please wait. Deleting ${name} from this customer record.`, async () => { await request(`/api/upload-portal/customers/${customer._id}/documents/${id}`, { method: "DELETE" }); }); await openCustomer(customer._id); } catch (error) { alert(error.message); updateDocumentRowDeleteButton(row); } }); actions.append(remove); updateDocumentRowDeleteButton(row);
       row.append(actions); list.append(row);
     });
-    const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; const saved20 = customer.documents?.form20; const ftitle = createDocTitleRow("Form 20 (Finance)", saved20); const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? "" : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
+    const form20 = document.createElement("section"); form20.className = "doc-row full"; form20.dataset.doc = "form20"; form20._documentName = "Form 20 (Finance)"; const saved20 = customer.documents?.form20; form20._savedDocument = saved20 || null; const ftitle = createDocTitleRow("Form 20 (Finance)", saved20); const fstate = document.createElement("div"); fstate.className = `doc-state${saved20 ? " saved" : ""}`; fstate.textContent = saved20 ? "" : "Upload a PDF (3+ pages) or capture three photos"; form20.append(ftitle, fstate); addPreviewPair(form20, customer, "form20", saved20);
     const form20Actions = document.createElement("div"); form20Actions.className = "doc-actions form20-actions form20-action-strip";
     const form20Preview = document.createElement("button"); form20Preview.type = "button"; form20Preview.className = "secondary doc-summary-preview form20-action-preview";
     form20Preview.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span class="button-label">Preview</span>';
@@ -1527,7 +1537,7 @@
       const scan20 = document.createElement("button"); scan20.type = "button"; scan20.className = "secondary smartscan-action"; scan20.textContent = "Scan Document";
       scan20.addEventListener("click", async () => { scan20.disabled = true; try { const files = await selectSmartScan("form20", true); if (!files?.length) return; if (files.length !== 3) { status($("saveStatus"), "Select or scan exactly three Form 20 pages.", "error"); return; } form20._file = null; form20._pages = files; fstate.textContent = `${files.length} scanned Form 20 page${files.length === 1 ? "" : "s"} ready`; updateForm20PreviewButton(); updateDocumentSaveButton(host); await loadSelectedFilePreview(form20, files[0]); } catch (error) { status($("saveStatus"), error.message, "error"); } finally { scan20.disabled = false; } }); form20Actions.append(scan20);
     }
-    const delete20 = document.createElement("button"); delete20.type = "button"; delete20.className = "danger doc-delete-action"; setIconButton(delete20, "trash", "Delete"); delete20.disabled = !saved20; delete20.title = saved20 ? "Delete saved Form 20" : "No saved document to delete"; delete20.addEventListener("click", async () => { if (saved20) { if (!confirm("Delete Form 20?")) return; try { await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, { method:"DELETE" }); await openCustomer(customer._id); } catch(error) { alert(error.message); } return; } if (!form20._file && !form20._pages?.length) return; form20._file = null; form20._pages = []; setPreview(form20._selectedPreview, null, "Selected"); fstate.textContent = "Upload a PDF (3+ pages) or capture three photos"; updateForm20PreviewButton(); updateDocumentSaveButton(host); }); form20Actions.append(delete20); form20.append(form20Actions);
+    const delete20 = document.createElement("button"); delete20.type = "button"; delete20.className = "danger doc-delete-action"; setIconButton(delete20, "trash", "Delete"); delete20.addEventListener("click", async () => { if (form20._file || form20._pages?.length) { form20._file = null; form20._pages = []; setPreview(form20._selectedPreview, null, "Selected"); fstate.textContent = form20._savedDocument ? "" : "Upload a PDF (3+ pages) or capture three photos"; fstate.classList.toggle("saved", Boolean(form20._savedDocument)); updateForm20PreviewButton(); updateDocumentRowDeleteButton(form20); updateDocumentSaveButton(host); return; } const currentSaved = form20._savedDocument; if (!currentSaved || !confirm("Delete Form 20?")) return; delete20.disabled = true; try { await withLoadingBarrier("Deleting Form 20 (Finance)", "Please wait. Deleting Form 20 (Finance) from this customer record.", async () => { await request(`/api/upload-portal/customers/${customer._id}/documents/form20`, { method:"DELETE" }); }); await openCustomer(customer._id); } catch(error) { alert(error.message); updateDocumentRowDeleteButton(form20); } }); form20Actions.append(delete20); form20.append(form20Actions); updateDocumentRowDeleteButton(form20);
     const form20Section = document.createElement("section"); form20Section.className = "form20-section"; form20Section.setAttribute("aria-labelledby", "form20SectionTitle");
     const form20SectionTitle = document.createElement("h2"); form20SectionTitle.id = "form20SectionTitle"; form20SectionTitle.className = "form20-section-title"; form20SectionTitle.textContent = "Form 20 document";
     form20Section.append(form20SectionTitle, form20);
