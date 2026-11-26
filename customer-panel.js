@@ -416,8 +416,8 @@
               ${expired && Number.isFinite(panelEnd) ? `<p>Panel access for renewal ends ${esc(date(panelEnd))}.</p>` : ""}
               ${!planId ? `<p>Choose your plan using the month selector below.</p>` : ""}
             </div>
-            ${paymentTermsNotice()}
             <div class="ndc-renewal-buttons">
+              ${paymentTermsNotice()}
               <button type="button" class="ndc-home-button" id="ndcQuickRenew" ${!canRenew || !planId || !hasExpiry || paymentBusy ? "disabled" : ""}>${urgent ? "Renew now" : "Pay now"} — add 30 days</button>
               <button type="button" class="ndc-renewal-more" id="ndcMoreMonths">Want more months?</button>
             </div>
