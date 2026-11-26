@@ -4739,3 +4739,8 @@ footer {
   .ndc-chrome-logo { width: 100px; height: 100px; }
 }
 .ndc-extra-device-allocation,.ndc-extra-device-purchase{margin:0 0 22px}.ndc-extra-device-purchase select{display:block;max-width:220px;width:100%;margin:10px 0 18px;padding:12px 14px;border:1px solid var(--line,#343434);border-radius:10px;background:#111;color:inherit;font:inherit}.ndc-extra-device-purchase .ndc-payment-trust{margin-top:18px}.ndc-extra-device-unavailable{padding:14px;border:1px solid #d7bd5540;border-radius:12px;color:var(--muted,#aaa);background:#d7bd550d}.ndc-extra-device-renewal select{display:block;max-width:260px;width:100%;margin:8px 0;padding:11px 13px;border:1px solid var(--line,#343434);border-radius:10px;background:#111;color:inherit;font:inherit}.ndc-extra-device-renewal small{display:block;color:var(--muted,#aaa);margin-top:8px}.ndc-extra-device-purchase [data-unlink-extra-device]{white-space:nowrap}@media(max-width:620px){.ndc-extra-device-purchase select,.ndc-extra-device-renewal select{max-width:none}.ndc-extra-device-allocation .ndc-card-heading{align-items:flex-start}}
+
+
+/* Payment terms notice shown immediately before payment actions. */
+p.ndc-payment-terms { margin: 12px 0 8px; color: var(--muted, #aaa); font-size: 12px; line-height: 1.5; }
+p.ndc-payment-terms a { color: var(--gold, #d7bd55); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
