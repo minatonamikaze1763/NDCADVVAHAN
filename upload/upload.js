@@ -37,7 +37,7 @@
     ["frontphoto", "Owners Photo with Vehicle"], ["chassis-photo", "Photo of chassis"],
     ["address-proof", "Address Proof"], ["insurance", "Certificate of Insurance"],
     ["dealer-invoice", "Dealers Invoice"], ["form20", "Form 20 (Finance)"],
-    ["inspection", "Form 20 (Signed + Chassis)"], ["form22", "Form 22"],
+    ["inspection", "Inspection"], ["form22", "Form 22"],
     ["form21", "Form 21"], ["owner-signature", "Owners Signature"],
     ["pan-card", "PAN Card"], ["owner-photo", "Owners Photo"]
   ];
@@ -660,7 +660,7 @@
       const row = document.querySelector(`[data-doc="${category}"]`);
       if (!row || !input.files?.[0]) return;
       let selected = input.files[0];
-      if (isCamera && smartScanEnabled) {
+      if (isCamera && (smartScanEnabled || category === "inspection")) {
         try {
           await ensureSmartScanModule();
           while (selected) {
