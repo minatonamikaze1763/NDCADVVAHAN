@@ -1555,14 +1555,16 @@
     }));
   }
   async function openCustomer(id) {
+    let loaded = false;
     await withLoadingBarrier("Loading upload panel", "Please wait while we load the customer upload panel.", async () => {
       try {
         const data = await request(`/api/upload-portal/customers/${id}`);
         currentCustomer = data.customer;
         renderCustomer(currentCustomer);
+        loaded = true;
       } catch (error) { status($("searchStatus"), error.message, "error"); }
     });
-    scrollCustomerToUploadArea($("customerView"));
+    if (loaded) scrollCustomerToUploadArea($("customerView"));
   }
   async function saveDocuments(customer, host, button) {
     if (!hasPendingDocumentChanges(host)) return;
