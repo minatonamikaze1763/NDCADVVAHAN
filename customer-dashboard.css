@@ -672,6 +672,30 @@ body.ndc-dashboard-v2 {
 .ndc-dashboard-v2 #ndcCloudPurchaseSubmit.ndc-cloud-pay-button:disabled{opacity:.55;filter:saturate(.5)}
 @media(max-width:600px){.ndc-dashboard-v2 #ndcCloudPurchaseSubmit.ndc-cloud-pay-button{min-height:56px;padding:14px 18px;font-size:.96rem}}
 
+/* Match the main-page checkout button on Extra Devices. */
+.ndc-dashboard-v2 .ndc-extra-device-purchase #ndcExtraDevicePurchaseSubmit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 600px;
+  min-height: 58px;
+  margin: 20px auto 12px;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--gold);
+  color: #171207;
+  font: 700 15px/1.5 var(--portfolio-ui);
+  cursor: pointer;
+  box-shadow: 0 6px 24px #d7bd5510;
+}
+.ndc-dashboard-v2 .ndc-extra-device-purchase #ndcExtraDevicePurchaseSubmit:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
 /* Invoice filtering controls and two-column billing summary headers. */
 .ndc-invoice-filters{display:grid;grid-template-columns:minmax(210px,2fr) minmax(140px,1fr) minmax(140px,1fr) auto auto;gap:12px;align-items:end;margin:4px 0 10px;padding:16px;border:1px solid rgba(215,189,85,.25);border-radius:14px;background:#11110f}
 .ndc-invoice-filters label{display:grid;gap:7px;color:#d6c66f;font-size:.86rem;font-weight:650}
