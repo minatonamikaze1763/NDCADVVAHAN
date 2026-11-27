@@ -568,6 +568,14 @@
     $("discardChangesDialog").close();
     if (host) closeCustomerEditor(host, true);
   });
+  const formatAadhaar = value => (value.replace(/[^0-9]/g, "").slice(0, 12).match(/.{1,4}/g) || []).join(" ");
+  $("aadhaarNumber").addEventListener("input", event => {
+    const field = event.target;
+    const digitsBefore = field.value.slice(0, field.selectionStart).replace(/[^0-9]/g, "").length;
+    field.value = formatAadhaar(field.value);
+    const cursor = Math.min(field.value.length, digitsBefore + Math.floor(Math.max(0, digitsBefore - 1) / 4));
+    field.setSelectionRange(cursor, cursor);
+  });
   $("customerForm").addEventListener("submit", async event => {
     event.preventDefault();
     const id = editingCustomerId;
@@ -581,7 +589,7 @@
     button.disabled = true;
     status($("createStatus"), id ? "Saving customer…" : "Creating customer…");
     try {
-      const body = JSON.stringify({ chassisNumber: id ? $("chassisNumber").value : chassisNumber, customerName: $("customerName").value, ownershipType: $("ownershipType").value, specialNumberSelection: $("specialNumberSelection").value, engineNumber: $("engineNumber").value, ownerCategory: $("ownerCategory").value, mobileNumber: $("mobileNumber").value, panNumber: $("panNumber").value.trim().toUpperCase(), aadhaarNumber: $("aadhaarNumber").value.trim(), houseNumber: $("houseNumber").value, villageTown: $("villageTown").value, landmark: $("landmark").value, districtCode: $("districtCode").value, talukaName: $("talukaName").value, pincode: $("pincode").value, paymentMode: $("paymentMode").value, financerName: $("financerName").value, insuranceType: $("insuranceType").value, insuranceCompany: $("insuranceCompany").value, insurancePolicyNumber: $("insurancePolicyNumber").value, insuranceStartDate: $("insuranceStartDate").value, applicationNumber: $("applicationNumber").value });
+      const body = JSON.stringify({ chassisNumber: id ? $("chassisNumber").value : chassisNumber, customerName: $("customerName").value, ownershipType: $("ownershipType").value, specialNumberSelection: $("specialNumberSelection").value, engineNumber: $("engineNumber").value, ownerCategory: $("ownerCategory").value, mobileNumber: $("mobileNumber").value, panNumber: $("panNumber").value.trim().toUpperCase(), aadhaarNumber: $("aadhaarNumber").value.replace(/[^0-9]/g, ""), houseNumber: $("houseNumber").value, villageTown: $("villageTown").value, landmark: $("landmark").value, districtCode: $("districtCode").value, talukaName: $("talukaName").value, pincode: $("pincode").value, paymentMode: $("paymentMode").value, financerName: $("financerName").value, insuranceType: $("insuranceType").value, insuranceCompany: $("insuranceCompany").value, insurancePolicyNumber: $("insurancePolicyNumber").value, insuranceStartDate: $("insuranceStartDate").value, applicationNumber: $("applicationNumber").value });
       const data = await request(id ? `/api/upload-portal/customers/${id}` : "/api/upload-portal/customers", { method: id ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body });
       $("customerDialog").close(); if (id) await openCustomer(id); else await openCustomer(data.customer._id); await searchCustomers($("search").value);
     } catch (error) { status($("createStatus"), error.message, "error"); }
@@ -1398,7 +1406,7 @@
     const titleBlock = document.createElement("div"); titleBlock.className = "customer-title-block"; const title = document.createElement("h2"); title.textContent = customer.customerName + " - " + customer.chassisNumber;
     const created = document.createElement("p"); created.className = "customer-created-date"; created.textContent = `Created ${formatRecordCreatedAt(customer.createdAt)}`; titleBlock.append(title, created);
     const controls = document.createElement("div"); controls.className = "customer-controls";
-    const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["specialNumberSelection", "customerName", "ownershipType", "chassisNumber", "engineNumber", "mobileNumber", "panNumber", "aadhaarNumber", "houseNumber", "villageTown", "landmark", "districtCode", "pincode", "talukaName", "paymentMode", "financerName", "insuranceType", "insuranceCompany", "insurancePolicyNumber", "insuranceStartDate", "ownerCategory", "applicationNumber"]) $(key).value = customer[key] ?? (key === "ownershipType" ? "Individual" : key === "insuranceType" ? "2" : key === "ownerCategory" ? "7" : ""); syncFinancerField(); $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
+    const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["specialNumberSelection", "customerName", "ownershipType", "chassisNumber", "engineNumber", "mobileNumber", "panNumber", "aadhaarNumber", "houseNumber", "villageTown", "landmark", "districtCode", "pincode", "talukaName", "paymentMode", "financerName", "insuranceType", "insuranceCompany", "insurancePolicyNumber", "insuranceStartDate", "ownerCategory", "applicationNumber"]) $(key).value = customer[key] ?? (key === "ownershipType" ? "Individual" : key === "insuranceType" ? "2" : key === "ownerCategory" ? "7" : ""); $("aadhaarNumber").value = formatAadhaar($("aadhaarNumber").value); syncFinancerField(); $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
     const close = document.createElement("button"); close.type = "button"; close.className = "quiet"; setIconButton(close, "close", "Close customer"); close.addEventListener("click", () => {
       if (!hasUnsavedEditorChanges(host)) {
         closeCustomerEditor(host);

@@ -186,7 +186,7 @@
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>Aadhaar number</span><span class="required">Required</span></span>
-        <input id="aadhaarNumber" type="text" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" required autocomplete="off" placeholder="12-digit Aadhaar number" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12)">
+        <input id="aadhaarNumber" type="text" inputmode="numeric" pattern="[0-9]{4} [0-9]{4} [0-9]{4}" required autocomplete="off" placeholder="1234 5678 9012">
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>House number / address line 1</span><span class="required">Required</span></span>
@@ -744,7 +744,7 @@
   <script src="document-matcher.js"></script>
   <script src="/upload/vendor/pdf.min.js?v=3.11.174"></script>
   <script src="/upload/vendor/jspdf.umd.min.js?v=2.5.1"></script>
-  <script src="upload.js?v=cloud-workspace-auth-20261126" defer></script>
+  <script src="upload.js?v=aadhaar-format-20261127" defer></script>
 </body>
 </html>
 
