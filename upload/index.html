@@ -185,11 +185,11 @@
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>Mobile number</span><span class="required">Required</span></span>
-        <input id="mobileNumber" type="tel" inputmode="numeric" maxlength="10" required autocomplete="tel" placeholder="10-digit mobile number">
+        <input id="mobileNumber" type="tel" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" required autocomplete="tel" placeholder="10-digit mobile number">
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>PAN</span><span class="optional">Optional</span></span>
-        <input id="panNumber" type="text" maxlength="10" autocapitalize="characters" autocomplete="off" placeholder="Enter PAN">
+        <input id="panNumber" type="text" maxlength="10" pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]" autocapitalize="characters" autocomplete="off" placeholder="Enter PAN">
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>House number / address line 1</span><span class="required">Required</span></span>
@@ -248,7 +248,7 @@
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>Pincode</span><span class="required">Required</span></span>
-        <input id="pincode" type="text" inputmode="numeric" maxlength="6" required autocomplete="postal-code" placeholder="6-digit pincode">
+        <input id="pincode" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="postal-code" placeholder="6-digit pincode">
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>HP / hypothecation</span><span class="optional">Optional</span></span>
