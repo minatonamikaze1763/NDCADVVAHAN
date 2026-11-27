@@ -33,6 +33,7 @@
   let logoutInProgress = false;
 
   let editingCustomerId = null;
+  let editingCustomerPurpose = null;
   const categories = [
     ["frontphoto", "Owners Photo with Vehicle"], ["chassis-photo", "Photo of chassis"],
     ["address-proof", "Address Proof"], ["insurance", "Certificate of Insurance"],
@@ -601,7 +602,8 @@
     const documentOnly = $("customerPurpose").value === "document-upload";
     const keepVisible = new Set(["customerName", "chassisNumber", "customerPurpose"]);
     const fields = [...$("customerForm").querySelectorAll(".customer-field")];
-    $("customerPurpose").closest(".customer-field").hidden = Boolean(editingCustomerId);
+    const canUpgradePurpose = Boolean(editingCustomerId) && editingCustomerPurpose === "document-upload";
+    $("customerPurpose").closest(".customer-field").hidden = Boolean(editingCustomerId) && !canUpgradePurpose;
     if (documentOnly) {
       if (!purposeFieldStates) purposeFieldStates = new Map();
       fields.forEach(label => {
@@ -617,7 +619,7 @@
       return;
     }
     fields.forEach(label => { label.hidden = false; });
-    $("customerPurpose").closest(".customer-field").hidden = Boolean(editingCustomerId);
+    $("customerPurpose").closest(".customer-field").hidden = Boolean(editingCustomerId) && !canUpgradePurpose;
     restorePurposeFieldStates();
     syncFinancerField();
     syncAddressFields();
@@ -628,7 +630,7 @@
   $("paymentMode").addEventListener("change", syncFinancerField);
   $("addressFillType").addEventListener("change", syncAddressFields);
   $("customerPurpose").addEventListener("change", syncCustomerPurpose);
-  $("newCustomer").addEventListener("click", async () => { if (!(await ensureActiveSession())) return; restorePurposeFieldStates(); editingCustomerId = null; $("customerForm").reset(); syncFinancerField(); syncAddressFields(); syncDistrictOptions(); syncCustomerPurpose(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
+  $("newCustomer").addEventListener("click", async () => { if (!(await ensureActiveSession())) return; restorePurposeFieldStates(); editingCustomerId = null; editingCustomerPurpose = null; $("customerForm").reset(); syncFinancerField(); syncAddressFields(); syncDistrictOptions(); syncCustomerPurpose(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
   $("closeDialog").addEventListener("click", () => $("customerDialog").close());
   $("keepEditing").addEventListener("click", () => {
     pendingCloseHost = null;
@@ -665,6 +667,7 @@
       const customerPurpose = $("customerPurpose").value || "tr-and-documents-upload";
       const customerData = { chassisNumber: id ? $("chassisNumber").value : chassisNumber, customerName: $("customerName").value };
       if (!id) customerData.customerPurpose = customerPurpose;
+      else if (editingCustomerPurpose === "document-upload" && customerPurpose === "tr-and-documents-upload") customerData.customerPurpose = customerPurpose;
       if (customerPurpose !== "document-upload") Object.assign(customerData, { careOfName: $("careOfName").value.trim().toUpperCase(), stateName: $("stateName").value, ownershipType: $("ownershipType").value, specialNumberSelection: $("specialNumberSelection").value, engineNumber: $("engineNumber").value, ownerCategory: $("ownerCategory").value, mobileNumber: $("mobileNumber").value, panNumber: $("panNumber").value.trim().toUpperCase(), aadhaarNumber: $("aadhaarNumber").value.replace(/[^0-9]/g, ""), addressFillType: $("addressFillType").value, houseNumber: $("houseNumber").value, villageTown: $("villageTown").value, landmark: $("landmark").value, districtCode: $("districtCode").value, talukaCode: $("talukaCode").value, talukaName: $("talukaCode").selectedOptions[0]?.textContent.trim() || "", pincode: $("pincode").value, paymentMode: $("paymentMode").value, financerName: $("financerName").value, insuranceType: $("insuranceType").value, insuranceCompany: $("insuranceCompany").value, insurancePolicyNumber: $("insurancePolicyNumber").value, insuranceStartDate: $("insuranceStartDate").value, applicationNumber: $("applicationNumber").value });
       const body = JSON.stringify(customerData);
       const data = await request(id ? `/api/upload-portal/customers/${id}` : "/api/upload-portal/customers", { method: id ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body });
@@ -1483,7 +1486,7 @@
     const titleBlock = document.createElement("div"); titleBlock.className = "customer-title-block"; const title = document.createElement("h2"); title.textContent = customer.customerName + " - " + customer.chassisNumber;
     const created = document.createElement("p"); created.className = "customer-created-date"; created.textContent = `Created ${formatRecordCreatedAt(customer.createdAt)}`; titleBlock.append(title, created);
     const controls = document.createElement("div"); controls.className = "customer-controls";
-    const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; restorePurposeFieldStates(); editingCustomerId = customer._id; $("customerForm").reset(); $("customerPurpose").value = customer.customerPurpose || "tr-and-documents-upload"; for (const key of ["specialNumberSelection", "customerName", "careOfName", "stateName", "ownershipType", "chassisNumber", "engineNumber", "mobileNumber", "panNumber", "aadhaarNumber", "addressFillType", "houseNumber", "villageTown", "landmark", "pincode", "paymentMode", "financerName", "insuranceType", "insuranceCompany", "insurancePolicyNumber", "insuranceStartDate", "ownerCategory", "applicationNumber"]) $(key).value = customer[key] ?? (key === "ownershipType" ? "Individual" : key === "addressFillType" ? "2" : key === "insuranceType" ? "2" : key === "ownerCategory" ? "7" : ""); $("stateName").value = customer.stateName || "Telangana"; syncDistrictOptions(customer.districtCode || ""); syncMandalOptions(customer.talukaCode, customer.talukaName); $("aadhaarNumber").value = formatAadhaar($("aadhaarNumber").value); syncFinancerField(); syncAddressFields(); syncCustomerPurpose(); $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
+    const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; restorePurposeFieldStates(); editingCustomerId = customer._id; editingCustomerPurpose = customer.customerPurpose || "tr-and-documents-upload"; $("customerForm").reset(); $("customerPurpose").value = editingCustomerPurpose; for (const key of ["specialNumberSelection", "customerName", "careOfName", "stateName", "ownershipType", "chassisNumber", "engineNumber", "mobileNumber", "panNumber", "aadhaarNumber", "addressFillType", "houseNumber", "villageTown", "landmark", "pincode", "paymentMode", "financerName", "insuranceType", "insuranceCompany", "insurancePolicyNumber", "insuranceStartDate", "ownerCategory", "applicationNumber"]) $(key).value = customer[key] ?? (key === "ownershipType" ? "Individual" : key === "addressFillType" ? "2" : key === "insuranceType" ? "2" : key === "ownerCategory" ? "7" : ""); $("stateName").value = customer.stateName || "Telangana"; syncDistrictOptions(customer.districtCode || ""); syncMandalOptions(customer.talukaCode, customer.talukaName); $("aadhaarNumber").value = formatAadhaar($("aadhaarNumber").value); syncFinancerField(); syncAddressFields(); syncCustomerPurpose(); $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
     const close = document.createElement("button"); close.type = "button"; close.className = "quiet"; setIconButton(close, "close", "Close customer"); close.addEventListener("click", () => {
       if (!hasUnsavedEditorChanges(host)) {
         closeCustomerEditor(host);
