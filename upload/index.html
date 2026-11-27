@@ -186,7 +186,7 @@
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>Aadhaar number</span><span class="required">Required</span></span>
-        <input id="aadhaarNumber" type="password" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" required autocomplete="off" placeholder="12-digit Aadhaar number">
+        <input id="aadhaarNumber" type="text" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" required autocomplete="off" placeholder="12-digit Aadhaar number" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12)">
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>House number / address line 1</span><span class="required">Required</span></span>
