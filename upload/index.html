@@ -252,7 +252,7 @@
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>Mandal / taluka</span><span class="required">Required</span></span>
-        <input id="talukaName" maxlength="35" required autocapitalize="characters" placeholder="Enter selected mandal / taluka">
+        <select id="talukaCode" required disabled><option value="">Select district first</option></select>
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>Cash or finance</span><span class="required">Required</span></span>
@@ -951,7 +951,8 @@
   <script src="document-matcher.js"></script>
   <script src="/upload/vendor/pdf.min.js?v=3.11.174"></script>
   <script src="/upload/vendor/jspdf.umd.min.js?v=2.5.1"></script>
-  <script src="upload.js?v=aadhaar-format-20261127" defer></script>
+  <script src="telangana-district-mandals.js?v=mandal-values-20261127"></script>
+  <script src="upload.js?v=mandal-values-20261127" defer></script>
 </body>
 </html>
 
