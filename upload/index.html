@@ -151,14 +151,6 @@
         <button id="closeDialog" class="quiet customer-dialog-close" type="button" aria-label="Close">✕</button>
       </div>
       <label class="customer-field">
-        <span class="customer-field-heading"><span>Chassis number</span><span class="required">Required</span></span>
-        <input id="chassisNumber" maxlength="17" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter chassis number">
-      </label>
-      <label class="customer-field">
-        <span class="customer-field-heading"><span>Customer name</span><span class="required">Required</span></span>
-        <input id="customerName" maxlength="120" required autocomplete="name" placeholder="Enter customer name">
-      </label>
-      <label class="customer-field">
         <span class="customer-field-heading"><span>Choice / fancy / retention number</span><span class="required">Required</span></span>
         <select id="specialNumberSelection" required>
           <option value="">Select</option>
@@ -167,21 +159,16 @@
         </select>
       </label>
       <label class="customer-field">
-        <span class="customer-field-heading"><span>Engine number</span><span class="optional">Optional</span></span>
-        <input id="engineNumber" type="text" maxlength="5" autocomplete="off" placeholder="Enter engine number">
+        <span class="customer-field-heading"><span>Customer name</span><span class="required">Required</span></span>
+        <input id="customerName" maxlength="120" required autocomplete="name" placeholder="Enter customer name">
       </label>
       <label class="customer-field">
-        <span class="customer-field-heading"><span>Owner category</span><span class="optional">Optional</span></span>
-        <select id="ownerCategory">
-          <option value="">Select</option>
-          <option value="2">DIVYANGJAN</option>
-          <option value="1">EX-SERVICEMAN</option>
-          <option value="7">GENERAL</option>
-          <option value="5">O B C</option>
-          <option value="6">OTHERS</option>
-          <option value="3">SCHEDULED CASTE</option>
-          <option value="4">SCHEDULED TRIBE</option>
-        </select>
+        <span class="customer-field-heading"><span>Chassis number</span><span class="required">Required</span></span>
+        <input id="chassisNumber" maxlength="17" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter chassis number">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Engine number</span><span class="required">Required</span></span>
+        <input id="engineNumber" type="text" maxlength="5" required autocomplete="off" placeholder="Enter engine number">
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>Mobile number</span><span class="required">Required</span></span>
@@ -243,16 +230,107 @@
         </select>
       </label>
       <label class="customer-field">
-        <span class="customer-field-heading"><span>Mandal / taluka</span><span class="required">Required</span></span>
-        <input id="talukaName" maxlength="35" required autocapitalize="characters" placeholder="Enter selected mandal / taluka">
-      </label>
-      <label class="customer-field">
         <span class="customer-field-heading"><span>Pincode</span><span class="required">Required</span></span>
         <input id="pincode" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="postal-code" placeholder="6-digit pincode">
       </label>
       <label class="customer-field">
-        <span class="customer-field-heading"><span>HP / hypothecation</span><span class="optional">Optional</span></span>
-        <input id="hp" maxlength="160" placeholder="Financier or hypothecation details">
+        <span class="customer-field-heading"><span>Mandal / taluka</span><span class="required">Required</span></span>
+        <input id="talukaName" maxlength="35" required autocapitalize="characters" placeholder="Enter selected mandal / taluka">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Cash or finance</span><span class="required">Required</span></span>
+        <select id="paymentMode" required>
+          <option value="">Select payment mode</option>
+          <option value="Cash">CASH</option>
+          <option value="Finance">FINANCE</option>
+        </select>
+      </label>
+      <label id="financerField" class="customer-field" hidden>
+        <span class="customer-field-heading"><span>Financer</span><span class="required">Required for finance</span></span>
+        <select id="financerName" disabled>
+          <option value="">Select financer</option>
+            <option value="State Bank of India">State Bank of India</option>
+            <option value="HDFC Bank">HDFC Bank</option>
+            <option value="ICICI Bank">ICICI Bank</option>
+            <option value="Axis Bank">Axis Bank</option>
+            <option value="IDFC FIRST Bank">IDFC FIRST Bank</option>
+            <option value="IndusInd Bank">IndusInd Bank</option>
+            <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+            <option value="Yes Bank">Yes Bank</option>
+            <option value="Bank of Baroda">Bank of Baroda</option>
+            <option value="Bank of India">Bank of India</option>
+            <option value="Canara Bank">Canara Bank</option>
+            <option value="Punjab National Bank">Punjab National Bank</option>
+            <option value="Union Bank of India">Union Bank of India</option>
+            <option value="Indian Bank">Indian Bank</option>
+            <option value="Central Bank of India">Central Bank of India</option>
+            <option value="UCO Bank">UCO Bank</option>
+            <option value="Punjab &amp; Sind Bank">Punjab &amp; Sind Bank</option>
+            <option value="Federal Bank">Federal Bank</option>
+            <option value="South Indian Bank">South Indian Bank</option>
+            <option value="Karnataka Bank">Karnataka Bank</option>
+            <option value="RBL Bank">RBL Bank</option>
+            <option value="Bandhan Bank">Bandhan Bank</option>
+            <option value="AU Small Finance Bank">AU Small Finance Bank</option>
+            <option value="Ujjivan Small Finance Bank">Ujjivan Small Finance Bank</option>
+            <option value="Equitas Small Finance Bank">Equitas Small Finance Bank</option>
+            <option value="Jana Small Finance Bank">Jana Small Finance Bank</option>
+            <option value="Bajaj Finance">Bajaj Finance</option>
+            <option value="Tata Capital">Tata Capital</option>
+            <option value="Mahindra Finance">Mahindra Finance</option>
+            <option value="L&amp;T Finance">L&amp;T Finance</option>
+            <option value="TVS Credit Services">TVS Credit Services</option>
+            <option value="Hero FinCorp">Hero FinCorp</option>
+            <option value="Cholamandalam Investment and Finance Company">Cholamandalam Investment and Finance Company</option>
+            <option value="Hinduja Leyland Finance">Hinduja Leyland Finance</option>
+            <option value="HDB Financial Services">HDB Financial Services</option>
+            <option value="Sundaram Finance">Sundaram Finance</option>
+            <option value="Muthoot Capital Services">Muthoot Capital Services</option>
+            <option value="Muthoot Finance">Muthoot Finance</option>
+            <option value="Manba Finance">Manba Finance</option>
+            <option value="Berar Finance">Berar Finance</option>
+            <option value="Poonawalla Fincorp">Poonawalla Fincorp</option>
+            <option value="Aditya Birla Finance">Aditya Birla Finance</option>
+            <option value="Piramal Finance">Piramal Finance</option>
+            <option value="SMFG India Credit">SMFG India Credit</option>
+            <option value="IIFL Finance">IIFL Finance</option>
+            <option value="DMI Finance">DMI Finance</option>
+            <option value="InCred Finance">InCred Finance</option>
+            <option value="Sammaan Capital">Sammaan Capital</option>
+            <option value="Vastu Finserve">Vastu Finserve</option>
+            <option value="Ess Kay Fincorp">Ess Kay Fincorp</option>
+            <option value="Clix Capital">Clix Capital</option>
+            <option value="Capri Global Capital">Capri Global Capital</option>
+            <option value="Toyota Financial Services India">Toyota Financial Services India</option>
+            <option value="Tata Motors Finance">Tata Motors Finance</option>
+        </select>
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Insurance company</span><span class="optional">Optional</span></span>
+        <select id="insuranceCompany">
+          <option value="">Insurance company options will be added later</option>
+        </select>
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Insurance policy number</span><span class="optional">Optional</span></span>
+        <input id="insurancePolicyNumber" maxlength="50" autocomplete="off" placeholder="Enter policy number">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Insurance start date</span><span class="optional">Optional</span></span>
+        <input id="insuranceStartDate" type="date">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Owner category</span><span class="required">Required</span></span>
+        <select id="ownerCategory" required>
+          <option value="">Select owner category</option>
+          <option value="2">DIVYANGJAN</option>
+          <option value="1">EX-SERVICEMAN</option>
+          <option value="7">GENERAL</option>
+          <option value="5">O B C</option>
+          <option value="6">OTHERS</option>
+          <option value="3">SCHEDULED CASTE</option>
+          <option value="4">SCHEDULED TRIBE</option>
+        </select>
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>Application number</span><span class="optional">Optional</span></span>
