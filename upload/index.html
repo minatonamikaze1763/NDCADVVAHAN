@@ -158,9 +158,97 @@
         <span class="customer-field-heading"><span>Customer name</span><span class="required">Required</span></span>
         <input id="customerName" maxlength="120" required autocomplete="name" placeholder="Enter customer name">
       </label>
-      <label class="customer-field customer-field-wide">
-        <span class="customer-field-heading"><span>Address</span><span class="optional">Optional</span></span>
-        <textarea id="address" rows="3" maxlength="500" placeholder="Enter customer address"></textarea>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Choice / fancy / retention number</span><span class="required">Required</span></span>
+        <select id="specialNumberSelection" required>
+          <option value="">Select</option>
+          <option value="No">NO</option>
+          <option value="Yes">YES</option>
+        </select>
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Engine number</span><span class="optional">Optional</span></span>
+        <input id="engineNumber" type="text" maxlength="5" autocomplete="off" placeholder="Enter engine number">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Owner category</span><span class="optional">Optional</span></span>
+        <select id="ownerCategory">
+          <option value="">Select</option>
+          <option value="2">DIVYANGJAN</option>
+          <option value="1">EX-SERVICEMAN</option>
+          <option value="7">GENERAL</option>
+          <option value="5">O B C</option>
+          <option value="6">OTHERS</option>
+          <option value="3">SCHEDULED CASTE</option>
+          <option value="4">SCHEDULED TRIBE</option>
+        </select>
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Mobile number</span><span class="required">Required</span></span>
+        <input id="mobileNumber" type="tel" inputmode="numeric" maxlength="10" required autocomplete="tel" placeholder="10-digit mobile number">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>PAN</span><span class="optional">Optional</span></span>
+        <input id="panNumber" type="text" maxlength="10" autocapitalize="characters" autocomplete="off" placeholder="Enter PAN">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>House number / address line 1</span><span class="required">Required</span></span>
+        <input id="houseNumber" maxlength="35" required autocapitalize="characters" placeholder="Enter house number">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Village / town</span><span class="required">Required</span></span>
+        <input id="villageTown" maxlength="35" required autocapitalize="characters" placeholder="Enter village or town">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Landmark</span><span class="optional">Optional</span></span>
+        <input id="landmark" maxlength="35" autocapitalize="characters" placeholder="Enter landmark">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>District</span><span class="required">Required</span></span>
+        <select id="districtCode" required>
+          <option value="">Select district</option>
+          <option value="532">Adilabad</option>
+          <option value="751">BHADRADRI KOTHAGUDEM</option>
+          <option value="752">HANUMAKONDA</option>
+          <option value="536">Hyderabad</option>
+          <option value="753">Jagitial</option>
+          <option value="754">JANGOAN</option>
+          <option value="755">JAYASHANKAR BHUPALAPALLY</option>
+          <option value="756">JOGULAMBA GADWAL</option>
+          <option value="757">KAMAREDDY</option>
+          <option value="534">Karimnagar</option>
+          <option value="541">Khammam</option>
+          <option value="758">KUMURAM BHEEM ASIFABAD</option>
+          <option value="759">MAHABUBABAD</option>
+          <option value="538">Mahbubnagar</option>
+          <option value="760">MANCHERIAL</option>
+          <option value="535">Medak</option>
+          <option value="761">MEDCHAL MALKAJGIRI</option>
+          <option value="762">Mulugu</option>
+          <option value="763">NAGARKURNOOL</option>
+          <option value="539">Nalgonda</option>
+          <option value="764">Narayanpet</option>
+          <option value="749">Nirmal</option>
+          <option value="533">Nizamabad</option>
+          <option value="765">PEDDAPALLI</option>
+          <option value="766">RAJANNA SIRCILLA</option>
+          <option value="703">SANGAREDDY</option>
+          <option value="768">SIDDIPET</option>
+          <option value="767">SIDDIPET</option>
+          <option value="769">SURYAPET</option>
+          <option value="770">VIKARABAD</option>
+          <option value="771">WANAPARTHY</option>
+          <option value="540">Warangal</option>
+          <option value="772">YADADRI BHUVANAGIRI</option>
+        </select>
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Mandal / taluka</span><span class="required">Required</span></span>
+        <input id="talukaName" maxlength="35" required autocapitalize="characters" placeholder="Enter selected mandal / taluka">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Pincode</span><span class="required">Required</span></span>
+        <input id="pincode" type="text" inputmode="numeric" maxlength="6" required autocomplete="postal-code" placeholder="6-digit pincode">
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>HP / hypothecation</span><span class="optional">Optional</span></span>
