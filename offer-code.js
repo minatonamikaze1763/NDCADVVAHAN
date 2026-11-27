@@ -13,7 +13,7 @@
       const badge = document.createElement('span'), title = document.createElement('strong'), description = document.createElement('p'), facts = document.createElement('div'), rules = document.createElement('p');
       badge.className = 'ndc-offer-badge'; badge.textContent = `${offer.code} applied`;
       title.textContent = offer.title; description.textContent = offer.description; facts.className = 'ndc-offer-facts';
-      for (const [label, value] of [['Plan & duration', `${offer.planName} · ${offer.months} months (${offer.durationDays} days)`], ['You save', money(offer.discountPaise)], ['You pay', money(offer.amountPaise)], ['Device logins', String(offer.maxDevices)]]) {
+      for (const [label, value] of [['Plan & duration', `${offer.planName} · ${offer.months} months (${offer.durationDays} days)`], ['You save', money(offer.discountPaise)], ['You pay', money(offer.amountPaise)], ['Device logins', String(offer.maxDevices)], ...(offer.cloudLoginLimit != null ? [['Cloud Workspace device logins', String(offer.cloudLoginLimit)]] : [])]) {
         const cell = document.createElement('div'), small = document.createElement('small'), strong = document.createElement('b'); small.textContent = label; strong.textContent = value; cell.append(small, strong); facts.append(cell);
       }
       rules.className = 'ndc-offer-terms'; rules.textContent = `${offer.retainDevicesOnRenewal ? `Extra devices continue on ${offer.planName} renewals at the regular ${money(offer.monthlyPrice * 100)}/month. ` : 'Extra devices apply to this purchased period. '}The discount applies once. ${offer.rules || ''}`;

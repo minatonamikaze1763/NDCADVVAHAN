@@ -27,6 +27,7 @@
         price.append(node('strong', money(offer.amountPaise, offer.currency)), node('del', money(offer.subtotalPaise, offer.currency)), node('span', `${offer.planName} · ${offer.months} months · ${offer.durationDays} days`));
         const benefits = node('ul', null, 'ndc-offer-benefits');
         for (const text of [`${offer.maxDevices} device logins${offer.extraDevices ? ` · ${offer.extraDevices} extra included` : ''}`, offer.retainDevicesOnRenewal ? `Extra devices stay on ${offer.planName} renewals at the regular ${money(offer.monthlyPrice * 100, offer.currency)}/month.` : 'Any extra devices apply to this purchased period.', 'One-time purchase discount. One redemption per account.']) benefits.append(node('li', text));
+        if (offer.cloudLoginLimit != null) benefits.append(node('li', `${offer.cloudLoginLimit} Cloud Workspace device logins`));
         const codeRow = node('div', null, 'ndc-offer-public-code'), code = node('code', offer.code), copy = node('button', 'Copy code'); copy.type = 'button';copy.setAttribute('aria-label', 'Copy offer code ' + offer.code);codeRow.append(code, copy);
         const notice = node('p', '', 'ndc-offer-card-notice'); notice.setAttribute('role', 'status');
         copy.onclick = async () => {
