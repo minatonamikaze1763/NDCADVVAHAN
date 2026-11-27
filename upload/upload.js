@@ -601,6 +601,7 @@
     const documentOnly = $("customerPurpose").value === "document-upload";
     const keepVisible = new Set(["customerName", "chassisNumber", "customerPurpose"]);
     const fields = [...$("customerForm").querySelectorAll(".customer-field")];
+    $("customerPurpose").closest(".customer-field").hidden = Boolean(editingCustomerId);
     if (documentOnly) {
       if (!purposeFieldStates) purposeFieldStates = new Map();
       fields.forEach(label => {
@@ -616,6 +617,7 @@
       return;
     }
     fields.forEach(label => { label.hidden = false; });
+    $("customerPurpose").closest(".customer-field").hidden = Boolean(editingCustomerId);
     restorePurposeFieldStates();
     syncFinancerField();
     syncAddressFields();
@@ -661,7 +663,8 @@
     status($("createStatus"), id ? "Saving customer…" : "Creating customer…");
     try {
       const customerPurpose = $("customerPurpose").value || "tr-and-documents-upload";
-      const customerData = { customerPurpose, chassisNumber: id ? $("chassisNumber").value : chassisNumber, customerName: $("customerName").value };
+      const customerData = { chassisNumber: id ? $("chassisNumber").value : chassisNumber, customerName: $("customerName").value };
+      if (!id) customerData.customerPurpose = customerPurpose;
       if (customerPurpose !== "document-upload") Object.assign(customerData, { careOfName: $("careOfName").value.trim().toUpperCase(), stateName: $("stateName").value, ownershipType: $("ownershipType").value, specialNumberSelection: $("specialNumberSelection").value, engineNumber: $("engineNumber").value, ownerCategory: $("ownerCategory").value, mobileNumber: $("mobileNumber").value, panNumber: $("panNumber").value.trim().toUpperCase(), aadhaarNumber: $("aadhaarNumber").value.replace(/[^0-9]/g, ""), addressFillType: $("addressFillType").value, houseNumber: $("houseNumber").value, villageTown: $("villageTown").value, landmark: $("landmark").value, districtCode: $("districtCode").value, talukaCode: $("talukaCode").value, talukaName: $("talukaCode").selectedOptions[0]?.textContent.trim() || "", pincode: $("pincode").value, paymentMode: $("paymentMode").value, financerName: $("financerName").value, insuranceType: $("insuranceType").value, insuranceCompany: $("insuranceCompany").value, insurancePolicyNumber: $("insurancePolicyNumber").value, insuranceStartDate: $("insuranceStartDate").value, applicationNumber: $("applicationNumber").value });
       const body = JSON.stringify(customerData);
       const data = await request(id ? `/api/upload-portal/customers/${id}` : "/api/upload-portal/customers", { method: id ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body });
