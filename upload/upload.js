@@ -588,11 +588,45 @@
       if (input) { input.required = !usePermanentAddress; input.disabled = usePermanentAddress; }
     });
   }
+  let purposeFieldStates = null;
+  function restorePurposeFieldStates() {
+    if (!purposeFieldStates) return;
+    purposeFieldStates.forEach((state, control) => {
+      control.disabled = state.disabled;
+      control.required = state.required;
+    });
+    purposeFieldStates = null;
+  }
+  function syncCustomerPurpose() {
+    const documentOnly = $("customerPurpose").value === "document-upload";
+    const keepVisible = new Set(["customerName", "chassisNumber", "customerPurpose"]);
+    const fields = [...$("customerForm").querySelectorAll(".customer-field")];
+    if (documentOnly) {
+      if (!purposeFieldStates) purposeFieldStates = new Map();
+      fields.forEach(label => {
+        const controls = [...label.querySelectorAll("input, select, textarea")];
+        if (controls.some(control => keepVisible.has(control.id))) return;
+        label.hidden = true;
+        controls.forEach(control => {
+          if (!purposeFieldStates.has(control)) purposeFieldStates.set(control, { disabled: control.disabled, required: control.required });
+          control.disabled = true;
+          control.required = false;
+        });
+      });
+      return;
+    }
+    fields.forEach(label => { label.hidden = false; });
+    restorePurposeFieldStates();
+    syncFinancerField();
+    syncAddressFields();
+    syncDistrictOptions($("districtCode").value);
+  }
   $("stateName").addEventListener("change", () => syncDistrictOptions());
   $("districtCode").addEventListener("change", () => syncMandalOptions());
   $("paymentMode").addEventListener("change", syncFinancerField);
   $("addressFillType").addEventListener("change", syncAddressFields);
-  $("newCustomer").addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = null; $("customerForm").reset(); syncFinancerField(); syncAddressFields(); syncDistrictOptions(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
+  $("customerPurpose").addEventListener("change", syncCustomerPurpose);
+  $("newCustomer").addEventListener("click", async () => { if (!(await ensureActiveSession())) return; restorePurposeFieldStates(); editingCustomerId = null; $("customerForm").reset(); syncFinancerField(); syncAddressFields(); syncDistrictOptions(); syncCustomerPurpose(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
   $("closeDialog").addEventListener("click", () => $("customerDialog").close());
   $("keepEditing").addEventListener("click", () => {
     pendingCloseHost = null;
@@ -626,7 +660,10 @@
     button.disabled = true;
     status($("createStatus"), id ? "Saving customer…" : "Creating customer…");
     try {
-      const body = JSON.stringify({ chassisNumber: id ? $("chassisNumber").value : chassisNumber, customerName: $("customerName").value, careOfName: $("careOfName").value.trim().toUpperCase(), stateName: $("stateName").value, ownershipType: $("ownershipType").value, specialNumberSelection: $("specialNumberSelection").value, engineNumber: $("engineNumber").value, ownerCategory: $("ownerCategory").value, mobileNumber: $("mobileNumber").value, panNumber: $("panNumber").value.trim().toUpperCase(), aadhaarNumber: $("aadhaarNumber").value.replace(/[^0-9]/g, ""), addressFillType: $("addressFillType").value, houseNumber: $("houseNumber").value, villageTown: $("villageTown").value, landmark: $("landmark").value, districtCode: $("districtCode").value, talukaCode: $("talukaCode").value, talukaName: $("talukaCode").selectedOptions[0]?.textContent.trim() || "", pincode: $("pincode").value, paymentMode: $("paymentMode").value, financerName: $("financerName").value, insuranceType: $("insuranceType").value, insuranceCompany: $("insuranceCompany").value, insurancePolicyNumber: $("insurancePolicyNumber").value, insuranceStartDate: $("insuranceStartDate").value, applicationNumber: $("applicationNumber").value });
+      const customerPurpose = $("customerPurpose").value || "tr-and-documents-upload";
+      const customerData = { customerPurpose, chassisNumber: id ? $("chassisNumber").value : chassisNumber, customerName: $("customerName").value };
+      if (customerPurpose !== "document-upload") Object.assign(customerData, { careOfName: $("careOfName").value.trim().toUpperCase(), stateName: $("stateName").value, ownershipType: $("ownershipType").value, specialNumberSelection: $("specialNumberSelection").value, engineNumber: $("engineNumber").value, ownerCategory: $("ownerCategory").value, mobileNumber: $("mobileNumber").value, panNumber: $("panNumber").value.trim().toUpperCase(), aadhaarNumber: $("aadhaarNumber").value.replace(/[^0-9]/g, ""), addressFillType: $("addressFillType").value, houseNumber: $("houseNumber").value, villageTown: $("villageTown").value, landmark: $("landmark").value, districtCode: $("districtCode").value, talukaCode: $("talukaCode").value, talukaName: $("talukaCode").selectedOptions[0]?.textContent.trim() || "", pincode: $("pincode").value, paymentMode: $("paymentMode").value, financerName: $("financerName").value, insuranceType: $("insuranceType").value, insuranceCompany: $("insuranceCompany").value, insurancePolicyNumber: $("insurancePolicyNumber").value, insuranceStartDate: $("insuranceStartDate").value, applicationNumber: $("applicationNumber").value });
+      const body = JSON.stringify(customerData);
       const data = await request(id ? `/api/upload-portal/customers/${id}` : "/api/upload-portal/customers", { method: id ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body });
       $("customerDialog").close(); if (id) await openCustomer(id); else await openCustomer(data.customer._id); await searchCustomers($("search").value);
     } catch (error) { status($("createStatus"), error.message, "error"); }
@@ -1443,7 +1480,7 @@
     const titleBlock = document.createElement("div"); titleBlock.className = "customer-title-block"; const title = document.createElement("h2"); title.textContent = customer.customerName + " - " + customer.chassisNumber;
     const created = document.createElement("p"); created.className = "customer-created-date"; created.textContent = `Created ${formatRecordCreatedAt(customer.createdAt)}`; titleBlock.append(title, created);
     const controls = document.createElement("div"); controls.className = "customer-controls";
-    const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["specialNumberSelection", "customerName", "careOfName", "stateName", "ownershipType", "chassisNumber", "engineNumber", "mobileNumber", "panNumber", "aadhaarNumber", "addressFillType", "houseNumber", "villageTown", "landmark", "pincode", "paymentMode", "financerName", "insuranceType", "insuranceCompany", "insurancePolicyNumber", "insuranceStartDate", "ownerCategory", "applicationNumber"]) $(key).value = customer[key] ?? (key === "ownershipType" ? "Individual" : key === "addressFillType" ? "2" : key === "insuranceType" ? "2" : key === "ownerCategory" ? "7" : ""); $("stateName").value = customer.stateName || "Telangana"; syncDistrictOptions(customer.districtCode || ""); syncMandalOptions(customer.talukaCode, customer.talukaName); $("aadhaarNumber").value = formatAadhaar($("aadhaarNumber").value); syncFinancerField(); syncAddressFields(); $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
+    const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; restorePurposeFieldStates(); editingCustomerId = customer._id; $("customerForm").reset(); $("customerPurpose").value = customer.customerPurpose || "tr-and-documents-upload"; for (const key of ["specialNumberSelection", "customerName", "careOfName", "stateName", "ownershipType", "chassisNumber", "engineNumber", "mobileNumber", "panNumber", "aadhaarNumber", "addressFillType", "houseNumber", "villageTown", "landmark", "pincode", "paymentMode", "financerName", "insuranceType", "insuranceCompany", "insurancePolicyNumber", "insuranceStartDate", "ownerCategory", "applicationNumber"]) $(key).value = customer[key] ?? (key === "ownershipType" ? "Individual" : key === "addressFillType" ? "2" : key === "insuranceType" ? "2" : key === "ownerCategory" ? "7" : ""); $("stateName").value = customer.stateName || "Telangana"; syncDistrictOptions(customer.districtCode || ""); syncMandalOptions(customer.talukaCode, customer.talukaName); $("aadhaarNumber").value = formatAadhaar($("aadhaarNumber").value); syncFinancerField(); syncAddressFields(); syncCustomerPurpose(); $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
     const close = document.createElement("button"); close.type = "button"; close.className = "quiet"; setIconButton(close, "close", "Close customer"); close.addEventListener("click", () => {
       if (!hasUnsavedEditorChanges(host)) {
         closeCustomerEditor(host);
