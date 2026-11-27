@@ -163,6 +163,12 @@
         <input id="customerName" maxlength="120" required autocomplete="name" placeholder="Enter customer name">
       </label>
       <label class="customer-field">
+        <span class="customer-field-heading"><span>Ownership type</span><span class="required">Required</span></span>
+        <select id="ownershipType" required>
+          <option value="Individual" selected>Individual</option>
+        </select>
+      </label>
+      <label class="customer-field">
         <span class="customer-field-heading"><span>Chassis number</span><span class="required">Required</span></span>
         <input id="chassisNumber" maxlength="17" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter chassis number">
       </label>
@@ -177,6 +183,10 @@
       <label class="customer-field">
         <span class="customer-field-heading"><span>PAN</span><span class="required">Required</span></span>
         <input id="panNumber" type="text" maxlength="10" pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]" required autocapitalize="characters" autocomplete="off" placeholder="Enter PAN">
+      </label>
+      <label class="customer-field">
+        <span class="customer-field-heading"><span>Aadhaar number</span><span class="required">Required</span></span>
+        <input id="aadhaarNumber" type="password" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" required autocomplete="off" placeholder="12-digit Aadhaar number">
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>House number / address line 1</span><span class="required">Required</span></span>
