@@ -189,14 +189,21 @@
         <input id="aadhaarNumber" type="text" inputmode="numeric" pattern="[0-9]{4} [0-9]{4} [0-9]{4}" required autocomplete="off" placeholder="1234 5678 9012">
       </label>
       <label class="customer-field">
+        <span class="customer-field-heading"><span>Address Fill Type</span><span class="required">Required</span></span>
+        <select id="addressFillType" required>
+          <option value="1">As per permanent address</option>
+          <option value="2" selected>Manual address</option>
+        </select>
+      </label>
+      <label class="customer-field" data-address-manual-field>
         <span class="customer-field-heading"><span>House number / address line 1</span><span class="required">Required</span></span>
         <input id="houseNumber" maxlength="35" required autocapitalize="characters" placeholder="Enter house number">
       </label>
-      <label class="customer-field">
+      <label class="customer-field" data-address-manual-field>
         <span class="customer-field-heading"><span>Village / town</span><span class="required">Required</span></span>
         <input id="villageTown" maxlength="35" required autocapitalize="characters" placeholder="Enter village or town">
       </label>
-      <label class="customer-field">
+      <label class="customer-field" data-address-manual-field>
         <span class="customer-field-heading"><span>Landmark</span><span class="required">Required</span></span>
         <input id="landmark" maxlength="35" required autocapitalize="characters" placeholder="Enter landmark">
       </label>
@@ -239,7 +246,7 @@
           <option value="772">YADADRI BHUVANAGIRI</option>
         </select>
       </label>
-      <label class="customer-field">
+      <label class="customer-field" data-address-manual-field>
         <span class="customer-field-heading"><span>Pincode</span><span class="required">Required</span></span>
         <input id="pincode" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="postal-code" placeholder="6-digit pincode">
       </label>
