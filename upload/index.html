@@ -187,8 +187,8 @@
         <input id="villageTown" maxlength="35" required autocapitalize="characters" placeholder="Enter village or town">
       </label>
       <label class="customer-field">
-        <span class="customer-field-heading"><span>Landmark</span><span class="optional">Optional</span></span>
-        <input id="landmark" maxlength="35" autocapitalize="characters" placeholder="Enter landmark">
+        <span class="customer-field-heading"><span>Landmark</span><span class="required">Required</span></span>
+        <input id="landmark" maxlength="35" required autocapitalize="characters" placeholder="Enter landmark">
       </label>
       <label class="customer-field">
         <span class="customer-field-heading"><span>District</span><span class="required">Required</span></span>
@@ -312,7 +312,7 @@
           <option value="1">COMPREHENSIVE</option>
           <option value="4">NOT AVAILABLE</option>
           <option value="3">THEFT AND THIRD PARTY</option>
-          <option value="2">THIRD PARTY</option>
+          <option value="2" selected="selected">THIRD PARTY</option>
         </select>
       </label>
       <label class="customer-field">
@@ -694,7 +694,7 @@
           <option value="">Select owner category</option>
           <option value="2">DIVYANGJAN</option>
           <option value="1">EX-SERVICEMAN</option>
-          <option value="7">GENERAL</option>
+          <option value="7" selected="selected">GENERAL</option>
           <option value="5">O B C</option>
           <option value="6">OTHERS</option>
           <option value="3">SCHEDULED CASTE</option>
