@@ -554,6 +554,20 @@
     logoutInProgress = false;
   });
   function syncFinancerField() { const financing = $("paymentMode").value === "Finance"; $("financerField").hidden = !financing; $("financerName").disabled = !financing; $("financerName").required = financing; if (!financing) $("financerName").value = ""; }
+  function syncMandalOptions(selectedValue = "", legacyName = "") {
+    const selector = $("talukaCode");
+    const district = (window.NDC_TELANGANA_DISTRICT_MANDALS || []).find(item => item.districtCode === $("districtCode").value);
+    selector.replaceChildren(new Option(district ? "Select Mandal / taluka" : "Select district first", ""));
+    const options = district?.mandals || [];
+    for (const mandal of options) selector.add(new Option(mandal.name, mandal.value));
+    selector.disabled = !district || options.length === 0;
+    let wanted = String(selectedValue || "");
+    if (!wanted && legacyName) {
+      const matches = options.filter(item => item.name.trim().toLocaleLowerCase() === String(legacyName).trim().toLocaleLowerCase());
+      if (matches.length === 1) wanted = matches[0].value;
+    }
+    selector.value = options.some(item => item.value === wanted) ? wanted : "";
+  }
   function syncAddressFields() {
     const usePermanentAddress = $("addressFillType").value === "1";
     document.querySelectorAll("[data-address-manual-field]").forEach(label => {
@@ -562,9 +576,10 @@
       if (input) { input.required = !usePermanentAddress; input.disabled = usePermanentAddress; }
     });
   }
+  $("districtCode").addEventListener("change", () => syncMandalOptions());
   $("paymentMode").addEventListener("change", syncFinancerField);
   $("addressFillType").addEventListener("change", syncAddressFields);
-  $("newCustomer").addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = null; $("customerForm").reset(); syncFinancerField(); syncAddressFields(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
+  $("newCustomer").addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = null; $("customerForm").reset(); syncFinancerField(); syncAddressFields(); syncMandalOptions(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
   $("closeDialog").addEventListener("click", () => $("customerDialog").close());
   $("keepEditing").addEventListener("click", () => {
     pendingCloseHost = null;
@@ -598,7 +613,7 @@
     button.disabled = true;
     status($("createStatus"), id ? "Saving customer…" : "Creating customer…");
     try {
-      const body = JSON.stringify({ chassisNumber: id ? $("chassisNumber").value : chassisNumber, customerName: $("customerName").value, ownershipType: $("ownershipType").value, specialNumberSelection: $("specialNumberSelection").value, engineNumber: $("engineNumber").value, ownerCategory: $("ownerCategory").value, mobileNumber: $("mobileNumber").value, panNumber: $("panNumber").value.trim().toUpperCase(), aadhaarNumber: $("aadhaarNumber").value.replace(/[^0-9]/g, ""), addressFillType: $("addressFillType").value, houseNumber: $("houseNumber").value, villageTown: $("villageTown").value, landmark: $("landmark").value, districtCode: $("districtCode").value, talukaName: $("talukaName").value, pincode: $("pincode").value, paymentMode: $("paymentMode").value, financerName: $("financerName").value, insuranceType: $("insuranceType").value, insuranceCompany: $("insuranceCompany").value, insurancePolicyNumber: $("insurancePolicyNumber").value, insuranceStartDate: $("insuranceStartDate").value, applicationNumber: $("applicationNumber").value });
+      const body = JSON.stringify({ chassisNumber: id ? $("chassisNumber").value : chassisNumber, customerName: $("customerName").value, ownershipType: $("ownershipType").value, specialNumberSelection: $("specialNumberSelection").value, engineNumber: $("engineNumber").value, ownerCategory: $("ownerCategory").value, mobileNumber: $("mobileNumber").value, panNumber: $("panNumber").value.trim().toUpperCase(), aadhaarNumber: $("aadhaarNumber").value.replace(/[^0-9]/g, ""), addressFillType: $("addressFillType").value, houseNumber: $("houseNumber").value, villageTown: $("villageTown").value, landmark: $("landmark").value, districtCode: $("districtCode").value, talukaCode: $("talukaCode").value, talukaName: $("talukaCode").selectedOptions[0]?.textContent.trim() || "", pincode: $("pincode").value, paymentMode: $("paymentMode").value, financerName: $("financerName").value, insuranceType: $("insuranceType").value, insuranceCompany: $("insuranceCompany").value, insurancePolicyNumber: $("insurancePolicyNumber").value, insuranceStartDate: $("insuranceStartDate").value, applicationNumber: $("applicationNumber").value });
       const data = await request(id ? `/api/upload-portal/customers/${id}` : "/api/upload-portal/customers", { method: id ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body });
       $("customerDialog").close(); if (id) await openCustomer(id); else await openCustomer(data.customer._id); await searchCustomers($("search").value);
     } catch (error) { status($("createStatus"), error.message, "error"); }
@@ -1415,7 +1430,7 @@
     const titleBlock = document.createElement("div"); titleBlock.className = "customer-title-block"; const title = document.createElement("h2"); title.textContent = customer.customerName + " - " + customer.chassisNumber;
     const created = document.createElement("p"); created.className = "customer-created-date"; created.textContent = `Created ${formatRecordCreatedAt(customer.createdAt)}`; titleBlock.append(title, created);
     const controls = document.createElement("div"); controls.className = "customer-controls";
-    const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["specialNumberSelection", "customerName", "ownershipType", "chassisNumber", "engineNumber", "mobileNumber", "panNumber", "aadhaarNumber", "addressFillType", "houseNumber", "villageTown", "landmark", "districtCode", "pincode", "talukaName", "paymentMode", "financerName", "insuranceType", "insuranceCompany", "insurancePolicyNumber", "insuranceStartDate", "ownerCategory", "applicationNumber"]) $(key).value = customer[key] ?? (key === "ownershipType" ? "Individual" : key === "addressFillType" ? "2" : key === "insuranceType" ? "2" : key === "ownerCategory" ? "7" : ""); $("aadhaarNumber").value = formatAadhaar($("aadhaarNumber").value); syncFinancerField(); syncAddressFields(); $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
+    const edit = document.createElement("button"); edit.type = "button"; edit.className = "quiet"; setIconButton(edit, "edit", "Edit details"); edit.addEventListener("click", async () => { if (!(await ensureActiveSession())) return; editingCustomerId = customer._id; $("customerForm").reset(); for (const key of ["specialNumberSelection", "customerName", "ownershipType", "chassisNumber", "engineNumber", "mobileNumber", "panNumber", "aadhaarNumber", "addressFillType", "houseNumber", "villageTown", "landmark", "pincode", "paymentMode", "financerName", "insuranceType", "insuranceCompany", "insurancePolicyNumber", "insuranceStartDate", "ownerCategory", "applicationNumber"]) $(key).value = customer[key] ?? (key === "ownershipType" ? "Individual" : key === "addressFillType" ? "2" : key === "insuranceType" ? "2" : key === "ownerCategory" ? "7" : ""); $("districtCode").value = customer.districtCode || ""; syncMandalOptions(customer.talukaCode, customer.talukaName); $("aadhaarNumber").value = formatAadhaar($("aadhaarNumber").value); syncFinancerField(); syncAddressFields(); $("dialogEyebrow").textContent = "EDIT CUSTOMER"; $("dialogTitle").textContent = "Edit customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Save changes"; status($("createStatus"), ""); $("customerDialog").showModal(); });
     const close = document.createElement("button"); close.type = "button"; close.className = "quiet"; setIconButton(close, "close", "Close customer"); close.addEventListener("click", () => {
       if (!hasUnsavedEditorChanges(host)) {
         closeCustomerEditor(host);
