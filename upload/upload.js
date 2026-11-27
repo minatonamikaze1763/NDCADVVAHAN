@@ -211,7 +211,7 @@
       const data = type.includes("application/json") ? await response.json().catch(() => ({})) : null;
       if (data?.code === "CLOUD_ENTITLEMENT_REQUIRED" || data?.code === "CLOUD_SUBSCRIPTION_REQUIRED") {
         expireSession("Cloud subscription not taken. Choose a Cloud Storage add-on in your customer panel to use /upload.");
-      } else if (data?.code === "SESSION_REVOKED") expireSession("This Cloud Workspace session was signed out because the 20-device limit was reached, or the session was revoked. Sign in again to continue.");
+      } else if (data?.code === "SESSION_REVOKED") expireSession("This Cloud Workspace session was signed out or revoked. Sign in again to continue.");
       else if (data?.code === "SESSION_EXPIRED" || response.status === 401 || response.status === 403) expireSession("Your Cloud Workspace session is no longer valid. Sign in again to continue.");
       const error = new Error(data?.error || `Request failed (${response.status}).`);
       error.code = data?.code || null;
