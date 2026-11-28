@@ -2,9 +2,6 @@ name: Build NDC Smart Scan Pages
 on:
   push:
     branches: [main]
-    paths:
-      - "upload/**"
-      - ".github/workflows/deploy-smart-scan-pages.yml"
   workflow_dispatch:
 permissions:
   contents: read
@@ -32,12 +29,32 @@ jobs:
       - name: Prepare same-origin browser assets
         working-directory: upload/smart-scan
         run: npm run setup-assets
-      - name: Remove installed npm package tree from the static artifact
-        run: rm -rf upload/smart-scan/node_modules upload/smart-scan/package-lock.json
+      - name: Stage the complete static website without repository metadata
+        run: |
+          mkdir -p _site
+          rsync -a \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='node_modules/' \
+            --exclude='AGENTS.md' \
+            --exclude='_site/' \
+            --exclude='upload/smart-scan/package.json' \
+            --exclude='upload/smart-scan/package-lock.json' \
+            --exclude='upload/smart-scan/setup-assets.cjs' \
+            --exclude='upload/smart-scan/README.md' \
+            ./ _site/
+          touch _site/.nojekyll
+          test -f _site/CNAME
+          test -f _site/upload/smart-scan/assets/tesseract/worker.min.js
+          test -f _site/upload/smart-scan/assets/tesseract/tesseract-core.wasm
+          test -f _site/upload/smart-scan/assets/models/eng.traineddata.gz
+          test -f _site/upload/smart-scan/assets/pdfjs/pdf.worker.mjs
+          test -f _site/index.html
+          test -f _site/upload/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
