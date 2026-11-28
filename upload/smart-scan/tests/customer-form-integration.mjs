@@ -11,7 +11,6 @@ const server=http.createServer((req,res)=>{
   const pathname=new URL(req.url,"http://127.0.0.1").pathname;
   const target=path.resolve(root,"."+decodeURIComponent(pathname));
   if(target!==root&&!target.startsWith(root+path.sep)){res.writeHead(403);res.end();return;}
-  if(pathname==="/__smartscan_fixture"){res.writeHead(200,{"content-type":"text/html; charset=utf-8","cache-control":"no-store"});res.end('<!doctype html><script src="/upload/vendor/jspdf.umd.min.js?v=2.5.1"></script>');return;}
   fs.stat(target,(err,st)=>{if(err||!st.isFile()){res.writeHead(404);res.end("Not found");return;}res.writeHead(200,{"content-type":mime[path.extname(target)]||"application/octet-stream","cache-control":"no-store"});fs.createReadStream(target).pipe(res);});
 });
 await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
@@ -22,11 +21,6 @@ const browser=await chromium.launch(launchOptions);
 try{
   const context=await browser.newContext({viewport:{width:1440,height:1000}});
   const page=await context.newPage();
-  const fixtureContext=await browser.newContext();
-  const fixturePage=await fixtureContext.newPage();
-  await fixturePage.route("https://server.nextdimensioncustoms.in/**",route=>route.fulfill({status:200,contentType:"application/json",body:"{}"}));
-  await fixturePage.goto(base+"/__smartscan_fixture");
-  await fixturePage.waitForFunction(()=>Boolean(window.jspdf?.jsPDF));
   const pageErrors=[];page.on("pageerror",error=>pageErrors.push(error.message));
   await page.addInitScript(({api})=>{
     const state={calls:[],creates:[],uploads:[],customerOCREnabled:true,failPanOnce:true,customer:null};
@@ -85,23 +79,9 @@ try{
     },{first,second});
     return {name:"synthetic-aadhaar.pdf",mimeType:"application/pdf",buffer:Buffer.from(bytes)};
   };
-  const makeScannedPdf=async lines=>{
-    const bytes=await fixturePage.evaluate(async rows=>{
-      const canvas=document.createElement("canvas");canvas.width=1800;canvas.height=Math.max(900,rows.length*100+120);
-      const ctx=canvas.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#111";ctx.font="bold 58px Arial";
-      rows.forEach((line,i)=>ctx.fillText(line,70,100+i*92));
-      const image=canvas.toDataURL("image/png");
-      const doc=new window.jspdf.jsPDF({unit:"pt",format:"a4"});doc.addImage(image,"PNG",10,10,575,800);
-      const blob=doc.output("blob");return Array.from(new Uint8Array(await blob.arrayBuffer()));
-    },lines);
-    return {name:"synthetic-scanned-aadhaar.pdf",mimeType:"application/pdf",buffer:Buffer.from(bytes)};
-  };
-
   let validNumber="";
   for(let i=0;i<10;i++){const candidate="12345678901"+i;if(validAadhaar(candidate)){validNumber=candidate;break;}}
   if(!validNumber)throw new Error("Could not generate a synthetic checksum-valid test number.");
-  const scannedPdfFile=await makeScannedPdf(["UIDAI Aadhaar","Name: SCANNED SAMPLE","Date of Birth: 01/02/1990","Gender: MALE","Aadhaar No: "+validNumber,"Address:","Door No: 1-2-3","Street: MAIN ROAD","Village: NIZAMABAD","Mandal: Nizamabad","District: Nizamabad","Telangana","PIN: 503001"]);
-  await fixtureContext.close();
 
   // Cancellation leaves only in-memory input and must not call customer creation or document APIs.
   await page.locator("#newCustomer").click();
