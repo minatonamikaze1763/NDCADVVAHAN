@@ -94,6 +94,7 @@ try{
   let validNumber="";
   for(let i=0;i<10;i++){const candidate="12345678901"+i;if(validAadhaar(candidate)){validNumber=candidate;break;}}
   if(!validNumber)throw new Error("Could not generate a synthetic checksum-valid test number.");
+  const scannedPdfFile=await makeScannedPdf(["UIDAI Aadhaar","Name: SCANNED SAMPLE","Date of Birth: 01/02/1990","Gender: MALE","Aadhaar No: "+validNumber,"Address:","Door No: 1-2-3","Street: MAIN ROAD","Village: NIZAMABAD","Mandal: Nizamabad","District: Nizamabad","Telangana","PIN: 503001"]);
 
   // Cancellation leaves only in-memory input and must not call customer creation or document APIs.
   await page.locator("#newCustomer").click();
@@ -125,8 +126,7 @@ try{
 
 
   // Exercise scanned-image PDF OCR (no embedded PDF text layer) through the customer form.
-  const scannedLines=["UIDAI Aadhaar","Name: SCANNED SAMPLE","Date of Birth: 01/02/1990","Gender: MALE","Aadhaar No: "+validNumber,...addressLines];
-  await page.locator('[data-slot="combinedAadhaar"] [data-file]').setInputFiles(await makeScannedPdf(scannedLines));
+  await page.locator('[data-slot="combinedAadhaar"] [data-file]').setInputFiles(scannedPdfFile);
   await page.locator('[data-slot="combinedAadhaar"] [data-extract]').click();
   await page.waitForFunction(()=>{
     const progress=document.querySelector(".ndc-ss-progress")?.textContent||"";
