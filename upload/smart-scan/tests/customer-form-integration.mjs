@@ -121,7 +121,8 @@ try{
 
 
   // Test separate Aadhaar sides, PAN, Sale Card, conflicts, real field mapping, and manual-value preservation.
-  await page.locator('input[name="ndcSmartScanMode"][value="separate"]').check();
+  await page.locator(".ndc-ss-mode label").filter({hasText:"Separate Front & Back"}).click();
+  if(await page.locator('input[name="ndcSmartScanMode"][value="separate"]').isChecked()!==true)throw new Error("Separate Aadhaar segmented option did not activate.");
   await page.locator("#ndcSmartScanSection > summary").click();
   await page.locator('[data-slot="aadhaarFront"] [data-file]').setInputFiles(await makePng(["UIDAI Aadhaar","Name: SAMPLE PERSON","Date of Birth: 01/02/1990","Gender: MALE","Aadhaar No: "+validNumber]));
   await page.locator('[data-slot="aadhaarBack"] [data-file]').setInputFiles(await makePng(addressLines));
