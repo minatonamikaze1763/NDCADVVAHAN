@@ -30,4 +30,8 @@ test("parses labeled values and does not invent a full birth date",()=>{
   const sale=parseSaleCard("Chassis No: 1HGCM82633A004352\nEngine No: EN123456\nMobile: 9052691719\nInvoice No: INV-123");
   assert.equal(sale.chassisNumber.value,"1HGCM82633A004352");
   assert.equal(sale.invoiceNumber.value,"INV-123");
+  const prices=parseSaleCard("Ex-showroom price: 100000\nInvoice amount: 120000\nOn-road price: 135000");
+  assert.equal(prices.exShowroomPrice.value,"100000");
+  assert.equal(prices.invoiceAmount.value,"120000");
+  assert.equal(prices.onRoadPrice.value,"135000");
 });
