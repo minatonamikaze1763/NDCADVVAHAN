@@ -7,6 +7,8 @@ function optionFor(select,value){
 }
 export async function mapFields(fields,{conflicts={},confirmOverwrite=()=>false}={}){
   const populated=[],review=[],missing=[];
+  const paymentMode=document.getElementById("paymentMode");
+  if(fields?.financerName?.value&&paymentMode&&!paymentMode.value){const finance=optionFor(paymentMode,"Finance");if(finance){paymentMode.value=finance.value;eventFor(paymentMode);}}
   const entries=Object.entries(fields||{}).sort(([a],[b])=>({stateName:0,districtCode:1,talukaName:2}[a]??5)-({stateName:0,districtCode:1,talukaName:2}[b]??5));
   for(const [key,entry] of entries){
     const id=idMap[key];if(!id)continue;
