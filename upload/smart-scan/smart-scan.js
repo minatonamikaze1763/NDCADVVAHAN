@@ -5,10 +5,10 @@ import {attachDocuments} from "./document-attachment.js";
 
 const TYPES={aadhaar:"Aadhaar",pan:"PAN Card",salecard:"Sale Card"};
 const ACCEPT=".jpg,.jpeg,.png,.webp,.pdf,application/pdf,image/jpeg,image/png,image/webp";
-const state={host:null,mode:"combined",conflictChoices:{},files:{combinedAadhaar:null,aadhaarFront:null,aadhaarBack:null,pan:null,salecard:null},urls:new Set(),running:false,sequence:0,results:[],conflicts:{},pendingCustomerId:null,bridge:null,visible:false,populated:0,reviewAccepted:false};
+const state={host:null,mode:"combined",conflictChoices:{},files:{combinedAadhaar:null,aadhaarFront:null,aadhaarBack:null,pan:null,salecard:null},urls:new Set(),running:false,sequence:0,results:[],conflicts:{},pendingCustomerId:null,attachmentsComplete:false,bridge:null,visible:false,populated:0,reviewAccepted:false};
 const escape=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function revoke(url){if(url){URL.revokeObjectURL(url);state.urls.delete(url);}}
-function clearFiles(){for(const file of Object.values(state.files))if(file?.previewUrl)revoke(file.previewUrl);state.files={combinedAadhaar:null,aadhaarFront:null,aadhaarBack:null,pan:null,salecard:null};state.results=[];state.conflicts={};state.pendingCustomerId=null;state.populated=0;state.reviewAccepted=false;}
+function clearFiles(){for(const file of Object.values(state.files))if(file?.previewUrl)revoke(file.previewUrl);state.files={combinedAadhaar:null,aadhaarFront:null,aadhaarBack:null,pan:null,salecard:null};state.results=[];state.conflicts={};state.pendingCustomerId=null;state.attachmentsComplete=false;state.populated=0;state.reviewAccepted=false;}
 function fileItem(slot,label,kind){
   return `<article class="ndc-ss-file" data-slot="${slot}"><div><strong>${label}</strong><small class="ndc-ss-file-name" data-name>No file selected</small></div><input data-file type="file" accept="${ACCEPT}" hidden><div class="ndc-ss-actions"><button type="button" data-select>Select file</button><button type="button" data-camera>Camera</button><button type="button" data-preview disabled>Preview</button><button type="button" data-extract disabled>Extract this</button><button type="button" data-remove disabled>Remove</button></div><p class="ndc-ss-status" data-status role="status">Optional</p></article>`;
 }
@@ -98,12 +98,13 @@ async function applyResults(){
   state.host.querySelectorAll("[data-field]")?.forEach(()=>{});
 }
 async function afterCreate(customerId,bridge){
-  state.pendingCustomerId=customerId;state.bridge=bridge;return retryAttachments();
+  state.pendingCustomerId=customerId;state.attachmentsComplete=false;state.bridge=bridge;return retryAttachments();
 }
 async function retryAttachments(){
   if(!state.pendingCustomerId||!state.bridge)return {success:true,failed:[]};
   const documents=Object.fromEntries(Object.entries(state.files).map(([key,value])=>[key,value?.file||null]));
   const result=await attachDocuments(state.pendingCustomerId,documents,{request:state.bridge.request,prepareUploadFile:state.bridge.prepareUploadFile});
+  state.attachmentsComplete=result.success;
   const btn=state.host?.querySelector("[data-retry]");if(btn)btn.hidden=result.success;
   if(!result.success)setProgress("Customer was created. Attachments failed: "+result.failed.map(x=>x.name+": "+x.error).join("; ")+" Retry is available.");
   else setProgress("Customer created and selected Aadhaar/PAN documents attached.");
@@ -115,5 +116,5 @@ function setVisibility({enabled,isNew,purpose}={}){
 }
 function reset(){state.sequence++;cancelOCR();clearFiles();state.running=false;if(state.host){render(state.host);setVisibility(state.visibility||{});}}
 export function mount(host,options={}){
-  state.host=host;state.bridge=options.bridge||null;state.visibility=options.visibility||{};render(host);setVisibility(state.visibility);return {setVisibility,reset,afterCreate,retryAttachments,hasFiles:()=>Object.values(state.files).some(Boolean),isReviewComplete:()=>!state.results.some(r=>r.success)||state.reviewAccepted,get pendingCustomerId(){return state.pendingCustomerId;},clear:()=>{state.sequence++;cancelOCR();state.running=false;clearFiles();render(host);}};
+  state.host=host;state.bridge=options.bridge||null;state.visibility=options.visibility||{};render(host);setVisibility(state.visibility);return {setVisibility,reset,afterCreate,retryAttachments,hasFiles:()=>Object.values(state.files).some(Boolean),isReviewComplete:()=>!state.results.some(r=>r.success)||state.reviewAccepted,get pendingCustomerId(){return state.pendingCustomerId;},get attachmentsComplete(){return state.attachmentsComplete;},clear:()=>{state.sequence++;cancelOCR();state.running=false;clearFiles();render(host);}};
 }
