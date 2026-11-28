@@ -59,7 +59,6 @@ export function parseAadhaar(text){
     if(addressContext)pincode=lines.map(line=>line.match(/(?:^|\D)([1-9]\d{5})(?:$|\D)/)).find(Boolean);
   }
   if(pincode)add(out,"pincode",pincode[1],.78);
-  if(pincode)add(out,"pincode",pincode[1],.76);
   const guardian=nextLabeledValue(lines,GUARDIAN_LABEL);
   if(guardian)add(out,"careOfName",guardian,.78);
 
