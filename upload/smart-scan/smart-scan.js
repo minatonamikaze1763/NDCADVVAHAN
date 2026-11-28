@@ -45,7 +45,7 @@ function removeFile(slot,renderAgain=true){
   cancelCurrent("Document removed. Previous OCR result discarded.");
   const old=state.files[slot];if(old?.previewUrl)revoke(old.previewUrl);state.files[slot]=null;
   const row=state.host?.querySelector(`[data-slot="${slot}"]`);
-  if(row){row.querySelector("[data-name]").textContent="No file selected";row.querySelector("[data-preview]").disabled=true;row.querySelector("[data-remove]").disabled=true;row.querySelector("[data-extract]").disabled=true;row.querySelector("[data-status]").textContent="Optional";}
+  if(row){const input=row.querySelector("[data-file]");if(input)input.value="";row.querySelector("[data-name]").textContent="No file selected";row.querySelector("[data-preview]").disabled=true;row.querySelector("[data-remove]").disabled=true;row.querySelector("[data-extract]").disabled=true;row.querySelector("[data-status]").textContent="Optional";}
   state.results=[];if(renderAgain)renderResults();
 }
 function preview(slot){
