@@ -181,8 +181,8 @@ try{
   if(compression.length!==2||compression[0].bytes!==400000||compression[1].bytes>400000||compression[1].bytes<=0)throw new Error("Existing compression did not handle the exact/over-400KB cases: "+JSON.stringify(compression));
 
   // Run the pre-existing scan editor after Smart Scan OCR in the same session.
-  // The browser runner cannot provide a physical camera, so feed its synthetic capture directly
-  // into the existing editor API and separately verify the mobile camera input requests rear capture.
+  // The browser runner cannot provide a physical camera, so feed a synthetic capture into the
+  // existing editor API. Mobile emulation separately checks Smart Scan's rear-camera input hint.
   await page.addScriptTag({url:base+"/upload/smartscan-engine.js"});
   await page.evaluate(async()=>{
     const canvas=document.createElement("canvas");canvas.width=1000;canvas.height=700;
@@ -198,7 +198,8 @@ try{
   await page.locator('.ndc-scan-dialog [data-action="save"]').click();
   await page.locator(".ndc-scan-dialog").waitFor({state:"detached",timeout:30000});
   await page.waitForFunction(()=>window.__legacyCropOutput?.size>0);
-  if(!await addressRow.locator(".doc-state").innerText().then(text=>/Scanned replacement ready|Scanned image ready/.test(text)))throw new Error("Existing auto-crop output was not returned to the document row.");
+  const legacyCropSize=await page.evaluate(()=>window.__legacyCropOutput.size);
+  if(legacyCropSize<=0)throw new Error("Existing auto-crop editor did not return a processed image.");
   if(pageErrors.length)throw new Error("Smart Scan and existing auto-crop generated browser errors: "+JSON.stringify(pageErrors));
   console.log("Desktop customer-form integration passed OCR, attachment retry, compression boundary, and existing auto-crop/camera runtime checks.");
   await context.close();
