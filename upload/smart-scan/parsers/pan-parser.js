@@ -20,7 +20,7 @@ export function parsePan(text){
   const out={},all=String(text||"").replace(/\r/g,"\n"),lines=all.split("\n").map(x=>x.trim()).filter(Boolean);
   const panLabel=all.match(/(?:PAN(?:\s*(?:number|no\.?))?|Permanent\s+Account\s+Number)\s*[:#\-]?\s*([A-Z]{5}[0-9]{4}[A-Z])/i);
   const pan=panLabel||all.match(/\b[A-Z]{5}[0-9]{4}[A-Z]\b/i);
-  if(pan)out.panNumber={value:(pan[1]||pan[0]).toUpperCase(),source:"PAN Card",confidence:panLabel?.[1]?.length===10?.9:.8,labeled:true};
+  if(pan)out.panNumber={value:(pan[1]||pan[0]).toUpperCase(),source:"PAN Card",confidence:panLabel ? .9 : .8,labeled:true};
   const dobLabel=all.match(/(?:date\s+of\s+birth|dob)\s*[:\-]?\s*(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{4})/i);
   const dob=isoDate(dobLabel?.[1]);
   if(dob)out.dateOfBirth={value:dob,source:"PAN Card",confidence:.78,labeled:true};
