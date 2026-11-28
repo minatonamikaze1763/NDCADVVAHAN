@@ -10,7 +10,7 @@ const escape=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">"
 function revoke(url){if(url){URL.revokeObjectURL(url);state.urls.delete(url);}}
 function clearFiles(){for(const file of Object.values(state.files))if(file?.previewUrl)revoke(file.previewUrl);state.files={combinedAadhaar:null,aadhaarFront:null,aadhaarBack:null,pan:null,salecard:null};state.results=[];state.conflicts={};state.pendingCustomerId=null;}
 function fileItem(slot,label,kind){
-  return `<article class="ndc-ss-file" data-slot="${slot}"><div><strong>${label}</strong><small class="ndc-ss-file-name" data-name>م No file selected</small></div><input data-file type="file" accept="${ACCEPT}" hidden><div class="ndc-ss-actions"><button type="button" data-select>Select file</button><button type="button" data-camera>Camera</button><button type="button" data-preview disabled>Preview</button><button type="button" data-extract disabled>Extract this</button><button type="button" data-remove disabled>Remove</button></div><p class="ndc-ss-status" data-status role="status">Optional</p></article>`;
+  return `<article class="ndc-ss-file" data-slot="${slot}"><div><strong>${label}</strong><small class="ndc-ss-file-name" data-name>No file selected</small></div><input data-file type="file" accept="${ACCEPT}" hidden><div class="ndc-ss-actions"><button type="button" data-select>Select file</button><button type="button" data-camera>Camera</button><button type="button" data-preview disabled>Preview</button><button type="button" data-extract disabled>Extract this</button><button type="button" data-remove disabled>Remove</button></div><p class="ndc-ss-status" data-status role="status">Optional</p></article>`;
 }
 function render(host){
   const slotHtml=()=>state.mode==="combined"?fileItem("combinedAadhaar","Combined Aadhaar · front/back, single or multi-page PDF","aadhaar"):`${fileItem("aadhaarFront","Aadhaar Card Front","aadhaar")}${fileItem("aadhaarBack","Aadhaar Card Back","aadhaar")}`;
@@ -23,13 +23,15 @@ function render(host){
   host.querySelectorAll("[data-extract]").forEach(btn=>btn.addEventListener("click",()=>runExtraction([btn.closest("[data-slot]").dataset.slot])));
   host.querySelectorAll('input[name="ndcSmartScanMode"]').forEach(input=>input.addEventListener("change",e=>{state.mode=e.target.value;if(state.mode==="combined"){removeFile("aadhaarFront",false);removeFile("aadhaarBack",false);}else removeFile("combinedAadhaar",false);render(host);}));
   host.querySelector("[data-extract-all]").addEventListener("click",()=>runExtraction(Object.keys(state.files)));
-  host.querySelector("[data-cancel]").addEventListener("click",()=>{state.sequence++;cancelOCR();setProgress("Cancelling OCR…");});
+  host.querySelector("[data-cancel]").addEventListener("click",()=>cancelCurrent("OCR cancelled. You can continue with manual entry."));
   host.querySelector("[data-autofill]").addEventListener("click",applyResults);
   host.querySelector("[data-retry]").addEventListener("click",retryAttachments);
   host.addEventListener("change",event=>{if(event.target.matches("[data-conflict]")){const key=event.target.dataset.conflict;state.conflictChoices[key]=Number(event.target.value);}});
 }
+function cancelCurrent(message="OCR cancelled."){if(!state.running)return;state.sequence++;cancelOCR();state.running=false;state.results=[];state.fields={};state.conflicts={};state.conflictChoices={};const button=state.host?.querySelector("[data-extract-all]");if(button)button.disabled=false;const cancel=state.host?.querySelector("[data-cancel]");if(cancel)cancel.hidden=true;renderResults();setProgress(message);}
 function setSelected(row,file){
   if(!file)return;
+  cancelCurrent("Document changed. Previous OCR result discarded.");
   const slot=row.dataset.slot;
   removeFile(slot,false);
   const url=URL.createObjectURL(file);state.urls.add(url);
@@ -40,6 +42,7 @@ function setSelected(row,file){
   setProgress("");
 }
 function removeFile(slot,renderAgain=true){
+  cancelCurrent("Document removed. Previous OCR result discarded.");
   const old=state.files[slot];if(old?.previewUrl)revoke(old.previewUrl);state.files[slot]=null;
   const row=state.host?.querySelector(`[data-slot="${slot}"]`);
   if(row){row.querySelector("[data-name]").textContent="No file selected";row.querySelector("[data-preview]").disabled=true;row.querySelector("[data-remove]").disabled=true;row.querySelector("[data-extract]").disabled=true;row.querySelector("[data-status]").textContent="Optional";}
