@@ -5,10 +5,10 @@ import {attachDocuments} from "./document-attachment.js";
 
 const TYPES={aadhaar:"Aadhaar",pan:"PAN Card",salecard:"Sale Card"};
 const ACCEPT=".jpg,.jpeg,.png,.webp,.pdf,application/pdf,image/jpeg,image/png,image/webp";
-const state={host:null,mode:"combined",conflictChoices:{},files:{combinedAadhaar:null,aadhaarFront:null,aadhaarBack:null,pan:null,salecard:null},urls:new Set(),running:false,sequence:0,results:[],conflicts:{},pendingCustomerId:null,bridge:null,visible:false};
+const state={host:null,mode:"combined",conflictChoices:{},files:{combinedAadhaar:null,aadhaarFront:null,aadhaarBack:null,pan:null,salecard:null},urls:new Set(),running:false,sequence:0,results:[],conflicts:{},pendingCustomerId:null,bridge:null,visible:false,populated:0,reviewAccepted:false};
 const escape=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function revoke(url){if(url){URL.revokeObjectURL(url);state.urls.delete(url);}}
-function clearFiles(){for(const file of Object.values(state.files))if(file?.previewUrl)revoke(file.previewUrl);state.files={combinedAadhaar:null,aadhaarFront:null,aadhaarBack:null,pan:null,salecard:null};state.results=[];state.conflicts={};state.pendingCustomerId=null;}
+function clearFiles(){for(const file of Object.values(state.files))if(file?.previewUrl)revoke(file.previewUrl);state.files={combinedAadhaar:null,aadhaarFront:null,aadhaarBack:null,pan:null,salecard:null};state.results=[];state.conflicts={};state.pendingCustomerId=null;state.populated=0;state.reviewAccepted=false;}
 function fileItem(slot,label,kind){
   return `<article class="ndc-ss-file" data-slot="${slot}"><div><strong>${label}</strong><small class="ndc-ss-file-name" data-name>No file selected</small></div><input data-file type="file" accept="${ACCEPT}" hidden><div class="ndc-ss-actions"><button type="button" data-select>Select file</button><button type="button" data-camera>Camera</button><button type="button" data-preview disabled>Preview</button><button type="button" data-extract disabled>Extract this</button><button type="button" data-remove disabled>Remove</button></div><p class="ndc-ss-status" data-status role="status">Optional</p></article>`;
 }
@@ -64,7 +64,7 @@ function selectedDocs(slots){
 }
 async function runExtraction(slots){
   if(state.running)return;const docs=selectedDocs(slots);if(!docs.length){setProgress("Choose at least one document first.");return;}
-  state.running=true;const seq=++state.sequence,button=state.host.querySelector("[data-extract-all]");button.disabled=true;state.host.querySelector("[data-cancel]").hidden=false;setProgress("Starting browser OCR…",2);
+  state.running=true;state.reviewAccepted=false;state.populated=0;const seq=++state.sequence,button=state.host.querySelector("[data-extract-all]");button.disabled=true;state.host.querySelector("[data-cancel]").hidden=false;setProgress("Starting browser OCR…",2);
   try{
     state.results=await extractDocuments(docs,{onProgress:p=>{if(seq!==state.sequence)return;setProgress(`${p.phase}: ${p.name} (${p.index} of ${p.total})`,Math.round(p.index/p.total*100));}});
     if(seq!==state.sequence)return;
@@ -76,7 +76,7 @@ function renderResults(){
   const root=state.host?.querySelector("[data-results]");if(!root)return;root.replaceChildren();
   const failed=state.results.filter(r=>!r.success),successful=state.results.filter(r=>r.success);
   const fields=state.fields||{},keys=Object.keys(fields),review=keys.filter(k=>fields[k].review).length;
-  state.host.querySelector("[data-summary]").textContent=state.results.length?`Documents processed: ${successful.length}/${state.results.length} · Fields extracted: ${keys.length} · Review required: ${review+Object.keys(state.conflicts).length} · Conflicts: ${Object.keys(state.conflicts).length} · Failed: ${failed.length}`:"";
+  state.host.querySelector("[data-summary]").textContent=state.results.length?`Documents processed: ${successful.length}/${state.results.length} · Fields extracted: ${keys.length} · Fields populated: ${state.populated} · Review required: ${review+Object.keys(state.conflicts).length} · Conflicts: ${Object.keys(state.conflicts).length} · Failed: ${failed.length}`:"";
   for(const fail of failed){const p=document.createElement("p");p.className="ndc-ss-error";p.textContent=`${fail.name}: ${fail.error}`;root.append(p);}
   for(const key of Object.keys(state.conflicts)){
     const entries=state.conflicts[key],wrap=document.createElement("fieldset");wrap.className="ndc-ss-conflict";const legend=document.createElement("legend");legend.textContent=`Conflicting ${key} — choose a source`;wrap.append(legend);
@@ -93,7 +93,8 @@ async function applyResults(){
   const fields={...(state.fields||{})};
   for(const [key,entries] of Object.entries(state.conflicts)){const chosen=entries[state.conflictChoices[key]];if(chosen)fields[key]=chosen;}
   const res=await mapFields(fields,{conflicts:state.conflicts,confirmOverwrite:ctx=>window.confirm(`Replace existing ${ctx.key} value with ${ctx.extracted} from ${ctx.source}?`)});
-  setProgress(`Populated ${res.populated.length} fields. ${res.review.length} need review. Extracted values remain editable.`);
+  state.populated=res.populated.length;state.reviewAccepted=true;renderResults();
+  setProgress(`Populated ${res.populated.length} fields. ${res.review.length} need review. Extracted values remain editable; review before saving.`);
   state.host.querySelectorAll("[data-field]")?.forEach(()=>{});
 }
 async function afterCreate(customerId,bridge){
@@ -114,5 +115,5 @@ function setVisibility({enabled,isNew,purpose}={}){
 }
 function reset(){state.sequence++;cancelOCR();clearFiles();state.running=false;if(state.host){render(state.host);setVisibility(state.visibility||{});}}
 export function mount(host,options={}){
-  state.host=host;state.bridge=options.bridge||null;state.visibility=options.visibility||{};render(host);setVisibility(state.visibility);return {setVisibility,reset,afterCreate,retryAttachments,hasFiles:()=>Object.values(state.files).some(Boolean),get pendingCustomerId(){return state.pendingCustomerId;},clear:()=>{state.sequence++;cancelOCR();state.running=false;clearFiles();render(host);}};
+  state.host=host;state.bridge=options.bridge||null;state.visibility=options.visibility||{};render(host);setVisibility(state.visibility);return {setVisibility,reset,afterCreate,retryAttachments,hasFiles:()=>Object.values(state.files).some(Boolean),isReviewComplete:()=>!state.results.some(r=>r.success)||state.reviewAccepted,get pendingCustomerId(){return state.pendingCustomerId;},clear:()=>{state.sequence++;cancelOCR();state.running=false;clearFiles();render(host);}};
 }
