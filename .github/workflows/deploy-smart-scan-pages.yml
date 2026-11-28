@@ -28,7 +28,7 @@ jobs:
           cache-dependency-path: upload/smart-scan/package.json
       - name: Install browser OCR dependencies
         working-directory: upload/smart-scan
-        run: npm install --no-audit --no-fund
+        run: npm install --omit=dev --no-audit --no-fund
       - name: Prepare same-origin browser assets
         working-directory: upload/smart-scan
         run: npm run setup-assets
