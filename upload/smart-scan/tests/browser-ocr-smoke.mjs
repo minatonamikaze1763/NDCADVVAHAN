@@ -2,7 +2,7 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
-import {chromium} from "playwright";
+import {chromium,firefox} from "playwright";
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"../../..");
 const mime={".html":"text/html; charset=utf-8",".js":"text/javascript; charset=utf-8",".mjs":"text/javascript; charset=utf-8",".wasm":"application/wasm",".gz":"application/gzip",".traineddata":"application/octet-stream",".json":"application/json"};
@@ -42,13 +42,19 @@ const server=http.createServer((req,res)=>{
 });
 await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
 const address=server.address();
-const browser=await chromium.launch({headless:true});
 try{
+ const browserTypes=process.env.SMARTSCAN_TEST_FIREFOX==="1"?[chromium,firefox]:[chromium];
+ for(const browserType of browserTypes){
+  const launchOptions={headless:true};if(browserType===chromium&&process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH)launchOptions.executablePath=process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  const browser=await browserType.launch(launchOptions);
+  try{
   const page=await browser.newPage();
   page.on("pageerror",e=>console.error("[browser]",e.message));
   await page.goto("http://127.0.0.1:"+address.port+"/__ocr_smoke");
   await page.waitForFunction(()=>window.ocrResult!==undefined,null,{timeout:180000});
   const result=await page.evaluate(()=>window.ocrResult);
   if(!result.ok)throw new Error("Synthetic browser OCR extraction failed: "+(result.error||JSON.stringify(result.summary)));
-  console.log("Synthetic Aadhaar, PAN and Sale Card extraction passed using same-origin self-hosted OCR assets.");
-}finally{await browser.close();await new Promise(resolve=>server.close(resolve));}
+  console.log("Synthetic Aadhaar, PAN and Sale Card extraction passed in "+browserType.name()+" using same-origin self-hosted OCR assets.");
+  }finally{await browser.close();}
+ }
+}finally{await new Promise(resolve=>server.close(resolve));}
