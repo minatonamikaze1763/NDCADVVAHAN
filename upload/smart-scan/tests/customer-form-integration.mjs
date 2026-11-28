@@ -11,6 +11,7 @@ const server=http.createServer((req,res)=>{
   const pathname=new URL(req.url,"http://127.0.0.1").pathname;
   const target=path.resolve(root,"."+decodeURIComponent(pathname));
   if(target!==root&&!target.startsWith(root+path.sep)){res.writeHead(403);res.end();return;}
+  if(pathname==="/__smartscan_fixture"){res.writeHead(200,{"content-type":"text/html; charset=utf-8","cache-control":"no-store"});res.end('<!doctype html><script src="/upload/vendor/jspdf.umd.min.js?v=2.5.1"></script>');return;}
   fs.stat(target,(err,st)=>{if(err||!st.isFile()){res.writeHead(404);res.end("Not found");return;}res.writeHead(200,{"content-type":mime[path.extname(target)]||"application/octet-stream","cache-control":"no-store"});fs.createReadStream(target).pipe(res);});
 });
 await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
@@ -23,7 +24,7 @@ try{
   const page=await context.newPage();
   const fixturePage=await context.newPage();
   await fixturePage.route("https://server.nextdimensioncustoms.in/**",route=>route.fulfill({status:200,contentType:"application/json",body:"{}"}));
-  await fixturePage.goto(base+"/upload/index.html");
+  await fixturePage.goto(base+"/__smartscan_fixture");
   await fixturePage.waitForFunction(()=>Boolean(window.jspdf?.jsPDF));
   const pageErrors=[];page.on("pageerror",error=>pageErrors.push(error.message));
   await page.addInitScript(({api})=>{
