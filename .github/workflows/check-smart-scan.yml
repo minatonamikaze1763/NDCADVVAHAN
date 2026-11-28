@@ -26,7 +26,7 @@ jobs:
           cache-dependency-path: upload/smart-scan/package.json
       - name: Install pinned OCR packages
         working-directory: upload/smart-scan
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Prepare self-hosted OCR and PDF assets
         working-directory: upload/smart-scan
         run: npm run setup-assets
@@ -39,7 +39,9 @@ jobs:
           node --check upload/upload.js
       - name: Install Chromium for same-origin OCR test
         working-directory: upload/smart-scan
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium firefox
       - name: Run parser, validation and browser OCR tests
         working-directory: upload/smart-scan
+        env:
+          SMARTSCAN_TEST_FIREFOX: "1"
         run: npm test
