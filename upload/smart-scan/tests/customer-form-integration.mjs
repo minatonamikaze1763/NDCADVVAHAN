@@ -21,6 +21,10 @@ const browser=await chromium.launch(launchOptions);
 try{
   const context=await browser.newContext({viewport:{width:1440,height:1000}});
   const page=await context.newPage();
+  const fixturePage=await context.newPage();
+  await fixturePage.route("https://server.nextdimensioncustoms.in/**",route=>route.fulfill({status:200,contentType:"application/json",body:"{}"}));
+  await fixturePage.goto(base+"/upload/index.html");
+  await fixturePage.waitForFunction(()=>Boolean(window.jspdf?.jsPDF));
   const pageErrors=[];page.on("pageerror",error=>pageErrors.push(error.message));
   await page.addInitScript(({api})=>{
     const state={calls:[],creates:[],uploads:[],customerOCREnabled:true,failPanOnce:true,customer:null};
@@ -80,7 +84,7 @@ try{
     return {name:"synthetic-aadhaar.pdf",mimeType:"application/pdf",buffer:Buffer.from(bytes)};
   };
   const makeScannedPdf=async lines=>{
-    const bytes=await page.evaluate(async rows=>{
+    const bytes=await fixturePage.evaluate(async rows=>{
       const canvas=document.createElement("canvas");canvas.width=1800;canvas.height=Math.max(900,rows.length*100+120);
       const ctx=canvas.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#111";ctx.font="bold 58px Arial";
       rows.forEach((line,i)=>ctx.fillText(line,70,100+i*92));
@@ -94,11 +98,11 @@ try{
   let validNumber="";
   for(let i=0;i<10;i++){const candidate="12345678901"+i;if(validAadhaar(candidate)){validNumber=candidate;break;}}
   if(!validNumber)throw new Error("Could not generate a synthetic checksum-valid test number.");
+  const scannedPdfFile=await makeScannedPdf(["UIDAI Aadhaar","Name: SCANNED SAMPLE","Date of Birth: 01/02/1990","Gender: MALE","Aadhaar No: "+validNumber,"Address:","Door No: 1-2-3","Street: MAIN ROAD","Village: NIZAMABAD","Mandal: Nizamabad","District: Nizamabad","Telangana","PIN: 503001"]);
 
   // Cancellation leaves only in-memory input and must not call customer creation or document APIs.
   await page.locator("#newCustomer").click();
   await page.locator("#ndcSmartScanCustomerHost").waitFor({state:"visible"});
-  const scannedPdfFile=await makeScannedPdf(["UIDAI Aadhaar","Name: SCANNED SAMPLE","Date of Birth: 01/02/1990","Gender: MALE","Aadhaar No: "+validNumber,"Address:","Door No: 1-2-3","Street: MAIN ROAD","Village: NIZAMABAD","Mandal: Nizamabad","District: Nizamabad","Telangana","PIN: 503001"]);
   await page.locator("#ndcSmartScanSection > summary").click();
   await page.locator('[data-slot="combinedAadhaar"] [data-file]').setInputFiles(await makePng(["Name: SAMPLE PERSON","Address: 503001"]));
   await page.locator("#closeDialog").click();
