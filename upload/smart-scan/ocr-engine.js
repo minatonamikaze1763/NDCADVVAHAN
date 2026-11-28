@@ -12,12 +12,12 @@ function loadScript(src){return new Promise((resolve,reject)=>{if(window.Tessera
 async function getWorker(){
   if(workerPromise)return workerPromise;
   workerPromise=(async()=>{await loadScript(BASE+"/tesseract/tesseract.min.js");if(!window.Tesseract)throw new Error("Tesseract.js did not initialize.");
-    activeWorker=await window.Tesseract.createWorker("eng",window.Tesseract.OEM.LSTM_ONLY,{workerPath:BASE+"/tesseract/worker.min.js",corePath:BASE+"/tesseract/tesseract-core-lstm.wasm.js",langPath:BASE+"/models",gzip:true,logger:()=>{}});
+    activeWorker=await window.Tesseract.createWorker("eng",window.Tesseract.OEM.LSTM_ONLY,{workerPath:BASE+"/tesseract/worker.min.js",corePath:BASE+"/tesseract/",langPath:BASE+"/models",gzip:true,logger:()=>{}});
     return activeWorker;})();
   try{return await workerPromise;}catch(e){workerPromise=null;throw e;}
 }
 async function getPdf(){
-  if(!pdfPromise)pdfPromise=import(BASE+"/pdfjs/pdf.min.mjs").then(pdf=>{pdf.GlobalWorkerOptions.workerSrc=BASE+"/pdfjs/pdf.worker.min.mjs";return pdf;});
+  if(!pdfPromise)pdfPromise=import(BASE+"/pdfjs/pdf.mjs").then(pdf=>{pdf.GlobalWorkerOptions.workerSrc=BASE+"/pdfjs/pdf.worker.mjs";return pdf;});
   return pdfPromise;
 }
 function checkFile(file){
