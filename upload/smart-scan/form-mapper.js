@@ -1,5 +1,5 @@
 import {validate} from "./validators.js";
-const idMap={customerName:"customerName",careOfName:"careOfName",chassisNumber:"chassisNumber",engineNumber:"engineNumber",mobileNumber:"mobileNumber",panNumber:"panNumber",aadhaarNumber:"aadhaarNumber",pincode:"pincode",stateName:"stateName",houseNumber:"houseNumber",villageTown:"villageTown",landmark:"landmark",financerName:"financerName",talukaName:"talukaCode"};
+const idMap={customerName:"customerName",careOfName:"careOfName",chassisNumber:"chassisNumber",engineNumber:"engineNumber",mobileNumber:"mobileNumber",panNumber:"panNumber",aadhaarNumber:"aadhaarNumber",pincode:"pincode",stateName:"stateName",districtCode:"districtCode",houseNumber:"houseNumber",villageTown:"villageTown",landmark:"landmark",financerName:"financerName",talukaName:"talukaCode"};
 const eventFor=el=>{el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}));};
 function optionFor(select,value){
   const norm=s=>String(s||"").trim().toLowerCase().replace(/[^a-z0-9]/g,"");
