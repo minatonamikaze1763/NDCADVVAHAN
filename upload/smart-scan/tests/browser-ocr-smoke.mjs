@@ -6,7 +6,7 @@ import {chromium} from "playwright";
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"../../..");
 const mime={".html":"text/html; charset=utf-8",".js":"text/javascript; charset=utf-8",".mjs":"text/javascript; charset=utf-8",".wasm":"application/wasm",".gz":"application/gzip",".traineddata":"application/octet-stream",".json":"application/json"};
-const smokePage=String.raw\`<!doctype html><meta charset="utf-8"><title>NDC Smart Scan OCR smoke</title><body><script type="module">
+const smokePage=String.raw`<!doctype html><meta charset="utf-8"><title>NDC Smart Scan OCR smoke</title><body><script type="module">
 import {extractDocuments} from "/upload/smart-scan/ocr-engine.js";
 async function synthetic(lines,name){
  const canvas=document.createElement("canvas");canvas.width=1500;canvas.height=Math.max(240,lines.length*70+40);
@@ -32,7 +32,7 @@ try {
   &&sale.fields.invoiceNumber?.value==="INV-123";
  window.ocrResult={ok,summary:results.map(item=>({success:item.success,fieldCount:Object.keys(item.fields||{}).length})),error:ok?"":"Structured extraction did not return all expected synthetic fields."};
 } catch(error) { window.ocrResult={ok:false,error:error?.message||String(error)}; }
-</script></body>\`;
+</script></body>`;
 const server=http.createServer((req,res)=>{
   const pathname=new URL(req.url,"http://127.0.0.1").pathname;
   if(pathname==="/__ocr_smoke"){res.writeHead(200,{"content-type":"text/html; charset=utf-8"});res.end(smokePage);return;}
