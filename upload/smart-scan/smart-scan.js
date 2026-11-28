@@ -28,7 +28,7 @@ function render(host){
   host.querySelector("[data-retry]").addEventListener("click",retryAttachments);
   host.addEventListener("change",event=>{if(event.target.matches("[data-conflict]")){const key=event.target.dataset.conflict;state.conflictChoices[key]=Number(event.target.value);}});
 }
-function cancelCurrent(message="OCR cancelled."){if(!state.running)return;state.sequence++;cancelOCR();state.running=false;state.results=[];state.fields={};state.conflicts={};state.conflictChoices={};const button=state.host?.querySelector("[data-extract-all]");if(button)button.disabled=false;const cancel=state.host?.querySelector("[data-cancel]");if(cancel)cancel.hidden=true;renderResults();setProgress(message);}
+function cancelCurrent(message="OCR cancelled."){if(state.running){state.sequence++;cancelOCR();}state.running=false;state.results=[];state.fields={};state.conflicts={};state.conflictChoices={};const button=state.host?.querySelector("[data-extract-all]");if(button)button.disabled=false;const cancel=state.host?.querySelector("[data-cancel]");if(cancel)cancel.hidden=true;renderResults();if(message)setProgress(message);}
 function setSelected(row,file){
   if(!file)return;
   cancelCurrent("Document changed. Previous OCR result discarded.");
@@ -114,5 +114,5 @@ function setVisibility({enabled,isNew,purpose}={}){
 }
 function reset(){state.sequence++;cancelOCR();clearFiles();state.running=false;if(state.host){render(state.host);setVisibility(state.visibility||{});}}
 export function mount(host,options={}){
-  state.host=host;state.bridge=options.bridge||null;state.visibility=options.visibility||{};render(host);setVisibility(state.visibility);return {setVisibility,reset,afterCreate,retryAttachments,hasFiles:()=>Object.values(state.files).some(Boolean),get pendingCustomerId(){return state.pendingCustomerId;},clear:()=>{state.sequence++;cancelOCR();clearFiles();render(host);}};
+  state.host=host;state.bridge=options.bridge||null;state.visibility=options.visibility||{};render(host);setVisibility(state.visibility);return {setVisibility,reset,afterCreate,retryAttachments,hasFiles:()=>Object.values(state.files).some(Boolean),get pendingCustomerId(){return state.pendingCustomerId;},clear:()=>{state.sequence++;cancelOCR();state.running=false;clearFiles();render(host);}};
 }
