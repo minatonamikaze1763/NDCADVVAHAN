@@ -4,6 +4,7 @@ import {validAadhaar,validPan,validChassis,validPin,validMobile,validEmail,valid
 import {parseAadhaar} from "../parsers/aadhaar-parser.js";
 import {parsePan} from "../parsers/pan-parser.js";
 import {parseSaleCard} from "../parsers/salecard-parser.js";
+import {parseAddress} from "../parsers/address-parser.js";
 
 test("validates standard field formats without guessing",()=>{
   assert.equal(validPan("ABCDE1234F"),true);
@@ -34,4 +35,8 @@ test("parses labeled values and does not invent a full birth date",()=>{
   assert.equal(prices.exShowroomPrice.value,"100000");
   assert.equal(prices.invoiceAmount.value,"120000");
   assert.equal(prices.onRoadPrice.value,"135000");
+  const address=parseAddress("Address:\nDoor No: 3-10-449\nVillage: Nizamabad\nMandal: Nizamabad\nDistrict: Nizamabad\nTelangana 503001");
+  assert.equal(address.houseNumber.value,"3-10-449");
+  assert.equal(address.talukaName.value,"Nizamabad");
+  assert.equal(address.pincode.value,"503001");
 });
