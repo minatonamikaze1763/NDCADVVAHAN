@@ -171,7 +171,7 @@ try{
     await page.locator("#customerView .save-bar .primary").click();
     await page.waitForFunction(name=>window.__smartScanMock.uploads.some(x=>x.filename===name),file.name,{timeout:30000});
   };
-  const belowLimit=await makePng(["SMALL SYNTHETIC PROOF"]);
+  const belowLimit=await makePng(["SMALL SYNTHETIC PROOF"]);belowLimit.name="synthetic-below-400000.png";
   await saveExistingDocument(belowLimit);
   const belowCapture=await page.evaluate(name=>window.__smartScanMock.uploads.find(x=>x.filename===name),belowLimit.name);
   if(!belowCapture||belowCapture.bytes!==belowLimit.buffer.length||belowCapture.bytes>=400000)throw new Error("Below-limit document was not preserved by the existing preparation path.");
