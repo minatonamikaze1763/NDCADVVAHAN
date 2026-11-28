@@ -671,6 +671,11 @@
   $("customerForm").addEventListener("submit", async event => {
     event.preventDefault();
     const id = editingCustomerId;
+    if (!id && customerSmartScan?.hasFiles() && !customerSmartScan.isReviewComplete()) {
+      status($("createStatus"), "Review the extracted details and select Review & Autofill before saving.", "error");
+      $("ndcSmartScanCustomerHost").scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     const chassisNumber = $("chassisNumber").value.trim();
     if (!id && !/^[A-Za-z0-9]{17}$/.test(chassisNumber)) {
       status($("createStatus"), "Enter a 17-character chassis number using letters and numbers only.", "error");
