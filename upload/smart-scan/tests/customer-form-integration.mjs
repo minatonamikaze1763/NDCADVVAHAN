@@ -22,7 +22,8 @@ const browser=await chromium.launch(launchOptions);
 try{
   const context=await browser.newContext({viewport:{width:1440,height:1000}});
   const page=await context.newPage();
-  const fixturePage=await context.newPage();
+  const fixtureContext=await browser.newContext();
+  const fixturePage=await fixtureContext.newPage();
   await fixturePage.route("https://server.nextdimensioncustoms.in/**",route=>route.fulfill({status:200,contentType:"application/json",body:"{}"}));
   await fixturePage.goto(base+"/__smartscan_fixture");
   await fixturePage.waitForFunction(()=>Boolean(window.jspdf?.jsPDF));
@@ -100,6 +101,7 @@ try{
   for(let i=0;i<10;i++){const candidate="12345678901"+i;if(validAadhaar(candidate)){validNumber=candidate;break;}}
   if(!validNumber)throw new Error("Could not generate a synthetic checksum-valid test number.");
   const scannedPdfFile=await makeScannedPdf(["UIDAI Aadhaar","Name: SCANNED SAMPLE","Date of Birth: 01/02/1990","Gender: MALE","Aadhaar No: "+validNumber,"Address:","Door No: 1-2-3","Street: MAIN ROAD","Village: NIZAMABAD","Mandal: Nizamabad","District: Nizamabad","Telangana","PIN: 503001"]);
+  await fixtureContext.close();
 
   // Cancellation leaves only in-memory input and must not call customer creation or document APIs.
   await page.locator("#newCustomer").click();
