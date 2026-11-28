@@ -1,0 +1,15 @@
+{
+  "name": "ndc-smart-scan-customer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser-side OCR assets for NDC Smart Scan customer autofill.",
+  "scripts": {
+    "setup-assets": "node setup-assets.cjs"
+  },
+  "dependencies": {
+    "@tesseract.js-data/eng": "1.0.0",
+    "pdfjs-dist": "6.5.438",
+    "tesseract.js": "7.0.0",
+    "tesseract.js-core": "7.0.0"
+  }
+}
