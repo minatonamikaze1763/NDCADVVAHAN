@@ -49,10 +49,10 @@ function cropSource(source,x,y,width,height){
 }
 function combineText(candidates){
   const seen=new Set(),lines=[];
-  for(const item of candidates){for(const line of item.text.split(/\\r?\\n/).map(s=>s.trim()).filter(Boolean)){
+  for(const item of candidates){for(const line of item.text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean)){
     const normalized=line.toLowerCase().replace(/[^a-z0-9]/g,"");if(normalized&&!seen.has(normalized)){seen.add(normalized);lines.push(line);}
   }}
-  return lines.join("\\n");
+  return lines.join("\n");
 }
 async function imageText(file,worker,kind){
   let bitmap;
@@ -68,7 +68,8 @@ async function imageText(file,worker,kind){
       ];
       for(const region of regions){try{candidates.push(await recognizeSource(region,worker));}finally{region.width=region.height=0;}}
     }
-    if(base.confidence<.55){
+    const hasAadhaarSignals=/(?:aadhaar|uidai|name|address|district|pin|date of birth|year of birth)/i.test(base.text);
+    if(base.confidence<.65||(kind==="aadhaar"&&!hasAadhaarSignals)){
       for(const angle of [90,180,270]){const rotated=rotateSource(bitmap,angle);try{candidates.push(await recognizeSource(rotated,worker));}finally{rotated.width=rotated.height=0;}}
     }
     const best=[...candidates].sort((a,b)=>b.confidence-a.confidence)[0];
