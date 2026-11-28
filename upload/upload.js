@@ -647,7 +647,8 @@
   $("addressFillType").addEventListener("change", syncAddressFields);
   $("customerPurpose").addEventListener("change", syncCustomerPurpose);
   $("newCustomer").addEventListener("click", async () => { if (!(await ensureActiveSession())) return; if (customerSmartScan?.pendingCustomerId) { status($("createStatus"), "Retry the pending customer document attachments before starting another customer.", "error"); return; } customerSmartScan?.reset(); restorePurposeFieldStates(); editingCustomerId = null; editingCustomerPurpose = null; $("customerForm").reset(); syncFinancerField(); syncAddressFields(); syncDistrictOptions(); syncCustomerPurpose(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); void syncNdcSmartScanCustomer(); });
-  $("closeDialog").addEventListener("click", () => { if (!customerSmartScan?.pendingCustomerId) customerSmartScan?.clear(); $("customerDialog").close(); });
+  $("closeDialog").addEventListener("click", () => { if (customerSmartScan?.pendingCustomerId && !customerSmartScan.attachmentsComplete) { status($("createStatus"), "Finish retrying the saved customer's document attachments before closing.", "error"); return; } if (!customerSmartScan?.pendingCustomerId) customerSmartScan?.clear(); $("customerDialog").close(); });
+  $("customerDialog").addEventListener("cancel", event => { if (customerSmartScan?.pendingCustomerId && !customerSmartScan.attachmentsComplete) { event.preventDefault(); status($("createStatus"), "Finish retrying the saved customer's document attachments before closing.", "error"); } });
   $("customerDialog").addEventListener("close", () => { if (!customerSmartScan?.pendingCustomerId) customerSmartScan?.clear(); });
   $("keepEditing").addEventListener("click", () => {
     pendingCloseHost = null;
@@ -686,7 +687,7 @@
     button.disabled = true;
     status($("createStatus"), id ? "Saving customer…" : "Creating customer…");
     try {
-      if (!id && customerSmartScan?.pendingCustomerId) { const pendingId = customerSmartScan.pendingCustomerId; const retry = await customerSmartScan.retryAttachments(); if (!retry.success) { status($("createStatus"), "Customer exists. Retry the pending document attachments above; do not submit again.", "error"); return; } customerSmartScan.clear(); $("customerDialog").close(); await openCustomer(pendingId); await searchCustomers($("search").value); return; }
+      if (!id && customerSmartScan?.pendingCustomerId) { const pendingId = customerSmartScan.pendingCustomerId; if (!customerSmartScan.attachmentsComplete) { const retry = await customerSmartScan.retryAttachments(); if (!retry.success) { status($("createStatus"), "Customer exists. Retry the pending document attachments above; do not submit again.", "error"); return; } } customerSmartScan.clear(); $("customerDialog").close(); await openCustomer(pendingId); await searchCustomers($("search").value); return; }
       const customerPurpose = $("customerPurpose").value || "tr-and-documents-upload";
       const customerData = { chassisNumber: id ? $("chassisNumber").value : chassisNumber, customerName: $("customerName").value };
       if (!id) customerData.customerPurpose = customerPurpose;
