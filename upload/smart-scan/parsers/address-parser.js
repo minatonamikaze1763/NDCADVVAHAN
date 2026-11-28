@@ -4,7 +4,7 @@ export function parseAddress(text){
   const all=String(text||"").replace(/\r/g,"\n"),lines=all.split("\n").map(x=>x.trim()).filter(Boolean),out={};
   const pin=all.match(/\b[1-9]\d{5}\b/);if(pin)add(out,"pincode",pin[0],.76);
   const rules=[
-    ["houseNumber",/(?:house|door|flat|h\.?\s*no\.?|door\s*no\.?)\s*[:#-]?\s*([A-Z0-9/-]{1,24})/i],
+    ["houseNumber",/(?:house\s*(?:number|no\.?)?|door\s*(?:number|no\.?)?|flat\s*(?:number|no\.?)?|h\.?\s*no\.?)\s*[:#-]?\s*([A-Z0-9/-]{1,24})/i],
     ["districtCode",/(?:district|dist\.?)\s*[:#-]?\s*([A-Z][A-Z .'-]{2,40})/i],
     ["talukaName",/(?:mandal|taluk|taluka|tehsil)\s*[:#-]?\s*([A-Z][A-Z .'-]{2,40})/i],
     ["villageTown",/(?:village|town|city|post office|post)\s*[:#-]?\s*([A-Z][A-Z .'-]{2,40})/i],
