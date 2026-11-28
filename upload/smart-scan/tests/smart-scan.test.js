@@ -22,7 +22,7 @@ test("parses labeled values and does not invent a full birth date",()=>{
   const aadhaar=parseAadhaar("Name: Sample Person\nYear of Birth: 1990\nC/O: Example Person\nPIN: 503001");
   assert.equal(aadhaar.birthYear.value,"1990");
   assert.equal(aadhaar.dateOfBirth,undefined);
-  assert.equal(aadhaar.careOfName.value,"Example Person");
+  assert.equal(aadhaar.careOfName,undefined);\n  const labeledGuardian=parseAadhaar("Guardian Name: Example Person");\n  assert.equal(labeledGuardian.careOfName.value,"Example Person");
   const pan=parsePan("Name\nSample Person\nFather's Name\nExample Person\nABCDE1234F\n01/01/1990");
   assert.equal(pan.panNumber.value,"ABCDE1234F");
   const sale=parseSaleCard("Chassis No: 1HGCM82633A004352\nEngine No: EN123456\nMobile: 9052691719\nInvoice No: INV-123");
