@@ -40,3 +40,22 @@ test("parses labeled values and does not invent a full birth date",()=>{
   assert.equal(address.talukaName.value,"Nizamabad");
   assert.equal(address.pincode.value,"503001");
 });
+
+test("Aadhaar number requires Aadhaar context and never uses mobile, VID or PIN digits",()=>{
+  let valid="";
+  for(let digit=0;digit<10;digit++){const candidate="12345678901"+digit;if(validAadhaar(candidate)){valid=candidate;break;}}
+  assert.ok(valid,"synthetic checksum-valid Aadhaar fixture");
+  const parsed=parseAadhaar("UIDAI Aadhaar\\nAadhaar Number: "+valid+"\\nMobile: 9052691719\\nVID: 1234567890123456\\nAddress:\\nDoor No: 3-10-449\\nVillage: Nizamabad\\nMandal: Nizamabad\\nDistrict: Nizamabad\\nTelangana 503001");
+  assert.equal(parsed.aadhaarNumber.value,valid);
+  assert.equal(parsed.pincode.value,"503001");
+  assert.equal(parseAadhaar("Mobile: 9052691719\\nVID: 1234567890123456\\nPIN: 503001").aadhaarNumber,undefined);
+  assert.equal(parseAadhaar("Aadhaar No: XXXX XXXX 1234").aadhaarNumber,undefined);
+  assert.equal(parseAadhaar("Aadhaar No: XXXX XXXX 1234").aadhaarLast4.value,"1234");
+});
+
+test("PAN parser keeps customer and father's names distinct when father label comes first",()=>{
+  const pan=parsePan("Father's Name\\nGUARDIAN SAMPLE\\nName\\nCUSTOMER SAMPLE\\nPAN: ABCDE1234F\\nDate of Birth: 01/02/1990");
+  assert.equal(pan.customerName.value,"CUSTOMER SAMPLE");
+  assert.equal(pan.careOfName.value,"GUARDIAN SAMPLE");
+  assert.equal(pan.dateOfBirth.value,"1990-02-01");
+});
