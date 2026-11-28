@@ -8,7 +8,7 @@ From the repository root:
 
 ```sh
 cd upload/smart-scan
-npm install
+npm ci
 npm run setup-assets
 ```
 
