@@ -29,8 +29,21 @@
   let autoForm20AsInspection = false;
   let smartScanEnabled = false;
   let smartScanModulePromise = null;
+  let customerOCREnabled = false;
+  let customerSmartScanModulePromise = null;
+  let customerSmartScan = null;
   let sessionValidationPromise = null;
   let logoutInProgress = false;
+
+  async function ensureCustomerSmartScan() {
+    if (!customerSmartScanModulePromise) customerSmartScanModulePromise = import("./smart-scan/smart-scan.js").then(module => { customerSmartScan = module.mount($("ndcSmartScanCustomerHost"), { visibility: { enabled: customerOCREnabled, isNew: !editingCustomerId, purpose: $("customerPurpose").value }, bridge: { request, prepareUploadFile } }); return customerSmartScan; });
+    return customerSmartScanModulePromise;
+  }
+  async function syncNdcSmartScanCustomer() {
+    const visibility = { enabled: customerOCREnabled, isNew: !editingCustomerId, purpose: $("customerPurpose").value };
+    if (!customerOCREnabled || !visibility.isNew || visibility.purpose !== "tr-and-documents-upload") { customerSmartScan?.setVisibility(visibility); return; }
+    const scan = await ensureCustomerSmartScan(); scan.setVisibility(visibility);
+  }
 
   let editingCustomerId = null;
   let editingCustomerPurpose = null;
@@ -328,6 +341,8 @@
     const data = await request("/api/upload-portal/settings");
     autoForm20AsInspection = data.autoForm20AsInspection === true;
     smartScanEnabled = data.smartScanEnabled === true;
+    customerOCREnabled = data.customerOCREnabled === true;
+    void syncNdcSmartScanCustomer();
     $("autoForm20AsInspection").checked = autoForm20AsInspection;
     $("saveRetention").disabled = true;
     status($("settingsStatus"), "");
@@ -599,6 +614,7 @@
     purposeFieldStates = null;
   }
   function syncCustomerPurpose() {
+    void syncNdcSmartScanCustomer();
     const documentOnly = $("customerPurpose").value === "document-upload";
     const keepVisible = new Set(["customerName", "chassisNumber", "customerPurpose"]);
     const fields = [...$("customerForm").querySelectorAll(".customer-field")];
@@ -630,8 +646,10 @@
   $("paymentMode").addEventListener("change", syncFinancerField);
   $("addressFillType").addEventListener("change", syncAddressFields);
   $("customerPurpose").addEventListener("change", syncCustomerPurpose);
-  $("newCustomer").addEventListener("click", async () => { if (!(await ensureActiveSession())) return; restorePurposeFieldStates(); editingCustomerId = null; editingCustomerPurpose = null; $("customerForm").reset(); syncFinancerField(); syncAddressFields(); syncDistrictOptions(); syncCustomerPurpose(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); });
-  $("closeDialog").addEventListener("click", () => $("customerDialog").close());
+  $("newCustomer").addEventListener("click", async () => { if (!(await ensureActiveSession())) return; if (customerSmartScan?.pendingCustomerId) { status($("createStatus"), "Retry the pending customer document attachments before starting another customer.", "error"); return; } customerSmartScan?.reset(); restorePurposeFieldStates(); editingCustomerId = null; editingCustomerPurpose = null; $("customerForm").reset(); syncFinancerField(); syncAddressFields(); syncDistrictOptions(); syncCustomerPurpose(); $("dialogEyebrow").textContent = "NEW CUSTOMER"; $("dialogTitle").textContent = "Create customer"; $("customerForm").querySelector("button[type=submit]").textContent = "Create customer"; status($("createStatus"), ""); $("customerDialog").showModal(); void syncNdcSmartScanCustomer(); });
+  $("closeDialog").addEventListener("click", () => { if (customerSmartScan?.pendingCustomerId && !customerSmartScan.attachmentsComplete) { status($("createStatus"), "Finish retrying the saved customer's document attachments before closing.", "error"); return; } if (!customerSmartScan?.pendingCustomerId) customerSmartScan?.clear(); $("customerDialog").close(); });
+  $("customerDialog").addEventListener("cancel", event => { if (customerSmartScan?.pendingCustomerId && !customerSmartScan.attachmentsComplete) { event.preventDefault(); status($("createStatus"), "Finish retrying the saved customer's document attachments before closing.", "error"); } });
+  $("customerDialog").addEventListener("close", () => { if (!customerSmartScan?.pendingCustomerId) customerSmartScan?.clear(); });
   $("keepEditing").addEventListener("click", () => {
     pendingCloseHost = null;
     $("discardChangesDialog").close();
@@ -654,6 +672,11 @@
   $("customerForm").addEventListener("submit", async event => {
     event.preventDefault();
     const id = editingCustomerId;
+    if (!id && customerSmartScan?.hasFiles() && !customerSmartScan.isReviewComplete()) {
+      status($("createStatus"), "Review the extracted details and select Review & Autofill before saving.", "error");
+      $("ndcSmartScanCustomerHost").scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     const chassisNumber = $("chassisNumber").value.trim();
     if (!id && !/^[A-Za-z0-9]{17}$/.test(chassisNumber)) {
       status($("createStatus"), "Enter a 17-character chassis number using letters and numbers only.", "error");
@@ -664,6 +687,7 @@
     button.disabled = true;
     status($("createStatus"), id ? "Saving customer…" : "Creating customer…");
     try {
+      if (!id && customerSmartScan?.pendingCustomerId) { const pendingId = customerSmartScan.pendingCustomerId; if (!customerSmartScan.attachmentsComplete) { const retry = await customerSmartScan.retryAttachments(); if (!retry.success) { status($("createStatus"), "Customer exists. Retry the pending document attachments above; do not submit again.", "error"); return; } } customerSmartScan.clear(); $("customerDialog").close(); await openCustomer(pendingId); await searchCustomers($("search").value); return; }
       const customerPurpose = $("customerPurpose").value || "tr-and-documents-upload";
       const customerData = { chassisNumber: id ? $("chassisNumber").value : chassisNumber, customerName: $("customerName").value };
       if (!id) customerData.customerPurpose = customerPurpose;
@@ -671,6 +695,7 @@
       if (customerPurpose !== "document-upload") Object.assign(customerData, { careOfName: $("careOfName").value.trim().toUpperCase(), stateName: $("stateName").value, ownershipType: $("ownershipType").value, specialNumberSelection: $("specialNumberSelection").value, engineNumber: $("engineNumber").value, ownerCategory: $("ownerCategory").value, mobileNumber: $("mobileNumber").value, panNumber: $("panNumber").value.trim().toUpperCase(), aadhaarNumber: $("aadhaarNumber").value.replace(/[^0-9]/g, ""), addressFillType: $("addressFillType").value, houseNumber: $("houseNumber").value, villageTown: $("villageTown").value, landmark: $("landmark").value, districtCode: $("districtCode").value, talukaCode: $("talukaCode").value, talukaName: $("talukaCode").selectedOptions[0]?.textContent.trim() || "", pincode: $("pincode").value, paymentMode: $("paymentMode").value, financerName: $("financerName").value, insuranceType: $("insuranceType").value, insuranceCompany: $("insuranceCompany").value, insurancePolicyNumber: $("insurancePolicyNumber").value, insuranceStartDate: $("insuranceStartDate").value, applicationNumber: $("applicationNumber").value });
       const body = JSON.stringify(customerData);
       const data = await request(id ? `/api/upload-portal/customers/${id}` : "/api/upload-portal/customers", { method: id ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body });
+      if (!id && customerSmartScan?.hasFiles()) { const attached = await customerSmartScan.afterCreate(data.customer._id, { request, prepareUploadFile }); if (!attached.success) { status($("createStatus"), "Customer was created, but attachments failed. Retry them above; do not submit again.", "error"); return; } customerSmartScan.clear(); }
       $("customerDialog").close(); if (id) await openCustomer(id); else await openCustomer(data.customer._id); await searchCustomers($("search").value);
     } catch (error) { status($("createStatus"), error.message, "error"); }
     finally { button.disabled = false; }
