@@ -16,6 +16,11 @@ const server=http.createServer((req,res)=>{
 await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
 const base="http://127.0.0.1:"+server.address().port;
 const api="https://server.nextdimensioncustoms.in";
+async function waitForStructuredField(page,key,expected){
+  await page.waitForFunction(({key,expected})=>[...document.querySelectorAll("[data-results] .ndc-ss-field")].some(row=>
+    row.querySelector(".ndc-ss-field-heading strong")?.textContent?.trim()===key&&row.querySelector("p")?.textContent?.trim()===expected
+  ),{key,expected},{timeout:120000});
+}
 const launchOptions={headless:true};if(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH)launchOptions.executablePath=process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
 const browser=await chromium.launch(launchOptions);
 try{
@@ -106,10 +111,13 @@ try{
   const pdfDiagnostics=await page.evaluate(()=>({
     progress:document.querySelector(".ndc-ss-progress")?.textContent,
     summary:document.querySelector("[data-summary]")?.textContent,
-    results:[...document.querySelectorAll("[data-results] > *")].map(el=>el.textContent)
+    results:[...document.querySelectorAll("[data-results] .ndc-ss-field")].map(row=>({
+      key:row.querySelector(".ndc-ss-field-heading strong")?.textContent?.trim(),
+      value:row.querySelector("p")?.textContent?.trim()
+    }))
   }));
-  if(!pdfDiagnostics.results.some(line=>/customerName:\s*SAMPLE PERSON/i.test(line)))throw new Error("Synthetic PDF did not populate the expected structured customer name: "+JSON.stringify(pdfDiagnostics));
-  if(!pdfDiagnostics.results.some(line=>/pincode:\s*503001/i.test(line)))throw new Error("Synthetic PDF did not populate the expected PIN: "+JSON.stringify(pdfDiagnostics));
+  if(!pdfDiagnostics.results.some(field=>field.key==="customerName"&&field.value==="SAMPLE PERSON"))throw new Error("Synthetic PDF did not extract the expected structured customer name: "+JSON.stringify(pdfDiagnostics));
+  if(!pdfDiagnostics.results.some(field=>field.key==="pincode"&&field.value==="503001"))throw new Error("Synthetic PDF did not extract the expected PIN: "+JSON.stringify(pdfDiagnostics));
 
 
   // Test separate Aadhaar sides, PAN, Sale Card, conflicts, real field mapping, and manual-value preservation.
@@ -248,7 +256,7 @@ try{
   if(await mobilePage.locator('[data-slot="combinedAadhaar"] [data-name]').textContent()!=="No file selected")throw new Error("Mobile document removal did not clear the selected preview.");
   await mobilePage.locator('[data-slot="combinedAadhaar"] [data-file]').setInputFiles({name:"synthetic-camera.png",mimeType:"image/png",buffer:Buffer.from(mobileBytes)});
   await mobilePage.locator('[data-extract-all]').click();
-  await mobilePage.getByText(/customerName: MOBILE SAMPLE/i).waitFor({timeout:120000});
+  await waitForStructuredField(mobilePage,"customerName","MOBILE SAMPLE");
   await mobilePage.locator("#closeDialog").click();
   if(await mobilePage.evaluate(()=>window.__smartScanMock.creates.length||window.__smartScanMock.uploads.length))throw new Error("Mobile scan persisted customer data before Save.");
   console.log("Mobile viewport/touch emulation passed file selection, camera-picker handoff, preview/removal, OCR, and cancellation. Physical camera hardware was not used.");
