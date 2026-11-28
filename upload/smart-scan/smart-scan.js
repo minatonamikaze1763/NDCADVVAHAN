@@ -21,12 +21,12 @@ function render(host){
   host.querySelectorAll("[data-preview]").forEach(btn=>btn.addEventListener("click",()=>preview(btn.closest("[data-slot]").dataset.slot)));
   host.querySelectorAll("[data-remove]").forEach(btn=>btn.addEventListener("click",()=>removeFile(btn.closest("[data-slot]").dataset.slot)));
   host.querySelectorAll("[data-extract]").forEach(btn=>btn.addEventListener("click",()=>runExtraction([btn.closest("[data-slot]").dataset.slot])));
-  host.querySelectorAll('input[name="ndcSmartScanMode"]').forEach(input=>input.addEventListener("change",e=>{state.mode=e.target.value;state.files.combinedAadhaar=state.files.aadhaarFront=state.files.aadhaarBack=null;render(host);}));
+  host.querySelectorAll('input[name="ndcSmartScanMode"]').forEach(input=>input.addEventListener("change",e=>{state.mode=e.target.value;if(state.mode==="combined"){removeFile("aadhaarFront",false);removeFile("aadhaarBack",false);}else removeFile("combinedAadhaar",false);render(host);}));
   host.querySelector("[data-extract-all]").addEventListener("click",()=>runExtraction(Object.keys(state.files)));
   host.querySelector("[data-cancel]").addEventListener("click",()=>{state.sequence++;cancelOCR();setProgress("Cancelling OCR…");});
   host.querySelector("[data-autofill]").addEventListener("click",applyResults);
   host.querySelector("[data-retry]").addEventListener("click",retryAttachments);
-  host.addEventListener("change",event=>{if(event.target.matches("[data-conflict]")){const key=event.target.dataset.conflict;state.conflicts[key]=Number(event.target.value);}});
+  host.addEventListener("change",event=>{if(event.target.matches("[data-conflict]")){const key=event.target.dataset.conflict;state.conflictChoices[key]=Number(event.target.value);}});
 }
 function setSelected(row,file){
   if(!file)return;
@@ -65,7 +65,7 @@ async function runExtraction(slots){
   try{
     state.results=await extractDocuments(docs,{onProgress:p=>{if(seq!==state.sequence)return;setProgress(`${p.phase}: ${p.name} (${p.index} of ${p.total})`,Math.round(p.index/p.total*100));}});
     if(seq!==state.sequence)return;
-    const merged=mergeDocuments(state.results.filter(x=>x.success));state.fields=merged.fields;state.conflicts=merged.conflicts;renderResults();setProgress("Extraction finished. Review values and sources before autofilling.",100);
+    const merged=mergeDocuments(state.results.filter(x=>x.success));state.fields=merged.fields;state.conflicts=merged.conflicts;state.conflictChoices={};renderResults();setProgress("Extraction finished. Review values and sources before autofilling.",100);
   }catch(error){if(error.name!=="AbortError")setProgress(error.message||"OCR failed. You can continue with manual entry.");}
   finally{if(seq===state.sequence){state.running=false;button.disabled=false;state.host.querySelector("[data-cancel]").hidden=true;await releaseWorker();}}
 }
@@ -77,8 +77,8 @@ function renderResults(){
   for(const fail of failed){const p=document.createElement("p");p.className="ndc-ss-error";p.textContent=`${fail.name}: ${fail.error}`;root.append(p);}
   for(const key of Object.keys(state.conflicts)){
     const entries=state.conflicts[key],wrap=document.createElement("fieldset");wrap.className="ndc-ss-conflict";const legend=document.createElement("legend");legend.textContent=`Conflicting ${key} — choose a source`;wrap.append(legend);
-    entries.forEach((entry,index)=>{const label=document.createElement("label");label.innerHTML=`<input type="radio" name="conflict-${escape(key)}" data-conflict="${escape(key)}" value="${index}" ${index===0?"checked":""}><span>${escape(entry.value)}</span><small>${escape(entry.source||"Document")} · ${Math.round((entry.confidence||0)*100)}% OCR</small>`;wrap.append(label);});
-    root.append(wrap);state.conflicts[key]=0;
+    entries.forEach((entry,index)=>{const label=document.createElement("label");label.innerHTML=`<input type="radio" name="conflict-${escape(key)}" data-conflict="${escape(key)}" value="${index}" ${state.conflictChoices[key]===index?"checked":""}><span>${escape(entry.value)}</span><small>${escape(entry.source||"Document")} · ${Math.round((entry.confidence||0)*100)}% OCR</small>`;wrap.append(label);});
+    root.append(wrap);
   }
   for(const [key,entry] of Object.entries(fields)){
     const row=document.createElement("p");row.className="ndc-ss-field";row.textContent=`${key}: ${entry.value} · ${entry.source} · ${entry.status||"Review"}`;root.append(row);
@@ -86,8 +86,9 @@ function renderResults(){
   state.host.querySelector("[data-autofill]").hidden=!keys.length;
 }
 async function applyResults(){
+  if(Object.keys(state.conflicts).some(key=>!Number.isInteger(state.conflictChoices[key]))){setProgress("Choose a value and source for each conflict before autofilling.");return;}
   const fields={...(state.fields||{})};
-  for(const [key,entries] of Object.entries(state.conflicts)){const chosen=entries[state.conflicts[key]||0];if(chosen)fields[key]=chosen;}
+  for(const [key,entries] of Object.entries(state.conflicts)){const chosen=entries[state.conflictChoices[key]];if(chosen)fields[key]=chosen;}
   const res=await mapFields(fields,{conflicts:state.conflicts,confirmOverwrite:ctx=>window.confirm(`Replace existing ${ctx.key} value with ${ctx.extracted} from ${ctx.source}?`)});
   setProgress(`Populated ${res.populated.length} fields. ${res.review.length} need review. Extracted values remain editable.`);
   state.host.querySelectorAll("[data-field]")?.forEach(()=>{});
@@ -97,7 +98,8 @@ async function afterCreate(customerId,bridge){
 }
 async function retryAttachments(){
   if(!state.pendingCustomerId||!state.bridge)return {success:true,failed:[]};
-  const result=await attachDocuments(state.pendingCustomerId,state.files,{request:state.bridge.request,prepareUploadFile:state.bridge.prepareUploadFile});
+  const documents=Object.fromEntries(Object.entries(state.files).map(([key,value])=>[key,value?.file||null]));
+  const result=await attachDocuments(state.pendingCustomerId,documents,{request:state.bridge.request,prepareUploadFile:state.bridge.prepareUploadFile});
   const btn=state.host?.querySelector("[data-retry]");if(btn)btn.hidden=result.success;
   if(!result.success)setProgress("Customer was created. Attachments failed: "+result.failed.map(x=>x.name+": "+x.error).join("; ")+" Retry is available.");
   else setProgress("Customer created and selected Aadhaar/PAN documents attached.");
