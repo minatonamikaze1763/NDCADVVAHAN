@@ -50,10 +50,15 @@ export function parseAadhaar(text){
         const digits=aadhaarDigits(match?.[1]);if(digits&&validAadhaar(digits)){candidate=digits;break;}
       }
     }
-    if(candidate)add(out,"aadhaarNumber",candidate,validAadhaar(candidate)?.82:.58);
+    if(candidate)add(out,"aadhaarNumber",candidate,validAadhaar(candidate) ? .82 : .58);
   }
 
-  const pincode=all.match(/(?:PIN(?:\s*Code)?|Postal\s*Code)\s*[:#\-]?\s*([1-9]\d{5})/i)||all.match(/\b([1-9]\d{5})\b/);
+  let pincode=all.match(/(?:PIN(?:\s*Code)?|Postal\s*Code)\s*[:#\-]?\s*([1-9]\d{5})/i);
+  if(!pincode){
+    const addressContext=lines.some(line=>/\b(?:address|village|town|city|mandal|taluk|district|state|postal|pin)\b/i.test(line));
+    if(addressContext)pincode=lines.map(line=>line.match(/(?:^|\D)([1-9]\d{5})(?:$|\D)/)).find(Boolean);
+  }
+  if(pincode)add(out,"pincode",pincode[1],.78);
   if(pincode)add(out,"pincode",pincode[1],.76);
   const guardian=nextLabeledValue(lines,GUARDIAN_LABEL);
   if(guardian)add(out,"careOfName",guardian,.78);
