@@ -62,8 +62,8 @@ function main() {
   const worker = choose(walk(tessJsDir, p => /[/\\]dist[/\\]worker\.min\.js$/.test(p)), "Tesseract.js browser worker");
   const cores = walk(coreDir, p => /tesseract-core.*\.wasm(?:\.js)?$/.test(p));
   const model = choose(walk(engDir, p => /eng\.traineddata(?:\.gz)?$/.test(p)), "English traineddata model");
-  const pdf = choose(walk(pdfDir, p => /[/\\]build[/\\]pdf(?:\\.min)?\\.mjs$/.test(p)), "PDF.js browser module");
-  const pdfWorker = choose(walk(pdfDir, p => /[/\\]build[/\\]pdf\\.worker(?:\\.min)?\\.mjs$/.test(p)), "PDF.js browser worker");
+  const pdf = choose(walk(pdfDir, p => /[/\\]build[/\\]pdf(?:\.min)?\.mjs$/.test(p)), "PDF.js browser module");
+  const pdfWorker = choose(walk(pdfDir, p => /[/\\]build[/\\]pdf\.worker(?:\.min)?\.mjs$/.test(p)), "PDF.js browser worker");
   if (!runtime || !worker || !cores.some(p => p.endsWith(".wasm.js")) || !cores.some(p => p.endsWith(".wasm")) || !model || !pdf || !pdfWorker) return;
 
   copy(runtime, path.join(tesseractOut, "tesseract.min.js"));
