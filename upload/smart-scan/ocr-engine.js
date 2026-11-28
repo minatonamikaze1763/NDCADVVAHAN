@@ -78,22 +78,37 @@ async function imageText(file,worker,kind){
 async function pdfText(file,worker,onProgress){
   const pdfjs=await getPdf(),bytes=new Uint8Array(await file.arrayBuffer());
   const task=pdfjs.getDocument({data:bytes,cMapUrl:BASE+"/pdfjs/cmaps/",cMapPacked:true,standardFontDataUrl:BASE+"/pdfjs/standard_fonts/"});let doc;
-  try{doc=await task.promise;}catch(e){if(/password/i.test(e?.message||""))throw new Error("This PDF is password-protected. Save an unlocked copy and try again.");throw new Error("PDF could not be opened. It may be corrupted or unsupported.");}
-  if(doc.numPages>MAX_PAGES)throw new Error("PDF has more than 8 pages. Split it into smaller files.");
-  const parts=[];
-  for(let n=1;n<=doc.numPages;n++){
-    if(cancelled)throw new DOMException("Cancelled","AbortError");
-    const page=await doc.getPage(n),content=await page.getTextContent(),embedded=content.items.map(x=>x.str).join(" ").trim();
-    let text=embedded,confidence=embedded?0.9:0.0;
-    if(!embedded){
-      const viewport=page.getViewport({scale:Math.min(2.2,MAX_SIDE/Math.max(page.getViewport({scale:1}).width,page.getViewport({scale:1}).height))});
-      const canvas=document.createElement("canvas");canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
-      await page.render({canvasContext:canvas.getContext("2d"),viewport}).promise;
-      const {data}=await worker.recognize(preprocess(canvas));text=data.text;confidence=data.confidence/100;canvas.width=canvas.height=0;
-    }
-    parts.push(text);onProgress?.(n,doc.numPages);page.cleanup();
+  try{
+    doc=await task.promise;
+  }catch(e){
+    try{await task.destroy();}catch{}
+    if(/password/i.test(e?.message||""))throw new Error("This PDF is password-protected. Save an unlocked copy and try again.");
+    throw new Error("PDF could not be opened. It may be corrupted or unsupported.");
   }
-  await doc.destroy();return {text:parts.join("\n"),confidence:parts.length?parts.reduce((s,_,i)=>s+i,0)/parts.length:0};
+  try{
+    if(doc.numPages>MAX_PAGES)throw new Error("PDF has more than 8 pages. Split it into smaller files.");
+    const parts=[];let confidenceTotal=0;
+    for(let n=1;n<=doc.numPages;n++){
+      if(cancelled)throw new DOMException("Cancelled","AbortError");
+      const page=await doc.getPage(n),content=await page.getTextContent(),embedded=content.items.map(x=>x.str).join(" ").trim();
+      let text=embedded,confidence=embedded?0.9:0.0;
+      if(!embedded){
+        const baseViewport=page.getViewport({scale:1});
+        const viewport=page.getViewport({scale:Math.min(2.2,MAX_SIDE/Math.max(baseViewport.width,baseViewport.height))});
+        const canvas=document.createElement("canvas");canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
+        try{
+          await page.render({canvasContext:canvas.getContext("2d"),viewport}).promise;
+          const prepared=preprocess(canvas);
+          try{const {data}=await worker.recognize(prepared);text=data.text;confidence=data.confidence/100;}
+          finally{prepared.width=prepared.height=0;}
+        }finally{canvas.width=canvas.height=0;}
+      }
+      parts.push(text);confidenceTotal+=confidence;onProgress?.(n,doc.numPages);page.cleanup();
+    }
+    return {text:parts.join("\n"),confidence:parts.length?confidenceTotal/parts.length:0};
+  }finally{
+    try{await task.destroy();}catch{}
+  }
 }
 function parse(text,kind){
   const parsers=kind==="aadhaar"?[parseAadhaar,parseAddress]:kind==="pan"?[parsePan]:[parseSaleCard];
