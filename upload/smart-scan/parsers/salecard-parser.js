@@ -16,7 +16,7 @@ const rules=[
 ];
 const add=(out,key,value,confidence=.72)=>{if(value)out[key]={value:String(value).trim(),source:"Sale Card",confidence,labeled:true};};
 function labeledLine(all,label,field,out){
- const lines=all.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean),re=new RegExp("^(?:"+label+")\\\\s*[:#-]?\\\\s*(.*)$","i");
+ const lines=all.split(/\r?\n/).map(x=>x.trim()).filter(Boolean),re=new RegExp("^(?:"+label+")\\s*[:#-]?\\s*(.*)$","i");
  const index=lines.findIndex(line=>re.test(line));if(index<0)return;
  const match=lines[index].match(re),value=match?.[1]?.trim()||lines[index+1]?.trim();
  if(value)add(out,field,value,.68);
