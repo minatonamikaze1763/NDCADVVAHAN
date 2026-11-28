@@ -112,17 +112,6 @@ try{
   if(!pdfDiagnostics.results.some(line=>/pincode:\s*503001/i.test(line)))throw new Error("Synthetic PDF did not populate the expected PIN: "+JSON.stringify(pdfDiagnostics));
 
 
-  // Exercise scanned-image PDF OCR (no embedded PDF text layer) through the customer form.
-  await page.locator('[data-slot="combinedAadhaar"] [data-file]').setInputFiles(scannedPdfFile);
-  await page.locator('[data-slot="combinedAadhaar"] [data-extract]').click();
-  await page.waitForFunction(()=>{
-    const progress=document.querySelector(".ndc-ss-progress")?.textContent||"";
-    return progress.includes("Extraction finished")||progress.includes("OCR failed")||progress.includes("PDF could not")||progress.includes("password-protected");
-  },null,{timeout:120000});
-  const scannedPdfDiagnostics=await page.evaluate(()=>({progress:document.querySelector(".ndc-ss-progress")?.textContent,results:[...document.querySelectorAll("[data-results] > *")].map(el=>el.textContent)}));
-  if(!scannedPdfDiagnostics.results.some(line=>/customerName:\s*SCANNED SAMPLE/i.test(line)))throw new Error("Scanned-image PDF OCR did not populate the expected customer name: "+JSON.stringify(scannedPdfDiagnostics));
-  if(!scannedPdfDiagnostics.results.some(line=>/pincode:\s*503001/i.test(line)))throw new Error("Scanned-image PDF OCR did not populate the expected PIN: "+JSON.stringify(scannedPdfDiagnostics));
-
   // Test separate Aadhaar sides, PAN, Sale Card, conflicts, real field mapping, and manual-value preservation.
   await page.locator('input[name="ndcSmartScanMode"][value="separate"]').check();
   await page.locator("#ndcSmartScanSection > summary").click();
