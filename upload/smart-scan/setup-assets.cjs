@@ -72,11 +72,15 @@ function main() {
   copy(model, path.join(modelOut, path.basename(model).endsWith(".gz") ? "eng.traineddata.gz" : "eng.traineddata"));
   copy(pdf, path.join(pdfOut, "pdf.mjs"));
   copy(pdfWorker, path.join(pdfOut, "pdf.worker.mjs"));
+  const cmaps = path.join(pdfDir, "cmaps");
+  const standardFonts = path.join(pdfDir, "standard_fonts");
+  if (fs.existsSync(cmaps)) fs.cpSync(cmaps, path.join(pdfOut, "cmaps"), { recursive: true });
+  if (fs.existsSync(standardFonts)) fs.cpSync(standardFonts, path.join(pdfOut, "standard_fonts"), { recursive: true });
 
   const required = [
     "tesseract/tesseract.min.js", "tesseract/worker.min.js",
     "tesseract/tesseract-core-lstm.wasm.js", "models/eng.traineddata.gz",
-    "pdfjs/pdf.min.mjs", "pdfjs/pdf.worker.min.mjs"
+    "pdfjs/pdf.mjs", "pdfjs/pdf.worker.mjs"
   ];
   const missing = required.filter(name => !exists(path.join(out, name)));
   if (missing.length) {
