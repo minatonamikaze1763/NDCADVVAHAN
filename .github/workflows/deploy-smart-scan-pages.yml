@@ -31,19 +31,36 @@ jobs:
         run: npm run setup-assets
       - name: Stage the complete static website without repository metadata
         run: |
-          mkdir -p _site
-          rsync -a \
-            --exclude='.git/' \
-            --exclude='.github/' \
-            --exclude='node_modules/' \
-            --exclude='AGENTS.md' \
-            --exclude='_site/' \
-            --exclude='upload/smart-scan/package.json' \
-            --exclude='upload/smart-scan/package-lock.json' \
-            --exclude='upload/smart-scan/setup-assets.cjs' \
-            --exclude='upload/smart-scan/README.md' \
-            ./ _site/
-          touch _site/.nojekyll
+          python3 - <<'PYCODE'
+          from pathlib import Path
+          import shutil
+
+          source = Path(".")
+          site = Path("_site")
+          excluded_dirs = {".git", ".github", "node_modules", "_site"}
+          excluded_files = {"AGENTS.md", ".gitignore", ".npmrc"}
+          excluded_paths = {
+              "upload/smart-scan/package.json",
+              "upload/smart-scan/package-lock.json",
+              "upload/smart-scan/setup-assets.cjs",
+              "upload/smart-scan/README.md",
+          }
+          for item in source.rglob("*"):
+              relative = item.relative_to(source)
+              if any(part in excluded_dirs for part in relative.parts):
+                  continue
+              if relative.as_posix() in excluded_paths or item.name in excluded_files:
+                  continue
+              if item.name == ".env" or item.name.startswith(".env."):
+                  continue
+              target = site / relative
+              if item.is_dir():
+                  target.mkdir(parents=True, exist_ok=True)
+              elif item.is_file():
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy2(item, target)
+          (site / ".nojekyll").touch()
+          PYCODE
           test -f _site/CNAME
           test -f _site/upload/smart-scan/assets/tesseract/worker.min.js
           test -f _site/upload/smart-scan/assets/tesseract/tesseract-core.wasm
