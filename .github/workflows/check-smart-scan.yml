@@ -36,6 +36,10 @@ jobs:
           node --check upload/smart-scan/ocr-engine.js
           node --check upload/smart-scan/form-mapper.js
           node --check upload/smart-scan/validators.js
-      - name: Run synthetic parser and validation tests
+          node --check upload/upload.js
+      - name: Install Chromium for same-origin OCR test
         working-directory: upload/smart-scan
-        run: node --test tests/*.test.js
+        run: npx playwright install --with-deps chromium
+      - name: Run parser, validation and browser OCR tests
+        working-directory: upload/smart-scan
+        run: npm test
