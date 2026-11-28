@@ -1,3 +1,5 @@
+import {parseAddress} from "./address-parser.js";
+
 const rules=[
   ["chassisNumber",/(?:chassis|vin|frame)\s*(?:no\.?|number)?\s*[:#-]?\s*([A-Z0-9]{17})/i],
   ["engineNumber",/(?:engine)\s*(?:no\.?|number)?\s*[:#-]?\s*([A-Z0-9-]{5,25})/i],
@@ -41,6 +43,10 @@ export function parseSaleCard(text){
  for(const [field,re] of dates){const m=all.match(re);if(m){const d=m[1].match(/(\d{1,2})[\/. -](\d{1,2})[\/. -](\d{4})/);if(d)add(out,field,d[3]+"-"+d[2].padStart(2,"0")+"-"+d[1].padStart(2,"0"),.7);}}
  labeledLine(all,"(?:customer name|buyer name)", "customerName",out);
  labeledLine(all,"(?:father(?:'s)? name)", "careOfName",out);
- labeledLine(all,"(?:customer address|buyer address)", "completeAddress",out);
+ labeledLine(all,"(?:customer address|buyer address|address)", "completeAddress",out);
+ const addressFields=parseAddress(all);
+ for(const key of ["houseNumber","villageTown","landmark","districtCode","talukaName","stateName","pincode","completeAddress"]){
+   if(!out[key]&&addressFields[key])out[key]={...addressFields[key],source:"Sale Card",confidence:Math.min(.68,addressFields[key].confidence||.68)};
+ }
  return out;
 }
