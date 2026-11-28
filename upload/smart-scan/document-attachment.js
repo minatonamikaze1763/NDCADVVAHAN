@@ -3,7 +3,7 @@ export async function attachDocuments(customerId,documents,{request,prepareUploa
   const queue=[];
   if(documents.combinedAadhaar)queue.push({name:"Combined Aadhaar",category:"address-proof",file:documents.combinedAadhaar,subcategory:"Aadhaar"});
   if(documents.aadhaarFront&&documents.aadhaarBack)queue.push({name:"Aadhaar front/back",category:"address-proof",file:await mergeSides(documents.aadhaarFront,documents.aadhaarBack),subcategory:"Aadhaar"});
-  else if(documents.aadhaarFront||documents.aadhaarBack)queue.push({name:"Incomplete Aadhaar",category:"address-proof",file:documents.aadhaarFront||documents.aadhaarBack,subcategory:"Aadhaar"});
+  else if(documents.aadhaarFront||documents.aadhaarBack){const accepted=window.confirm("Only one Aadhaar side is available. The attachment may be incomplete and is not verified. Attach the available side anyway?");if(accepted)queue.push({name:"Incomplete Aadhaar",category:"address-proof",file:documents.aadhaarFront||documents.aadhaarBack,subcategory:"Aadhaar"});}
   if(documents.pan)queue.push({name:"PAN Card",category:"pan-card",file:documents.pan});
   for(const item of queue){
     try{
