@@ -32,6 +32,8 @@ jobs:
       - name: Prepare same-origin browser assets
         working-directory: upload/smart-scan
         run: npm run setup-assets
+      - name: Remove installed npm package tree from the static artifact
+        run: rm -rf upload/smart-scan/node_modules upload/smart-scan/package-lock.json
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
