@@ -70,8 +70,8 @@ function main() {
   copy(worker, path.join(tesseractOut, "worker.min.js"));
   for (const core of cores) copy(core, path.join(tesseractOut, path.basename(core)));
   copy(model, path.join(modelOut, path.basename(model).endsWith(".gz") ? "eng.traineddata.gz" : "eng.traineddata"));
-  copy(pdf, path.join(pdfOut, "pdf.min.mjs"));
-  copy(pdfWorker, path.join(pdfOut, "pdf.worker.min.mjs"));
+  copy(pdf, path.join(pdfOut, "pdf.mjs"));
+  copy(pdfWorker, path.join(pdfOut, "pdf.worker.mjs"));
 
   const required = [
     "tesseract/tesseract.min.js", "tesseract/worker.min.js",
