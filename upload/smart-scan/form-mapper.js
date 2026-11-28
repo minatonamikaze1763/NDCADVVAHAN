@@ -11,6 +11,8 @@ export async function mapFields(fields,{conflicts={},confirmOverwrite=()=>false}
   for(const [key,entry] of entries){
     const id=idMap[key];if(!id)continue;
     const el=document.getElementById(id);if(!el){missing.push(key);continue;}
+    const validation=validate(key,entry.value);
+    if(entry.status==="invalid"||validation.status==="invalid"){el.dataset.smartScanStatus="invalid";review.push(key);continue;}
     if(el.value&&el.value.trim()&&el.value.trim()!==String(entry.value).trim()&&!confirmOverwrite({key,current:el.value,extracted:entry.value,source:entry.source})){review.push(key);continue;}
     if(el.tagName==="SELECT"){
       if(key==="stateName"){const option=optionFor(el,entry.value);if(!option){review.push(key);continue;}el.value=option.value;eventFor(el);await new Promise(r=>setTimeout(r,150));}
