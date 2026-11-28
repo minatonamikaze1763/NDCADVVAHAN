@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: upload/smart-scan/package.json
+          cache-dependency-path: upload/smart-scan/package-lock.json
       - name: Install pinned OCR packages
         working-directory: upload/smart-scan
         run: npm ci --no-audit --no-fund
