@@ -183,6 +183,7 @@ try{
   // Run the pre-existing scan editor after Smart Scan OCR in the same session.
   // The browser runner cannot provide a physical camera, so feed its synthetic capture directly
   // into the existing editor API and separately verify the mobile camera input requests rear capture.
+  await page.addScriptTag({url:base+"/upload/smartscan-engine.js"});
   await page.evaluate(async()=>{
     const canvas=document.createElement("canvas");canvas.width=1000;canvas.height=700;
     const context=canvas.getContext("2d");context.fillStyle="#fff";context.fillRect(0,0,canvas.width,canvas.height);
