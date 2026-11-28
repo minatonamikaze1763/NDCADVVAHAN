@@ -1,0 +1,41 @@
+name: Check NDC Smart Scan
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "upload/smart-scan/**"
+      - "upload/upload.js"
+      - "upload/index.html"
+      - ".github/workflows/check-smart-scan.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "upload/smart-scan/**"
+      - "upload/upload.js"
+      - "upload/index.html"
+      - ".github/workflows/check-smart-scan.yml"
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: upload/smart-scan/package.json
+      - name: Install pinned OCR packages
+        working-directory: upload/smart-scan
+        run: npm install --no-audit --no-fund
+      - name: Prepare self-hosted OCR and PDF assets
+        working-directory: upload/smart-scan
+        run: npm run setup-assets
+      - name: Syntax-check independent modules
+        run: |
+          node --check upload/smart-scan/smart-scan.js
+          node --check upload/smart-scan/ocr-engine.js
+          node --check upload/smart-scan/form-mapper.js
+          node --check upload/smart-scan/validators.js
+      - name: Run synthetic parser and validation tests
+        working-directory: upload/smart-scan
+        run: node --test tests/*.test.js
