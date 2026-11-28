@@ -32,7 +32,7 @@ try{
   const page=await browser.newPage();
   page.on("pageerror",e=>console.error("[browser]",e.message));
   await page.goto(`http://127.0.0.1:${address.port}/__ocr_smoke`);
-  await page.waitForFunction(()=>window.ocrResult!==undefined,{timeout:120000});
+  await page.waitForFunction(()=>window.ocrResult!==undefined,null,{timeout:120000});
   const result=await page.evaluate(()=>window.ocrResult);
   if(!result.ok||!/NDC\s+SMART\s+SCAN\s+TEST/i.test(result.text))throw new Error("Local OCR smoke test failed: "+(result.error||result.text));
   console.log("Local browser OCR smoke test passed using self-hosted assets.");
