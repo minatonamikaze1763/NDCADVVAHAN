@@ -79,6 +79,18 @@ try{
     },{first,second});
     return {name:"synthetic-aadhaar.pdf",mimeType:"application/pdf",buffer:Buffer.from(bytes)};
   };
+  const makeScannedPdf=async lines=>{
+    const bytes=await page.evaluate(async rows=>{
+      const canvas=document.createElement("canvas");canvas.width=1800;canvas.height=Math.max(900,rows.length*100+120);
+      const ctx=canvas.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#111";ctx.font="bold 58px Arial";
+      rows.forEach((line,i)=>ctx.fillText(line,70,100+i*92));
+      const image=canvas.toDataURL("image/png");
+      const doc=new window.jspdf.jsPDF({unit:"pt",format:"a4"});doc.addImage(image,"PNG",10,10,575,800);
+      const blob=doc.output("blob");return Array.from(new Uint8Array(await blob.arrayBuffer()));
+    },lines);
+    return {name:"synthetic-scanned-aadhaar.pdf",mimeType:"application/pdf",buffer:Buffer.from(bytes)};
+  };
+
   let validNumber="";
   for(let i=0;i<10;i++){const candidate="12345678901"+i;if(validAadhaar(candidate)){validNumber=candidate;break;}}
   if(!validNumber)throw new Error("Could not generate a synthetic checksum-valid test number.");
@@ -110,6 +122,19 @@ try{
   }));
   if(!pdfDiagnostics.results.some(line=>/customerName:\s*SAMPLE PERSON/i.test(line)))throw new Error("Synthetic PDF did not populate the expected structured customer name: "+JSON.stringify(pdfDiagnostics));
   if(!pdfDiagnostics.results.some(line=>/pincode:\s*503001/i.test(line)))throw new Error("Synthetic PDF did not populate the expected PIN: "+JSON.stringify(pdfDiagnostics));
+
+
+  // Exercise scanned-image PDF OCR (no embedded PDF text layer) through the customer form.
+  const scannedLines=["UIDAI Aadhaar","Name: SCANNED SAMPLE","Date of Birth: 01/02/1990","Gender: MALE","Aadhaar No: "+validNumber,...addressLines];
+  await page.locator('[data-slot="combinedAadhaar"] [data-file]').setInputFiles(await makeScannedPdf(scannedLines));
+  await page.locator('[data-slot="combinedAadhaar"] [data-extract]').click();
+  await page.waitForFunction(()=>{
+    const progress=document.querySelector(".ndc-ss-progress")?.textContent||"";
+    return progress.includes("Extraction finished")||progress.includes("OCR failed")||progress.includes("PDF could not")||progress.includes("password-protected");
+  },null,{timeout:120000});
+  const scannedPdfDiagnostics=await page.evaluate(()=>({progress:document.querySelector(".ndc-ss-progress")?.textContent,results:[...document.querySelectorAll("[data-results] > *")].map(el=>el.textContent)}));
+  if(!scannedPdfDiagnostics.results.some(line=>/customerName:\s*SCANNED SAMPLE/i.test(line)))throw new Error("Scanned-image PDF OCR did not populate the expected customer name: "+JSON.stringify(scannedPdfDiagnostics));
+  if(!scannedPdfDiagnostics.results.some(line=>/pincode:\s*503001/i.test(line)))throw new Error("Scanned-image PDF OCR did not populate the expected PIN: "+JSON.stringify(scannedPdfDiagnostics));
 
   // Test separate Aadhaar sides, PAN, Sale Card, conflicts, real field mapping, and manual-value preservation.
   await page.locator('input[name="ndcSmartScanMode"][value="separate"]').check();
