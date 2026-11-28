@@ -6,7 +6,7 @@ const rules=[
   ["email",/\b([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})\b/i],
   ["pincode",/(?:pin(?:code)?|postal code)\s*[:#-]?\s*([1-9]\d{5})/i],
   ["invoiceNumber",/(?:invoice|bill)\s*(?:no\.?|number|#)\s*[:#-]?\s*([A-Z0-9\/-]{3,30})/i],
-  ["financerName",/(?:financier|finance company|hypothecation)\s*[:#-]?\s*([A-Z][A-Z &().'\/-]{2,60})/i],
+  ["financerName",/(?:financier(?: name)?|finance company|bank name)\s*[:#-]?\s*([A-Z][A-Z &().'\/-]{2,60})/i],
   ["vehicleModel",/(?:vehicle model|model name|model)\s*[:#-]?\s*([A-Z0-9 &().'\/-]{2,60})/i],
   ["variant",/(?:variant|grade)\s*[:#-]?\s*([A-Z0-9 &().'\/-]{2,50})/i],
   ["manufacturer",/(?:manufacturer|make)\s*[:#-]?\s*([A-Z][A-Z &().'\/-]{2,40})/i],
@@ -16,8 +16,10 @@ const rules=[
 ];
 const add=(out,key,value,confidence=.72)=>{if(value)out[key]={value:String(value).trim(),source:"Sale Card",confidence,labeled:true};};
 function labeledLine(all,label,field,out){
- const re=new RegExp("(?:^|\\n)\\s*(?:"+label+")\\s*[:#-]?\\s*([^\\n]{2,100})","i"),m=all.match(re);
- if(m)add(out,field,m[1].trim(),.68);
+ const lines=all.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean),re=new RegExp("^(?:"+label+")\\\\s*[:#-]?\\\\s*(.*)$","i");
+ const index=lines.findIndex(line=>re.test(line));if(index<0)return;
+ const match=lines[index].match(re),value=match?.[1]?.trim()||lines[index+1]?.trim();
+ if(value)add(out,field,value,.68);
 }
 export function parseSaleCard(text){
  const out={},all=String(text||"").replace(/\r/g,"\n");
@@ -37,7 +39,7 @@ export function parseSaleCard(text){
   ["saleDate",/(?:sale date|date of sale|delivery date)\s*[:#-]?\s*(\d{1,2}[\/. -]\d{1,2}[\/. -]\d{4})/i]
  ];
  for(const [field,re] of dates){const m=all.match(re);if(m){const d=m[1].match(/(\d{1,2})[\/. -](\d{1,2})[\/. -](\d{4})/);if(d)add(out,field,d[3]+"-"+d[2].padStart(2,"0")+"-"+d[1].padStart(2,"0"),.7);}}
- labeledLine(all,"(?:customer name|buyer name|customer)", "customerName",out);
+ labeledLine(all,"(?:customer name|buyer name)", "customerName",out);
  labeledLine(all,"(?:father(?:'s)? name)", "careOfName",out);
  labeledLine(all,"(?:customer address|buyer address)", "completeAddress",out);
  return out;
