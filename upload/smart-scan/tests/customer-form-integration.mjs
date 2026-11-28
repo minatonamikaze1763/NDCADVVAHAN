@@ -21,6 +21,7 @@ const browser=await chromium.launch(launchOptions);
 try{
   const context=await browser.newContext({viewport:{width:1440,height:1000}});
   const page=await context.newPage();
+  const pageErrors=[];page.on("pageerror",error=>pageErrors.push(error.message));
   await page.addInitScript(({api})=>{
     const state={calls:[],creates:[],uploads:[],customerOCREnabled:true,failPanOnce:true,customer:null};
     window.__smartScanMock=state;
@@ -34,7 +35,7 @@ try{
       if(url.pathname==="/api/cloud/auth/login")return json({token:"synthetic-token",expiresAt:Date.now()+3600000,user:{username:"synthetic",cloudAddon:{active:true}}});
       if(url.pathname==="/api/cloud/auth/me")return json({user:{username:"synthetic",cloudAddon:{active:true}},sessionExpiresAt:Date.now()+3600000});
       if(url.pathname==="/api/cloud/auth/logout")return json({success:true});
-      if(url.pathname==="/api/upload-portal/settings")return json({autoForm20AsInspection:false,smartScanEnabled:false,customerOCREnabled:state.customerOCREnabled});
+      if(url.pathname==="/api/upload-portal/settings")return json({autoForm20AsInspection:false,smartScanEnabled:true,customerOCREnabled:state.customerOCREnabled});
       if(url.pathname==="/api/upload-portal/customers"&&method==="GET")return json({customers:[]});
       if(url.pathname==="/api/upload-portal/customers"&&method==="POST"){
         const body=JSON.parse(options.body||"{}");state.creates.push(body);
@@ -43,8 +44,10 @@ try{
       }
       if(url.pathname==="/api/upload-portal/customers/synthetic-customer-1"&&method==="GET")return json({customer:state.customer});
       if(url.pathname.startsWith("/api/upload-portal/customers/synthetic-customer-1/documents/")&&method==="PUT"){
-        const category=url.pathname.split("/").at(-1);state.uploads.push({customerId:"synthetic-customer-1",category});
+        const category=url.pathname.split("/").at(-1),headers=new Headers(options.headers||{});
+        state.uploads.push({customerId:"synthetic-customer-1",category,bytes:Number(options.body?.size||0),filename:headers.get("X-NDC-Original-Filename"),subcategory:headers.get("X-NDC-Subcategory"),processed:headers.get("X-NDC-Processed")});
         if(category==="pan-card"&&state.failPanOnce){state.failPanOnce=false;return json({error:"Synthetic first PAN attachment failure"},500);}
+        state.customer.documents={...(state.customer.documents||{}),[category]:{filename:headers.get("X-NDC-Original-Filename"),contentType:headers.get("X-NDC-Upload-Type"),subcategory:headers.get("X-NDC-Subcategory")}};
         return json({success:true});
       }
       return json({success:true});
@@ -145,8 +148,45 @@ try{
   if(finalState.creates!==1)throw new Error("Retry created a duplicate customer.");
   if(!finalState.uploads.every(x=>x.customerId==="synthetic-customer-1"))throw new Error("Attachment retry did not reuse the same customer ID.");
   if(finalState.uploads.some(x=>x.category==="dealer-invoice"))throw new Error("Sale Card was incorrectly attached as a Dealer Invoice.");
-  if(!finalState.uploads.some(x=>x.category==="address-proof")||!finalState.uploads.some(x=>x.category==="pan-card"))throw new Error("Aadhaar/PAN document attachment slots were not used.");
-  console.log("Desktop customer-form integration passed: cancellation, PDF extraction, separated Aadhaar sides, conflict review, manual-value preservation, dropdown mapping, one customer save, and same-ID attachment retry.");
+  if(!finalState.uploads.some(x=>x.category==="address-proof"&&x.subcategory==="Aadhaar")||!finalState.uploads.some(x=>x.category==="pan-card"))throw new Error("Aadhaar/PAN document attachment slots or Aadhaar category were not used.");
+  if(finalState.uploads.some(x=>x.bytes<=0||x.bytes>400000))throw new Error("Smart Scan attachment preparation did not preserve the 400 KB ceiling: "+JSON.stringify(finalState.uploads.map(x=>({category:x.category,bytes:x.bytes}))));
+
+  // Exercise the pre-existing customer document upload and cropper in this same browser session.
+  const addressRow=page.locator('.doc-row[data-doc="address-proof"]');
+  await addressRow.locator('[data-subcategory]').selectOption("Aadhaar");
+  const makePaddedPng=async(name,targetBytes)=>{
+    const image=await makePng(["SYNTHETIC DOCUMENT","Aadhaar Address Proof","Nizamabad Telangana 503001"]);
+    if(image.buffer.length>targetBytes)throw new Error("Synthetic image unexpectedly exceeds its requested byte test size.");
+    const padded=Buffer.alloc(targetBytes);image.buffer.copy(padded);return {name,mimeType:"image/png",buffer:padded};
+  };
+  const saveExistingDocument=async(file)=>{
+    const chooserPromise=page.waitForEvent("filechooser");
+    await addressRow.locator(".doc-actions button").nth(1).click();
+    await (await chooserPromise).setFiles(file);
+    await page.locator("#customerView .save-bar .primary").click();
+    await page.waitForFunction(name=>window.__smartScanMock.uploads.some(x=>x.filename===name),file.name,{timeout:30000});
+  };
+  const belowLimit=await makePng(["SMALL SYNTHETIC PROOF"]);
+  await saveExistingDocument(belowLimit);
+  const belowCapture=await page.evaluate(name=>window.__smartScanMock.uploads.find(x=>x.filename===name),belowLimit.name);
+  if(!belowCapture||belowCapture.bytes!==belowLimit.buffer.length||belowCapture.bytes>=400000)throw new Error("Below-limit document was not preserved by the existing preparation path.");
+  await saveExistingDocument(await makePaddedPng("synthetic-exact-400000.png",400000));
+  await saveExistingDocument(await makePaddedPng("synthetic-over-400000.png",400001));
+  const compression=await page.evaluate(()=>window.__smartScanMock.uploads.filter(x=>/^synthetic-(exact|over)-400000/.test(x.filename||"")));
+  if(compression.length!==2||compression[0].bytes!==400000||compression[1].bytes>400000||compression[1].bytes<=0)throw new Error("Existing compression did not handle the exact/over-400KB cases: "+JSON.stringify(compression));
+
+  // Use the existing camera selection path and independent auto-crop editor after Smart Scan OCR ran.
+  const legacyCameraChoice=page.waitForEvent("filechooser");
+  await addressRow.locator(".doc-actions button").nth(0).click();
+  await (await legacyCameraChoice).setFiles(await makePng(["SYNTHETIC CAMERA DOCUMENT","ADDRESS PROOF"]));
+  await page.locator(".ndc-scan-dialog").waitFor({state:"visible",timeout:30000});
+  if(!await page.evaluate(()=>window.NDCSmartScan&&window.Tesseract))throw new Error("Existing cropper or independent Smart Scan OCR runtime is not present in the same session.");
+  await page.locator('.ndc-scan-dialog [data-action="autocrop"]').click();
+  await page.locator('.ndc-scan-dialog [data-action="save"]').click();
+  await page.locator(".ndc-scan-dialog").waitFor({state:"detached",timeout:30000});
+  if(!await addressRow.locator(".doc-state").innerText().then(text=>/Scanned replacement ready|Scanned image ready/.test(text)))throw new Error("Existing auto-crop output was not returned to the document row.");
+  if(pageErrors.length)throw new Error("Smart Scan and existing auto-crop generated browser errors: "+JSON.stringify(pageErrors));
+  console.log("Desktop customer-form integration passed OCR, attachment retry, compression boundary, and existing auto-crop/camera runtime checks.");
   await context.close();
 
   // Mobile viewport/touch simulation. The file chooser stands in for a camera picker; it is not a physical-device camera test.
