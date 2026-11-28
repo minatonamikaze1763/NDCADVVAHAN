@@ -41,7 +41,7 @@ async function imageText(file,worker){
 }
 async function pdfText(file,worker,onProgress){
   const pdfjs=await getPdf(),bytes=new Uint8Array(await file.arrayBuffer());
-  const task=pdfjs.getDocument({data:bytes});let doc;
+  const task=pdfjs.getDocument({data:bytes,cMapUrl:BASE+"/pdfjs/cmaps/",cMapPacked:true,standardFontDataUrl:BASE+"/pdfjs/standard_fonts/"});let doc;
   try{doc=await task.promise;}catch(e){if(/password/i.test(e?.message||""))throw new Error("This PDF is password-protected. Save an unlocked copy and try again.");throw new Error("PDF could not be opened. It may be corrupted or unsupported.");}
   if(doc.numPages>MAX_PAGES)throw new Error("PDF has more than 8 pages. Split it into smaller files.");
   const parts=[];
