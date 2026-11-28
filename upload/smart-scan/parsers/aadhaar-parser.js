@@ -14,7 +14,7 @@ export function parseAadhaar(text) {
   const state=lines.find(x=>/\b(Telangana|Andhra Pradesh|Maharashtra|Karnataka|Tamil Nadu|Kerala|Delhi|Uttar Pradesh)\b/i.test(x)); if(state) add(out,"stateName",state.match(/\b(Telangana|Andhra Pradesh|Maharashtra|Karnataka|Tamil Nadu|Kerala|Delhi|Uttar Pradesh)\b/i)[0],.75);
   const addressStart=lines.findIndex(x=>/\b(address|ಪೂರ್ಣ ವಿಳಾಸ|पता)\b/i.test(x));
   if(addressStart>=0){ const address=lines.slice(addressStart+1,addressStart+5).filter(x=>!/^\d{4}/.test(x)).join(", "); if(address) add(out,"completeAddress",address,.68); }
-  const care=all.match(/\b(?:S\/O|D\/O|W\/O|C\/O)\s*[:.]?\s*([A-Z][A-Z .'-]{2,50})/i);
-  if(care) add(out,"careOfName",care[1].trim(),.62);
+  const guardian=all.match(/\\b(?:Father(?:'s)? Name|Guardian(?:'s)? Name)\\s*[:.]?\\s*([A-Z][A-Z .'-]{2,50})/i);
+  if(guardian) add(out,"careOfName",guardian[1].trim(),.72);
   return out;
 }
