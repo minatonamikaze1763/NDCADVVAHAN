@@ -32,11 +32,47 @@ function preprocess(source){
   for(let i=0;i<data.length;i+=4){const gray=(.299*data[i]+.587*data[i+1]+.114*data[i+2]-128)*1.28+128;const v=Math.max(0,Math.min(255,gray));data[i]=data[i+1]=data[i+2]=v;}
   ctx.putImageData(image,0,0);return canvas;
 }
-async function imageText(file,worker){
+async function recognizeSource(source,worker){
+  const canvas=preprocess(source);
+  try{const {data}=await worker.recognize(canvas);return {text:data.text||"",confidence:Number(data.confidence||0)/100};}
+  finally{canvas.width=canvas.height=0;}
+}
+function rotateSource(source,degrees){
+  const radians=degrees*Math.PI/180,swap=degrees%180!==0,canvas=document.createElement("canvas");
+  canvas.width=swap?source.height:source.width;canvas.height=swap?source.width:source.height;
+  const ctx=canvas.getContext("2d");ctx.translate(canvas.width/2,canvas.height/2);ctx.rotate(radians);ctx.drawImage(source,-source.width/2,-source.height/2);
+  return canvas;
+}
+function cropSource(source,x,y,width,height){
+  const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.floor(width));canvas.height=Math.max(1,Math.floor(height));
+  canvas.getContext("2d").drawImage(source,x,y,width,height,0,0,canvas.width,canvas.height);return canvas;
+}
+function combineText(candidates){
+  const seen=new Set(),lines=[];
+  for(const item of candidates){for(const line of item.text.split(/\\r?\\n/).map(s=>s.trim()).filter(Boolean)){
+    const normalized=line.toLowerCase().replace(/[^a-z0-9]/g,"");if(normalized&&!seen.has(normalized)){seen.add(normalized);lines.push(line);}
+  }}
+  return lines.join("\\n");
+}
+async function imageText(file,worker,kind){
   let bitmap;
   try{
     bitmap=await createImageBitmap(file,{imageOrientation:"from-image"});
-    const canvas=preprocess(bitmap);const {data}=await worker.recognize(canvas);canvas.width=canvas.height=0;return {text:data.text,confidence:data.confidence/100};
+    const candidates=[await recognizeSource(bitmap,worker)],base=candidates[0];
+    if(kind==="aadhaar"&&(base.confidence<.76||!/(aadhaar|uidai|address|date of birth|year of birth|male|female|pin)/i.test(base.text))){
+      const regions=[
+        cropSource(bitmap,0,0,bitmap.width/2,bitmap.height),
+        cropSource(bitmap,bitmap.width/2,0,bitmap.width/2,bitmap.height),
+        cropSource(bitmap,0,0,bitmap.width,bitmap.height/2),
+        cropSource(bitmap,0,bitmap.height/2,bitmap.width,bitmap.height/2)
+      ];
+      for(const region of regions){try{candidates.push(await recognizeSource(region,worker));}finally{region.width=region.height=0;}}
+    }
+    if(base.confidence<.55){
+      for(const angle of [90,180,270]){const rotated=rotateSource(bitmap,angle);try{candidates.push(await recognizeSource(rotated,worker));}finally{rotated.width=rotated.height=0;}}
+    }
+    const best=[...candidates].sort((a,b)=>b.confidence-a.confidence)[0];
+    return {text:combineText(candidates),confidence:best.confidence};
   }finally{bitmap?.close?.();}
 }
 async function pdfText(file,worker,onProgress){
