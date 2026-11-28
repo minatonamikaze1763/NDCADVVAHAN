@@ -76,6 +76,20 @@ async function imageText(file,worker,kind){
     return {text:combineText(candidates),confidence:best.confidence};
   }finally{bitmap?.close?.();}
 }
+function arrangePdfTextLines(items){
+  const rows=[];
+  for(const item of items||[]){
+    const value=String(item?.str||"").trim();
+    if(!value)continue;
+    const x=Number(item.transform?.[4])||0,y=Number(item.transform?.[5])||0;
+    const tolerance=Math.max(2,Math.min(5,Number(item.height)||8)*.35);
+    let row=rows.find(candidate=>Math.abs(candidate.y-y)<=tolerance);
+    if(!row){row={y,items:[]};rows.push(row);}
+    row.items.push({x,value});
+  }
+  rows.sort((a,b)=>b.y-a.y);
+  return rows.map(row=>row.items.sort((a,b)=>a.x-b.x).map(item=>item.value).join(" ").trim()).filter(Boolean).join("\n");
+}
 async function pdfText(file,worker,onProgress){
   const pdfjs=await getPdf(),bytes=new Uint8Array(await file.arrayBuffer());
   const task=pdfjs.getDocument({data:bytes,cMapUrl:BASE+"/pdfjs/cmaps/",cMapPacked:true,standardFontDataUrl:BASE+"/pdfjs/standard_fonts/"});let doc;
@@ -91,7 +105,7 @@ async function pdfText(file,worker,onProgress){
     const parts=[];let confidenceTotal=0;
     for(let n=1;n<=doc.numPages;n++){
       if(cancelled)throw new DOMException("Cancelled","AbortError");
-      const page=await doc.getPage(n),content=await page.getTextContent(),embedded=content.items.map(x=>x.str).join(" ").trim();
+      const page=await doc.getPage(n),content=await page.getTextContent(),embedded=arrangePdfTextLines(content.items);
       let text=embedded,confidence=embedded?0.9:0.0;
       if(!embedded){
         const baseViewport=page.getViewport({scale:1});
@@ -123,7 +137,7 @@ export async function extractDocuments(documents,{onProgress=()=>{},signal}={}){
       if(cancelled||signal?.aborted)throw new DOMException("Cancelled","AbortError");
       const item=documents[i];checkFile(item.file);onProgress({index:i+1,total:documents.length,name:item.file.name,phase:"Reading"});
       try{
-        const read=item.file.type==="application/pdf"||/\.pdf$/i.test(item.file.name||"")?await pdfText(item.file,worker,()=>{}):await imageText(item.file,worker);
+        const read=item.file.type==="application/pdf"||/\.pdf$/i.test(item.file.name||"")?await pdfText(item.file,worker,()=>{}):await imageText(item.file,worker,item.kind);
         const fields=assess(parse(read.text,item.kind),item.kind);
         results.push({name:item.file.name,kind:item.kind,fields,text:read.text,confidence:read.confidence,success:true});
       }catch(error){results.push({name:item.file.name,kind:item.kind,error:error.message||"Could not read document.",success:false});}
